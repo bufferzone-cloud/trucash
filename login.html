@@ -3,240 +3,570 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TruCash - Login</title>
-    <link rel="stylesheet" href="login-style.css">
+    <title>TruCash | Login</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=SF+Pro+Display:wght@300;400;500;600;700&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div class="login-container">
-        <!-- Left Side - Branding -->
-        <div class="login-left">
-            <div class="brand-section">
-                <div class="logo">
-                    <div class="logo-icon">₭</div>
-                    <h1 class="logo-text">TruCash</h1>
+    <div class="login-page">
+        <div class="login-container">
+            <div class="login-card">
+                <div class="login-header">
+                    <h1 class="login-logo">
+                        <i class="fas fa-landmark"></i> TruCash
+                    </h1>
+                    <p class="login-subtitle">Collateral-Based Loan Management System</p>
                 </div>
-                <h2 class="tagline">Collateral-Based Digital Loans</h2>
-                <p class="description">Secure, fast, and transparent loan management system connecting customers to loans through registered agents.</p>
                 
-                <div class="features-list">
-                    <div class="feature">
-                        <i class="fas fa-shield-alt"></i>
-                        <span>Bank-grade Security</span>
+                <form id="loginForm" class="login-form">
+                    <div class="form-group">
+                        <label for="email" class="form-label">Email Address</label>
+                        <input type="email" id="email" class="form-input" placeholder="Enter your email" required>
+                        <div class="form-error" id="emailError"></div>
                     </div>
-                    <div class="feature">
-                        <i class="fas fa-bolt"></i>
-                        <span>Instant Approvals</span>
+                    
+                    <div class="form-group">
+                        <label for="password" class="form-label">Password</label>
+                        <input type="password" id="password" class="form-input" placeholder="Enter your password" required>
+                        <div class="form-error" id="passwordError"></div>
                     </div>
-                    <div class="feature">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Real-time Tracking</span>
+                    
+                    <div class="form-group">
+                        <div class="role-selector">
+                            <button type="button" class="role-btn" data-role="customer">Customer</button>
+                            <button type="button" class="role-btn" data-role="agent">Agent</button>
+                            <button type="button" class="role-btn" data-role="admin">Admin</button>
+                            <button type="button" class="role-btn active" data-role="sudo">SUDO</button>
+                        </div>
                     </div>
-                    <div class="feature">
-                        <i class="fas fa-mobile-alt"></i>
-                        <span>Mobile Friendly</span>
+                    
+                    <button type="submit" class="login-btn" id="loginBtn">
+                        <i class="fas fa-sign-in-alt"></i> Login to Dashboard
+                    </button>
+                    
+                    <div class="form-group">
+                        <div class="flex justify-between">
+                            <a href="#" id="forgotPassword" class="text-sm">Forgot Password?</a>
+                            <a href="#" id="registerLink" class="text-sm">Register as Agent</a>
+                        </div>
+                    </div>
+                </form>
+                
+                <div class="login-footer">
+                    <p class="text-xs">
+                        <i class="fas fa-lock"></i> Secure Login • 
+                        <i class="fas fa-shield-alt"></i> Encrypted Data • 
+                        <i class="fas fa-history"></i> Full Audit Trail
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Registration Modal -->
+            <div class="modal" id="registerModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Agent Registration</h3>
+                        <button class="modal-close" id="closeRegisterModal">
+                            <i class="fas fa-times"></i>
+                        </button>
+                    </div>
+                    <div class="modal-body">
+                        <form id="registerForm">
+                            <div class="form-group">
+                                <label for="regFullName" class="form-label">Full Name *</label>
+                                <input type="text" id="regFullName" class="form-input" required>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="regEmail" class="form-label">Email Address *</label>
+                                    <input type="email" id="regEmail" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="regPhone" class="form-label">Phone Number *</label>
+                                    <input type="tel" id="regPhone" class="form-input" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="regPassword" class="form-label">Password *</label>
+                                    <input type="password" id="regPassword" class="form-input" required>
+                                </div>
+                                <div class="form-group">
+                                    <label for="regConfirmPassword" class="form-label">Confirm Password *</label>
+                                    <input type="password" id="regConfirmPassword" class="form-input" required>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="regNRC" class="form-label">NRC Number *</label>
+                                <input type="text" id="regNRC" class="form-input" placeholder="e.g., 123456/78/9" required>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">NRC Photos *</label>
+                                <div class="file-upload" id="nrcUploadArea">
+                                    <i class="fas fa-cloud-upload-alt fa-2x mb-3"></i>
+                                    <p class="text-sm mb-2">Click to upload or drag & drop</p>
+                                    <p class="text-xs text-gray-500">Front and back of NRC (Max 5MB each)</p>
+                                    <input type="file" id="nrcFront" class="file-input" accept="image/*" multiple>
+                                </div>
+                                <div class="file-preview" id="nrcPreview"></div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Profile Photo *</label>
+                                <div class="file-upload" id="profileUploadArea">
+                                    <i class="fas fa-user-circle fa-2x mb-3"></i>
+                                    <p class="text-sm mb-2">Click to upload profile photo</p>
+                                    <p class="text-xs text-gray-500">Clear face photo (Max 5MB)</p>
+                                    <input type="file" id="profilePhoto" class="file-input" accept="image/*">
+                                </div>
+                                <div class="file-preview" id="profilePreview"></div>
+                            </div>
+                        </form>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" id="cancelRegister">Cancel</button>
+                        <button class="btn btn-primary" id="submitRegister">
+                            <i class="fas fa-user-plus"></i> Register as Agent
+                        </button>
                     </div>
                 </div>
             </div>
             
-            <div class="role-cards">
-                <div class="role-card" data-role="sudo">
-                    <div class="role-icon sudo">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <div class="role-info">
-                        <h4>Sudo</h4>
-                        <p>System Owner - Full Control</p>
-                    </div>
-                </div>
-                <div class="role-card" data-role="admin">
-                    <div class="role-icon admin">
-                        <i class="fas fa-user-tie"></i>
-                    </div>
-                    <div class="role-info">
-                        <h4>Admin</h4>
-                        <p>Operations Control</p>
-                    </div>
-                </div>
-                <div class="role-card" data-role="agent">
-                    <div class="role-icon agent">
-                        <i class="fas fa-user-friends"></i>
-                    </div>
-                    <div class="role-info">
-                        <h4>Agent</h4>
-                        <p>Customer Acquisition</p>
-                    </div>
-                </div>
-                <div class="role-card" data-role="customer">
-                    <div class="role-icon customer">
-                        <i class="fas fa-user"></i>
-                    </div>
-                    <div class="role-info">
-                        <h4>Customer</h4>
-                        <p>Loan Borrower</p>
-                    </div>
-                </div>
-            </div>
-        </div>
-
-        <!-- Right Side - Login Form -->
-        <div class="login-right">
-            <div class="login-form-container">
-                <div class="form-header">
-                    <h3>Welcome Back</h3>
-                    <p>Sign in to your TruCash account</p>
-                </div>
-
-                <form id="loginForm" class="login-form">
-                    <div class="form-group">
-                        <label for="email">Email Address</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-envelope"></i>
-                            <input type="email" id="email" name="email" placeholder="Enter your email" required>
-                        </div>
-                    </div>
-
-                    <div class="form-group">
-                        <label for="password">Password</label>
-                        <div class="input-with-icon">
-                            <i class="fas fa-lock"></i>
-                            <input type="password" id="password" name="password" placeholder="Enter your password" required>
-                            <button type="button" class="show-password" id="showPassword">
-                                <i class="fas fa-eye"></i>
-                            </button>
-                        </div>
-                    </div>
-
-                    <div class="form-group role-selection">
-                        <label>Login as</label>
-                        <div class="role-options">
-                            <label class="role-option">
-                                <input type="radio" name="role" value="sudo" required>
-                                <span>Sudo</span>
-                            </label>
-                            <label class="role-option">
-                                <input type="radio" name="role" value="admin">
-                                <span>Admin</span>
-                            </label>
-                            <label class="role-option">
-                                <input type="radio" name="role" value="agent">
-                                <span>Agent</span>
-                            </label>
-                            <label class="role-option">
-                                <input type="radio" name="role" value="customer">
-                                <span>Customer</span>
-                            </label>
-                        </div>
-                    </div>
-
-                    <div class="form-group remember-forgot">
-                        <label class="remember">
-                            <input type="checkbox" id="remember">
-                            <span>Remember me</span>
-                        </label>
-                        <a href="#" class="forgot-password">Forgot Password?</a>
-                    </div>
-
-                    <button type="submit" class="login-btn" id="loginBtn">
-                        <span>Sign In</span>
-                        <i class="fas fa-arrow-right"></i>
-                    </button>
-
-                    <div class="divider">
-                        <span>or</span>
-                    </div>
-
-                    <div class="register-section">
-                        <p>Don't have an account?</p>
-                        <div class="register-links">
-                            <a href="#" class="register-link agent-register">
-                                <i class="fas fa-user-plus"></i>
-                                <span>Register as Agent</span>
-                            </a>
-                            <a href="#" class="register-link customer-register">
-                                <i class="fas fa-handshake"></i>
-                                <span>Register as Customer</span>
-                            </a>
-                        </div>
-                    </div>
-                </form>
-
-                <!-- Registration Forms -->
-                <div class="registration-form" id="agentRegistration" style="display: none;">
-                    <div class="form-header">
-                        <h3>Agent Registration</h3>
-                        <p>Register to become a TruCash Agent</p>
-                        <button type="button" class="back-to-login">
-                            <i class="fas fa-arrow-left"></i> Back to Login
+            <!-- Forgot Password Modal -->
+            <div class="modal" id="forgotPasswordModal">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h3 class="modal-title">Reset Password</h3>
+                        <button class="modal-close" id="closeForgotModal">
+                            <i class="fas fa-times"></i>
                         </button>
                     </div>
-                    <form id="agentRegisterForm">
-                        <!-- Agent registration fields -->
-                    </form>
-                </div>
-
-                <div class="registration-form" id="customerRegistration" style="display: none;">
-                    <div class="form-header">
-                        <h3>Customer Registration</h3>
-                        <p>Apply for loans through registered agents</p>
-                        <button type="button" class="back-to-login">
-                            <i class="fas fa-arrow-left"></i> Back to Login
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label for="resetEmail" class="form-label">Enter your email address</label>
+                            <input type="email" id="resetEmail" class="form-input" placeholder="you@example.com">
+                        </div>
+                        <p class="text-sm text-gray-500 mt-2">
+                            We'll send you a link to reset your password.
+                        </p>
+                    </div>
+                    <div class="modal-footer">
+                        <button class="btn btn-outline" id="cancelReset">Cancel</button>
+                        <button class="btn btn-primary" id="submitReset">
+                            <i class="fas fa-paper-plane"></i> Send Reset Link
                         </button>
                     </div>
-                    <form id="customerRegisterForm">
-                        <!-- Customer registration fields -->
-                    </form>
                 </div>
-
-                <!-- OTP Verification Modal -->
-                <div class="otp-modal" id="otpModal" style="display: none;">
-                    <div class="otp-content">
-                        <h3>Two-Factor Authentication</h3>
-                        <p>Enter the 6-digit code sent to your email</p>
-                        <div class="otp-inputs">
-                            <input type="text" maxlength="1" class="otp-input">
-                            <input type="text" maxlength="1" class="otp-input">
-                            <input type="text" maxlength="1" class="otp-input">
-                            <input type="text" maxlength="1" class="otp-input">
-                            <input type="text" maxlength="1" class="otp-input">
-                            <input type="text" maxlength="1" class="otp-input">
-                        </div>
-                        <button class="verify-otp">Verify</button>
-                        <p class="resend-otp">Didn't receive code? <a href="#">Resend</a></p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-analytics.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="firebase.js"></script>
+    <script src="auth.js"></script>
+    <script src="cloudinary.js"></script>
+    <script>
+        // Login Page JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Elements
+            const loginForm = document.getElementById('loginForm');
+            const emailInput = document.getElementById('email');
+            const passwordInput = document.getElementById('password');
+            const loginBtn = document.getElementById('loginBtn');
+            const roleBtns = document.querySelectorAll('.role-btn');
+            const registerLink = document.getElementById('registerLink');
+            const forgotPasswordLink = document.getElementById('forgotPassword');
+            
+            // Modals
+            const registerModal = document.getElementById('registerModal');
+            const forgotPasswordModal = document.getElementById('forgotPasswordModal');
+            
+            // Current role selection
+            let currentRole = 'sudo';
+            
+            // Set SUDO credentials by default
+            emailInput.value = 'trucash@gmail.com';
+            passwordInput.value = '123456';
+            
+            // Role selection
+            roleBtns.forEach(btn => {
+                btn.addEventListener('click', function() {
+                    roleBtns.forEach(b => b.classList.remove('active'));
+                    this.classList.add('active');
+                    currentRole = this.dataset.role;
+                    
+                    // Update placeholder text based on role
+                    switch(currentRole) {
+                        case 'customer':
+                            emailInput.placeholder = 'customer@example.com';
+                            break;
+                        case 'agent':
+                            emailInput.placeholder = 'agent@example.com';
+                            break;
+                        case 'admin':
+                            emailInput.placeholder = 'admin@example.com';
+                            break;
+                        case 'sudo':
+                            emailInput.placeholder = 'trucash@gmail.com';
+                            emailInput.value = 'trucash@gmail.com';
+                            passwordInput.value = '123456';
+                            break;
+                    }
+                });
+            });
+            
+            // Login form submission
+            loginForm.addEventListener('submit', async function(e) {
+                e.preventDefault();
+                
+                const email = emailInput.value.trim();
+                const password = passwordInput.value;
+                
+                // Validate inputs
+                if (!email || !password) {
+                    showError('Please fill in all fields');
+                    return;
+                }
+                
+                // Show loading state
+                loginBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Logging in...';
+                loginBtn.disabled = true;
+                
+                try {
+                    const result = await authManager.login(email, password);
+                    
+                    if (result.success) {
+                        // Check if user role matches selected role
+                        const userData = await db.getUserData(result.user.uid);
+                        
+                        if (userData.role !== currentRole && currentRole !== 'sudo') {
+                            // If SUDO is logging in as other role for testing
+                            if (userData.role === 'sudo') {
+                                // Allow SUDO to access any dashboard
+                                window.location.href = currentRole + '.html';
+                            } else {
+                                showError(`Please login as ${userData.role}`);
+                                resetLoginButton();
+                            }
+                        } else {
+                            // Successful login - authManager will handle redirect
+                            showNotification('Login successful! Redirecting...', 'success');
+                        }
+                    } else {
+                        showError(result.error);
+                        resetLoginButton();
+                    }
+                } catch (error) {
+                    showError('An error occurred. Please try again.');
+                    console.error('Login error:', error);
+                    resetLoginButton();
+                }
+            });
+            
+            // Register link click
+            registerLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                registerModal.classList.add('active');
+            });
+            
+            // Forgot password link
+            forgotPasswordLink.addEventListener('click', function(e) {
+                e.preventDefault();
+                forgotPasswordModal.classList.add('active');
+            });
+            
+            // Close modals
+            document.getElementById('closeRegisterModal').addEventListener('click', function() {
+                registerModal.classList.remove('active');
+            });
+            
+            document.getElementById('cancelRegister').addEventListener('click', function() {
+                registerModal.classList.remove('active');
+            });
+            
+            document.getElementById('closeForgotModal').addEventListener('click', function() {
+                forgotPasswordModal.classList.remove('active');
+            });
+            
+            document.getElementById('cancelReset').addEventListener('click', function() {
+                forgotPasswordModal.classList.remove('active');
+            });
+            
+            // Forgot password submission
+            document.getElementById('submitReset').addEventListener('click', async function() {
+                const email = document.getElementById('resetEmail').value.trim();
+                
+                if (!email) {
+                    showError('Please enter your email address');
+                    return;
+                }
+                
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Sending...';
+                this.disabled = true;
+                
+                try {
+                    const result = await authManager.resetPassword(email);
+                    
+                    if (result.success) {
+                        showNotification('Password reset link sent to your email', 'success');
+                        forgotPasswordModal.classList.remove('active');
+                    } else {
+                        showError(result.error);
+                    }
+                } catch (error) {
+                    showError('Failed to send reset link');
+                }
+                
+                this.innerHTML = '<i class="fas fa-paper-plane"></i> Send Reset Link';
+                this.disabled = false;
+            });
+            
+            // Agent registration
+            document.getElementById('submitRegister').addEventListener('click', async function() {
+                const form = document.getElementById('registerForm');
+                const formData = new FormData(form);
+                
+                // Validate form
+                const fullName = document.getElementById('regFullName').value.trim();
+                const email = document.getElementById('regEmail').value.trim();
+                const phone = document.getElementById('regPhone').value.trim();
+                const password = document.getElementById('regPassword').value;
+                const confirmPassword = document.getElementById('regConfirmPassword').value;
+                const nrc = document.getElementById('regNRC').value.trim();
+                
+                if (!fullName || !email || !phone || !password || !confirmPassword || !nrc) {
+                    showError('Please fill in all required fields');
+                    return;
+                }
+                
+                if (password !== confirmPassword) {
+                    showError('Passwords do not match');
+                    return;
+                }
+                
+                if (password.length < 6) {
+                    showError('Password must be at least 6 characters');
+                    return;
+                }
+                
+                // Validate NRC format (Zambian NRC: 123456/78/9)
+                const nrcRegex = /^\d{6}\/\d{2}\/\d{1}$/;
+                if (!nrcRegex.test(nrc)) {
+                    showError('Invalid NRC format. Use: 123456/78/9');
+                    return;
+                }
+                
+                // Validate phone number (Zambian format)
+                const phoneRegex = /^\+?260?\d{9}$/;
+                if (!phoneRegex.test(phone.replace(/\s/g, ''))) {
+                    showError('Invalid phone number. Use Zambian format: +260XXXXXXXXX');
+                    return;
+                }
+                
+                // Show loading state
+                this.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Registering...';
+                this.disabled = true;
+                
+                try {
+                    // Upload NRC photos
+                    const nrcFrontInput = document.getElementById('nrcFront');
+                    const profilePhotoInput = document.getElementById('profilePhoto');
+                    
+                    if (!nrcFrontInput.files.length || !profilePhotoInput.files.length) {
+                        showError('Please upload required documents');
+                        this.innerHTML = '<i class="fas fa-user-plus"></i> Register as Agent';
+                        this.disabled = false;
+                        return;
+                    }
+                    
+                    // Upload files to Cloudinary
+                    const nrcFiles = Array.from(nrcFrontInput.files);
+                    const profileFile = profilePhotoInput.files[0];
+                    
+                    showNotification('Uploading documents...', 'info');
+                    
+                    const uploadResults = await Promise.all([
+                        ...nrcFiles.map(file => cloudinary.uploadFile(file, 'nrc')),
+                        cloudinary.uploadFile(profileFile, 'profile')
+                    ]);
+                    
+                    const nrcPhotos = uploadResults.slice(0, nrcFiles.length).map(r => r.url);
+                    const profilePhoto = uploadResults[uploadResults.length - 1].url;
+                    
+                    // Prepare agent data
+                    const agentData = {
+                        fullName: fullName,
+                        phone: phone,
+                        nrcNumber: nrc,
+                        nrcPhotos: nrcPhotos,
+                        profilePhoto: profilePhoto,
+                        role: 'agent',
+                        status: 'pending',
+                        registrationDate: new Date().toISOString()
+                    };
+                    
+                    // Register agent
+                    const result = await authManager.register(email, password, agentData, 'agent');
+                    
+                    if (result.success) {
+                        showNotification('Registration successful! Awaiting admin approval.', 'success');
+                        registerModal.classList.remove('active');
+                        form.reset();
+                        
+                        // Clear previews
+                        document.getElementById('nrcPreview').innerHTML = '';
+                        document.getElementById('profilePreview').innerHTML = '';
+                    } else {
+                        showError(result.error);
+                    }
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    showError('Registration failed. Please try again.');
+                }
+                
+                this.innerHTML = '<i class="fas fa-user-plus"></i> Register as Agent';
+                this.disabled = false;
+            });
+            
+            // File upload handling
+            setupFileUpload('nrcUploadArea', 'nrcFront', 'nrcPreview', 'NRC');
+            setupFileUpload('profileUploadArea', 'profilePhoto', 'profilePreview', 'Profile Photo');
+            
+            // Helper Functions
+            function setupFileUpload(uploadAreaId, inputId, previewId, label) {
+                const uploadArea = document.getElementById(uploadAreaId);
+                const fileInput = document.getElementById(inputId);
+                const previewArea = document.getElementById(previewId);
+                
+                uploadArea.addEventListener('click', () => fileInput.click());
+                
+                uploadArea.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.add('dragover');
+                });
+                
+                uploadArea.addEventListener('dragleave', () => {
+                    uploadArea.classList.remove('dragover');
+                });
+                
+                uploadArea.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    uploadArea.classList.remove('dragover');
+                    
+                    if (e.dataTransfer.files.length) {
+                        fileInput.files = e.dataTransfer.files;
+                        handleFileSelect(fileInput.files, previewArea, label);
+                    }
+                });
+                
+                fileInput.addEventListener('change', () => {
+                    handleFileSelect(fileInput.files, previewArea, label);
+                });
+                
+                function handleFileSelect(files, previewArea, label) {
+                    previewArea.innerHTML = '';
+                    
+                    Array.from(files).forEach((file, index) => {
+                        if (!file.type.startsWith('image/')) {
+                            showError(`${label} must be an image file`);
+                            return;
+                        }
+                        
+                        if (file.size > 5 * 1024 * 1024) {
+                            showError(`${label} must be less than 5MB`);
+                            return;
+                        }
+                        
+                        const reader = new FileReader();
+                        reader.onload = (e) => {
+                            const img = document.createElement('img');
+                            img.src = e.target.result;
+                            img.style.maxWidth = '100px';
+                            img.style.maxHeight = '100px';
+                            
+                            const fileItem = document.createElement('div');
+                            fileItem.className = 'file-item';
+                            fileItem.appendChild(img);
+                            
+                            const removeBtn = document.createElement('div');
+                            removeBtn.className = 'file-remove';
+                            removeBtn.innerHTML = '<i class="fas fa-times"></i>';
+                            removeBtn.addEventListener('click', () => {
+                                fileItem.remove();
+                                // Clear file input
+                                fileInput.value = '';
+                            });
+                            
+                            fileItem.appendChild(removeBtn);
+                            previewArea.appendChild(fileItem);
+                        };
+                        reader.readAsDataURL(file);
+                    });
+                }
+            }
+            
+            function showError(message) {
+                const notification = document.createElement('div');
+                notification.className = 'notification error';
+                notification.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="fas fa-exclamation-circle"></i>
                     </div>
-                </div>
-            </div>
-
-            <div class="login-footer">
-                <p>© 2024 TruCash. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                    <a href="#">Support</a>
-                </div>
-            </div>
-        </div>
-    </div>
-
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner">
-            <div class="spinner"></div>
-            <p>Authenticating...</p>
-        </div>
-    </div>
-
-    <!-- Error Toast -->
-    <div class="toast" id="errorToast">
-        <div class="toast-content">
-            <i class="fas fa-exclamation-circle"></i>
-            <span id="toastMessage">Error message here</span>
-        </div>
-        <button class="toast-close">&times;</button>
-    </div>
-
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="login.js"></script>
+                    <div>${message}</div>
+                `;
+                
+                document.querySelector('.login-container').appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('active');
+                }, 10);
+                
+                setTimeout(() => {
+                    notification.classList.remove('active');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+            
+            function showNotification(message, type) {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 'info-circle'}"></i>
+                    </div>
+                    <div>${message}</div>
+                `;
+                
+                document.querySelector('.login-container').appendChild(notification);
+                
+                setTimeout(() => {
+                    notification.classList.add('active');
+                }, 10);
+                
+                setTimeout(() => {
+                    notification.classList.remove('active');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+            }
+            
+            function resetLoginButton() {
+                loginBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Login to Dashboard';
+                loginBtn.disabled = false;
+            }
+            
+            // Initialize auth manager
+            authManager.initAuthListener();
+        });
+    </script>
 </body>
 </html>
