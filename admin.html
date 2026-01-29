@@ -1,0 +1,1400 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruCash - Admin Dashboard</title>
+    <link rel="stylesheet" href="styles/admin.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <style>
+        .photo-gallery {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+        
+        .photo-item {
+            border-radius: 8px;
+            overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+        
+        .photo-item:hover {
+            transform: scale(1.05);
+        }
+        
+        .photo-item img {
+            width: 100%;
+            height: 100px;
+            object-fit: cover;
+        }
+        
+        .modal-photo {
+            max-width: 90%;
+            max-height: 80vh;
+            border-radius: 12px;
+        }
+        
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        
+        .status-pending { background: #fbbf24; color: #78350f; }
+        .status-approved { background: #10b981; color: #064e3b; }
+        .status-rejected { background: #ef4444; color: #7f1d1d; }
+        .status-overdue { background: #f97316; color: #7c2d12; }
+        .status-defaulted { background: #dc2626; color: #450a0a; }
+        .status-repaid { background: #8b5cf6; color: #4c1d95; }
+        .status-active { background: #3b82f6; color: #1e3a8a; }
+        
+        .verification-actions {
+            display: flex;
+            gap: 8px;
+        }
+        
+        .action-btn {
+            padding: 6px 12px;
+            border-radius: 6px;
+            font-size: 12px;
+            font-weight: 600;
+            cursor: pointer;
+            border: none;
+            transition: all 0.2s ease;
+        }
+        
+        .action-approve {
+            background: #10b981;
+            color: white;
+        }
+        
+        .action-reject {
+            background: #ef4444;
+            color: white;
+        }
+        
+        .action-view {
+            background: #3b82f6;
+            color: white;
+        }
+        
+        .loan-agreement {
+            background: #1f2937;
+            border: 1px solid #374151;
+            border-radius: 12px;
+            padding: 24px;
+            margin-top: 20px;
+        }
+        
+        .loan-terms {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+            margin: 20px 0;
+        }
+        
+        .term-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            background: #111827;
+            border-radius: 8px;
+        }
+        
+        .installment-plan {
+            background: #111827;
+            border-radius: 12px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        
+        .installment-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px;
+            border-bottom: 1px solid #374151;
+        }
+        
+        .installment-row:last-child {
+            border-bottom: none;
+        }
+        
+        .payment-proof {
+            max-width: 200px;
+            border-radius: 8px;
+            cursor: pointer;
+        }
+    </style>
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-user-shield"></i>
+                <h2>TruCash <span class="role-badge">ADMIN</span></h2>
+            </div>
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar">
+                    <i class="fas fa-user-cog"></i>
+                </div>
+                <div class="user-details">
+                    <h4 id="userName">Loading...</h4>
+                    <span class="user-email" id="userEmail">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-section">
+                <h3>Dashboard</h3>
+                <ul>
+                    <li class="active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Overview</span>
+                    </li>
+                    <li data-section="notifications">
+                        <i class="fas fa-bell"></i>
+                        <span>Notifications</span>
+                        <span class="badge" id="notificationBadge">0</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <h3>Verifications</h3>
+                <ul>
+                    <li data-section="agent-approvals">
+                        <i class="fas fa-user-check"></i>
+                        <span>Agent Approvals</span>
+                        <span class="badge" id="agentApprovalBadge">0</span>
+                    </li>
+                    <li data-section="customer-verifications">
+                        <i class="fas fa-user-friends"></i>
+                        <span>Customer Verifications</span>
+                        <span class="badge" id="customerVerificationBadge">0</span>
+                    </li>
+                    <li data-section="collateral-verification">
+                        <i class="fas fa-gem"></i>
+                        <span>Collateral Verification</span>
+                        <span class="badge" id="collateralVerificationBadge">0</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <h3>Loan Management</h3>
+                <ul>
+                    <li data-section="loan-applications">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <span>Loan Applications</span>
+                        <span class="badge" id="loanApplicationBadge">0</span>
+                    </li>
+                    <li data-section="active-loans">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>Active Loans</span>
+                        <span class="badge" id="activeLoansBadge">0</span>
+                    </li>
+                    <li data-section="repayments">
+                        <i class="fas fa-money-check-alt"></i>
+                        <span>Repayments</span>
+                        <span class="badge" id="repaymentBadge">0</span>
+                    </li>
+                    <li data-section="overdue-loans">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Overdue Loans</span>
+                        <span class="badge" id="overdueLoansBadge">0</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <h3>Reports & Monitoring</h3>
+                <ul>
+                    <li data-section="reports">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports</span>
+                    </li>
+                    <li data-section="risk-monitoring">
+                        <i class="fas fa-radar"></i>
+                        <span>Risk Monitoring</span>
+                    </li>
+                    <li data-section="audit-log">
+                        <i class="fas fa-history"></i>
+                        <span>Audit Log</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <h3>Account Management</h3>
+                <ul>
+                    <li data-section="blacklist">
+                        <i class="fas fa-ban"></i>
+                        <span>Blacklisted Accounts</span>
+                    </li>
+                    <li data-section="settings">
+                        <i class="fas fa-cog"></i>
+                        <span>Settings</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+            <div class="system-status">
+                <i class="fas fa-circle"></i>
+                <span>Admin Mode</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Dashboard Overview</h1>
+            </div>
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="header-btn" id="quickStatsBtn" title="Quick Stats">
+                        <i class="fas fa-chart-pie"></i>
+                    </button>
+                    <button class="header-btn" id="helpBtn" title="Help">
+                        <i class="fas fa-question-circle"></i>
+                    </button>
+                    <div class="date-display" id="currentDate">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="content-wrapper">
+            <!-- Dashboard Overview Section -->
+            <section id="dashboardSection" class="section-content active">
+                <div class="stats-grid">
+                    <!-- Pending Agents Card -->
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Pending Agents</h3>
+                            <div class="stat-value" id="pendingAgentsCount">0</div>
+                            <div class="stat-action">
+                                <button class="btn-small" id="viewPendingAgents">View All</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Customers Card -->
+                    <div class="stat-card info">
+                        <div class="stat-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Pending Customers</h3>
+                            <div class="stat-value" id="pendingCustomersCount">0</div>
+                            <div class="stat-action">
+                                <button class="btn-small" id="viewPendingCustomers">View All</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Pending Loans Card -->
+                    <div class="stat-card primary">
+                        <div class="stat-icon">
+                            <i class="fas fa-file-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Pending Loans</h3>
+                            <div class="stat-value" id="pendingLoansCount">0</div>
+                            <div class="stat-action">
+                                <button class="btn-small" id="viewPendingLoans">Review</button>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overdue Loans Card -->
+                    <div class="stat-card danger">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Overdue Loans</h3>
+                            <div class="stat-value" id="overdueLoansCount">K 0</div>
+                            <div class="stat-details">
+                                <span id="overdueLoansNumber">0 loans</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Today's Revenue Card -->
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Today's Revenue</h3>
+                            <div class="stat-value" id="todayRevenue">K 0</div>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>0% from yesterday</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Agents Card -->
+                    <div class="stat-card secondary">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Active Agents</h3>
+                            <div class="stat-value" id="activeAgentsCount">0</div>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>0 active</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Quick Actions -->
+                <div class="quick-actions">
+                    <h3>Quick Actions</h3>
+                    <div class="actions-grid">
+                        <button class="action-card" id="quickApproveAgent">
+                            <i class="fas fa-user-check"></i>
+                            <span>Approve Agent</span>
+                        </button>
+                        <button class="action-card" id="quickVerifyCustomer">
+                            <i class="fas fa-user-shield"></i>
+                            <span>Verify Customer</span>
+                        </button>
+                        <button class="action-card" id="quickReviewLoan">
+                            <i class="fas fa-file-signature"></i>
+                            <span>Review Loan</span>
+                        </button>
+                        <button class="action-card" id="quickConfirmPayment">
+                            <i class="fas fa-receipt"></i>
+                            <span>Confirm Payment</span>
+                        </button>
+                        <button class="action-card" id="quickGenerateReport">
+                            <i class="fas fa-chart-bar"></i>
+                            <span>Generate Report</span>
+                        </button>
+                        <button class="action-card" id="quickBlacklist">
+                            <i class="fas fa-ban"></i>
+                            <span>Blacklist Account</span>
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="recent-activity">
+                    <div class="card-header">
+                        <h3>Recent Activity</h3>
+                        <button class="btn-text" id="viewAllActivity">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="activity-list" id="recentActivityList">
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>No recent activity</p>
+                                <span class="activity-time">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- System Alerts -->
+                <div class="system-alerts">
+                    <div class="card-header">
+                        <h3>System Alerts</h3>
+                        <button class="btn-text" id="dismissAllAlerts">
+                            Dismiss All
+                        </button>
+                    </div>
+                    <div class="alerts-list" id="systemAlertsList">
+                        <div class="alert-item info">
+                            <i class="fas fa-info-circle"></i>
+                            <div class="alert-content">
+                                <p>No alerts at the moment</p>
+                                <span>System is running smoothly</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Agent Approvals Section -->
+            <section id="agentApprovalsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Agent Registration Approvals</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="exportAgents">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button class="btn-primary" id="bulkApproveAgents">
+                            <i class="fas fa-check-double"></i> Bulk Approve
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="agentSearch" placeholder="Search agents by name, NRC, or email...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="agentStatusFilter">
+                            <option value="pending">Pending Approval</option>
+                            <option value="all">All Agents</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <input type="date" id="agentDateFilter" class="date-filter">
+                        <button class="btn-secondary" id="refreshAgents">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllAgents"></th>
+                                    <th>Agent ID</th>
+                                    <th>Full Name</th>
+                                    <th>NRC Number</th>
+                                    <th>Phone</th>
+                                    <th>Email</th>
+                                    <th>Registered</th>
+                                    <th>Status</th>
+                                    <th>Documents</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="agentsTableBody">
+                                <tr>
+                                    <td colspan="10" class="empty-state">
+                                        <i class="fas fa-user-tie"></i>
+                                        <p>No agents pending approval</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="table-info">
+                            Showing <span id="agentsShowing">0</span> of <span id="agentsTotal">0</span> agents
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" disabled id="agentsPrev">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span>Page <span id="agentsPage">1</span> of <span id="agentsTotalPages">1</span></span>
+                            <button class="pagination-btn" disabled id="agentsNext">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Customer Verifications Section -->
+            <section id="customerVerificationsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Customer Account Verifications</h2>
+                    <button class="btn-primary" id="bulkVerifyCustomers">
+                        <i class="fas fa-user-check"></i> Bulk Verify
+                    </button>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="customerSearch" placeholder="Search customers by name, NRC, or Agent ID...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="customerStatusFilter">
+                            <option value="pending">Pending Verification</option>
+                            <option value="all">All Customers</option>
+                            <option value="verified">Verified</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                        <input type="date" id="customerDateFilter" class="date-filter">
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th><input type="checkbox" id="selectAllCustomers"></th>
+                                    <th>Customer ID</th>
+                                    <th>Full Name</th>
+                                    <th>NRC Number</th>
+                                    <th>Phone</th>
+                                    <th>Agent ID</th>
+                                    <th>Registered</th>
+                                    <th>Status</th>
+                                    <th>Documents</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="customersTableBody">
+                                <tr>
+                                    <td colspan="10" class="empty-state">
+                                        <i class="fas fa-users"></i>
+                                        <p>No customers pending verification</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="table-info">
+                            Showing <span id="customersShowing">0</span> of <span id="customersTotal">0</span> customers
+                        </div>
+                        <div class="pagination">
+                            <button class="pagination-btn" disabled id="customersPrev">
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span>Page <span id="customersPage">1</span> of <span id="customersTotalPages">1</span></span>
+                            <button class="pagination-btn" disabled id="customersNext">
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Loan Applications Section -->
+            <section id="loanApplicationsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Loan Application Review</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="generateAgreement">
+                            <i class="fas fa-file-contract"></i> Generate Agreement
+                        </button>
+                        <button class="btn-primary" id="bulkProcessLoans">
+                            <i class="fas fa-cogs"></i> Bulk Process
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="loanSearch" placeholder="Search loans by customer name, ID, or amount...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="loanStatusFilter">
+                            <option value="pending">Pending Review</option>
+                            <option value="all">All Applications</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                            <option value="under_review">Under Review</option>
+                        </select>
+                        <select id="loanAmountFilter">
+                            <option value="">All Amounts</option>
+                            <option value="small">Small (&lt; K5,000)</option>
+                            <option value="medium">Medium (K5,000 - K20,000)</option>
+                            <option value="large">Large (&gt; K20,000)</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="applications-grid" id="loanApplicationsGrid">
+                    <!-- Loan application cards will be dynamically inserted here -->
+                    <div class="empty-state">
+                        <i class="fas fa-file-invoice-dollar"></i>
+                        <h3>No Loan Applications</h3>
+                        <p>There are no loan applications pending review</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Active Loans Section -->
+            <section id="activeLoansSection" class="section-content">
+                <div class="section-header">
+                    <h2>Active Loans Management</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="exportActiveLoans">
+                            <i class="fas fa-file-export"></i> Export
+                        </button>
+                        <button class="btn-primary" id="addManualPayment">
+                            <i class="fas fa-money-bill"></i> Add Payment
+                        </button>
+                    </div>
+                </div>
+
+                <div class="stats-row">
+                    <div class="mini-stat">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <div>
+                            <h4>Total Active Loans</h4>
+                            <span class="value" id="totalActiveLoans">0</span>
+                        </div>
+                    </div>
+                    <div class="mini-stat">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <div>
+                            <h4>Total Outstanding</h4>
+                            <span class="value" id="totalOutstanding">K 0</span>
+                        </div>
+                    </div>
+                    <div class="mini-stat">
+                        <i class="fas fa-percentage"></i>
+                        <div>
+                            <h4>Avg Interest Rate</h4>
+                            <span class="value" id="avgInterestRate">0%</span>
+                        </div>
+                    </div>
+                    <div class="mini-stat">
+                        <i class="fas fa-calendar-alt"></i>
+                        <div>
+                            <h4>Avg Duration</h4>
+                            <span class="value" id="avgLoanDuration">0 months</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Loan ID</th>
+                                    <th>Customer</th>
+                                    <th>Agent</th>
+                                    <th>Amount</th>
+                                    <th>Issued</th>
+                                    <th>Due Date</th>
+                                    <th>Paid/Total</th>
+                                    <th>Status</th>
+                                    <th>Collateral</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="activeLoansTableBody">
+                                <tr>
+                                    <td colspan="10" class="empty-state">
+                                        <i class="fas fa-hand-holding-usd"></i>
+                                        <p>No active loans</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Repayments Section -->
+            <section id="repaymentsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Repayment Management</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="exportRepayments">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                        <button class="btn-primary" id="sendReminders">
+                            <i class="fas fa-bell"></i> Send Reminders
+                        </button>
+                    </div>
+                </div>
+
+                <div class="tabs">
+                    <button class="tab-btn active" data-tab="pending">Pending Confirmations</button>
+                    <button class="tab-btn" data-tab="confirmed">Confirmed Payments</button>
+                    <button class="tab-btn" data-tab="overdue">Overdue Payments</button>
+                </div>
+
+                <div class="tab-content active" id="pendingTab">
+                    <div class="table-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Payment ID</th>
+                                        <th>Customer</th>
+                                        <th>Loan ID</th>
+                                        <th>Amount</th>
+                                        <th>Due Date</th>
+                                        <th>Proof</th>
+                                        <th>Submitted</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="pendingPaymentsBody">
+                                    <tr>
+                                        <td colspan="8" class="empty-state">
+                                            <i class="fas fa-check-circle"></i>
+                                            <p>No payments pending confirmation</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="confirmedTab">
+                    <div class="table-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Payment ID</th>
+                                        <th>Customer</th>
+                                        <th>Loan ID</th>
+                                        <th>Amount</th>
+                                        <th>Confirmed By</th>
+                                        <th>Confirmed On</th>
+                                        <th>Reference</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="confirmedPaymentsBody">
+                                    <tr>
+                                        <td colspan="7" class="empty-state">
+                                            <i class="fas fa-receipt"></i>
+                                            <p>No confirmed payments</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="tab-content" id="overdueTab">
+                    <div class="table-card">
+                        <div class="table-container">
+                            <table class="data-table">
+                                <thead>
+                                    <tr>
+                                        <th>Customer</th>
+                                        <th>Loan ID</th>
+                                        <th>Amount Due</th>
+                                        <th>Due Date</th>
+                                        <th>Overdue Days</th>
+                                        <th>Penalty</th>
+                                        <th>Total Due</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="overduePaymentsBody">
+                                    <tr>
+                                        <td colspan="8" class="empty-state">
+                                            <i class="fas fa-exclamation-triangle"></i>
+                                            <p>No overdue payments</p>
+                                        </td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Overdue Loans Section -->
+            <section id="overdueLoansSection" class="section-content">
+                <div class="section-header">
+                    <h2>Overdue Loans & Recovery</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="exportOverdue">
+                            <i class="fas fa-file-excel"></i> Export
+                        </button>
+                        <button class="btn-danger" id="initiateRecovery">
+                            <i class="fas fa-hammer"></i> Initiate Recovery
+                        </button>
+                    </div>
+                </div>
+
+                <div class="overdue-stats">
+                    <div class="stat-card danger">
+                        <div class="stat-icon">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Overdue Amount</h3>
+                            <div class="stat-value" id="totalOverdueAmount">K 0</div>
+                            <div class="stat-details">
+                                <span id="totalOverdueLoans">0 loans</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Accumulated Penalties</h3>
+                            <div class="stat-value" id="totalPenalties">K 0</div>
+                            <div class="stat-details">
+                                <span>From overdue loans</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="stat-card info">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-clock"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Avg Overdue Days</h3>
+                            <div class="stat-value" id="avgOverdueDays">0</div>
+                            <div class="stat-details">
+                                <span>Days overdue</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Loan ID</th>
+                                    <th>Customer</th>
+                                    <th>Agent</th>
+                                    <th>Original Amount</th>
+                                    <th>Due Date</th>
+                                    <th>Overdue Days</th>
+                                    <th>Penalty</th>
+                                    <th>Total Due</th>
+                                    <th>Last Contact</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="overdueLoansTableBody">
+                                <tr>
+                                    <td colspan="10" class="empty-state">
+                                        <i class="fas fa-check-circle"></i>
+                                        <p>No overdue loans</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Collateral Verification Section -->
+            <section id="collateralVerificationSection" class="section-content">
+                <div class="section-header">
+                    <h2>Collateral Verification Gallery</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="exportCollateral">
+                            <i class="fas fa-download"></i> Export List
+                        </button>
+                        <button class="btn-primary" id="revalueCollateral">
+                            <i class="fas fa-balance-scale"></i> Revalue
+                        </button>
+                    </div>
+                </div>
+
+                <div class="collateral-grid" id="collateralGrid">
+                    <!-- Collateral items will be dynamically inserted here -->
+                    <div class="empty-state">
+                        <i class="fas fa-gem"></i>
+                        <h3>No Collateral Items</h3>
+                        <p>No collateral items pending verification</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reportsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Reports & Analytics</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="dailyReport">
+                            <i class="fas fa-calendar-day"></i> Daily
+                        </button>
+                        <button class="btn-secondary" id="weeklyReport">
+                            <i class="fas fa-calendar-week"></i> Weekly
+                        </button>
+                        <button class="btn-primary" id="monthlyReport">
+                            <i class="fas fa-calendar-alt"></i> Monthly
+                        </button>
+                    </div>
+                </div>
+
+                <div class="reports-dashboard">
+                    <div class="report-filters">
+                        <div class="filter-row">
+                            <div class="filter-group">
+                                <label>Report Type</label>
+                                <select id="reportType">
+                                    <option value="financial">Financial Summary</option>
+                                    <option value="loans">Loan Portfolio</option>
+                                    <option value="agents">Agent Performance</option>
+                                    <option value="customers">Customer Analysis</option>
+                                    <option value="collateral">Collateral Report</option>
+                                    <option value="risk">Risk Assessment</option>
+                                </select>
+                            </div>
+                            <div class="filter-group">
+                                <label>Date Range</label>
+                                <input type="text" id="reportDateRange" class="date-range" placeholder="Select date range">
+                            </div>
+                            <div class="filter-group">
+                                <label>Format</label>
+                                <select id="reportFormat">
+                                    <option value="summary">Summary</option>
+                                    <option value="detailed">Detailed</option>
+                                    <option value="comparative">Comparative</option>
+                                </select>
+                            </div>
+                        </div>
+                        <button class="btn-primary" id="generateReportBtn">
+                            <i class="fas fa-chart-bar"></i> Generate Report
+                        </button>
+                    </div>
+
+                    <div class="report-preview">
+                        <div class="report-header">
+                            <h3>Report Preview</h3>
+                            <div class="report-actions">
+                                <button class="btn-small" id="printReport">
+                                    <i class="fas fa-print"></i> Print
+                                </button>
+                                <button class="btn-small" id="downloadReport">
+                                    <i class="fas fa-download"></i> Download
+                                </button>
+                            </div>
+                        </div>
+                        <div class="report-content" id="reportContent">
+                            <div class="report-placeholder">
+                                <i class="fas fa-chart-line"></i>
+                                <h4>No Report Generated</h4>
+                                <p>Configure filters and generate a report to view data</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Risk Monitoring Section -->
+            <section id="riskMonitoringSection" class="section-content">
+                <div class="section-header">
+                    <h2>Risk Monitoring Dashboard</h2>
+                    <button class="btn-danger" id="refreshRiskData">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                </div>
+
+                <div class="risk-metrics-grid">
+                    <div class="risk-card high">
+                        <div class="risk-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>High Risk Loans</h3>
+                        </div>
+                        <div class="risk-value" id="highRiskLoans">0</div>
+                        <div class="risk-details">
+                            <span>Amount at Risk: K <span id="highRiskAmount">0</span></span>
+                        </div>
+                    </div>
+
+                    <div class="risk-card medium">
+                        <div class="risk-header">
+                            <i class="fas fa-exclamation-circle"></i>
+                            <h3>Medium Risk</h3>
+                        </div>
+                        <div class="risk-value" id="mediumRiskLoans">0</div>
+                        <div class="risk-details">
+                            <span>Requires monitoring</span>
+                        </div>
+                    </div>
+
+                    <div class="risk-card low">
+                        <div class="risk-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Low Risk</h3>
+                        </div>
+                        <div class="risk-value" id="lowRiskLoans">0</div>
+                        <div class="risk-details">
+                            <span>Performing well</span>
+                        </div>
+                    </div>
+
+                    <div class="risk-card watch">
+                        <div class="risk-header">
+                            <i class="fas fa-eye"></i>
+                            <h3>Watch List</h3>
+                        </div>
+                        <div class="risk-value" id="watchListCount">0</div>
+                        <div class="risk-details">
+                            <span>Customers on watch list</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="risk-analysis">
+                    <div class="risk-chart">
+                        <h3>Risk Distribution</h3>
+                        <canvas id="riskDistributionChart"></canvas>
+                    </div>
+                    <div class="risk-list">
+                        <h3>Top Risk Factors</h3>
+                        <div class="risk-factors" id="riskFactorsList">
+                            <div class="risk-factor">
+                                <i class="fas fa-circle"></i>
+                                <span>No risk factors identified</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Audit Log Section -->
+            <section id="auditLogSection" class="section-content">
+                <div class="section-header">
+                    <h2>System Audit Log</h2>
+                    <div class="header-actions">
+                        <button class="btn-secondary" id="exportAuditLog">
+                            <i class="fas fa-download"></i> Export Log
+                        </button>
+                        <button class="btn-danger" id="clearAuditLog">
+                            <i class="fas fa-trash"></i> Clear Old Logs
+                        </button>
+                    </div>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="auditSearch" placeholder="Search audit log...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="auditUserFilter">
+                            <option value="">All Users</option>
+                        </select>
+                        <select id="auditActionFilter">
+                            <option value="">All Actions</option>
+                            <option value="login">Login</option>
+                            <option value="logout">Logout</option>
+                            <option value="create">Create</option>
+                            <option value="update">Update</option>
+                            <option value="delete">Delete</option>
+                            <option value="approve">Approve</option>
+                            <option value="reject">Reject</option>
+                            <option value="verify">Verify</option>
+                        </select>
+                        <input type="date" id="auditDateFilter">
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Timestamp</th>
+                                    <th>User</th>
+                                    <th>Action</th>
+                                    <th>Details</th>
+                                    <th>IP Address</th>
+                                    <th>User Agent</th>
+                                </tr>
+                            </thead>
+                            <tbody id="auditLogBody">
+                                <tr>
+                                    <td colspan="6" class="empty-state">
+                                        <i class="fas fa-history"></i>
+                                        <p>No audit logs available</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Blacklist Section -->
+            <section id="blacklistSection" class="section-content">
+                <div class="section-header">
+                    <h2>Blacklisted Accounts</h2>
+                    <button class="btn-danger" id="addToBlacklist">
+                        <i class="fas fa-ban"></i> Add to Blacklist
+                    </button>
+                </div>
+
+                <div class="blacklist-stats">
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-slash"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Blacklisted Customers</h3>
+                            <div class="stat-value" id="blacklistedCustomers">0</div>
+                        </div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Blacklisted Agents</h3>
+                            <div class="stat-value" id="blacklistedAgents">0</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Type</th>
+                                    <th>ID Number</th>
+                                    <th>Reason</th>
+                                    <th>Blacklisted By</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="blacklistTableBody">
+                                <tr>
+                                    <td colspan="7" class="empty-state">
+                                        <i class="fas fa-ban"></i>
+                                        <p>No blacklisted accounts</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Settings Section -->
+            <section id="settingsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Admin Settings</h2>
+                    <button class="btn-primary" id="saveSettings">
+                        <i class="fas fa-save"></i> Save Settings
+                    </button>
+                </div>
+
+                <div class="settings-grid">
+                    <div class="settings-card">
+                        <h3>Notification Settings</h3>
+                        <div class="settings-item">
+                            <label>
+                                <input type="checkbox" id="emailNotifications" checked>
+                                <span>Email Notifications</span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <label>
+                                <input type="checkbox" id="smsNotifications">
+                                <span>SMS Notifications</span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <label>
+                                <input type="checkbox" id="pushNotifications" checked>
+                                <span>Push Notifications</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Security Settings</h3>
+                        <div class="settings-item">
+                            <label>
+                                <input type="checkbox" id="twoFactorAuth">
+                                <span>Two-Factor Authentication</span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <label>
+                                <input type="checkbox" id="sessionTimeout" checked>
+                                <span>Automatic Session Timeout</span>
+                            </label>
+                        </div>
+                        <div class="settings-item">
+                            <label>
+                                <input type="checkbox" id="ipWhitelist">
+                                <span>IP Address Whitelist</span>
+                            </label>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Display Settings</h3>
+                        <div class="settings-item">
+                            <label>Theme</label>
+                            <select id="themeSelect">
+                                <option value="dark">Dark</option>
+                                <option value="light">Light</option>
+                                <option value="auto">Auto</option>
+                            </select>
+                        </div>
+                        <div class="settings-item">
+                            <label>Items Per Page</label>
+                            <select id="itemsPerPage">
+                                <option value="10">10</option>
+                                <option value="25" selected>25</option>
+                                <option value="50">50</option>
+                                <option value="100">100</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="settings-card">
+                        <h3>Profile Settings</h3>
+                        <div class="profile-form">
+                            <div class="form-group">
+                                <label>Full Name</label>
+                                <input type="text" id="adminFullName" placeholder="Enter your full name">
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address</label>
+                                <input type="email" id="adminEmail" placeholder="Enter your email">
+                            </div>
+                            <div class="form-group">
+                                <label>Change Password</label>
+                                <input type="password" id="newPassword" placeholder="New password">
+                                <input type="password" id="confirmPassword" placeholder="Confirm password">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modals -->
+        <div class="modal" id="agentDetailModal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3>Agent Details</h3>
+                    <button class="modal-close" onclick="closeModal('agentDetailModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="agentDetailContent">
+                        <!-- Agent details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="customerDetailModal">
+            <div class="modal-content large">
+                <div class="modal-header">
+                    <h3>Customer Details</h3>
+                    <button class="modal-close" onclick="closeModal('customerDetailModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="customerDetailContent">
+                        <!-- Customer details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="loanDetailModal">
+            <div class="modal-content xlarge">
+                <div class="modal-header">
+                    <h3>Loan Application Details</h3>
+                    <button class="modal-close" onclick="closeModal('loanDetailModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="loanDetailContent">
+                        <!-- Loan details will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="paymentConfirmationModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Confirm Payment</h3>
+                    <button class="modal-close" onclick="closeModal('paymentConfirmationModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <div id="paymentConfirmationContent">
+                        <!-- Payment confirmation form will be loaded here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div class="modal" id="photoModal">
+            <div class="modal-content photo-modal">
+                <div class="modal-header">
+                    <h3>Photo Viewer</h3>
+                    <button class="modal-close" onclick="closeModal('photoModal')">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <img id="modalPhoto" src="" alt="Photo" class="modal-photo">
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="module" src="scripts/firebase.js"></script>
+    <script type="module" src="scripts/admin.js"></script>
+    <script>
+        function closeModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.classList.remove('active');
+            setTimeout(() => modal.style.display = 'none', 300);
+        }
+        
+        function showModal(modalId) {
+            const modal = document.getElementById(modalId);
+            modal.style.display = 'flex';
+            setTimeout(() => modal.classList.add('active'), 10);
+        }
+        
+        function viewPhoto(photoUrl) {
+            document.getElementById('modalPhoto').src = photoUrl;
+            showModal('photoModal');
+        }
+    </script>
+</body>
+</html>
