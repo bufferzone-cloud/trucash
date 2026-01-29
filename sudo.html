@@ -4,748 +4,902 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruCash - Sudo Dashboard</title>
+    <link rel="stylesheet" href="style.css">
     <link rel="stylesheet" href="sudo.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
-<body>
-    <!-- Sidebar -->
-    <nav class="sidebar">
-        <div class="sidebar-header">
-            <div class="logo">
-                <i class="fas fa-crown"></i>
-                <h2>TruCash <span class="role-badge">SUDO</span></h2>
-            </div>
-            <div class="user-info" id="userInfo">
-                <div class="user-avatar">
-                    <i class="fas fa-user-shield"></i>
+<body class="sudo-theme">
+    <div class="app-container">
+        <!-- Sidebar -->
+        <aside class="sidebar sudo-sidebar">
+            <div class="sidebar-header">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-crown"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h3>TruCash</h3>
+                        <span class="role-badge">SUDO</span>
+                    </div>
                 </div>
-                <div class="user-details">
-                    <h4 id="userName">Loading...</h4>
-                    <span class="user-email" id="userEmail">Loading...</span>
-                </div>
-            </div>
-        </div>
-
-        <div class="sidebar-menu">
-            <div class="menu-section">
-                <h3>System Control</h3>
-                <ul>
-                    <li class="active" data-section="dashboard">
-                        <i class="fas fa-tachometer-alt"></i>
-                        <span>Dashboard</span>
-                    </li>
-                    <li data-section="admins">
-                        <i class="fas fa-user-shield"></i>
-                        <span>Admin Management</span>
-                    </li>
-                    <li data-section="system-config">
-                        <i class="fas fa-cogs"></i>
-                        <span>System Configuration</span>
-                    </li>
-                    <li data-section="reports">
-                        <i class="fas fa-chart-bar"></i>
-                        <span>Reports & Analytics</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="menu-section">
-                <h3>Financial Control</h3>
-                <ul>
-                    <li data-section="loans-overview">
-                        <i class="fas fa-hand-holding-usd"></i>
-                        <span>All Loans</span>
-                    </li>
-                    <li data-section="transactions">
-                        <i class="fas fa-exchange-alt"></i>
-                        <span>Transactions</span>
-                    </li>
-                    <li data-section="revenue">
-                        <i class="fas fa-money-bill-wave"></i>
-                        <span>Revenue Analysis</span>
-                    </li>
-                </ul>
-            </div>
-
-            <div class="menu-section">
-                <h3>Monitoring</h3>
-                <ul>
-                    <li data-section="risk-alerts">
-                        <i class="fas fa-exclamation-triangle"></i>
-                        <span>Risk Alerts</span>
-                        <span class="badge" id="riskBadge">0</span>
-                    </li>
-                    <li data-section="audit-log">
-                        <i class="fas fa-history"></i>
-                        <span>Audit Log</span>
-                    </li>
-                    <li data-section="agent-performance">
-                        <i class="fas fa-chart-line"></i>
-                        <span>Agent Performance</span>
-                    </li>
-                </ul>
-            </div>
-        </div>
-
-        <div class="sidebar-footer">
-            <button class="logout-btn" id="logoutBtn">
-                <i class="fas fa-sign-out-alt"></i>
-                <span>Logout</span>
-            </button>
-            <div class="system-status">
-                <i class="fas fa-circle"></i>
-                <span>System Online</span>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Main Content -->
-    <main class="main-content">
-        <!-- Header -->
-        <header class="main-header">
-            <div class="header-left">
-                <button class="menu-toggle" id="menuToggle">
+                <button class="sidebar-toggle" id="sidebarToggle">
                     <i class="fas fa-bars"></i>
                 </button>
-                <h1 id="pageTitle">Dashboard</h1>
             </div>
-            <div class="header-right">
-                <div class="header-actions">
-                    <button class="header-btn" id="refreshBtn">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                    <button class="header-btn" id="notificationsBtn">
-                        <i class="fas fa-bell"></i>
-                        <span class="badge">3</span>
-                    </button>
-                    <div class="date-display" id="currentDate">
-                        Loading...
+            
+            <div class="sidebar-content">
+                <nav class="sidebar-nav">
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" href="#dashboard">
+                                <i class="fas fa-tachometer-alt"></i>
+                                <span>Dashboard</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#admins">
+                                <i class="fas fa-user-tie"></i>
+                                <span>Admin Management</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#system-config">
+                                <i class="fas fa-cog"></i>
+                                <span>System Configuration</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#loans">
+                                <i class="fas fa-money-check-alt"></i>
+                                <span>Loan Management</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#reports">
+                                <i class="fas fa-chart-bar"></i>
+                                <span>Reports & Analytics</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#transactions">
+                                <i class="fas fa-exchange-alt"></i>
+                                <span>All Transactions</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#system-logs">
+                                <i class="fas fa-history"></i>
+                                <span>System Logs</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#agent-performance">
+                                <i class="fas fa-chart-line"></i>
+                                <span>Agent Performance</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#risk-management">
+                                <i class="fas fa-exclamation-triangle"></i>
+                                <span>Risk Management</span>
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" href="#backup">
+                                <i class="fas fa-database"></i>
+                                <span>Backup & Restore</span>
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <div class="sidebar-divider"></div>
+                    
+                    <div class="sidebar-footer">
+                        <div class="user-info">
+                            <div class="user-avatar">
+                                <i class="fas fa-user-shield"></i>
+                            </div>
+                            <div class="user-details">
+                                <strong id="userName">System Owner</strong>
+                                <small id="userEmail">trucash@gmail.com</small>
+                            </div>
+                        </div>
+                        <button class="btn btn-sudo-outline btn-sm" id="logoutBtn">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Logout</span>
+                        </button>
+                    </div>
+                </nav>
+            </div>
+        </aside>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header sudo-header">
+                <div class="header-left">
+                    <h1 class="page-title" id="pageTitle">Dashboard</h1>
+                    <div class="breadcrumb">
+                        <span>Home</span>
+                        <i class="fas fa-chevron-right"></i>
+                        <span id="breadcrumbCurrent">Dashboard</span>
                     </div>
                 </div>
-            </div>
-        </header>
-
-        <!-- Dashboard Content -->
-        <div class="content-wrapper">
-            <!-- Dashboard Section -->
-            <section id="dashboardSection" class="section-content active">
-                <div class="stats-grid">
-                    <!-- Total Loans Card -->
-                    <div class="stat-card premium">
-                        <div class="stat-icon">
-                            <i class="fas fa-hand-holding-usd"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Total Loans Issued</h3>
-                            <div class="stat-value" id="totalLoans">K 0</div>
-                            <div class="stat-trend">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>0% from last month</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Total Repayments Card -->
-                    <div class="stat-card premium">
-                        <div class="stat-icon">
-                            <i class="fas fa-money-check-alt"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Total Repayments</h3>
-                            <div class="stat-value" id="totalRepayments">K 0</div>
-                            <div class="stat-trend">
-                                <i class="fas fa-arrow-up"></i>
-                                <span>0% recovery rate</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Overdue Loans Card -->
-                    <div class="stat-card warning">
-                        <div class="stat-icon">
-                            <i class="fas fa-exclamation-circle"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Overdue Loans</h3>
-                            <div class="stat-value" id="overdueLoans">K 0</div>
-                            <div class="stat-details">
-                                <span id="overdueCount">0 loans</span>
-                                <span class="badge">High Risk</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Defaulted Loans Card -->
-                    <div class="stat-card danger">
-                        <div class="stat-icon">
-                            <i class="fas fa-times-circle"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Defaulted Loans</h3>
-                            <div class="stat-value" id="defaultedLoans">K 0</div>
-                            <div class="stat-details">
-                                <span id="defaultedCount">0 loans</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Revenue Summary Card -->
-                    <div class="stat-card success">
-                        <div class="stat-icon">
-                            <i class="fas fa-chart-line"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Revenue & Profit</h3>
-                            <div class="stat-value" id="totalRevenue">K 0</div>
-                            <div class="stat-breakdown">
-                                <span>Interest: K 0</span>
-                                <span>Penalties: K 0</span>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Active Agents Card -->
-                    <div class="stat-card info">
-                        <div class="stat-icon">
-                            <i class="fas fa-user-tie"></i>
-                        </div>
-                        <div class="stat-info">
-                            <h3>Active Agents</h3>
-                            <div class="stat-value" id="activeAgents">0</div>
-                            <div class="stat-details">
-                                <span id="totalAgents">0 total</span>
-                            </div>
+                
+                <div class="header-right">
+                    <div class="header-actions">
+                        <button class="btn btn-ghost" id="notificationsBtn">
+                            <i class="fas fa-bell"></i>
+                            <span class="badge badge-danger" id="notificationCount">3</span>
+                        </button>
+                        <button class="btn btn-ghost" id="quickActionsBtn">
+                            <i class="fas fa-bolt"></i>
+                            <span>Quick Actions</span>
+                        </button>
+                        <div class="system-health">
+                            <div class="health-indicator healthy" id="systemHealth"></div>
+                            <span>System Healthy</span>
                         </div>
                     </div>
                 </div>
-
-                <!-- Charts and Graphs -->
-                <div class="charts-grid">
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3>Loan Distribution by Status</h3>
-                            <select class="chart-filter" id="loanDistributionFilter">
+            </header>
+            
+            <!-- Content Area -->
+            <div class="content-area" id="contentArea">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="content-section active">
+                    <div class="section-header">
+                        <h2>System Overview</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-sudo-primary" id="refreshDashboard">
+                                <i class="fas fa-sync-alt"></i>
+                                <span>Refresh</span>
+                            </button>
+                            <button class="btn btn-sudo-outline" id="exportDashboard">
+                                <i class="fas fa-download"></i>
+                                <span>Export Report</span>
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Grid -->
+                    <div class="sudo-grid">
+                        <div class="stats-card">
+                            <div class="stat-value" id="totalLoans">K 12,450,000</div>
+                            <div class="stat-label">Total Loans Issued</div>
+                            <div class="stat-change">
+                                <i class="fas fa-arrow-up"></i>
+                                12.5% from last month
+                            </div>
+                        </div>
+                        
+                        <div class="stats-card">
+                            <div class="stat-value" id="totalRepayments">K 8,950,000</div>
+                            <div class="stat-label">Total Repayments</div>
+                            <div class="stat-change">
+                                <i class="fas fa-arrow-up"></i>
+                                8.3% from last month
+                            </div>
+                        </div>
+                        
+                        <div class="stats-card">
+                            <div class="stat-value" id="overdueLoans">K 1,230,000</div>
+                            <div class="stat-label">Overdue Loans</div>
+                            <div class="stat-change danger">
+                                <i class="fas fa-arrow-up"></i>
+                                5.2% from last month
+                            </div>
+                        </div>
+                        
+                        <div class="stats-card">
+                            <div class="stat-value" id="totalRevenue">K 2,150,000</div>
+                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-change">
+                                <i class="fas fa-arrow-up"></i>
+                                15.7% from last month
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="row mb-4">
+                        <div class="col-lg-8">
+                            <div class="sudo-card">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-chart-line"></i>
+                                        Loan Performance Trends
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <canvas id="loanTrendsChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-4">
+                            <div class="sudo-card">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-chart-pie"></i>
+                                        Loan Status Distribution
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <canvas id="loanStatusChart" height="250"></canvas>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Agent Leaderboard -->
+                    <div class="sudo-card">
+                        <div class="sudo-card-header">
+                            <h3 class="sudo-card-title">
+                                <i class="fas fa-trophy"></i>
+                                Top Performing Agents
+                            </h3>
+                            <select class="sudo-form-control" id="leaderboardPeriod" style="width: auto;">
                                 <option value="month">This Month</option>
                                 <option value="quarter">This Quarter</option>
                                 <option value="year">This Year</option>
                             </select>
                         </div>
-                        <div class="chart-container">
-                            <canvas id="loanDistributionChart"></canvas>
-                        </div>
-                    </div>
-
-                    <div class="chart-card">
-                        <div class="chart-header">
-                            <h3>Revenue Trend</h3>
-                            <select class="chart-filter" id="revenueTrendFilter">
-                                <option value="7">Last 7 Days</option>
-                                <option value="30">Last 30 Days</option>
-                                <option value="90">Last 90 Days</option>
-                            </select>
-                        </div>
-                        <div class="chart-container">
-                            <canvas id="revenueTrendChart"></canvas>
-                        </div>
-                    </div>
-                </div>
-
-                <!-- Agent Leaderboard -->
-                <div class="leaderboard-card">
-                    <div class="card-header">
-                        <h3>Agent Performance Leaderboard</h3>
-                        <button class="btn-primary" id="exportLeaderboard">
-                            <i class="fas fa-download"></i> Export
-                        </button>
-                    </div>
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Rank</th>
-                                    <th>Agent Name</th>
-                                    <th>Agent ID</th>
-                                    <th>Customers</th>
-                                    <th>Active Loans</th>
-                                    <th>Total Volume</th>
-                                    <th>Recovery Rate</th>
-                                    <th>Commission</th>
-                                </tr>
-                            </thead>
-                            <tbody id="leaderboardBody">
-                                <tr>
-                                    <td colspan="8" class="empty-state">
-                                        <i class="fas fa-chart-bar"></i>
-                                        <p>No agent data available</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-
-                <!-- Recent Activity -->
-                <div class="activity-card">
-                    <div class="card-header">
-                        <h3>Recent System Activity</h3>
-                        <button class="btn-text" id="viewAllActivity">
-                            View All <i class="fas fa-arrow-right"></i>
-                        </button>
-                    </div>
-                    <div class="activity-list" id="recentActivity">
-                        <div class="activity-item">
-                            <div class="activity-icon">
-                                <i class="fas fa-info-circle"></i>
-                            </div>
-                            <div class="activity-content">
-                                <p>No recent activity</p>
-                                <span class="activity-time">Just now</span>
+                        <div class="sudo-card-body">
+                            <div class="table-responsive">
+                                <table class="table sudo-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Rank</th>
+                                            <th>Agent</th>
+                                            <th>Agent ID</th>
+                                            <th>Customers</th>
+                                            <th>Loans Issued</th>
+                                            <th>Total Amount</th>
+                                            <th>Success Rate</th>
+                                            <th>Commission</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="leaderboardTable">
+                                        <!-- Data will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- Admin Management Section -->
-            <section id="adminsSection" class="section-content">
-                <div class="section-header">
-                    <h2>Admin Account Management</h2>
-                    <button class="btn-primary" id="createAdminBtn">
-                        <i class="fas fa-plus"></i> Create New Admin
-                    </button>
-                </div>
-
-                <div class="filters-bar">
-                    <div class="search-box">
-                        <i class="fas fa-search"></i>
-                        <input type="text" id="adminSearch" placeholder="Search admins by name or email...">
+                    
+                    <!-- Recent Activity & Risk Alerts -->
+                    <div class="row mt-4">
+                        <div class="col-lg-6">
+                            <div class="sudo-card">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-history"></i>
+                                        Recent System Activity
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <ul class="activity-feed" id="recentActivity">
+                                        <!-- Activity items will be populated by JavaScript -->
+                                    </ul>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="sudo-card">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-exclamation-triangle"></i>
+                                        Risk Alerts
+                                        <span class="badge badge-sudo-danger ml-2" id="riskAlertCount">3</span>
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <div class="alert alert-danger" id="highRiskLoans">
+                                        <strong>High Risk Loans Detected:</strong> 5 loans exceeding K50,000 with overdue payments
+                                    </div>
+                                    <div class="alert alert-warning" id="agentPerformance">
+                                        <strong>Agent Performance Alert:</strong> 2 agents below 70% collection rate
+                                    </div>
+                                    <div class="alert alert-info" id="systemMaintenance">
+                                        <strong>System Maintenance:</strong> Scheduled for Saturday, 2:00 AM - 4:00 AM
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
                     </div>
-                    <div class="filter-group">
-                        <select id="adminStatusFilter">
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                        </select>
-                        <button class="btn-secondary" id="refreshAdmins">
-                            <i class="fas fa-sync-alt"></i>
-                        </button>
-                    </div>
-                </div>
-
-                <div class="table-card">
-                    <div class="table-container">
-                        <table class="data-table">
-                            <thead>
-                                <tr>
-                                    <th>Admin ID</th>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Created</th>
-                                    <th>Status</th>
-                                    <th>Permissions</th>
-                                    <th>Last Login</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminsTableBody">
-                                <tr>
-                                    <td colspan="8" class="empty-state">
-                                        <i class="fas fa-user-shield"></i>
-                                        <p>No admin accounts found</p>
-                                    </td>
-                                </tr>
-                            </tbody>
-                        </table>
-                    </div>
-                    <div class="table-footer">
-                        <div class="pagination">
-                            <button class="pagination-btn" disabled>
-                                <i class="fas fa-chevron-left"></i>
-                            </button>
-                            <span>Page 1 of 1</span>
-                            <button class="pagination-btn" disabled>
-                                <i class="fas fa-chevron-right"></i>
+                </section>
+                
+                <!-- Admin Management Section -->
+                <section id="admins" class="content-section">
+                    <div class="section-header">
+                        <h2>Admin Account Management</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-sudo-primary" id="createAdminBtn">
+                                <i class="fas fa-user-plus"></i>
+                                <span>Create New Admin</span>
                             </button>
                         </div>
                     </div>
-                </div>
-            </section>
-
-            <!-- System Configuration Section -->
-            <section id="systemConfigSection" class="section-content">
-                <div class="section-header">
-                    <h2>System Configuration</h2>
-                    <button class="btn-primary" id="saveConfigBtn">
-                        <i class="fas fa-save"></i> Save All Changes
-                    </button>
-                </div>
-
-                <div class="config-grid">
-                    <!-- Loan Configuration -->
-                    <div class="config-card">
-                        <div class="config-header">
-                            <i class="fas fa-money-bill-wave"></i>
-                            <h3>Loan Configuration</h3>
+                    
+                    <div class="sudo-card">
+                        <div class="sudo-card-header">
+                            <h3 class="sudo-card-title">
+                                <i class="fas fa-users-cog"></i>
+                                Active Administrators
+                            </h3>
+                            <div class="search-box">
+                                <input type="text" class="sudo-form-control" id="adminSearch" placeholder="Search admins...">
+                                <i class="fas fa-search"></i>
+                            </div>
                         </div>
-                        <div class="config-body">
-                            <div class="config-item">
-                                <label>Minimum Loan Amount (K)</label>
-                                <input type="number" id="minLoanAmount" class="config-input" value="500">
-                            </div>
-                            <div class="config-item">
-                                <label>Maximum Loan Amount (K)</label>
-                                <input type="number" id="maxLoanAmount" class="config-input" value="50000">
-                            </div>
-                            <div class="config-item">
-                                <label>Base Interest Rate (%)</label>
-                                <input type="number" id="baseInterestRate" class="config-input" value="15" step="0.1">
-                            </div>
-                            <div class="config-item">
-                                <label>Loan Duration Options (Months)</label>
-                                <input type="text" id="loanDurations" class="config-input" value="3,6,9,12,18,24">
-                                <small class="hint">Comma-separated values</small>
+                        <div class="sudo-card-body">
+                            <div class="table-responsive">
+                                <table class="table sudo-table">
+                                    <thead>
+                                        <tr>
+                                            <th>Admin ID</th>
+                                            <th>Full Name</th>
+                                            <th>Email</th>
+                                            <th>Phone</th>
+                                            <th>Permissions</th>
+                                            <th>Status</th>
+                                            <th>Last Active</th>
+                                            <th>Actions</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody id="adminsTable">
+                                        <!-- Admin data will be populated by JavaScript -->
+                                    </tbody>
+                                </table>
                             </div>
                         </div>
                     </div>
-
-                    <!-- Penalty Configuration -->
-                    <div class="config-card">
-                        <div class="config-header">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>Penalty Configuration</h3>
+                </section>
+                
+                <!-- System Configuration Section -->
+                <section id="system-config" class="content-section">
+                    <div class="section-header">
+                        <h2>System Configuration</h2>
+                        <div class="section-actions">
+                            <button class="btn btn-sudo-primary" id="saveConfigBtn">
+                                <i class="fas fa-save"></i>
+                                <span>Save All Changes</span>
+                            </button>
                         </div>
-                        <div class="config-body">
-                            <div class="config-item">
-                                <label>Daily Penalty Rate (%)</label>
-                                <input type="number" id="dailyPenaltyRate" class="config-input" value="0.5" step="0.1">
+                    </div>
+                    
+                    <div class="row">
+                        <div class="col-lg-6">
+                            <div class="sudo-card">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-money-bill-wave"></i>
+                                        Loan Configuration
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <form id="loanConfigForm">
+                                        <div class="form-group">
+                                            <label class="form-label">Minimum Loan Amount (ZMW)</label>
+                                            <input type="number" class="sudo-form-control" id="minLoanAmount" value="500" min="100" step="50">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Maximum Loan Amount (ZMW)</label>
+                                            <input type="number" class="sudo-form-control" id="maxLoanAmount" value="50000" min="1000" step="1000">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Base Interest Rate (%)</label>
+                                            <input type="number" class="sudo-form-control" id="baseInterestRate" value="15" min="1" max="100" step="0.5">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Loan Duration Options (Months)</label>
+                                            <select class="sudo-form-control" id="loanDurations" multiple>
+                                                <option value="3" selected>3 Months</option>
+                                                <option value="6" selected>6 Months</option>
+                                                <option value="9" selected>9 Months</option>
+                                                <option value="12" selected>12 Months</option>
+                                                <option value="18">18 Months</option>
+                                                <option value="24">24 Months</option>
+                                            </select>
+                                            <small class="form-text">Hold Ctrl/Cmd to select multiple options</small>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="config-item">
-                                <label>Grace Period (Days)</label>
-                                <input type="number" id="gracePeriod" class="config-input" value="7">
+                            
+                            <div class="sudo-card mt-4">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-calendar-times"></i>
+                                        Penalty Configuration
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <form id="penaltyConfigForm">
+                                        <div class="form-group">
+                                            <label class="form-label">Penalty Rate (% per day)</label>
+                                            <input type="number" class="sudo-form-control" id="penaltyRate" value="2" min="0.1" max="10" step="0.1">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Grace Period (Days)</label>
+                                            <input type="number" class="sudo-form-control" id="gracePeriod" value="7" min="0" max="30">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Maximum Penalty (% of principal)</label>
+                                            <input type="number" class="sudo-form-control" id="maxPenalty" value="50" min="10" max="200" step="5">
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
-                            <div class="config-item">
-                                <label>Maximum Penalty (%)</label>
-                                <input type="number" id="maxPenalty" class="config-input" value="25" step="0.1">
+                        </div>
+                        
+                        <div class="col-lg-6">
+                            <div class="sudo-card">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-user-tie"></i>
+                                        Agent Commission
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <form id="commissionConfigForm">
+                                        <div class="form-group">
+                                            <label class="form-label">Base Commission Rate (%)</label>
+                                            <input type="number" class="sudo-form-control" id="baseCommission" value="5" min="1" max="20" step="0.5">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Performance Bonus Threshold</label>
+                                            <input type="number" class="sudo-form-control" id="bonusThreshold" value="90" min="50" max="100" step="1">
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Bonus Rate (%)</label>
+                                            <input type="number" class="sudo-form-control" id="bonusRate" value="2" min="0.5" max="10" step="0.5">
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <div class="sudo-card mt-4">
+                                <div class="sudo-card-header">
+                                    <h3 class="sudo-card-title">
+                                        <i class="fas fa-cubes"></i>
+                                        Collateral Categories
+                                    </h3>
+                                </div>
+                                <div class="sudo-card-body">
+                                    <form id="collateralConfigForm">
+                                        <div class="form-group">
+                                            <label class="form-label">Collateral Categories</label>
+                                            <div id="collateralCategories">
+                                                <!-- Categories will be populated by JavaScript -->
+                                            </div>
+                                            <button type="button" class="btn btn-sudo-outline btn-sm mt-2" id="addCategoryBtn">
+                                                <i class="fas fa-plus"></i>
+                                                <span>Add Category</span>
+                                            </button>
+                                        </div>
+                                        
+                                        <div class="form-group">
+                                            <label class="form-label">Minimum Collateral Value Multiplier</label>
+                                            <input type="number" class="sudo-form-control" id="collateralMultiplier" value="1.5" min="1" max="5" step="0.1">
+                                            <small class="form-text">Collateral must be worth at least loan amount × multiplier</small>
+                                        </div>
+                                    </form>
+                                </div>
                             </div>
                         </div>
                     </div>
+                </section>
+                
+                <!-- Add more sections for other functionality -->
+                
+            </div>
+        </main>
+    </div>
 
-                    <!-- Agent Configuration -->
-                    <div class="config-card">
-                        <div class="config-header">
-                            <i class="fas fa-user-tie"></i>
-                            <h3>Agent Configuration</h3>
-                        </div>
-                        <div class="config-body">
-                            <div class="config-item">
-                                <label>Commission Rate (%)</label>
-                                <input type="number" id="agentCommission" class="config-input" value="2.5" step="0.1">
-                            </div>
-                            <div class="config-item">
-                                <label>Minimum Customers for Bonus</label>
-                                <input type="number" id="minCustomersForBonus" class="config-input" value="10">
-                            </div>
-                            <div class="config-item">
-                                <label>Bonus Rate (%)</label>
-                                <input type="number" id="bonusRate" class="config-input" value="0.5" step="0.1">
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- Collateral Configuration -->
-                    <div class="config-card">
-                        <div class="config-header">
-                            <i class="fas fa-gem"></i>
-                            <h3>Collateral Configuration</h3>
-                        </div>
-                        <div class="config-body">
-                            <div class="config-item">
-                                <label>Collateral Categories</label>
-                                <textarea id="collateralCategories" class="config-textarea">Vehicle, Electronics, Jewelry, Real Estate, Machinery, Other Valuables</textarea>
-                            </div>
-                            <div class="config-item">
-                                <label>Minimum Photos Required</label>
-                                <input type="number" id="minCollateralPhotos" class="config-input" value="3">
-                            </div>
-                            <div class="config-item">
-                                <label>Value Assessment Rate (%)</label>
-                                <input type="number" id="collateralAssessmentRate" class="config-input" value="70" step="0.1">
-                                <small class="hint">Percentage of market value considered</small>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- System Modules -->
-                    <div class="config-card">
-                        <div class="config-header">
-                            <i class="fas fa-puzzle-piece"></i>
-                            <h3>System Modules</h3>
-                        </div>
-                        <div class="config-body">
-                            <div class="config-item checkbox">
-                                <label>
-                                    <input type="checkbox" id="moduleSMS" checked>
-                                    <span>SMS Notifications</span>
-                                </label>
-                            </div>
-                            <div class="config-item checkbox">
-                                <label>
-                                    <input type="checkbox" id="moduleEmail" checked>
-                                    <span>Email Notifications</span>
-                                </label>
-                            </div>
-                            <div class="config-item checkbox">
-                                <label>
-                                    <input type="checkbox" id="moduleOTP" checked>
-                                    <span>OTP Authentication</span>
-                                </label>
-                            </div>
-                            <div class="config-item checkbox">
-                                <label>
-                                    <input type="checkbox" id="moduleAutoApprove" checked>
-                                    <span>Auto-Approval for Verified Customers</span>
-                                </label>
-                            </div>
-                            <div class="config-item checkbox">
-                                <label>
-                                    <input type="checkbox" id="modulePenaltyAuto" checked>
-                                    <span>Automatic Penalty Calculation</span>
-                                </label>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Reports Section -->
-            <section id="reportsSection" class="section-content">
-                <div class="section-header">
-                    <h2>Reports & Analytics</h2>
-                    <div class="report-actions">
-                        <button class="btn-secondary" id="generatePDF">
-                            <i class="fas fa-file-pdf"></i> PDF
-                        </button>
-                        <button class="btn-secondary" id="generateExcel">
-                            <i class="fas fa-file-excel"></i> Excel
-                        </button>
-                        <button class="btn-primary" id="generateCustomReport">
-                            <i class="fas fa-chart-bar"></i> Custom Report
-                        </button>
-                    </div>
-                </div>
-
-                <div class="report-filters">
-                    <div class="filter-row">
-                        <div class="filter-group">
-                            <label>Report Type</label>
-                            <select id="reportType">
-                                <option value="financial">Financial Summary</option>
-                                <option value="loans">Loan Portfolio</option>
-                                <option value="agents">Agent Performance</option>
-                                <option value="risk">Risk Assessment</option>
-                                <option value="collateral">Collateral Analysis</option>
-                            </select>
-                        </div>
-                        <div class="filter-group">
-                            <label>Date Range</label>
-                            <input type="text" id="reportDateRange" class="date-range-input" placeholder="Select date range">
-                        </div>
-                        <div class="filter-group">
-                            <label>Format</label>
-                            <select id="reportFormat">
-                                <option value="summary">Summary View</option>
-                                <option value="detailed">Detailed View</option>
-                                <option value="comparative">Comparative Analysis</option>
-                            </select>
-                        </div>
-                    </div>
-                    <button class="btn-primary" id="applyReportFilters">
-                        <i class="fas fa-filter"></i> Generate Report
-                    </button>
-                </div>
-
-                <div class="report-preview" id="reportPreview">
-                    <div class="report-placeholder">
-                        <i class="fas fa-chart-pie"></i>
-                        <h3>Report Preview</h3>
-                        <p>Configure filters and generate report to view data</p>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Risk Alerts Section -->
-            <section id="riskAlertsSection" class="section-content">
-                <div class="section-header">
-                    <h2>Risk Alerts & Monitoring</h2>
-                    <div class="alert-actions">
-                        <button class="btn-secondary" id="markAllRead">
-                            <i class="fas fa-check-double"></i> Mark All Read
-                        </button>
-                        <button class="btn-danger" id="clearAlerts">
-                            <i class="fas fa-trash"></i> Clear All
-                        </button>
-                    </div>
-                </div>
-
-                <div class="alerts-grid">
-                    <div class="alert-card critical">
-                        <div class="alert-header">
-                            <i class="fas fa-skull-crossbones"></i>
-                            <h3>Critical Alerts</h3>
-                            <span class="alert-count" id="criticalCount">0</span>
-                        </div>
-                        <div class="alert-list" id="criticalAlerts">
-                            <div class="empty-alerts">
-                                <i class="fas fa-check-circle"></i>
-                                <p>No critical alerts</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert-card warning">
-                        <div class="alert-header">
-                            <i class="fas fa-exclamation-triangle"></i>
-                            <h3>High Risk</h3>
-                            <span class="alert-count" id="warningCount">0</span>
-                        </div>
-                        <div class="alert-list" id="warningAlerts">
-                            <div class="empty-alerts">
-                                <i class="fas fa-check-circle"></i>
-                                <p>No high risk alerts</p>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div class="alert-card info">
-                        <div class="alert-header">
-                            <i class="fas fa-info-circle"></i>
-                            <h3>Medium Risk</h3>
-                            <span class="alert-count" id="infoCount">0</span>
-                        </div>
-                        <div class="alert-list" id="infoAlerts">
-                            <div class="empty-alerts">
-                                <i class="fas fa-check-circle"></i>
-                                <p>No medium risk alerts</p>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="risk-metrics">
-                    <h3>Risk Metrics Overview</h3>
-                    <div class="metrics-grid">
-                        <div class="metric-card">
-                            <div class="metric-value" id="defaultRate">0%</div>
-                            <div class="metric-label">Default Rate</div>
-                            <div class="metric-trend negative">
-                                <i class="fas fa-arrow-up"></i> 0%
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value" id="overdueRate">0%</div>
-                            <div class="metric-label">Overdue Rate</div>
-                            <div class="metric-trend negative">
-                                <i class="fas fa-arrow-up"></i> 0%
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value" id="recoveryRate">0%</div>
-                            <div class="metric-label">Recovery Rate</div>
-                            <div class="metric-trend positive">
-                                <i class="fas fa-arrow-up"></i> 0%
-                            </div>
-                        </div>
-                        <div class="metric-card">
-                            <div class="metric-value" id="collateralCoverage">0%</div>
-                            <div class="metric-label">Collateral Coverage</div>
-                            <div class="metric-trend positive">
-                                <i class="fas fa-arrow-up"></i> 0%
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </section>
-        </div>
-
-        <!-- Modals -->
-        <div class="modal" id="createAdminModal">
+    <!-- Modals -->
+    <div class="modal sudo-modal" id="createAdminModal">
+        <div class="modal-dialog modal-lg">
             <div class="modal-content">
                 <div class="modal-header">
-                    <h3>Create New Admin Account</h3>
-                    <button class="modal-close" id="closeAdminModal">
+                    <h5 class="modal-title">Create New Admin Account</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal">
                         <i class="fas fa-times"></i>
                     </button>
                 </div>
                 <div class="modal-body">
-                    <form id="createAdminForm">
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Full Name *</label>
-                                <input type="text" id="adminFullName" required>
+                    <form id="newAdminForm">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Full Name *</label>
+                                    <input type="text" class="sudo-form-control" id="adminFullName" required>
+                                </div>
                             </div>
-                            <div class="form-group">
-                                <label>Email Address *</label>
-                                <input type="email" id="adminEmail" required>
-                            </div>
-                        </div>
-                        <div class="form-row">
-                            <div class="form-group">
-                                <label>Password *</label>
-                                <input type="password" id="adminPassword" required>
-                                <small class="hint">Minimum 8 characters</small>
-                            </div>
-                            <div class="form-group">
-                                <label>Confirm Password *</label>
-                                <input type="password" id="adminConfirmPassword" required>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Email Address *</label>
+                                    <input type="email" class="sudo-form-control" id="adminEmail" required>
+                                </div>
                             </div>
                         </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">Phone Number *</label>
+                                    <input type="tel" class="sudo-form-control" id="adminPhone" required>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label class="form-label">NRC Number *</label>
+                                    <input type="text" class="sudo-form-control" id="adminNRC" required>
+                                </div>
+                            </div>
+                        </div>
+                        
                         <div class="form-group">
-                            <label>Permissions</label>
+                            <label class="form-label">Permissions</label>
                             <div class="permissions-grid">
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions" value="verify_agents" checked>
-                                    <span>Verify Agents</span>
-                                </label>
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions" value="verify_customers" checked>
-                                    <span>Verify Customers</span>
-                                </label>
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions" value="approve_loans" checked>
-                                    <span>Approve Loans</span>
-                                </label>
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions" value="confirm_payments" checked>
-                                    <span>Confirm Payments</span>
-                                </label>
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions" value="manage_collateral" checked>
-                                    <span>Manage Collateral</span>
-                                </label>
-                                <label class="permission-item">
-                                    <input type="checkbox" name="permissions" value="generate_reports" checked>
-                                    <span>Generate Reports</span>
-                                </label>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="permLoans" checked>
+                                    <label class="form-check-label" for="permLoans">Loan Management</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="permAgents" checked>
+                                    <label class="form-check-label" for="permAgents">Agent Management</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="permCustomers" checked>
+                                    <label class="form-check-label" for="permCustomers">Customer Management</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="permReports">
+                                    <label class="form-check-label" for="permReports">Report Generation</label>
+                                </div>
+                                <div class="form-check">
+                                    <input type="checkbox" class="form-check-input" id="permSettings">
+                                    <label class="form-check-label" for="permSettings">System Settings</label>
+                                </div>
                             </div>
                         </div>
-                        <div class="form-actions">
-                            <button type="button" class="btn-secondary" id="cancelAdminCreate">
-                                Cancel
-                            </button>
-                            <button type="submit" class="btn-primary">
-                                <i class="fas fa-user-plus"></i> Create Admin
-                            </button>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Temporary Password</label>
+                            <div class="input-group">
+                                <input type="text" class="sudo-form-control" id="adminTempPassword" value="TruCash@123" readonly>
+                                <button type="button" class="btn btn-sudo-outline" id="generatePassword">
+                                    <i class="fas fa-redo"></i>
+                                    <span>Generate</span>
+                                </button>
+                            </div>
+                            <small class="form-text">Admin must change this password on first login</small>
                         </div>
                     </form>
                 </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-sudo-outline" data-bs-dismiss="modal">Cancel</button>
+                    <button type="button" class="btn btn-sudo-primary" id="submitAdminForm">Create Admin Account</button>
+                </div>
             </div>
         </div>
-    </main>
+    </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <!-- Notifications Panel -->
+    <div class="notifications-panel" id="notificationsPanel">
+        <div class="notifications-header">
+            <h5>Notifications</h5>
+            <button class="btn btn-ghost btn-sm" id="markAllRead">
+                <i class="fas fa-check-double"></i>
+                <span>Mark all as read</span>
+            </button>
+        </div>
+        <div class="notifications-list" id="notificationsList">
+            <!-- Notifications will be populated by JavaScript -->
+        </div>
+    </div>
+
+    <!-- Quick Actions Panel -->
+    <div class="quick-actions-panel" id="quickActionsPanel">
+        <div class="quick-actions-header">
+            <h5>Quick Actions</h5>
+        </div>
+        <div class="quick-actions-grid">
+            <a href="#" class="quick-action" data-action="create-admin">
+                <div class="quick-action-icon">
+                    <i class="fas fa-user-plus"></i>
+                </div>
+                <span>Create Admin</span>
+            </a>
+            <a href="#" class="quick-action" data-action="view-reports">
+                <div class="quick-action-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <span>View Reports</span>
+            </a>
+            <a href="#" class="quick-action" data-action="system-backup">
+                <div class="quick-action-icon">
+                    <i class="fas fa-database"></i>
+                </div>
+                <span>Backup System</span>
+            </a>
+            <a href="#" class="quick-action" data-action="audit-logs">
+                <div class="quick-action-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <span>Audit Logs</span>
+            </a>
+            <a href="#" class="quick-action" data-action="risk-analysis">
+                <div class="quick-action-icon">
+                    <i class="fas fa-shield-alt"></i>
+                </div>
+                <span>Risk Analysis</span>
+            </a>
+            <a href="#" class="quick-action" data-action="export-data">
+                <div class="quick-action-icon">
+                    <i class="fas fa-file-export"></i>
+                </div>
+                <span>Export Data</span>
+            </a>
+        </div>
+    </div>
+
     <script type="module" src="firebase.js"></script>
     <script type="module" src="sudo.js"></script>
+    
+    <style>
+        /* Additional styles for sudo dashboard */
+        .app-container {
+            display: flex;
+            min-height: 100vh;
+            background: var(--sudo-bg);
+        }
+        
+        .sidebar {
+            width: var(--sidebar-width);
+            flex-shrink: 0;
+            display: flex;
+            flex-direction: column;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar.collapsed {
+            width: var(--sidebar-collapsed-width);
+        }
+        
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            min-width: 0;
+        }
+        
+        .header {
+            height: var(--header-height);
+            flex-shrink: 0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+        }
+        
+        .content-area {
+            flex: 1;
+            padding: 24px;
+            overflow-y: auto;
+        }
+        
+        .content-section {
+            display: none;
+        }
+        
+        .content-section.active {
+            display: block;
+        }
+        
+        .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 24px;
+        }
+        
+        .row {
+            display: flex;
+            flex-wrap: wrap;
+            margin: -12px;
+        }
+        
+        .col-lg-6, .col-lg-8, .col-lg-4 {
+            padding: 12px;
+        }
+        
+        .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
+        .col-lg-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
+        .col-lg-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
+        
+        .mb-4 { margin-bottom: 24px; }
+        .mt-4 { margin-top: 24px; }
+        .ml-2 { margin-left: 8px; }
+        
+        .table-responsive {
+            overflow-x: auto;
+        }
+        
+        .search-box {
+            position: relative;
+            width: 250px;
+        }
+        
+        .search-box input {
+            padding-right: 40px;
+        }
+        
+        .search-box i {
+            position: absolute;
+            right: 12px;
+            top: 50%;
+            transform: translateY(-50%);
+            color: var(--sudo-text-secondary);
+        }
+        
+        .permissions-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 12px;
+            padding: 16px;
+            background: rgba(28, 28, 30, 0.5);
+            border-radius: 12px;
+        }
+        
+        .notifications-panel,
+        .quick-actions-panel {
+            position: fixed;
+            top: var(--header-height);
+            right: 24px;
+            width: 350px;
+            background: var(--sudo-card-bg);
+            border: 1px solid var(--sudo-border);
+            border-radius: 16px;
+            box-shadow: var(--shadow-xl);
+            z-index: 1000;
+            display: none;
+        }
+        
+        .notifications-panel.show,
+        .quick-actions-panel.show {
+            display: block;
+        }
+        
+        .notifications-header,
+        .quick-actions-header {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--sudo-border);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        
+        .notifications-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .notification-item {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--sudo-border);
+            transition: background 0.2s ease;
+        }
+        
+        .notification-item:hover {
+            background: rgba(10, 132, 255, 0.05);
+        }
+        
+        .notification-item.unread {
+            background: rgba(10, 132, 255, 0.1);
+        }
+        
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--sudo-text);
+        }
+        
+        .notification-message {
+            font-size: 14px;
+            color: var(--sudo-text-secondary);
+            margin-bottom: 8px;
+        }
+        
+        .notification-time {
+            font-size: 12px;
+            color: var(--sudo-text-secondary);
+        }
+        
+        .quick-actions-grid {
+            padding: 20px;
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        
+        .input-group {
+            display: flex;
+        }
+        
+        .input-group .sudo-form-control {
+            flex: 1;
+            border-top-right-radius: 0;
+            border-bottom-right-radius: 0;
+        }
+        
+        .input-group .btn {
+            border-top-left-radius: 0;
+            border-bottom-left-radius: 0;
+        }
+        
+        .btn-close {
+            background: none;
+            border: none;
+            color: var(--sudo-text-secondary);
+            cursor: pointer;
+            padding: 8px;
+            border-radius: 8px;
+            transition: all 0.2s ease;
+        }
+        
+        .btn-close:hover {
+            background: rgba(255, 255, 255, 0.1);
+            color: var(--sudo-text);
+        }
+        
+        @media (max-width: 1200px) {
+            .sudo-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+        
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                left: -100%;
+                top: 0;
+                bottom: 0;
+                z-index: 1100;
+                transition: left 0.3s ease;
+            }
+            
+            .sidebar.show {
+                left: 0;
+            }
+            
+            .sudo-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .col-lg-6, .col-lg-8, .col-lg-4 {
+                flex: 0 0 100%;
+                max-width: 100%;
+            }
+            
+            .notifications-panel,
+            .quick-actions-panel {
+                width: calc(100% - 48px);
+                right: 12px;
+                left: 12px;
+            }
+        }
+    </style>
 </body>
 </html>
