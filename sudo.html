@@ -1,0 +1,751 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruCash - Sudo Dashboard</title>
+    <link rel="stylesheet" href="styles/sudo.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/flatpickr/dist/flatpickr.min.css">
+</head>
+<body>
+    <!-- Sidebar -->
+    <nav class="sidebar">
+        <div class="sidebar-header">
+            <div class="logo">
+                <i class="fas fa-crown"></i>
+                <h2>TruCash <span class="role-badge">SUDO</span></h2>
+            </div>
+            <div class="user-info" id="userInfo">
+                <div class="user-avatar">
+                    <i class="fas fa-user-shield"></i>
+                </div>
+                <div class="user-details">
+                    <h4 id="userName">Loading...</h4>
+                    <span class="user-email" id="userEmail">Loading...</span>
+                </div>
+            </div>
+        </div>
+
+        <div class="sidebar-menu">
+            <div class="menu-section">
+                <h3>System Control</h3>
+                <ul>
+                    <li class="active" data-section="dashboard">
+                        <i class="fas fa-tachometer-alt"></i>
+                        <span>Dashboard</span>
+                    </li>
+                    <li data-section="admins">
+                        <i class="fas fa-user-shield"></i>
+                        <span>Admin Management</span>
+                    </li>
+                    <li data-section="system-config">
+                        <i class="fas fa-cogs"></i>
+                        <span>System Configuration</span>
+                    </li>
+                    <li data-section="reports">
+                        <i class="fas fa-chart-bar"></i>
+                        <span>Reports & Analytics</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <h3>Financial Control</h3>
+                <ul>
+                    <li data-section="loans-overview">
+                        <i class="fas fa-hand-holding-usd"></i>
+                        <span>All Loans</span>
+                    </li>
+                    <li data-section="transactions">
+                        <i class="fas fa-exchange-alt"></i>
+                        <span>Transactions</span>
+                    </li>
+                    <li data-section="revenue">
+                        <i class="fas fa-money-bill-wave"></i>
+                        <span>Revenue Analysis</span>
+                    </li>
+                </ul>
+            </div>
+
+            <div class="menu-section">
+                <h3>Monitoring</h3>
+                <ul>
+                    <li data-section="risk-alerts">
+                        <i class="fas fa-exclamation-triangle"></i>
+                        <span>Risk Alerts</span>
+                        <span class="badge" id="riskBadge">0</span>
+                    </li>
+                    <li data-section="audit-log">
+                        <i class="fas fa-history"></i>
+                        <span>Audit Log</span>
+                    </li>
+                    <li data-section="agent-performance">
+                        <i class="fas fa-chart-line"></i>
+                        <span>Agent Performance</span>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <div class="sidebar-footer">
+            <button class="logout-btn" id="logoutBtn">
+                <i class="fas fa-sign-out-alt"></i>
+                <span>Logout</span>
+            </button>
+            <div class="system-status">
+                <i class="fas fa-circle"></i>
+                <span>System Online</span>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Header -->
+        <header class="main-header">
+            <div class="header-left">
+                <button class="menu-toggle" id="menuToggle">
+                    <i class="fas fa-bars"></i>
+                </button>
+                <h1 id="pageTitle">Dashboard</h1>
+            </div>
+            <div class="header-right">
+                <div class="header-actions">
+                    <button class="header-btn" id="refreshBtn">
+                        <i class="fas fa-sync-alt"></i>
+                    </button>
+                    <button class="header-btn" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge">3</span>
+                    </button>
+                    <div class="date-display" id="currentDate">
+                        Loading...
+                    </div>
+                </div>
+            </div>
+        </header>
+
+        <!-- Dashboard Content -->
+        <div class="content-wrapper">
+            <!-- Dashboard Section -->
+            <section id="dashboardSection" class="section-content active">
+                <div class="stats-grid">
+                    <!-- Total Loans Card -->
+                    <div class="stat-card premium">
+                        <div class="stat-icon">
+                            <i class="fas fa-hand-holding-usd"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Loans Issued</h3>
+                            <div class="stat-value" id="totalLoans">K 0</div>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>0% from last month</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Total Repayments Card -->
+                    <div class="stat-card premium">
+                        <div class="stat-icon">
+                            <i class="fas fa-money-check-alt"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Total Repayments</h3>
+                            <div class="stat-value" id="totalRepayments">K 0</div>
+                            <div class="stat-trend">
+                                <i class="fas fa-arrow-up"></i>
+                                <span>0% recovery rate</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Overdue Loans Card -->
+                    <div class="stat-card warning">
+                        <div class="stat-icon">
+                            <i class="fas fa-exclamation-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Overdue Loans</h3>
+                            <div class="stat-value" id="overdueLoans">K 0</div>
+                            <div class="stat-details">
+                                <span id="overdueCount">0 loans</span>
+                                <span class="badge">High Risk</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Defaulted Loans Card -->
+                    <div class="stat-card danger">
+                        <div class="stat-icon">
+                            <i class="fas fa-times-circle"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Defaulted Loans</h3>
+                            <div class="stat-value" id="defaultedLoans">K 0</div>
+                            <div class="stat-details">
+                                <span id="defaultedCount">0 loans</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Revenue Summary Card -->
+                    <div class="stat-card success">
+                        <div class="stat-icon">
+                            <i class="fas fa-chart-line"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Revenue & Profit</h3>
+                            <div class="stat-value" id="totalRevenue">K 0</div>
+                            <div class="stat-breakdown">
+                                <span>Interest: K 0</span>
+                                <span>Penalties: K 0</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Active Agents Card -->
+                    <div class="stat-card info">
+                        <div class="stat-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="stat-info">
+                            <h3>Active Agents</h3>
+                            <div class="stat-value" id="activeAgents">0</div>
+                            <div class="stat-details">
+                                <span id="totalAgents">0 total</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Charts and Graphs -->
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Loan Distribution by Status</h3>
+                            <select class="chart-filter" id="loanDistributionFilter">
+                                <option value="month">This Month</option>
+                                <option value="quarter">This Quarter</option>
+                                <option value="year">This Year</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="loanDistributionChart"></canvas>
+                        </div>
+                    </div>
+
+                    <div class="chart-card">
+                        <div class="chart-header">
+                            <h3>Revenue Trend</h3>
+                            <select class="chart-filter" id="revenueTrendFilter">
+                                <option value="7">Last 7 Days</option>
+                                <option value="30">Last 30 Days</option>
+                                <option value="90">Last 90 Days</option>
+                            </select>
+                        </div>
+                        <div class="chart-container">
+                            <canvas id="revenueTrendChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Agent Leaderboard -->
+                <div class="leaderboard-card">
+                    <div class="card-header">
+                        <h3>Agent Performance Leaderboard</h3>
+                        <button class="btn-primary" id="exportLeaderboard">
+                            <i class="fas fa-download"></i> Export
+                        </button>
+                    </div>
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Rank</th>
+                                    <th>Agent Name</th>
+                                    <th>Agent ID</th>
+                                    <th>Customers</th>
+                                    <th>Active Loans</th>
+                                    <th>Total Volume</th>
+                                    <th>Recovery Rate</th>
+                                    <th>Commission</th>
+                                </tr>
+                            </thead>
+                            <tbody id="leaderboardBody">
+                                <tr>
+                                    <td colspan="8" class="empty-state">
+                                        <i class="fas fa-chart-bar"></i>
+                                        <p>No agent data available</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Recent Activity -->
+                <div class="activity-card">
+                    <div class="card-header">
+                        <h3>Recent System Activity</h3>
+                        <button class="btn-text" id="viewAllActivity">
+                            View All <i class="fas fa-arrow-right"></i>
+                        </button>
+                    </div>
+                    <div class="activity-list" id="recentActivity">
+                        <div class="activity-item">
+                            <div class="activity-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="activity-content">
+                                <p>No recent activity</p>
+                                <span class="activity-time">Just now</span>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Admin Management Section -->
+            <section id="adminsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Admin Account Management</h2>
+                    <button class="btn-primary" id="createAdminBtn">
+                        <i class="fas fa-plus"></i> Create New Admin
+                    </button>
+                </div>
+
+                <div class="filters-bar">
+                    <div class="search-box">
+                        <i class="fas fa-search"></i>
+                        <input type="text" id="adminSearch" placeholder="Search admins by name or email...">
+                    </div>
+                    <div class="filter-group">
+                        <select id="adminStatusFilter">
+                            <option value="all">All Status</option>
+                            <option value="active">Active</option>
+                            <option value="suspended">Suspended</option>
+                        </select>
+                        <button class="btn-secondary" id="refreshAdmins">
+                            <i class="fas fa-sync-alt"></i>
+                        </button>
+                    </div>
+                </div>
+
+                <div class="table-card">
+                    <div class="table-container">
+                        <table class="data-table">
+                            <thead>
+                                <tr>
+                                    <th>Admin ID</th>
+                                    <th>Full Name</th>
+                                    <th>Email</th>
+                                    <th>Created</th>
+                                    <th>Status</th>
+                                    <th>Permissions</th>
+                                    <th>Last Login</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="adminsTableBody">
+                                <tr>
+                                    <td colspan="8" class="empty-state">
+                                        <i class="fas fa-user-shield"></i>
+                                        <p>No admin accounts found</p>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <div class="table-footer">
+                        <div class="pagination">
+                            <button class="pagination-btn" disabled>
+                                <i class="fas fa-chevron-left"></i>
+                            </button>
+                            <span>Page 1 of 1</span>
+                            <button class="pagination-btn" disabled>
+                                <i class="fas fa-chevron-right"></i>
+                            </button>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- System Configuration Section -->
+            <section id="systemConfigSection" class="section-content">
+                <div class="section-header">
+                    <h2>System Configuration</h2>
+                    <button class="btn-primary" id="saveConfigBtn">
+                        <i class="fas fa-save"></i> Save All Changes
+                    </button>
+                </div>
+
+                <div class="config-grid">
+                    <!-- Loan Configuration -->
+                    <div class="config-card">
+                        <div class="config-header">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <h3>Loan Configuration</h3>
+                        </div>
+                        <div class="config-body">
+                            <div class="config-item">
+                                <label>Minimum Loan Amount (K)</label>
+                                <input type="number" id="minLoanAmount" class="config-input" value="500">
+                            </div>
+                            <div class="config-item">
+                                <label>Maximum Loan Amount (K)</label>
+                                <input type="number" id="maxLoanAmount" class="config-input" value="50000">
+                            </div>
+                            <div class="config-item">
+                                <label>Base Interest Rate (%)</label>
+                                <input type="number" id="baseInterestRate" class="config-input" value="15" step="0.1">
+                            </div>
+                            <div class="config-item">
+                                <label>Loan Duration Options (Months)</label>
+                                <input type="text" id="loanDurations" class="config-input" value="3,6,9,12,18,24">
+                                <small class="hint">Comma-separated values</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Penalty Configuration -->
+                    <div class="config-card">
+                        <div class="config-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>Penalty Configuration</h3>
+                        </div>
+                        <div class="config-body">
+                            <div class="config-item">
+                                <label>Daily Penalty Rate (%)</label>
+                                <input type="number" id="dailyPenaltyRate" class="config-input" value="0.5" step="0.1">
+                            </div>
+                            <div class="config-item">
+                                <label>Grace Period (Days)</label>
+                                <input type="number" id="gracePeriod" class="config-input" value="7">
+                            </div>
+                            <div class="config-item">
+                                <label>Maximum Penalty (%)</label>
+                                <input type="number" id="maxPenalty" class="config-input" value="25" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Agent Configuration -->
+                    <div class="config-card">
+                        <div class="config-header">
+                            <i class="fas fa-user-tie"></i>
+                            <h3>Agent Configuration</h3>
+                        </div>
+                        <div class="config-body">
+                            <div class="config-item">
+                                <label>Commission Rate (%)</label>
+                                <input type="number" id="agentCommission" class="config-input" value="2.5" step="0.1">
+                            </div>
+                            <div class="config-item">
+                                <label>Minimum Customers for Bonus</label>
+                                <input type="number" id="minCustomersForBonus" class="config-input" value="10">
+                            </div>
+                            <div class="config-item">
+                                <label>Bonus Rate (%)</label>
+                                <input type="number" id="bonusRate" class="config-input" value="0.5" step="0.1">
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Collateral Configuration -->
+                    <div class="config-card">
+                        <div class="config-header">
+                            <i class="fas fa-gem"></i>
+                            <h3>Collateral Configuration</h3>
+                        </div>
+                        <div class="config-body">
+                            <div class="config-item">
+                                <label>Collateral Categories</label>
+                                <textarea id="collateralCategories" class="config-textarea">Vehicle, Electronics, Jewelry, Real Estate, Machinery, Other Valuables</textarea>
+                            </div>
+                            <div class="config-item">
+                                <label>Minimum Photos Required</label>
+                                <input type="number" id="minCollateralPhotos" class="config-input" value="3">
+                            </div>
+                            <div class="config-item">
+                                <label>Value Assessment Rate (%)</label>
+                                <input type="number" id="collateralAssessmentRate" class="config-input" value="70" step="0.1">
+                                <small class="hint">Percentage of market value considered</small>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- System Modules -->
+                    <div class="config-card">
+                        <div class="config-header">
+                            <i class="fas fa-puzzle-piece"></i>
+                            <h3>System Modules</h3>
+                        </div>
+                        <div class="config-body">
+                            <div class="config-item checkbox">
+                                <label>
+                                    <input type="checkbox" id="moduleSMS" checked>
+                                    <span>SMS Notifications</span>
+                                </label>
+                            </div>
+                            <div class="config-item checkbox">
+                                <label>
+                                    <input type="checkbox" id="moduleEmail" checked>
+                                    <span>Email Notifications</span>
+                                </label>
+                            </div>
+                            <div class="config-item checkbox">
+                                <label>
+                                    <input type="checkbox" id="moduleOTP" checked>
+                                    <span>OTP Authentication</span>
+                                </label>
+                            </div>
+                            <div class="config-item checkbox">
+                                <label>
+                                    <input type="checkbox" id="moduleAutoApprove" checked>
+                                    <span>Auto-Approval for Verified Customers</span>
+                                </label>
+                            </div>
+                            <div class="config-item checkbox">
+                                <label>
+                                    <input type="checkbox" id="modulePenaltyAuto" checked>
+                                    <span>Automatic Penalty Calculation</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Reports Section -->
+            <section id="reportsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Reports & Analytics</h2>
+                    <div class="report-actions">
+                        <button class="btn-secondary" id="generatePDF">
+                            <i class="fas fa-file-pdf"></i> PDF
+                        </button>
+                        <button class="btn-secondary" id="generateExcel">
+                            <i class="fas fa-file-excel"></i> Excel
+                        </button>
+                        <button class="btn-primary" id="generateCustomReport">
+                            <i class="fas fa-chart-bar"></i> Custom Report
+                        </button>
+                    </div>
+                </div>
+
+                <div class="report-filters">
+                    <div class="filter-row">
+                        <div class="filter-group">
+                            <label>Report Type</label>
+                            <select id="reportType">
+                                <option value="financial">Financial Summary</option>
+                                <option value="loans">Loan Portfolio</option>
+                                <option value="agents">Agent Performance</option>
+                                <option value="risk">Risk Assessment</option>
+                                <option value="collateral">Collateral Analysis</option>
+                            </select>
+                        </div>
+                        <div class="filter-group">
+                            <label>Date Range</label>
+                            <input type="text" id="reportDateRange" class="date-range-input" placeholder="Select date range">
+                        </div>
+                        <div class="filter-group">
+                            <label>Format</label>
+                            <select id="reportFormat">
+                                <option value="summary">Summary View</option>
+                                <option value="detailed">Detailed View</option>
+                                <option value="comparative">Comparative Analysis</option>
+                            </select>
+                        </div>
+                    </div>
+                    <button class="btn-primary" id="applyReportFilters">
+                        <i class="fas fa-filter"></i> Generate Report
+                    </button>
+                </div>
+
+                <div class="report-preview" id="reportPreview">
+                    <div class="report-placeholder">
+                        <i class="fas fa-chart-pie"></i>
+                        <h3>Report Preview</h3>
+                        <p>Configure filters and generate report to view data</p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Risk Alerts Section -->
+            <section id="riskAlertsSection" class="section-content">
+                <div class="section-header">
+                    <h2>Risk Alerts & Monitoring</h2>
+                    <div class="alert-actions">
+                        <button class="btn-secondary" id="markAllRead">
+                            <i class="fas fa-check-double"></i> Mark All Read
+                        </button>
+                        <button class="btn-danger" id="clearAlerts">
+                            <i class="fas fa-trash"></i> Clear All
+                        </button>
+                    </div>
+                </div>
+
+                <div class="alerts-grid">
+                    <div class="alert-card critical">
+                        <div class="alert-header">
+                            <i class="fas fa-skull-crossbones"></i>
+                            <h3>Critical Alerts</h3>
+                            <span class="alert-count" id="criticalCount">0</span>
+                        </div>
+                        <div class="alert-list" id="criticalAlerts">
+                            <div class="empty-alerts">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No critical alerts</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert-card warning">
+                        <div class="alert-header">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <h3>High Risk</h3>
+                            <span class="alert-count" id="warningCount">0</span>
+                        </div>
+                        <div class="alert-list" id="warningAlerts">
+                            <div class="empty-alerts">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No high risk alerts</p>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="alert-card info">
+                        <div class="alert-header">
+                            <i class="fas fa-info-circle"></i>
+                            <h3>Medium Risk</h3>
+                            <span class="alert-count" id="infoCount">0</span>
+                        </div>
+                        <div class="alert-list" id="infoAlerts">
+                            <div class="empty-alerts">
+                                <i class="fas fa-check-circle"></i>
+                                <p>No medium risk alerts</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="risk-metrics">
+                    <h3>Risk Metrics Overview</h3>
+                    <div class="metrics-grid">
+                        <div class="metric-card">
+                            <div class="metric-value" id="defaultRate">0%</div>
+                            <div class="metric-label">Default Rate</div>
+                            <div class="metric-trend negative">
+                                <i class="fas fa-arrow-up"></i> 0%
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="overdueRate">0%</div>
+                            <div class="metric-label">Overdue Rate</div>
+                            <div class="metric-trend negative">
+                                <i class="fas fa-arrow-up"></i> 0%
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="recoveryRate">0%</div>
+                            <div class="metric-label">Recovery Rate</div>
+                            <div class="metric-trend positive">
+                                <i class="fas fa-arrow-up"></i> 0%
+                            </div>
+                        </div>
+                        <div class="metric-card">
+                            <div class="metric-value" id="collateralCoverage">0%</div>
+                            <div class="metric-label">Collateral Coverage</div>
+                            <div class="metric-trend positive">
+                                <i class="fas fa-arrow-up"></i> 0%
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </section>
+        </div>
+
+        <!-- Modals -->
+        <div class="modal" id="createAdminModal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h3>Create New Admin Account</h3>
+                    <button class="modal-close" id="closeAdminModal">
+                        <i class="fas fa-times"></i>
+                    </button>
+                </div>
+                <div class="modal-body">
+                    <form id="createAdminForm">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Full Name *</label>
+                                <input type="text" id="adminFullName" required>
+                            </div>
+                            <div class="form-group">
+                                <label>Email Address *</label>
+                                <input type="email" id="adminEmail" required>
+                            </div>
+                        </div>
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label>Password *</label>
+                                <input type="password" id="adminPassword" required>
+                                <small class="hint">Minimum 8 characters</small>
+                            </div>
+                            <div class="form-group">
+                                <label>Confirm Password *</label>
+                                <input type="password" id="adminConfirmPassword" required>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Permissions</label>
+                            <div class="permissions-grid">
+                                <label class="permission-item">
+                                    <input type="checkbox" name="permissions" value="verify_agents" checked>
+                                    <span>Verify Agents</span>
+                                </label>
+                                <label class="permission-item">
+                                    <input type="checkbox" name="permissions" value="verify_customers" checked>
+                                    <span>Verify Customers</span>
+                                </label>
+                                <label class="permission-item">
+                                    <input type="checkbox" name="permissions" value="approve_loans" checked>
+                                    <span>Approve Loans</span>
+                                </label>
+                                <label class="permission-item">
+                                    <input type="checkbox" name="permissions" value="confirm_payments" checked>
+                                    <span>Confirm Payments</span>
+                                </label>
+                                <label class="permission-item">
+                                    <input type="checkbox" name="permissions" value="manage_collateral" checked>
+                                    <span>Manage Collateral</span>
+                                </label>
+                                <label class="permission-item">
+                                    <input type="checkbox" name="permissions" value="generate_reports" checked>
+                                    <span>Generate Reports</span>
+                                </label>
+                            </div>
+                        </div>
+                        <div class="form-actions">
+                            <button type="button" class="btn-secondary" id="cancelAdminCreate">
+                                Cancel
+                            </button>
+                            <button type="submit" class="btn-primary">
+                                <i class="fas fa-user-plus"></i> Create Admin
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/flatpickr"></script>
+    <script type="module" src="scripts/firebase.js"></script>
+    <script type="module" src="scripts/sudo.js"></script>
+</body>
+</html>
