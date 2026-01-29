@@ -3,903 +3,1208 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>TruCash - Sudo Dashboard</title>
+    <title>TruCash | SUDO Dashboard</title>
     <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="sudo.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <link href="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.css" rel="stylesheet">
 </head>
 <body class="sudo-theme">
-    <div class="app-container">
-        <!-- Sidebar -->
-        <aside class="sidebar sudo-sidebar">
-            <div class="sidebar-header">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-crown"></i>
-                    </div>
-                    <div class="logo-text">
-                        <h3>TruCash</h3>
-                        <span class="role-badge">SUDO</span>
+    <!-- Navigation -->
+    <nav class="navbar">
+        <div class="navbar-content">
+            <div class="navbar-brand">
+                <i class="fas fa-crown navbar-logo"></i>
+                <span>TruCash SUDO</span>
+            </div>
+            
+            <div class="navbar-user">
+                <div class="user-info">
+                    <div class="user-name" id="userName">System Owner</div>
+                    <div class="user-role">SUDO Administrator</div>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-icon btn-outline" id="notificationsBtn">
+                        <i class="fas fa-bell"></i>
+                        <span class="badge" id="notificationCount">0</span>
+                    </button>
+                    <button class="btn btn-icon btn-outline" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+    </nav>
+    
+    <!-- Sidebar -->
+    <aside class="sidebar">
+        <div class="sidebar-content">
+            <div class="sidebar-section">
+                <div class="section-title">System Control</div>
+                <div class="sidebar-nav">
+                    <a href="#" class="nav-item active" data-view="dashboard">
+                        <div class="nav-icon">
+                            <i class="fas fa-tachometer-alt"></i>
+                        </div>
+                        <div class="nav-text">Dashboard</div>
+                    </a>
+                    <a href="#" class="nav-item" data-view="admins">
+                        <div class="nav-icon">
+                            <i class="fas fa-user-shield"></i>
+                        </div>
+                        <div class="nav-text">Admin Management</div>
+                    </a>
+                    <a href="#" class="nav-item" data-view="system-config">
+                        <div class="nav-icon">
+                            <i class="fas fa-sliders-h"></i>
+                        </div>
+                        <div class="nav-text">System Configuration</div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-title">Monitoring</div>
+                <div class="sidebar-nav">
+                    <a href="#" class="nav-item" data-view="agents">
+                        <div class="nav-icon">
+                            <i class="fas fa-user-tie"></i>
+                        </div>
+                        <div class="nav-text">Agents</div>
+                    </a>
+                    <a href="#" class="nav-item" data-view="customers">
+                        <div class="nav-icon">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="nav-text">Customers</div>
+                    </a>
+                    <a href="#" class="nav-item" data-view="loans">
+                        <div class="nav-icon">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="nav-text">All Loans</div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-title">Reports & Analytics</div>
+                <div class="sidebar-nav">
+                    <a href="#" class="nav-item" data-view="reports">
+                        <div class="nav-icon">
+                            <i class="fas fa-chart-bar"></i>
+                        </div>
+                        <div class="nav-text">Financial Reports</div>
+                    </a>
+                    <a href="#" class="nav-item" data-view="audit-logs">
+                        <div class="nav-icon">
+                            <i class="fas fa-history"></i>
+                        </div>
+                        <div class="nav-text">Audit Logs</div>
+                    </a>
+                    <a href="#" class="nav-item" data-view="risk-monitoring">
+                        <div class="nav-icon">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="nav-text">Risk Monitoring</div>
+                    </a>
+                </div>
+            </div>
+            
+            <div class="sidebar-section">
+                <div class="section-title">Tools</div>
+                <div class="sidebar-nav">
+                    <a href="#" class="nav-item" data-view="backup">
+                        <div class="nav-icon">
+                            <i class="fas fa-database"></i>
+                        </div>
+                        <div class="nav-text">Backup & Restore</div>
+                    </a>
+                    <a href="#" class="nav-item" id="exportDataBtn">
+                        <div class="nav-icon">
+                            <i class="fas fa-file-export"></i>
+                        </div>
+                        <div class="nav-text">Export Data</div>
+                    </a>
+                    <a href="#" class="nav-item" id="systemStatusBtn">
+                        <div class="nav-icon">
+                            <i class="fas fa-heartbeat"></i>
+                        </div>
+                        <div class="nav-text">System Status</div>
+                    </a>
+                </div>
+            </div>
+        </div>
+    </aside>
+    
+    <!-- Main Content -->
+    <main class="main-content">
+        <!-- Dashboard View -->
+        <div class="view active" id="dashboardView">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">System Overview</h1>
+                    <p class="text-gray-400">Complete control and monitoring of TruCash operations</p>
+                </div>
+                <div class="flex gap-2">
+                    <button class="btn btn-outline" id="refreshDashboard">
+                        <i class="fas fa-sync-alt"></i> Refresh
+                    </button>
+                    <div class="text-xs text-gray-400" id="lastUpdated">
+                        Last updated: Just now
                     </div>
                 </div>
-                <button class="sidebar-toggle" id="sidebarToggle">
-                    <i class="fas fa-bars"></i>
+            </div>
+            
+            <!-- Stats Grid -->
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be populated by JavaScript -->
+            </div>
+            
+            <!-- Charts Row -->
+            <div class="grid grid-cols-2 gap-6 mb-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Loan Portfolio</h3>
+                        <p class="card-subtitle">Distribution by status</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="loanPortfolioChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Revenue Trend</h3>
+                        <p class="card-subtitle">Last 30 days (ZMW)</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="chart-container">
+                            <canvas id="revenueChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Recent Activity & Top Agents -->
+            <div class="grid grid-cols-2 gap-6">
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Recent System Activity</h3>
+                        <p class="card-subtitle">Live audit trail</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table" id="recentActivityTable">
+                                <thead>
+                                    <tr>
+                                        <th>Time</th>
+                                        <th>User</th>
+                                        <th>Action</th>
+                                        <th>Details</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Activity logs will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Top Performing Agents</h3>
+                        <p class="card-subtitle">Based on loan volume</p>
+                    </div>
+                    <div class="card-body">
+                        <div class="table-container">
+                            <table class="table" id="topAgentsTable">
+                                <thead>
+                                    <tr>
+                                        <th>Agent</th>
+                                        <th>Customers</th>
+                                        <th>Loans</th>
+                                        <th>Volume</th>
+                                        <th>Rating</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    <!-- Top agents will be populated here -->
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Admin Management View -->
+        <div class="view" id="adminsView">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">Admin Management</h1>
+                    <p class="text-gray-400">Create, edit, and manage administrator accounts</p>
+                </div>
+                <button class="btn btn-primary" id="createAdminBtn">
+                    <i class="fas fa-user-plus"></i> Create New Admin
                 </button>
             </div>
             
-            <div class="sidebar-content">
-                <nav class="sidebar-nav">
-                    <ul class="nav flex-column">
-                        <li class="nav-item">
-                            <a class="nav-link active" href="#dashboard">
-                                <i class="fas fa-tachometer-alt"></i>
-                                <span>Dashboard</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#admins">
-                                <i class="fas fa-user-tie"></i>
-                                <span>Admin Management</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#system-config">
-                                <i class="fas fa-cog"></i>
-                                <span>System Configuration</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#loans">
-                                <i class="fas fa-money-check-alt"></i>
-                                <span>Loan Management</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#reports">
-                                <i class="fas fa-chart-bar"></i>
-                                <span>Reports & Analytics</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#transactions">
-                                <i class="fas fa-exchange-alt"></i>
-                                <span>All Transactions</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#system-logs">
-                                <i class="fas fa-history"></i>
-                                <span>System Logs</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#agent-performance">
-                                <i class="fas fa-chart-line"></i>
-                                <span>Agent Performance</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#risk-management">
-                                <i class="fas fa-exclamation-triangle"></i>
-                                <span>Risk Management</span>
-                            </a>
-                        </li>
-                        <li class="nav-item">
-                            <a class="nav-link" href="#backup">
-                                <i class="fas fa-database"></i>
-                                <span>Backup & Restore</span>
-                            </a>
-                        </li>
-                    </ul>
-                    
-                    <div class="sidebar-divider"></div>
-                    
-                    <div class="sidebar-footer">
-                        <div class="user-info">
-                            <div class="user-avatar">
-                                <i class="fas fa-user-shield"></i>
-                            </div>
-                            <div class="user-details">
-                                <strong id="userName">System Owner</strong>
-                                <small id="userEmail">trucash@gmail.com</small>
-                            </div>
+            <div class="card">
+                <div class="card-header">
+                    <div class="flex justify-between items-center">
+                        <div>
+                            <h3 class="card-title">Administrator Accounts</h3>
+                            <p class="card-subtitle">All system administrators</p>
                         </div>
-                        <button class="btn btn-sudo-outline btn-sm" id="logoutBtn">
-                            <i class="fas fa-sign-out-alt"></i>
-                            <span>Logout</span>
-                        </button>
+                        <div class="flex gap-2">
+                            <input type="text" class="form-input" placeholder="Search admins..." id="adminSearch">
+                            <button class="btn btn-outline">
+                                <i class="fas fa-filter"></i> Filter
+                            </button>
+                        </div>
                     </div>
-                </nav>
+                </div>
+                <div class="card-body">
+                    <div class="table-container">
+                        <table class="table" id="adminsTable">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Phone</th>
+                                    <th>Status</th>
+                                    <th>Last Login</th>
+                                    <th>Permissions</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Admins will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
             </div>
-        </aside>
+        </div>
         
-        <!-- Main Content -->
-        <main class="main-content">
-            <!-- Header -->
-            <header class="header sudo-header">
-                <div class="header-left">
-                    <h1 class="page-title" id="pageTitle">Dashboard</h1>
-                    <div class="breadcrumb">
-                        <span>Home</span>
-                        <i class="fas fa-chevron-right"></i>
-                        <span id="breadcrumbCurrent">Dashboard</span>
-                    </div>
+        <!-- System Configuration View -->
+        <div class="view" id="systemConfigView">
+            <div class="flex justify-between items-center mb-6">
+                <div>
+                    <h1 class="text-2xl font-bold">System Configuration</h1>
+                    <p class="text-gray-400">Configure loan parameters, fees, and system settings</p>
                 </div>
-                
-                <div class="header-right">
-                    <div class="header-actions">
-                        <button class="btn btn-ghost" id="notificationsBtn">
-                            <i class="fas fa-bell"></i>
-                            <span class="badge badge-danger" id="notificationCount">3</span>
-                        </button>
-                        <button class="btn btn-ghost" id="quickActionsBtn">
-                            <i class="fas fa-bolt"></i>
-                            <span>Quick Actions</span>
-                        </button>
-                        <div class="system-health">
-                            <div class="health-indicator healthy" id="systemHealth"></div>
-                            <span>System Healthy</span>
-                        </div>
-                    </div>
-                </div>
-            </header>
+                <button class="btn btn-primary" id="saveConfigBtn">
+                    <i class="fas fa-save"></i> Save Configuration
+                </button>
+            </div>
             
-            <!-- Content Area -->
-            <div class="content-area" id="contentArea">
-                <!-- Dashboard Section -->
-                <section id="dashboard" class="content-section active">
-                    <div class="section-header">
-                        <h2>System Overview</h2>
-                        <div class="section-actions">
-                            <button class="btn btn-sudo-primary" id="refreshDashboard">
-                                <i class="fas fa-sync-alt"></i>
-                                <span>Refresh</span>
-                            </button>
-                            <button class="btn btn-sudo-outline" id="exportDashboard">
-                                <i class="fas fa-download"></i>
-                                <span>Export Report</span>
-                            </button>
-                        </div>
+            <div class="grid grid-cols-2 gap-6">
+                <!-- Loan Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Loan Parameters</h3>
                     </div>
-                    
-                    <!-- Stats Grid -->
-                    <div class="sudo-grid">
-                        <div class="stats-card">
-                            <div class="stat-value" id="totalLoans">K 12,450,000</div>
-                            <div class="stat-label">Total Loans Issued</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i>
-                                12.5% from last month
-                            </div>
-                        </div>
-                        
-                        <div class="stats-card">
-                            <div class="stat-value" id="totalRepayments">K 8,950,000</div>
-                            <div class="stat-label">Total Repayments</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i>
-                                8.3% from last month
-                            </div>
-                        </div>
-                        
-                        <div class="stats-card">
-                            <div class="stat-value" id="overdueLoans">K 1,230,000</div>
-                            <div class="stat-label">Overdue Loans</div>
-                            <div class="stat-change danger">
-                                <i class="fas fa-arrow-up"></i>
-                                5.2% from last month
-                            </div>
-                        </div>
-                        
-                        <div class="stats-card">
-                            <div class="stat-value" id="totalRevenue">K 2,150,000</div>
-                            <div class="stat-label">Total Revenue</div>
-                            <div class="stat-change">
-                                <i class="fas fa-arrow-up"></i>
-                                15.7% from last month
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Charts Row -->
-                    <div class="row mb-4">
-                        <div class="col-lg-8">
-                            <div class="sudo-card">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-chart-line"></i>
-                                        Loan Performance Trends
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <canvas id="loanTrendsChart" height="250"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-lg-4">
-                            <div class="sudo-card">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-chart-pie"></i>
-                                        Loan Status Distribution
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <canvas id="loanStatusChart" height="250"></canvas>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Agent Leaderboard -->
-                    <div class="sudo-card">
-                        <div class="sudo-card-header">
-                            <h3 class="sudo-card-title">
-                                <i class="fas fa-trophy"></i>
-                                Top Performing Agents
-                            </h3>
-                            <select class="sudo-form-control" id="leaderboardPeriod" style="width: auto;">
-                                <option value="month">This Month</option>
-                                <option value="quarter">This Quarter</option>
-                                <option value="year">This Year</option>
-                            </select>
-                        </div>
-                        <div class="sudo-card-body">
-                            <div class="table-responsive">
-                                <table class="table sudo-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Rank</th>
-                                            <th>Agent</th>
-                                            <th>Agent ID</th>
-                                            <th>Customers</th>
-                                            <th>Loans Issued</th>
-                                            <th>Total Amount</th>
-                                            <th>Success Rate</th>
-                                            <th>Commission</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="leaderboardTable">
-                                        <!-- Data will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Recent Activity & Risk Alerts -->
-                    <div class="row mt-4">
-                        <div class="col-lg-6">
-                            <div class="sudo-card">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-history"></i>
-                                        Recent System Activity
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <ul class="activity-feed" id="recentActivity">
-                                        <!-- Activity items will be populated by JavaScript -->
-                                    </ul>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-lg-6">
-                            <div class="sudo-card">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-exclamation-triangle"></i>
-                                        Risk Alerts
-                                        <span class="badge badge-sudo-danger ml-2" id="riskAlertCount">3</span>
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <div class="alert alert-danger" id="highRiskLoans">
-                                        <strong>High Risk Loans Detected:</strong> 5 loans exceeding K50,000 with overdue payments
-                                    </div>
-                                    <div class="alert alert-warning" id="agentPerformance">
-                                        <strong>Agent Performance Alert:</strong> 2 agents below 70% collection rate
-                                    </div>
-                                    <div class="alert alert-info" id="systemMaintenance">
-                                        <strong>System Maintenance:</strong> Scheduled for Saturday, 2:00 AM - 4:00 AM
-                                    </div>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- Admin Management Section -->
-                <section id="admins" class="content-section">
-                    <div class="section-header">
-                        <h2>Admin Account Management</h2>
-                        <div class="section-actions">
-                            <button class="btn btn-sudo-primary" id="createAdminBtn">
-                                <i class="fas fa-user-plus"></i>
-                                <span>Create New Admin</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="sudo-card">
-                        <div class="sudo-card-header">
-                            <h3 class="sudo-card-title">
-                                <i class="fas fa-users-cog"></i>
-                                Active Administrators
-                            </h3>
-                            <div class="search-box">
-                                <input type="text" class="sudo-form-control" id="adminSearch" placeholder="Search admins...">
-                                <i class="fas fa-search"></i>
-                            </div>
-                        </div>
-                        <div class="sudo-card-body">
-                            <div class="table-responsive">
-                                <table class="table sudo-table">
-                                    <thead>
-                                        <tr>
-                                            <th>Admin ID</th>
-                                            <th>Full Name</th>
-                                            <th>Email</th>
-                                            <th>Phone</th>
-                                            <th>Permissions</th>
-                                            <th>Status</th>
-                                            <th>Last Active</th>
-                                            <th>Actions</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody id="adminsTable">
-                                        <!-- Admin data will be populated by JavaScript -->
-                                    </tbody>
-                                </table>
-                            </div>
-                        </div>
-                    </div>
-                </section>
-                
-                <!-- System Configuration Section -->
-                <section id="system-config" class="content-section">
-                    <div class="section-header">
-                        <h2>System Configuration</h2>
-                        <div class="section-actions">
-                            <button class="btn btn-sudo-primary" id="saveConfigBtn">
-                                <i class="fas fa-save"></i>
-                                <span>Save All Changes</span>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <div class="row">
-                        <div class="col-lg-6">
-                            <div class="sudo-card">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-money-bill-wave"></i>
-                                        Loan Configuration
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <form id="loanConfigForm">
-                                        <div class="form-group">
-                                            <label class="form-label">Minimum Loan Amount (ZMW)</label>
-                                            <input type="number" class="sudo-form-control" id="minLoanAmount" value="500" min="100" step="50">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Maximum Loan Amount (ZMW)</label>
-                                            <input type="number" class="sudo-form-control" id="maxLoanAmount" value="50000" min="1000" step="1000">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Base Interest Rate (%)</label>
-                                            <input type="number" class="sudo-form-control" id="baseInterestRate" value="15" min="1" max="100" step="0.5">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Loan Duration Options (Months)</label>
-                                            <select class="sudo-form-control" id="loanDurations" multiple>
-                                                <option value="3" selected>3 Months</option>
-                                                <option value="6" selected>6 Months</option>
-                                                <option value="9" selected>9 Months</option>
-                                                <option value="12" selected>12 Months</option>
-                                                <option value="18">18 Months</option>
-                                                <option value="24">24 Months</option>
-                                            </select>
-                                            <small class="form-text">Hold Ctrl/Cmd to select multiple options</small>
-                                        </div>
-                                    </form>
-                                </div>
+                    <div class="card-body">
+                        <form id="loanConfigForm">
+                            <div class="form-group">
+                                <label class="form-label">Minimum Loan Amount (ZMW)</label>
+                                <input type="number" class="form-input" id="minLoanAmount" min="0" step="100">
                             </div>
                             
-                            <div class="sudo-card mt-4">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-calendar-times"></i>
-                                        Penalty Configuration
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <form id="penaltyConfigForm">
-                                        <div class="form-group">
-                                            <label class="form-label">Penalty Rate (% per day)</label>
-                                            <input type="number" class="sudo-form-control" id="penaltyRate" value="2" min="0.1" max="10" step="0.1">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Grace Period (Days)</label>
-                                            <input type="number" class="sudo-form-control" id="gracePeriod" value="7" min="0" max="30">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Maximum Penalty (% of principal)</label>
-                                            <input type="number" class="sudo-form-control" id="maxPenalty" value="50" min="10" max="200" step="5">
-                                        </div>
-                                    </form>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="col-lg-6">
-                            <div class="sudo-card">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-user-tie"></i>
-                                        Agent Commission
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <form id="commissionConfigForm">
-                                        <div class="form-group">
-                                            <label class="form-label">Base Commission Rate (%)</label>
-                                            <input type="number" class="sudo-form-control" id="baseCommission" value="5" min="1" max="20" step="0.5">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Performance Bonus Threshold</label>
-                                            <input type="number" class="sudo-form-control" id="bonusThreshold" value="90" min="50" max="100" step="1">
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Bonus Rate (%)</label>
-                                            <input type="number" class="sudo-form-control" id="bonusRate" value="2" min="0.5" max="10" step="0.5">
-                                        </div>
-                                    </form>
-                                </div>
+                            <div class="form-group">
+                                <label class="form-label">Maximum Loan Amount (ZMW)</label>
+                                <input type="number" class="form-input" id="maxLoanAmount" min="0" step="1000">
                             </div>
                             
-                            <div class="sudo-card mt-4">
-                                <div class="sudo-card-header">
-                                    <h3 class="sudo-card-title">
-                                        <i class="fas fa-cubes"></i>
-                                        Collateral Categories
-                                    </h3>
-                                </div>
-                                <div class="sudo-card-body">
-                                    <form id="collateralConfigForm">
-                                        <div class="form-group">
-                                            <label class="form-label">Collateral Categories</label>
-                                            <div id="collateralCategories">
-                                                <!-- Categories will be populated by JavaScript -->
-                                            </div>
-                                            <button type="button" class="btn btn-sudo-outline btn-sm mt-2" id="addCategoryBtn">
-                                                <i class="fas fa-plus"></i>
-                                                <span>Add Category</span>
-                                            </button>
-                                        </div>
-                                        
-                                        <div class="form-group">
-                                            <label class="form-label">Minimum Collateral Value Multiplier</label>
-                                            <input type="number" class="sudo-form-control" id="collateralMultiplier" value="1.5" min="1" max="5" step="0.1">
-                                            <small class="form-text">Collateral must be worth at least loan amount × multiplier</small>
-                                        </div>
-                                    </form>
+                            <div class="form-group">
+                                <label class="form-label">Interest Rate (%)</label>
+                                <input type="number" class="form-input" id="interestRate" min="0" max="100" step="0.1">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Loan Duration Options</label>
+                                <div class="flex gap-2">
+                                    <input type="number" class="form-input" placeholder="Months" id="loanDuration1">
+                                    <input type="number" class="form-input" placeholder="Months" id="loanDuration2">
+                                    <input type="number" class="form-input" placeholder="Months" id="loanDuration3">
                                 </div>
                             </div>
-                        </div>
+                        </form>
                     </div>
-                </section>
-                
-                <!-- Add more sections for other functionality -->
-                
-            </div>
-        </main>
-    </div>
-
-    <!-- Modals -->
-    <div class="modal sudo-modal" id="createAdminModal">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title">Create New Admin Account</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal">
-                        <i class="fas fa-times"></i>
-                    </button>
                 </div>
-                <div class="modal-body">
-                    <form id="newAdminForm">
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label">Full Name *</label>
-                                    <input type="text" class="sudo-form-control" id="adminFullName" required>
-                                </div>
+                
+                <!-- Fee Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Fee Structure</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="feeConfigForm">
+                            <div class="form-group">
+                                <label class="form-label">Processing Fee (%)</label>
+                                <input type="number" class="form-input" id="processingFee" min="0" max="10" step="0.1">
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label">Email Address *</label>
-                                    <input type="email" class="sudo-form-control" id="adminEmail" required>
-                                </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Late Payment Penalty (% per day)</label>
+                                <input type="number" class="form-input" id="latePenalty" min="0" max="5" step="0.1">
                             </div>
-                        </div>
-                        
-                        <div class="row">
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label">Phone Number *</label>
-                                    <input type="tel" class="sudo-form-control" id="adminPhone" required>
-                                </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Agent Commission (%)</label>
+                                <input type="number" class="form-input" id="agentCommission" min="0" max="20" step="0.5">
                             </div>
-                            <div class="col-md-6">
-                                <div class="form-group">
-                                    <label class="form-label">NRC Number *</label>
-                                    <input type="text" class="sudo-form-control" id="adminNRC" required>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Permissions</label>
-                            <div class="permissions-grid">
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="permLoans" checked>
-                                    <label class="form-check-label" for="permLoans">Loan Management</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="permAgents" checked>
-                                    <label class="form-check-label" for="permAgents">Agent Management</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="permCustomers" checked>
-                                    <label class="form-check-label" for="permCustomers">Customer Management</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="permReports">
-                                    <label class="form-check-label" for="permReports">Report Generation</label>
-                                </div>
-                                <div class="form-check">
-                                    <input type="checkbox" class="form-check-input" id="permSettings">
-                                    <label class="form-check-label" for="permSettings">System Settings</label>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Temporary Password</label>
-                            <div class="input-group">
-                                <input type="text" class="sudo-form-control" id="adminTempPassword" value="TruCash@123" readonly>
-                                <button type="button" class="btn btn-sudo-outline" id="generatePassword">
-                                    <i class="fas fa-redo"></i>
-                                    <span>Generate</span>
-                                </button>
-                            </div>
-                            <small class="form-text">Admin must change this password on first login</small>
-                        </div>
-                    </form>
+                        </form>
+                    </div>
                 </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-sudo-outline" data-bs-dismiss="modal">Cancel</button>
-                    <button type="button" class="btn btn-sudo-primary" id="submitAdminForm">Create Admin Account</button>
+                
+                <!-- Collateral Configuration -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">Collateral Settings</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="collateralConfigForm">
+                            <div class="form-group">
+                                <label class="form-label">Collateral Categories</label>
+                                <textarea class="form-input" id="collateralCategories" rows="3" 
+                                          placeholder="Enter categories separated by commas"></textarea>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Minimum Collateral Value Multiplier</label>
+                                <input type="number" class="form-input" id="collateralMultiplier" min="1" max="5" step="0.5">
+                                <small class="text-gray-400">e.g., 1.5x loan amount</small>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Required Photos</label>
+                                <div class="flex gap-2">
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" id="photoFront" checked>
+                                        <span>Front View</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" id="photoSide" checked>
+                                        <span>Side View</span>
+                                    </label>
+                                    <label class="flex items-center gap-2">
+                                        <input type="checkbox" id="photoClose" checked>
+                                        <span>Close-up</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+                
+                <!-- System Settings -->
+                <div class="card">
+                    <div class="card-header">
+                        <h3 class="card-title">System Preferences</h3>
+                    </div>
+                    <div class="card-body">
+                        <form id="systemConfigForm">
+                            <div class="form-group">
+                                <label class="form-label">Currency</label>
+                                <select class="form-input" id="systemCurrency">
+                                    <option value="ZMW" selected>Zambian Kwacha (ZMW)</option>
+                                    <option value="USD">US Dollar (USD)</option>
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">System Timezone</label>
+                                <select class="form-input" id="systemTimezone">
+                                    <option value="Africa/Lusaka" selected>Africa/Lusaka (GMT+2)</option>
+                                    <!-- More timezones would be added -->
+                                </select>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Session Timeout (minutes)</label>
+                                <input type="number" class="form-input" id="sessionTimeout" min="5" max="240" value="30">
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Enable SMS Notifications</label>
+                                <label class="switch">
+                                    <input type="checkbox" id="enableSMS">
+                                    <span class="slider"></span>
+                                </label>
+                            </div>
+                        </form>
+                    </div>
                 </div>
             </div>
         </div>
-    </div>
-
-    <!-- Notifications Panel -->
-    <div class="notifications-panel" id="notificationsPanel">
-        <div class="notifications-header">
-            <h5>Notifications</h5>
-            <button class="btn btn-ghost btn-sm" id="markAllRead">
-                <i class="fas fa-check-double"></i>
-                <span>Mark all as read</span>
-            </button>
-        </div>
-        <div class="notifications-list" id="notificationsList">
-            <!-- Notifications will be populated by JavaScript -->
-        </div>
-    </div>
-
-    <!-- Quick Actions Panel -->
-    <div class="quick-actions-panel" id="quickActionsPanel">
-        <div class="quick-actions-header">
-            <h5>Quick Actions</h5>
-        </div>
-        <div class="quick-actions-grid">
-            <a href="#" class="quick-action" data-action="create-admin">
-                <div class="quick-action-icon">
-                    <i class="fas fa-user-plus"></i>
-                </div>
-                <span>Create Admin</span>
-            </a>
-            <a href="#" class="quick-action" data-action="view-reports">
-                <div class="quick-action-icon">
-                    <i class="fas fa-chart-bar"></i>
-                </div>
-                <span>View Reports</span>
-            </a>
-            <a href="#" class="quick-action" data-action="system-backup">
-                <div class="quick-action-icon">
-                    <i class="fas fa-database"></i>
-                </div>
-                <span>Backup System</span>
-            </a>
-            <a href="#" class="quick-action" data-action="audit-logs">
-                <div class="quick-action-icon">
-                    <i class="fas fa-history"></i>
-                </div>
-                <span>Audit Logs</span>
-            </a>
-            <a href="#" class="quick-action" data-action="risk-analysis">
-                <div class="quick-action-icon">
-                    <i class="fas fa-shield-alt"></i>
-                </div>
-                <span>Risk Analysis</span>
-            </a>
-            <a href="#" class="quick-action" data-action="export-data">
-                <div class="quick-action-icon">
-                    <i class="fas fa-file-export"></i>
-                </div>
-                <span>Export Data</span>
-            </a>
-        </div>
-    </div>
-
-    <script type="module" src="firebase.js"></script>
-    <script type="module" src="sudo.js"></script>
+        
+        <!-- Additional views would continue here (Agents, Customers, Loans, etc.) -->
+        
+    </main>
     
-    <style>
-        /* Additional styles for sudo dashboard */
-        .app-container {
-            display: flex;
-            min-height: 100vh;
-            background: var(--sudo-bg);
-        }
-        
-        .sidebar {
-            width: var(--sidebar-width);
-            flex-shrink: 0;
-            display: flex;
-            flex-direction: column;
-            transition: all 0.3s ease;
-        }
-        
-        .sidebar.collapsed {
-            width: var(--sidebar-collapsed-width);
-        }
-        
-        .main-content {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-        
-        .header {
-            height: var(--header-height);
-            flex-shrink: 0;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 24px;
-        }
-        
-        .content-area {
-            flex: 1;
-            padding: 24px;
-            overflow-y: auto;
-        }
-        
-        .content-section {
-            display: none;
-        }
-        
-        .content-section.active {
-            display: block;
-        }
-        
-        .section-header {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-bottom: 24px;
-        }
-        
-        .row {
-            display: flex;
-            flex-wrap: wrap;
-            margin: -12px;
-        }
-        
-        .col-lg-6, .col-lg-8, .col-lg-4 {
-            padding: 12px;
-        }
-        
-        .col-lg-6 { flex: 0 0 50%; max-width: 50%; }
-        .col-lg-8 { flex: 0 0 66.6667%; max-width: 66.6667%; }
-        .col-lg-4 { flex: 0 0 33.3333%; max-width: 33.3333%; }
-        
-        .mb-4 { margin-bottom: 24px; }
-        .mt-4 { margin-top: 24px; }
-        .ml-2 { margin-left: 8px; }
-        
-        .table-responsive {
-            overflow-x: auto;
-        }
-        
-        .search-box {
-            position: relative;
-            width: 250px;
-        }
-        
-        .search-box input {
-            padding-right: 40px;
-        }
-        
-        .search-box i {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            color: var(--sudo-text-secondary);
-        }
-        
-        .permissions-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 12px;
-            padding: 16px;
-            background: rgba(28, 28, 30, 0.5);
-            border-radius: 12px;
-        }
-        
-        .notifications-panel,
-        .quick-actions-panel {
-            position: fixed;
-            top: var(--header-height);
-            right: 24px;
-            width: 350px;
-            background: var(--sudo-card-bg);
-            border: 1px solid var(--sudo-border);
-            border-radius: 16px;
-            box-shadow: var(--shadow-xl);
-            z-index: 1000;
-            display: none;
-        }
-        
-        .notifications-panel.show,
-        .quick-actions-panel.show {
-            display: block;
-        }
-        
-        .notifications-header,
-        .quick-actions-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--sudo-border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-        
-        .notifications-list {
-            max-height: 400px;
-            overflow-y: auto;
-        }
-        
-        .notification-item {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--sudo-border);
-            transition: background 0.2s ease;
-        }
-        
-        .notification-item:hover {
-            background: rgba(10, 132, 255, 0.05);
-        }
-        
-        .notification-item.unread {
-            background: rgba(10, 132, 255, 0.1);
-        }
-        
-        .notification-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-            color: var(--sudo-text);
-        }
-        
-        .notification-message {
-            font-size: 14px;
-            color: var(--sudo-text-secondary);
-            margin-bottom: 8px;
-        }
-        
-        .notification-time {
-            font-size: 12px;
-            color: var(--sudo-text-secondary);
-        }
-        
-        .quick-actions-grid {
-            padding: 20px;
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
-        }
-        
-        .input-group {
-            display: flex;
-        }
-        
-        .input-group .sudo-form-control {
-            flex: 1;
-            border-top-right-radius: 0;
-            border-bottom-right-radius: 0;
-        }
-        
-        .input-group .btn {
-            border-top-left-radius: 0;
-            border-bottom-left-radius: 0;
-        }
-        
-        .btn-close {
-            background: none;
-            border: none;
-            color: var(--sudo-text-secondary);
-            cursor: pointer;
-            padding: 8px;
-            border-radius: 8px;
-            transition: all 0.2s ease;
-        }
-        
-        .btn-close:hover {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--sudo-text);
-        }
-        
-        @media (max-width: 1200px) {
-            .sudo-grid {
-                grid-template-columns: repeat(2, 1fr);
-            }
-        }
-        
-        @media (max-width: 768px) {
-            .sidebar {
-                position: fixed;
-                left: -100%;
-                top: 0;
-                bottom: 0;
-                z-index: 1100;
-                transition: left 0.3s ease;
+    <!-- Modals -->
+    <div class="modal" id="createAdminModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Create Administrator Account</h3>
+                <button class="modal-close" id="closeAdminModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <form id="createAdminForm">
+                    <div class="form-group">
+                        <label class="form-label">Full Name *</label>
+                        <input type="text" class="form-input" id="adminName" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Email Address *</label>
+                        <input type="email" class="form-input" id="adminEmail" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Phone Number *</label>
+                        <input type="tel" class="form-input" id="adminPhone" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Password *</label>
+                        <input type="password" class="form-input" id="adminPassword" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Confirm Password *</label>
+                        <input type="password" class="form-input" id="adminConfirmPassword" required>
+                    </div>
+                    
+                    <div class="form-group">
+                        <label class="form-label">Permissions</label>
+                        <div class="grid grid-cols-2 gap-2">
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="permissions" value="approve_loans" checked>
+                                <span>Approve Loans</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="permissions" value="verify_documents" checked>
+                                <span>Verify Documents</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="permissions" value="manage_agents" checked>
+                                <span>Manage Agents</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="permissions" value="manage_customers">
+                                <span>Manage Customers</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="permissions" value="view_reports">
+                                <span>View Reports</span>
+                            </label>
+                            <label class="flex items-center gap-2">
+                                <input type="checkbox" name="permissions" value="configure_system">
+                                <span>Configure System</span>
+                            </label>
+                        </div>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelCreateAdmin">Cancel</button>
+                <button class="btn btn-primary" id="submitCreateAdmin">
+                    <i class="fas fa-user-plus"></i> Create Administrator
+                </button>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Notifications Panel -->
+    <div class="modal" id="notificationsPanel">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Notifications</h3>
+                <button class="modal-close" id="closeNotifications">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="flex flex-col gap-4" id="notificationsList">
+                    <!-- Notifications will be populated here -->
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-auth.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/12.8.0/firebase-database.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@3.9.1/dist/chart.min.js"></script>
+    
+    <!-- App Scripts -->
+    <script src="firebase.js"></script>
+    <script src="auth.js"></script>
+    <script src="cloudinary.js"></script>
+    <script>
+        // SUDO Dashboard JavaScript
+        document.addEventListener('DOMContentLoaded', function() {
+            // Initialize variables
+            let currentUser = null;
+            let systemStats = {};
+            let loanPortfolioChart = null;
+            let revenueChart = null;
+            
+            // DOM Elements
+            const views = document.querySelectorAll('.view');
+            const navItems = document.querySelectorAll('.nav-item');
+            const logoutBtn = document.getElementById('logoutBtn');
+            const refreshBtn = document.getElementById('refreshDashboard');
+            const createAdminBtn = document.getElementById('createAdminBtn');
+            const saveConfigBtn = document.getElementById('saveConfigBtn');
+            
+            // Initialize
+            initializeDashboard();
+            
+            async function initializeDashboard() {
+                // Check authentication
+                currentUser = authManager.currentUser;
+                if (!currentUser || authManager.userRole !== 'sudo') {
+                    window.location.href = 'login.html';
+                    return;
+                }
+                
+                // Set user name
+                document.getElementById('userName').textContent = 
+                    authManager.userData?.fullName || 'System Owner';
+                
+                // Load initial data
+                await loadDashboardData();
+                setupEventListeners();
+                setupRealTimeListeners();
             }
             
-            .sidebar.show {
-                left: 0;
+            async function loadDashboardData() {
+                try {
+                    // Show loading state
+                    document.getElementById('statsGrid').innerHTML = `
+                        <div class="card">
+                            <div class="card-body">
+                                <div class="loading-spinner"></div>
+                            </div>
+                        </div>
+                    `;
+                    
+                    // Load system statistics
+                    systemStats = await db.getSystemStatistics();
+                    updateStatsGrid();
+                    
+                    // Load recent activity
+                    await loadRecentActivity();
+                    
+                    // Load top agents
+                    await loadTopAgents();
+                    
+                    // Initialize charts
+                    initializeCharts();
+                    
+                    // Update last updated time
+                    document.getElementById('lastUpdated').textContent = 
+                        `Last updated: ${new Date().toLocaleTimeString()}`;
+                } catch (error) {
+                    console.error('Error loading dashboard data:', error);
+                    showNotification('Failed to load dashboard data', 'error');
+                }
             }
             
-            .sudo-grid {
-                grid-template-columns: 1fr;
+            function updateStatsGrid() {
+                const stats = systemStats;
+                const statsGrid = document.getElementById('statsGrid');
+                
+                statsGrid.innerHTML = `
+                    <div class="card stat-card">
+                        <div class="stat-icon bg-primary/10 text-primary">
+                            <i class="fas fa-file-invoice-dollar"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${formatCurrency(stats.totalAmount)}</div>
+                            <div class="stat-label">Total Loan Portfolio</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                12% from last month
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon bg-success/10 text-success">
+                            <i class="fas fa-check-circle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${stats.activeLoans}</div>
+                            <div class="stat-label">Active Loans</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                ${Math.round((stats.activeLoans / stats.totalLoans) * 100)}% of total
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon bg-warning/10 text-warning">
+                            <i class="fas fa-clock"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${stats.overdueLoans}</div>
+                            <div class="stat-label">Overdue Loans</div>
+                            <div class="stat-change ${stats.overdueLoans > 0 ? 'negative' : 'positive'}">
+                                <i class="fas fa-${stats.overdueLoans > 0 ? 'arrow-up' : 'check'}"></i>
+                                ${stats.overdueLoans > 0 ? 'Needs attention' : 'All good'}
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon bg-info/10 text-info">
+                            <i class="fas fa-users"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${stats.totalAgents}</div>
+                            <div class="stat-label">Active Agents</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                ${stats.approvedAgents} approved
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon bg-secondary/10 text-secondary">
+                            <i class="fas fa-money-bill-wave"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${formatCurrency(stats.totalRevenue)}</div>
+                            <div class="stat-label">Total Revenue</div>
+                            <div class="stat-change positive">
+                                <i class="fas fa-arrow-up"></i>
+                                18% from last month
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="card stat-card">
+                        <div class="stat-icon bg-danger/10 text-danger">
+                            <i class="fas fa-exclamation-triangle"></i>
+                        </div>
+                        <div class="stat-content">
+                            <div class="stat-value">${stats.defaultedLoans}</div>
+                            <div class="stat-label">Defaulted Loans</div>
+                            <div class="stat-change ${stats.defaultedLoans > 0 ? 'negative' : 'positive'}">
+                                <i class="fas fa-${stats.defaultedLoans > 0 ? 'arrow-up' : 'check'}"></i>
+                                ${stats.defaultedLoans > 0 ? 'Risk alert' : 'No defaults'}
+                            </div>
+                        </div>
+                    </div>
+                `;
             }
             
-            .col-lg-6, .col-lg-8, .col-lg-4 {
-                flex: 0 0 100%;
-                max-width: 100%;
+            async function loadRecentActivity() {
+                try {
+                    const logsRef = database.ref('auditLogs');
+                    const snapshot = await logsRef.orderByChild('timestamp').limitToLast(10).once('value');
+                    const logs = snapshot.val() || {};
+                    
+                    const tableBody = document.querySelector('#recentActivityTable tbody');
+                    tableBody.innerHTML = '';
+                    
+                    Object.entries(logs).reverse().forEach(([id, log]) => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${formatTime(log.timestamp)}</td>
+                            <td>${log.userId ? log.userId.substring(0, 8) + '...' : 'System'}</td>
+                            <td><span class="status-badge status-${log.action.toLowerCase()}">${log.action}</span></td>
+                            <td>${log.details || 'No details'}</td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error loading activity logs:', error);
+                }
             }
             
-            .notifications-panel,
-            .quick-actions-panel {
-                width: calc(100% - 48px);
-                right: 12px;
-                left: 12px;
+            async function loadTopAgents() {
+                try {
+                    const agents = await db.getAllAgents();
+                    const agentArray = Object.entries(agents)
+                        .filter(([id, agent]) => agent.status === 'approved')
+                        .map(([id, agent]) => ({
+                            id,
+                            ...agent,
+                            performance: calculateAgentPerformance(agent)
+                        }))
+                        .sort((a, b) => b.performance.score - a.performance.score)
+                        .slice(0, 5);
+                    
+                    const tableBody = document.querySelector('#topAgentsTable tbody');
+                    tableBody.innerHTML = '';
+                    
+                    agentArray.forEach(agent => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>
+                                <div class="flex items-center gap-2">
+                                    <img src="${agent.profilePhoto || 'https://via.placeholder.com/32'}" 
+                                         class="w-8 h-8 rounded-full">
+                                    <div>
+                                        <div class="font-medium">${agent.fullName}</div>
+                                        <div class="text-xs text-gray-400">${agent.agentId}</div>
+                                    </div>
+                                </div>
+                            </td>
+                            <td>${agent.totalCustomers || 0}</td>
+                            <td>${agent.activeLoans || 0}</td>
+                            <td>${formatCurrency(agent.totalCommission || 0)}</td>
+                            <td>
+                                <div class="flex">
+                                    ${Array.from({length: 5}).map((_, i) => `
+                                        <i class="fas fa-star ${i < agent.performance.rating ? 'text-yellow-400' : 'text-gray-400'}"></i>
+                                    `).join('')}
+                                </div>
+                            </td>
+                        `;
+                        tableBody.appendChild(row);
+                    });
+                } catch (error) {
+                    console.error('Error loading top agents:', error);
+                }
             }
-        }
-    </style>
+            
+            function calculateAgentPerformance(agent) {
+                // Simple performance calculation
+                const customers = agent.totalCustomers || 0;
+                const loans = agent.activeLoans || 0;
+                const commission = agent.totalCommission || 0;
+                
+                let score = customers * 0.3 + loans * 0.4 + (commission / 1000) * 0.3;
+                let rating = Math.min(5, Math.ceil(score / 2));
+                
+                return { score, rating };
+            }
+            
+            function initializeCharts() {
+                // Destroy existing charts
+                if (loanPortfolioChart) loanPortfolioChart.destroy();
+                if (revenueChart) revenueChart.destroy();
+                
+                // Loan Portfolio Chart
+                const loanCtx = document.getElementById('loanPortfolioChart').getContext('2d');
+                loanPortfolioChart = new Chart(loanCtx, {
+                    type: 'doughnut',
+                    data: {
+                        labels: ['Active', 'Pending', 'Overdue', 'Defaulted', 'Paid'],
+                        datasets: [{
+                            data: [
+                                systemStats.activeLoans,
+                                systemStats.totalLoans - systemStats.activeLoans - systemStats.overdueLoans - systemStats.defaultedLoans,
+                                systemStats.overdueLoans,
+                                systemStats.defaultedLoans,
+                                systemStats.totalLoans - systemStats.activeLoans
+                            ],
+                            backgroundColor: [
+                                'rgba(52, 199, 89, 0.8)',
+                                'rgba(255, 149, 0, 0.8)',
+                                'rgba(255, 45, 85, 0.8)',
+                                'rgba(255, 59, 48, 0.8)',
+                                'rgba(142, 142, 147, 0.8)'
+                            ],
+                            borderWidth: 1
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                position: 'bottom'
+                            }
+                        }
+                    }
+                });
+                
+                // Revenue Chart (sample data)
+                const revenueCtx = document.getElementById('revenueChart').getContext('2d');
+                revenueChart = new Chart(revenueCtx, {
+                    type: 'line',
+                    data: {
+                        labels: Array.from({length: 30}, (_, i) => `Day ${i + 1}`),
+                        datasets: [{
+                            label: 'Daily Revenue (ZMW)',
+                            data: Array.from({length: 30}, () => Math.floor(Math.random() * 10000) + 5000),
+                            borderColor: 'rgba(0, 122, 255, 1)',
+                            backgroundColor: 'rgba(0, 122, 255, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    },
+                    options: {
+                        responsive: true,
+                        maintainAspectRatio: false,
+                        plugins: {
+                            legend: {
+                                display: false
+                            }
+                        },
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                },
+                                ticks: {
+                                    callback: function(value) {
+                                        return 'ZMW ' + value.toLocaleString();
+                                    }
+                                }
+                            },
+                            x: {
+                                grid: {
+                                    color: 'rgba(255, 255, 255, 0.1)'
+                                }
+                            }
+                        }
+                    }
+                });
+            }
+            
+            function setupEventListeners() {
+                // Navigation
+                navItems.forEach(item => {
+                    item.addEventListener('click', function(e) {
+                        e.preventDefault();
+                        
+                        // Update active state
+                        navItems.forEach(nav => nav.classList.remove('active'));
+                        this.classList.add('active');
+                        
+                        // Show selected view
+                        const viewName = this.dataset.view;
+                        views.forEach(view => {
+                            view.classList.remove('active');
+                            if (view.id === `${viewName}View`) {
+                                view.classList.add('active');
+                            }
+                        });
+                    });
+                });
+                
+                // Logout
+                logoutBtn.addEventListener('click', () => {
+                    authManager.logout();
+                });
+                
+                // Refresh dashboard
+                refreshBtn.addEventListener('click', async () => {
+                    refreshBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Refreshing...';
+                    await loadDashboardData();
+                    refreshBtn.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+                });
+                
+                // Create admin
+                createAdminBtn.addEventListener('click', () => {
+                    document.getElementById('createAdminModal').classList.add('active');
+                });
+                
+                // Close admin modal
+                document.getElementById('closeAdminModal').addEventListener('click', () => {
+                    document.getElementById('createAdminModal').classList.remove('active');
+                });
+                
+                document.getElementById('cancelCreateAdmin').addEventListener('click', () => {
+                    document.getElementById('createAdminModal').classList.remove('active');
+                });
+                
+                // Submit create admin
+                document.getElementById('submitCreateAdmin').addEventListener('click', async () => {
+                    const form = document.getElementById('createAdminForm');
+                    const name = document.getElementById('adminName').value;
+                    const email = document.getElementById('adminEmail').value;
+                    const phone = document.getElementById('adminPhone').value;
+                    const password = document.getElementById('adminPassword').value;
+                    const confirmPassword = document.getElementById('adminConfirmPassword').value;
+                    
+                    // Validation
+                    if (!name || !email || !phone || !password || !confirmPassword) {
+                        showNotification('Please fill all required fields', 'error');
+                        return;
+                    }
+                    
+                    if (password !== confirmPassword) {
+                        showNotification('Passwords do not match', 'error');
+                        return;
+                    }
+                    
+                    if (password.length < 6) {
+                        showNotification('Password must be at least 6 characters', 'error');
+                        return;
+                    }
+                    
+                    // Get permissions
+                    const permissions = Array.from(document.querySelectorAll('input[name="permissions"]:checked'))
+                        .map(cb => cb.value);
+                    
+                    const button = document.getElementById('submitCreateAdmin');
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Creating...';
+                    button.disabled = true;
+                    
+                    try {
+                        const adminData = {
+                            fullName: name,
+                            phone: phone,
+                            role: 'admin',
+                            permissions: permissions,
+                            status: 'active',
+                            createdBy: currentUser.uid,
+                            createdAt: firebase.database.ServerValue.TIMESTAMP
+                        };
+                        
+                        const result = await authManager.register(email, password, adminData, 'admin');
+                        
+                        if (result.success) {
+                            showNotification('Admin account created successfully', 'success');
+                            document.getElementById('createAdminModal').classList.remove('active');
+                            form.reset();
+                        } else {
+                            showNotification(result.error, 'error');
+                        }
+                    } catch (error) {
+                        showNotification('Failed to create admin account', 'error');
+                        console.error('Create admin error:', error);
+                    }
+                    
+                    button.innerHTML = '<i class="fas fa-user-plus"></i> Create Administrator';
+                    button.disabled = false;
+                });
+                
+                // Save configuration
+                saveConfigBtn.addEventListener('click', async () => {
+                    const button = saveConfigBtn;
+                    button.innerHTML = '<i class="fas fa-spinner fa-spin"></i> Saving...';
+                    button.disabled = true;
+                    
+                    try {
+                        // Collect configuration data
+                        const configData = {
+                            loan: {
+                                minAmount: parseFloat(document.getElementById('minLoanAmount').value),
+                                maxAmount: parseFloat(document.getElementById('maxLoanAmount').value),
+                                interestRate: parseFloat(document.getElementById('interestRate').value),
+                                durations: [
+                                    document.getElementById('loanDuration1').value,
+                                    document.getElementById('loanDuration2').value,
+                                    document.getElementById('loanDuration3').value
+                                ].filter(d => d)
+                            },
+                            fees: {
+                                processingFee: parseFloat(document.getElementById('processingFee').value),
+                                latePenalty: parseFloat(document.getElementById('latePenalty').value),
+                                agentCommission: parseFloat(document.getElementById('agentCommission').value)
+                            },
+                            collateral: {
+                                categories: document.getElementById('collateralCategories').value.split(',').map(c => c.trim()),
+                                multiplier: parseFloat(document.getElementById('collateralMultiplier').value),
+                                requiredPhotos: {
+                                    front: document.getElementById('photoFront').checked,
+                                    side: document.getElementById('photoSide').checked,
+                                    close: document.getElementById('photoClose').checked
+                                }
+                            },
+                            system: {
+                                currency: document.getElementById('systemCurrency').value,
+                                timezone: document.getElementById('systemTimezone').value,
+                                sessionTimeout: parseInt(document.getElementById('sessionTimeout').value),
+                                enableSMS: document.getElementById('enableSMS').checked
+                            },
+                            updatedBy: currentUser.uid,
+                            updatedAt: firebase.database.ServerValue.TIMESTAMP
+                        };
+                        
+                        // Save to Firebase
+                        await database.ref('system/config').set(configData);
+                        
+                        // Log the action
+                        await db.logActivity(currentUser.uid, 'CONFIG_UPDATE', {
+                            config: 'system_settings'
+                        });
+                        
+                        showNotification('Configuration saved successfully', 'success');
+                    } catch (error) {
+                        showNotification('Failed to save configuration', 'error');
+                        console.error('Save config error:', error);
+                    }
+                    
+                    button.innerHTML = '<i class="fas fa-save"></i> Save Configuration';
+                    button.disabled = false;
+                });
+                
+                // Load existing configuration
+                loadSystemConfig();
+            }
+            
+            async function loadSystemConfig() {
+                try {
+                    const snapshot = await database.ref('system/config').once('value');
+                    const config = snapshot.val();
+                    
+                    if (config) {
+                        // Loan config
+                        if (config.loan) {
+                            document.getElementById('minLoanAmount').value = config.loan.minAmount || '';
+                            document.getElementById('maxLoanAmount').value = config.loan.maxAmount || '';
+                            document.getElementById('interestRate').value = config.loan.interestRate || '';
+                            
+                            if (config.loan.durations) {
+                                const durations = config.loan.durations;
+                                document.getElementById('loanDuration1').value = durations[0] || '';
+                                document.getElementById('loanDuration2').value = durations[1] || '';
+                                document.getElementById('loanDuration3').value = durations[2] || '';
+                            }
+                        }
+                        
+                        // Fee config
+                        if (config.fees) {
+                            document.getElementById('processingFee').value = config.fees.processingFee || '';
+                            document.getElementById('latePenalty').value = config.fees.latePenalty || '';
+                            document.getElementById('agentCommission').value = config.fees.agentCommission || '';
+                        }
+                        
+                        // Collateral config
+                        if (config.collateral) {
+                            document.getElementById('collateralCategories').value = config.collateral.categories?.join(', ') || '';
+                            document.getElementById('collateralMultiplier').value = config.collateral.multiplier || '';
+                            
+                            if (config.collateral.requiredPhotos) {
+                                document.getElementById('photoFront').checked = config.collateral.requiredPhotos.front || false;
+                                document.getElementById('photoSide').checked = config.collateral.requiredPhotos.side || false;
+                                document.getElementById('photoClose').checked = config.collateral.requiredPhotos.close || false;
+                            }
+                        }
+                        
+                        // System config
+                        if (config.system) {
+                            document.getElementById('systemCurrency').value = config.system.currency || 'ZMW';
+                            document.getElementById('systemTimezone').value = config.system.timezone || 'Africa/Lusaka';
+                            document.getElementById('sessionTimeout').value = config.system.sessionTimeout || 30;
+                            document.getElementById('enableSMS').checked = config.system.enableSMS || false;
+                        }
+                    }
+                } catch (error) {
+                    console.error('Error loading system config:', error);
+                }
+            }
+            
+            function setupRealTimeListeners() {
+                // Listen for new loans
+                db.listenToLoans((loans) => {
+                    // Update stats if dashboard is active
+                    if (document.getElementById('dashboardView').classList.contains('active')) {
+                        updateStatsWithLoans(loans);
+                    }
+                });
+                
+                // Listen for audit logs
+                database.ref('auditLogs').limitToLast(1).on('child_added', (snapshot) => {
+                    const log = snapshot.val();
+                    // Show notification for important logs
+                    if (log.action.includes('APPROVE') || log.action.includes('REJECT') || 
+                        log.action.includes('CREATE') || log.action.includes('DELETE')) {
+                        showNotification(`System activity: ${log.action}`, 'info');
+                    }
+                    
+                    // Update recent activity table
+                    if (document.getElementById('dashboardView').classList.contains('active')) {
+                        loadRecentActivity();
+                    }
+                });
+            }
+            
+            function updateStatsWithLoans(loans) {
+                // Recalculate stats from loans data
+                const totalLoans = Object.keys(loans).length;
+                const activeLoans = Object.values(loans).filter(l => l.status === 'active').length;
+                const overdueLoans = Object.values(loans).filter(l => l.status === 'overdue').length;
+                const defaultedLoans = Object.values(loans).filter(l => l.status === 'defaulted').length;
+                
+                // Update stats object
+                systemStats.totalLoans = totalLoans;
+                systemStats.activeLoans = activeLoans;
+                systemStats.overdueLoans = overdueLoans;
+                systemStats.defaultedLoans = defaultedLoans;
+                
+                // Update stats grid
+                updateStatsGrid();
+                
+                // Update charts
+                if (loanPortfolioChart) {
+                    loanPortfolioChart.data.datasets[0].data = [
+                        activeLoans,
+                        totalLoans - activeLoans - overdueLoans - defaultedLoans,
+                        overdueLoans,
+                        defaultedLoans,
+                        totalLoans - activeLoans
+                    ];
+                    loanPortfolioChart.update();
+                }
+            }
+            
+            // Utility functions
+            function formatCurrency(amount) {
+                return new Intl.NumberFormat('en-ZM', {
+                    style: 'currency',
+                    currency: 'ZMW',
+                    minimumFractionDigits: 2
+                }).format(amount || 0);
+            }
+            
+            function formatTime(timestamp) {
+                const date = new Date(timestamp);
+                return date.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+            }
+            
+            function showNotification(message, type) {
+                // Create notification element
+                const notification = document.createElement('div');
+                notification.className = `notification ${type} animate-slideInRight`;
+                notification.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="fas fa-${type === 'success' ? 'check-circle' : 
+                                         type === 'error' ? 'exclamation-circle' : 
+                                         type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    </div>
+                    <div>${message}</div>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Show notification
+                setTimeout(() => notification.classList.add('active'), 10);
+                
+                // Auto remove after 5 seconds
+                setTimeout(() => {
+                    notification.classList.remove('active');
+                    setTimeout(() => notification.remove(), 300);
+                }, 5000);
+                
+                // Update notification count
+                const countElement = document.getElementById('notificationCount');
+                let count = parseInt(countElement.textContent) || 0;
+                countElement.textContent = count + 1;
+                countElement.style.display = count + 1 > 0 ? 'block' : 'none';
+            }
+        });
+    </script>
 </body>
 </html>
