@@ -5,11 +5,10 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruCash | Secure Login</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK -->
+    <!-- Firebase SDK - Only include what's actually needed -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-firestore-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <!-- Cloudinary Upload Widget -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
@@ -1544,1217 +1543,1289 @@
     <!-- JavaScript Implementation -->
     <script>
         // ===== Firebase Configuration =====
-const firebaseConfig = {
-    apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
-    authDomain: "trucash-9fee8.firebaseapp.com",
-    databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
-    projectId: "trucash-9fee8",
-    storageBucket: "trucash-9fee8.firebasestorage.app",
-    messagingSenderId: "622416212225",
-    appId: "1:622416212225:web:07418a9b16f955c330ab00",
-    measurementId: "G-6TEZFNFDBK"
-};
-
-// Initialize Firebase
-let firebaseApp, auth, db;
-
-try {
-    firebaseApp = firebase.initializeApp(firebaseConfig);
-    auth = firebase.auth();
-    db = firebase.firestore(); // Changed to firestore
-    console.log("Firebase initialized successfully");
-} catch (error) {
-    console.error("Firebase initialization error:", error);
-}
-
-// ===== Cloudinary Configuration =====
-const cloudinaryConfig = {
-    cloudName: 'dd3lcymrk',
-    uploadPreset: 'h3eyhc2o',
-    apiKey: '',
-    folder: 'trucash/users',
-    maxFileSize: 5242880,
-    allowedFormats: ['jpg', 'jpeg', 'png', 'pdf'],
-    multiple: false,
-    resourceType: 'auto',
-    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf'],
-    maxImageFileSize: 5242880,
-    maxVideoFileSize: 10485760,
-    theme: 'white',
-    showPoweredBy: false,
-    styles: {
-        palette: {
-            window: "#FFFFFF",
-            windowBorder: "#90A0B3",
-            tabIcon: "#007AFF",
-            menuIcons: "#5A616A",
-            textDark: "#000000",
-            textLight: "#FFFFFF",
-            link: "#007AFF",
-            action: "#FF620C",
-            inactiveTabIcon: "#0E2F5A",
-            error: "#F44235",
-            inProgress: "#007AFF",
-            complete: "#20B832",
-            sourceBg: "#E4EBF1"
-        },
-        fonts: {
-            default: null,
-            "'IBM Plex Sans', sans-serif": {
-                url: "https://fonts.googleapis.com/css?family=IBM+Plex+Sans",
-                active: true
-            }
-        }
-    }
-};
-
-// ===== Application State =====
-const AppState = {
-    currentUser: null,
-    isAuthenticated: false,
-    userType: null,
-    uploadProgress: 0,
-    uploadedFiles: {
-        nrcFront: null,
-        nrcBack: null,
-        profile: null,
-        additional: null
-    },
-    registrationData: null,
-    cloudinaryWidget: null,
-    activeUploadBox: null
-};
-
-// ===== Utility Functions =====
-const Utils = {
-    validateEmail: (email) => {
-        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-        return re.test(email);
-    },
-    
-    validatePhone: (phone) => {
-        const re = /^\+?[\d\s\-\(\)]{10,}$/;
-        return re.test(phone);
-    },
-    
-    validatePassword: (password) => {
-        return password.length >= 6;
-    },
-    
-    validateNRC: (nrc) => {
-        const re = /^\d{6}\/\d{2}\/\d{1}$/;
-        return re.test(nrc);
-    },
-    
-    validateFile: (file, allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']) => {
-        if (!file) return { valid: false, error: 'No file selected' };
-        if (!allowedTypes.includes(file.type)) {
-            return { valid: false, error: 'Invalid file type. Please upload JPG, PNG, or PDF files.' };
-        }
-        if (file.size > 5 * 1024 * 1024) {
-            return { valid: false, error: 'File size exceeds 5MB' };
-        }
-        return { valid: true, error: null };
-    },
-    
-    showNotification: (title, message, type = 'info', duration = 5000) => {
-        const notification = document.createElement('div');
-        notification.className = `notification ${type}`;
-        notification.innerHTML = `
-            <div class="notification-icon">
-                <i class="fas ${
-                    type === 'success' ? 'fa-check-circle' :
-                    type === 'error' ? 'fa-exclamation-circle' :
-                    type === 'warning' ? 'fa-exclamation-triangle' :
-                    'fa-info-circle'
-                }"></i>
-            </div>
-            <div class="notification-content">
-                <div class="notification-title">${title}</div>
-                <div class="notification-message">${message}</div>
-            </div>
-            <button class="notification-close">
-                <i class="fas fa-times"></i>
-            </button>
-        `;
-        
-        document.body.appendChild(notification);
-        
-        setTimeout(() => notification.classList.add('active'), 10);
-        
-        notification.querySelector('.notification-close').addEventListener('click', () => {
-            notification.classList.remove('active');
-            setTimeout(() => notification.remove(), 300);
-        });
-        
-        setTimeout(() => {
-            if (notification.parentNode) {
-                notification.classList.remove('active');
-                setTimeout(() => notification.remove(), 300);
-            }
-        }, duration);
-        
-        return notification;
-    },
-    
-    showLoading: (message = 'Processing...', submessage = 'Please wait') => {
-        const overlay = document.getElementById('loadingOverlay');
-        const text = overlay.querySelector('.loading-text');
-        const subtext = overlay.querySelector('.loading-subtext');
-        
-        text.textContent = message;
-        subtext.textContent = submessage;
-        overlay.classList.add('active');
-    },
-    
-    hideLoading: () => {
-        const overlay = document.getElementById('loadingOverlay');
-        overlay.classList.remove('active');
-    },
-    
-    updateProgress: (progress, elementId = 'uploadProgressFill') => {
-        const progressFill = document.getElementById(elementId);
-        if (progressFill) {
-            progressFill.style.width = `${progress}%`;
-        }
-    },
-    
-    showProgress: (elementId = 'uploadProgress') => {
-        const progressBar = document.getElementById(elementId);
-        if (progressBar) {
-            progressBar.classList.add('active');
-        }
-    },
-    
-    hideProgress: (elementId = 'uploadProgress') => {
-        const progressBar = document.getElementById(elementId);
-        if (progressBar) {
-            progressBar.classList.remove('active');
-        }
-    },
-    
-    formatFileSize: (bytes) => {
-        if (bytes === 0) return '0 Bytes';
-        const k = 1024;
-        const sizes = ['Bytes', 'KB', 'MB', 'GB'];
-        const i = Math.floor(Math.log(bytes) / Math.log(k));
-        return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-    },
-    
-    debounce: (func, wait) => {
-        let timeout;
-        return function executedFunction(...args) {
-            const later = () => {
-                clearTimeout(timeout);
-                func(...args);
-            };
-            clearTimeout(timeout);
-            timeout = setTimeout(later, wait);
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
+            authDomain: "trucash-9fee8.firebaseapp.com",
+            projectId: "trucash-9fee8",
+            storageBucket: "trucash-9fee8.firebasestorage.app",
+            messagingSenderId: "622416212225",
+            appId: "1:622416212225:web:07418a9b16f955c330ab00",
+            measurementId: "G-6TEZFNFDBK"
         };
-    }
-};
 
-// ===== Firebase Service =====
-const FirebaseService = {
-    async signIn(email, password) {
+        // Initialize Firebase
+        let firebaseApp, auth, db;
+        
         try {
-            const userCredential = await auth.signInWithEmailAndPassword(email, password);
-            AppState.currentUser = userCredential.user;
-            AppState.isAuthenticated = true;
-            
-            // Get user data from Firestore
-            const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
-            
-            if (userDoc.exists) {
-                const userData = userDoc.data();
-                AppState.userType = userData.userType;
-                AppState.registrationData = userData;
-            }
-            
-            return { success: true, user: userCredential.user };
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore(); // Using Firestore (not Realtime Database)
+            console.log("Firebase initialized successfully");
         } catch (error) {
-            console.error('Sign in error:', error);
-            let errorMessage = 'Login failed. Please check your credentials.';
-            
-            if (error.code === 'auth/user-not-found') {
-                errorMessage = 'No account found with this email.';
-            } else if (error.code === 'auth/wrong-password') {
-                errorMessage = 'Incorrect password. Please try again.';
-            } else if (error.code === 'auth/too-many-requests') {
-                errorMessage = 'Too many failed attempts. Please try again later.';
-            }
-            
-            return { success: false, error: errorMessage };
+            console.error("Firebase initialization error:", error);
         }
-    },
-    
-    async signOut() {
-        try {
-            await auth.signOut();
-            AppState.currentUser = null;
-            AppState.isAuthenticated = false;
-            AppState.userType = null;
-            return { success: true };
-        } catch (error) {
-            return { success: false, error: error.message };
-        }
-    },
-    
-    async registerUser(userData) {
-        try {
-            // Create user in Firebase Auth
-            const userCredential = await auth.createUserWithEmailAndPassword(
-                userData.email,
-                userData.password
-            );
-            
-            // Prepare user data for Firestore
-            const userDoc = {
-                uid: userCredential.user.uid,
-                fullName: userData.fullName,
-                email: userData.email,
-                phone: userData.phone,
-                residence: userData.residence,
-                nrc: userData.nrc,
-                nrcFront: userData.nrcFront,
-                nrcBack: userData.nrcBack,
-                profilePhoto: userData.profilePhoto,
-                additionalDoc: userData.additionalDoc || '',
-                userType: userData.userType,
-                status: userData.userType === 'agent' ? 'pending' : 'active',
-                createdAt: firebase.firestore.FieldValue.serverTimestamp(),
-                updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
-                lastLogin: firebase.firestore.FieldValue.serverTimestamp()
-            };
-            
-            // Save to Firestore
-            await db.collection('users').doc(userCredential.user.uid).set(userDoc);
-            
-            // Update application state
-            AppState.currentUser = userCredential.user;
-            AppState.isAuthenticated = true;
-            AppState.userType = userData.userType;
-            AppState.registrationData = userDoc;
-            
-            return { success: true, user: userCredential.user, userDoc };
-        } catch (error) {
-            console.error('Registration error:', error);
-            let errorMessage = 'Registration failed. Please try again.';
-            
-            if (error.code === 'auth/email-already-in-use') {
-                errorMessage = 'Email already registered. Please use a different email or login.';
-            } else if (error.code === 'auth/weak-password') {
-                errorMessage = 'Password is too weak. Please use at least 6 characters.';
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage = 'Invalid email address.';
-            }
-            
-            return { success: false, error: errorMessage };
-        }
-    },
-    
-    async sendPasswordReset(email) {
-        try {
-            await auth.sendPasswordResetEmail(email);
-            return { success: true };
-        } catch (error) {
-            let errorMessage = 'Failed to send reset email.';
-            
-            if (error.code === 'auth/user-not-found') {
-                errorMessage = 'No account found with this email.';
-            } else if (error.code === 'auth/invalid-email') {
-                errorMessage = 'Invalid email address.';
-            }
-            
-            return { success: false, error: errorMessage };
-        }
-    },
-    
-    async checkEmailExists(email) {
-        try {
-            const methods = await auth.fetchSignInMethodsForEmail(email);
-            return { exists: methods.length > 0 };
-        } catch (error) {
-            console.error('Error checking email:', error);
-            return { exists: false, error: error.message };
-        }
-    }
-};
 
-// ===== Cloudinary Service =====
-const CloudinaryService = {
-    widget: null,
-    
-    initUploadWidget() {
-        this.widget = cloudinary.createUploadWidget({
-            cloudName: cloudinaryConfig.cloudName,
-            uploadPreset: cloudinaryConfig.uploadPreset,
-            sources: ['local', 'camera', 'url'],
+        // ===== Cloudinary Configuration =====
+        const cloudinaryConfig = {
+            cloudName: 'dd3lcymrk',
+            uploadPreset: 'h3eyhc2o',
+            apiKey: '', // Not needed for client-side uploads with upload preset
+            folder: 'trucash/users',
+            maxFileSize: 5242880, // 5MB
+            allowedFormats: ['jpg', 'jpeg', 'png', 'pdf'],
             multiple: false,
-            maxFiles: 1,
-            maxFileSize: cloudinaryConfig.maxFileSize,
-            clientAllowedFormats: cloudinaryConfig.clientAllowedFormats,
-            showAdvancedOptions: false,
-            cropping: false,
-            theme: 'minimal',
-            styles: cloudinaryConfig.styles,
-            folder: cloudinaryConfig.folder
-        }, (error, result) => {
-            this.handleUploadCallback(error, result);
-        });
-        
-        console.log("Cloudinary widget initialized");
-    },
-    
-    handleUploadCallback(error, result) {
-        if (error) {
-            console.error('Cloudinary upload error:', error);
-            // Don't show notification to user - silent fail
-            return;
-        }
-        
-        if (result && result.event === "success") {
-            this.handleUploadComplete(result.info);
-        } else if (result && result.event === "close") {
-            console.log('Cloudinary widget closed');
-        }
-    },
-    
-    handleUploadComplete(info) {
-        if (!AppState.activeUploadBox) {
-            console.error('No active upload box found');
-            return;
-        }
-        
-        const fileData = {
-            url: info.secure_url,
-            publicId: info.public_id,
-            format: info.format,
-            bytes: info.bytes,
-            width: info.width,
-            height: info.height,
-            originalFilename: info.original_filename
+            resourceType: 'auto',
+            clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf'],
+            maxImageFileSize: 5242880,
+            maxVideoFileSize: 10485760,
+            theme: 'white',
+            showPoweredBy: false,
+            styles: {
+                palette: {
+                    window: "#FFFFFF",
+                    windowBorder: "#90A0B3",
+                    tabIcon: "#007AFF",
+                    menuIcons: "#5A616A",
+                    textDark: "#000000",
+                    textLight: "#FFFFFF",
+                    link: "#007AFF",
+                    action: "#FF620C",
+                    inactiveTabIcon: "#0E2F5A",
+                    error: "#F44235",
+                    inProgress: "#007AFF",
+                    complete: "#20B832",
+                    sourceBg: "#E4EBF1"
+                }
+            }
         };
-        
-        // Determine which upload box this belongs to
-        const type = AppState.activeUploadBox.dataset.type;
-        const stateKey = type === 'nrc-front' ? 'nrcFront' : 
-                        type === 'nrc-back' ? 'nrcBack' :
-                        type === 'profile' ? 'profile' : 'additional';
-        
-        AppState.uploadedFiles[stateKey] = fileData;
-        
-        // Update preview
-        this.updatePreview(AppState.activeUploadBox, fileData.url);
-        
-        // Show success status
-        const status = AppState.activeUploadBox.querySelector('.upload-status');
-        status.classList.add('active');
-        
-        // Update the hidden input field
-        const uploadedFilesInput = document.getElementById('uploadedFiles');
-        if (uploadedFilesInput) {
-            const filesData = JSON.parse(uploadedFilesInput.value);
-            filesData[stateKey] = fileData.url;
-            uploadedFilesInput.value = JSON.stringify(filesData);
-        }
-        
-        // REMOVED: Cloudinary success notification - silent upload
-        console.log('File uploaded to Cloudinary:', fileData);
-        
-        // Reset active upload box
-        AppState.activeUploadBox = null;
-    },
-    
-    updatePreview(box, imageUrl) {
-        // Remove existing preview and overlay
-        const existingPreview = box.querySelector('.upload-preview');
-        const existingOverlay = box.querySelector('.upload-overlay');
-        
-        if (existingPreview) existingPreview.remove();
-        if (existingOverlay) existingOverlay.remove();
-        
-        // Create new preview
-        const preview = document.createElement('img');
-        preview.className = 'upload-preview';
-        preview.src = imageUrl;
-        preview.alt = 'Upload preview';
-        preview.onerror = () => {
-            preview.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzk5OSI+VXBsb2FkZWQ8L3RleHQ+PC9zdmc+';
-        };
-        
-        // Create overlay with remove button
-        const overlay = document.createElement('div');
-        overlay.className = 'upload-overlay';
-        overlay.innerHTML = `
-            <button class="remove-upload" data-type="${box.dataset.type}">
-                <i class="fas fa-trash"></i>
-            </button>
-        `;
-        
-        box.appendChild(preview);
-        box.appendChild(overlay);
-        box.classList.add('active');
-        
-        // Add remove functionality
-        overlay.querySelector('.remove-upload').addEventListener('click', (e) => {
-            e.stopPropagation();
-            this.removeUpload(box);
-        });
-    },
-    
-    removeUpload(box) {
-        const type = box.dataset.type;
-        const stateKey = type === 'nrc-front' ? 'nrcFront' : 
-                        type === 'nrc-back' ? 'nrcBack' :
-                        type === 'profile' ? 'profile' : 'additional';
-        
-        AppState.uploadedFiles[stateKey] = null;
-        
-        // Clear preview
-        const preview = box.querySelector('.upload-preview');
-        const overlay = box.querySelector('.upload-overlay');
-        const status = box.querySelector('.upload-status');
-        
-        if (preview) preview.remove();
-        if (overlay) overlay.remove();
-        if (status) {
-            status.classList.remove('active');
-        }
-        
-        // Clear file input
-        const fileInput = box.querySelector('.file-input');
-        if (fileInput) fileInput.value = '';
-        
-        // Remove active class
-        box.classList.remove('active');
-        
-        // Update hidden input
-        const uploadedFilesInput = document.getElementById('uploadedFiles');
-        if (uploadedFilesInput) {
-            const filesData = JSON.parse(uploadedFilesInput.value);
-            filesData[stateKey] = '';
-            uploadedFilesInput.value = JSON.stringify(filesData);
-        }
-        
-        // REMOVED: File removed notification - silent operation
-    },
-    
-    openWidget(uploadBox) {
-        if (!this.widget) {
-            this.initUploadWidget();
-        }
-        
-        // Mark the active box
-        document.querySelectorAll('.upload-box').forEach(box => {
-            box.classList.remove('active');
-        });
-        
-        AppState.activeUploadBox = uploadBox;
-        this.widget.open();
-    }
-};
 
-// ===== Validation Service =====
-const ValidationService = {
-    validations: {
-        email: {
-            validate: Utils.validateEmail,
-            message: 'Please enter a valid email address'
-        },
-        phone: {
-            validate: Utils.validatePhone,
-            message: 'Please enter a valid phone number (at least 10 digits)'
-        },
-        password: {
-            validate: Utils.validatePassword,
-            message: 'Password must be at least 6 characters'
-        },
-        nrc: {
-            validate: Utils.validateNRC,
-            message: 'Please enter a valid NRC (format: 123456/78/9)'
-        },
-        fullName: {
-            validate: (value) => value.trim().length >= 2,
-            message: 'Full name must be at least 2 characters'
-        },
-        residence: {
-            validate: (value) => value.trim().length >= 5,
-            message: 'Please enter a valid address (at least 5 characters)'
-        }
-    },
-    
-    validateField(fieldId, value) {
-        const fieldName = fieldId.replace('reg', '').replace('Validation', '').toLowerCase();
-        const validation = this.validations[fieldName];
-        
-        if (!validation) return { valid: true, message: '' };
-        
-        const isValid = validation.validate(value);
-        return {
-            valid: isValid,
-            message: isValid ? '' : validation.message
+        // ===== Application State =====
+        const AppState = {
+            currentUser: null,
+            isAuthenticated: false,
+            userType: null,
+            uploadProgress: 0,
+            uploadedFiles: {
+                nrcFront: null,
+                nrcBack: null,
+                profile: null,
+                additional: null
+            },
+            registrationData: null,
+            cloudinaryWidget: null,
+            activeUploadBox: null,
+            isUploading: false
         };
-    },
-    
-    validateForm(formData) {
-        const errors = [];
-        
-        // Validate each field
-        for (const [field, value] of Object.entries(formData)) {
-            if (field === 'userType' && !value) {
-                errors.push('Please select a user type');
-            }
-            
-            if (field === 'confirmPassword' && value !== formData.password) {
-                errors.push('Passwords do not match');
-            }
-            
-            if (field !== 'confirmPassword' && field !== 'userType') {
-                const validation = this.validateField(field, value);
-                if (!validation.valid) {
-                    errors.push(validation.message);
-                }
-            }
-        }
-        
-        // Validate file uploads
-        if (!AppState.uploadedFiles.nrcFront || !AppState.uploadedFiles.nrcBack || !AppState.uploadedFiles.profile) {
-            errors.push('Please upload all required documents (NRC front, NRC back, and profile photo)');
-        }
-        
-        return {
-            valid: errors.length === 0,
-            errors: errors
-        };
-    },
-    
-    updateValidationUI(fieldId, isValid, message) {
-        const input = document.getElementById(fieldId);
-        const validationEl = document.getElementById(fieldId + 'Validation');
-        
-        if (!input || !validationEl) return;
-        
-        if (isValid && message) {
-            input.classList.remove('invalid');
-            input.classList.add('valid');
-            validationEl.classList.remove('invalid');
-            validationEl.classList.add('valid');
-            validationEl.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
-        } else if (!isValid) {
-            input.classList.remove('valid');
-            input.classList.add('invalid');
-            validationEl.classList.remove('valid');
-            validationEl.classList.add('invalid');
-            validationEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
-        } else {
-            input.classList.remove('valid', 'invalid');
-            validationEl.classList.remove('valid', 'invalid');
-            validationEl.innerHTML = '';
-        }
-    }
-};
 
-// ===== DOM Manager =====
-const DOMManager = {
-    init() {
-        this.cacheElements();
-        this.bindEvents();
-        this.initFileUploads();
-        this.checkAuthState();
-        this.initCloudinary();
-    },
-    
-    cacheElements() {
-        // Login form elements
-        this.loginForm = document.getElementById('loginForm');
-        this.emailInput = document.getElementById('email');
-        this.passwordInput = document.getElementById('password');
-        this.togglePasswordBtn = document.getElementById('togglePassword');
-        this.loginBtn = document.getElementById('loginBtn');
-        this.loginBtnText = document.getElementById('loginBtnText');
-        this.loginSpinner = document.getElementById('loginSpinner');
-        this.loginProgress = document.getElementById('loginProgress');
-        this.loginProgressFill = document.getElementById('loginProgressFill');
-        
-        // Registration elements
-        this.registerBtn = document.getElementById('registerBtn');
-        this.registerModal = document.getElementById('registerModal');
-        this.closeRegisterModal = document.getElementById('closeRegisterModal');
-        this.cancelRegister = document.getElementById('cancelRegister');
-        this.userTypeSelection = document.getElementById('userTypeSelection');
-        this.userTypeBtns = document.querySelectorAll('.user-type-btn');
-        this.registerForm = document.getElementById('registerForm');
-        this.submitRegisterBtn = document.getElementById('submitRegister');
-        this.submitRegisterText = document.getElementById('submitRegisterText');
-        this.submitSpinner = document.getElementById('submitSpinner');
-        
-        // Forgot password elements
-        this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
-        this.forgotPasswordModal = document.getElementById('forgotPasswordModal');
-        this.closeForgotModal = document.getElementById('closeForgotModal');
-        this.cancelReset = document.getElementById('cancelReset');
-        this.submitReset = document.getElementById('submitReset');
-        
-        // Upload elements
-        this.uploadBoxes = document.querySelectorAll('.upload-box');
-        this.fileInputs = document.querySelectorAll('.file-input');
-        this.uploadProgress = document.getElementById('uploadProgress');
-        this.uploadProgressFill = document.getElementById('uploadProgressFill');
-        
-        // Validation elements
-        this.validationMessages = document.querySelectorAll('.validation-message');
-    },
-    
-    bindEvents() {
-        // Login form events
-        this.loginForm.addEventListener('submit', this.handleLogin.bind(this));
-        this.togglePasswordBtn.addEventListener('click', this.togglePasswordVisibility.bind(this));
-        
-        // Registration events
-        this.registerBtn.addEventListener('click', this.showRegisterModal.bind(this));
-        this.closeRegisterModal.addEventListener('click', this.hideRegisterModal.bind(this));
-        this.cancelRegister.addEventListener('click', this.hideRegisterModal.bind(this));
-        
-        this.userTypeBtns.forEach(btn => {
-            btn.addEventListener('click', () => this.selectUserType(btn));
-        });
-        
-        this.submitRegisterBtn.addEventListener('click', this.handleRegistration.bind(this));
-        
-        // Forgot password events
-        this.forgotPasswordLink.addEventListener('click', (e) => {
-            e.preventDefault();
-            this.showForgotPasswordModal();
-        });
-        
-        this.closeForgotModal.addEventListener('click', this.hideForgotPasswordModal.bind(this));
-        this.cancelReset.addEventListener('click', this.hideForgotPasswordModal.bind(this));
-        this.submitReset.addEventListener('click', this.handlePasswordReset.bind(this));
-        
-        // Input validation events
-        this.setupInputValidation();
-        
-        // Window controls (visual only)
-        document.querySelectorAll('.window-control').forEach(control => {
-            control.addEventListener('click', this.handleWindowControl.bind(this));
-        });
-        
-        // Dock items
-        document.querySelectorAll('.dock-item').forEach(item => {
-            item.addEventListener('click', this.handleDockItem.bind(this));
-        });
-    },
-    
-    initFileUploads() {
-        this.uploadBoxes.forEach(box => {
-            box.addEventListener('click', (e) => {
-                if (!e.target.closest('.remove-upload')) {
-                    this.handleFileUploadClick(box);
+        // ===== Utility Functions =====
+        const Utils = {
+            validateEmail: (email) => {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            },
+            
+            validatePhone: (phone) => {
+                const re = /^\+?[\d\s\-\(\)]{10,}$/;
+                return re.test(phone);
+            },
+            
+            validatePassword: (password) => {
+                return password.length >= 6;
+            },
+            
+            validateNRC: (nrc) => {
+                const re = /^\d{6}\/\d{2}\/\d{1}$/;
+                return re.test(nrc);
+            },
+            
+            validateFile: (file, allowedTypes = ['image/jpeg', 'image/png', 'image/jpg', 'application/pdf']) => {
+                if (!file) return { valid: false, error: 'No file selected' };
+                if (!allowedTypes.includes(file.type)) {
+                    return { valid: false, error: 'Invalid file type. Please upload JPG, PNG, or PDF files.' };
                 }
-            });
-        });
-    },
-    
-    initCloudinary() {
-        // Initialize Cloudinary widget
-        try {
-            CloudinaryService.initUploadWidget();
-            console.log("Cloudinary service initialized");
-        } catch (error) {
-            console.error("Failed to initialize Cloudinary:", error);
-            Utils.showNotification('Initialization Error', 'Failed to initialize file upload service', 'error');
-        }
-    },
-    
-    setupInputValidation() {
-        // Real-time validation for registration form
-        const validateInput = Utils.debounce((input) => {
-            const fieldId = input.id;
-            const value = input.value.trim();
-            
-            if (fieldId.startsWith('reg')) {
-                const validation = ValidationService.validateField(fieldId, value);
-                ValidationService.updateValidationUI(fieldId, validation.valid, validation.message);
-            }
-        }, 500);
-        
-        // Add validation listeners to registration inputs
-        document.querySelectorAll('#registerForm .form-input').forEach(input => {
-            input.addEventListener('input', () => validateInput(input));
-            input.addEventListener('blur', () => validateInput(input));
-        });
-        
-        // Password confirmation validation
-        const confirmPasswordInput = document.getElementById('regConfirmPassword');
-        const passwordInput = document.getElementById('regPassword');
-        
-        if (confirmPasswordInput && passwordInput) {
-            const validatePasswordMatch = () => {
-                const password = passwordInput.value;
-                const confirmPassword = confirmPasswordInput.value;
-                
-                if (confirmPassword && password !== confirmPassword) {
-                    ValidationService.updateValidationUI(
-                        'regConfirmPassword',
-                        false,
-                        'Passwords do not match'
-                    );
-                } else if (confirmPassword && password === confirmPassword) {
-                    ValidationService.updateValidationUI(
-                        'regConfirmPassword',
-                        true,
-                        'Passwords match'
-                    );
+                if (file.size > 5 * 1024 * 1024) {
+                    return { valid: false, error: 'File size exceeds 5MB' };
                 }
-            };
+                return { valid: true, error: null };
+            },
             
-            confirmPasswordInput.addEventListener('input', validatePasswordMatch);
-            passwordInput.addEventListener('input', validatePasswordMatch);
-        }
-    },
-    
-    // Event Handlers
-    async handleLogin(e) {
-        e.preventDefault();
-        
-        const email = this.emailInput.value.trim();
-        const password = this.passwordInput.value;
-        
-        // Validate inputs
-        if (!email || !password) {
-            Utils.showNotification('Validation Error', 'Please fill in all fields', 'error');
-            return;
-        }
-        
-        if (!Utils.validateEmail(email)) {
-            Utils.showNotification('Validation Error', 'Please enter a valid email address', 'error');
-            return;
-        }
-        
-        // Show loading state
-        this.loginBtn.disabled = true;
-        this.loginBtnText.style.display = 'none';
-        this.loginSpinner.style.display = 'inline-block';
-        Utils.showProgress('loginProgress');
-        Utils.updateProgress(30, 'loginProgressFill');
-        
-        try {
-            // Sign in with Firebase
-            const result = await FirebaseService.signIn(email, password);
-            
-            if (result.success) {
-                Utils.updateProgress(100, 'loginProgressFill');
-                
-                // Show success notification
-                Utils.showNotification(
-                    'Login Successful',
-                    `Welcome back to TruCash!`,
-                    'success'
-                );
-                
-                // Determine redirect based on user type
-                let redirectPage = 'customer-dashboard.html';
-                if (AppState.userType === 'agent') {
-                    redirectPage = 'agent-dashboard.html';
+            showNotification: (title, message, type = 'info', duration = 5000) => {
+                // Only show notifications for registration, not for Cloudinary uploads
+                if (title.includes('Cloudinary') || title.includes('Upload') || message.includes('Cloudinary')) {
+                    console.log(`[Cloudinary] ${title}: ${message}`);
+                    return;
                 }
                 
-                // Redirect after delay
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <div class="notification-icon">
+                        <i class="fas ${
+                            type === 'success' ? 'fa-check-circle' :
+                            type === 'error' ? 'fa-exclamation-circle' :
+                            type === 'warning' ? 'fa-exclamation-triangle' :
+                            'fa-info-circle'
+                        }"></i>
+                    </div>
+                    <div class="notification-content">
+                        <div class="notification-title">${title}</div>
+                        <div class="notification-message">${message}</div>
+                    </div>
+                    <button class="notification-close">
+                        <i class="fas fa-times"></i>
+                    </button>
+                `;
+                
+                document.body.appendChild(notification);
+                
+                setTimeout(() => notification.classList.add('active'), 10);
+                
+                notification.querySelector('.notification-close').addEventListener('click', () => {
+                    notification.classList.remove('active');
+                    setTimeout(() => notification.remove(), 300);
+                });
+                
                 setTimeout(() => {
-                    window.location.href = redirectPage;
-                }, 1500);
-                
-            } else {
-                throw new Error(result.error);
-            }
-        } catch (error) {
-            Utils.showNotification('Login Failed', error.message, 'error');
-            this.resetLoginButton();
-            Utils.hideProgress('loginProgress');
-        }
-    },
-    
-    togglePasswordVisibility() {
-        const type = this.passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
-        this.passwordInput.setAttribute('type', type);
-        
-        const icon = this.togglePasswordBtn.querySelector('i');
-        icon.className = type === 'password' ? 'far fa-eye' : 'far fa-eye-slash';
-    },
-    
-    showRegisterModal() {
-        this.registerModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    },
-    
-    hideRegisterModal() {
-        this.registerModal.classList.remove('active');
-        document.body.style.overflow = 'auto';
-        this.resetRegistrationForm();
-    },
-    
-    selectUserType(button) {
-        // Remove active class from all buttons
-        this.userTypeBtns.forEach(btn => btn.classList.remove('active'));
-        
-        // Add active class to clicked button
-        button.classList.add('active');
-        
-        // Set user type
-        const userType = button.dataset.userType;
-        document.getElementById('regUserType').value = userType;
-        
-        // Show registration form
-        this.userTypeSelection.style.display = 'none';
-        this.registerForm.style.display = 'block';
-        this.submitRegisterBtn.style.display = 'block';
-    },
-    
-    async handleRegistration() {
-        // Collect form data
-        const formData = {
-            fullName: document.getElementById('regFullName').value.trim(),
-            email: document.getElementById('regEmail').value.trim(),
-            phone: document.getElementById('regPhone').value.trim(),
-            password: document.getElementById('regPassword').value,
-            confirmPassword: document.getElementById('regConfirmPassword').value,
-            residence: document.getElementById('regResidence').value.trim(),
-            nrc: document.getElementById('regNRC').value.trim(),
-            userType: document.getElementById('regUserType').value
-        };
-        
-        // Validate form
-        const validation = ValidationService.validateForm(formData);
-        if (!validation.valid) {
-            validation.errors.forEach(error => {
-                Utils.showNotification('Validation Error', error, 'error');
-            });
-            return;
-        }
-        
-        // Check if all required files are uploaded to Cloudinary
-        if (!AppState.uploadedFiles.nrcFront || !AppState.uploadedFiles.nrcBack || !AppState.uploadedFiles.profile) {
-            Utils.showNotification(
-                'Missing Documents',
-                'Please upload all required documents (NRC front/back and profile photo)',
-                'error'
-            );
-            return;
-        }
-        
-        // Show loading state
-        this.submitRegisterBtn.disabled = true;
-        this.submitRegisterText.style.display = 'none';
-        this.submitSpinner.style.display = 'inline-block';
-        Utils.showLoading('Creating your account...', 'This may take a moment');
-        
-        try {
-            // Prepare user data with Cloudinary URLs
-            const userData = {
-                ...formData,
-                nrcFront: AppState.uploadedFiles.nrcFront.url,
-                nrcBack: AppState.uploadedFiles.nrcBack.url,
-                profilePhoto: AppState.uploadedFiles.profile.url,
-                additionalDoc: AppState.uploadedFiles.additional ? AppState.uploadedFiles.additional.url : ''
-            };
-            
-            console.log('Registering user with data:', { ...userData, password: '***' });
-            
-            // Register user in Firebase
-            const result = await FirebaseService.registerUser(userData);
-            
-            if (result.success) {
-                Utils.hideLoading();
-                Utils.showNotification(
-                    'Registration Successful',
-                    `Welcome to TruCash! Your account has been created successfully.`,
-                    'success'
-                );
-                
-                // Close modal and reset
-                setTimeout(() => {
-                    this.hideRegisterModal();
-                    
-                    // Auto-login for customers
-                    if (userData.userType === 'customer') {
-                        this.emailInput.value = userData.email;
-                        this.passwordInput.value = userData.password;
-                        
-                        // Auto login after a brief delay
-                        setTimeout(() => {
-                            this.handleLogin(new Event('submit'));
-                        }, 1000);
-                    } else {
-                        // For agents, show pending approval message
-                        Utils.showNotification(
-                            'Account Pending Approval',
-                            'Your agent account is pending approval from an administrator.',
-                            'info'
-                        );
+                    if (notification.parentNode) {
+                        notification.classList.remove('active');
+                        setTimeout(() => notification.remove(), 300);
                     }
-                }, 2000);
+                }, duration);
                 
-            } else {
-                throw new Error(result.error);
-            }
-        } catch (error) {
-            Utils.hideLoading();
-            Utils.showNotification('Registration Failed', error.message, 'error');
-            this.submitRegisterBtn.disabled = false;
-            this.submitRegisterText.style.display = 'inline';
-            this.submitSpinner.style.display = 'none';
-        }
-    },
-    
-    showForgotPasswordModal() {
-        this.forgotPasswordModal.classList.add('active');
-        document.body.style.overflow = 'hidden';
-    },
-    
-    hideForgotPasswordModal() {
-        this.forgotPasswordModal.classList.remove('active');
-        document.body.style.overflow = 'auto';
-        document.getElementById('resetEmail').value = '';
-    },
-    
-    async handlePasswordReset() {
-        const email = document.getElementById('resetEmail').value.trim();
-        
-        if (!email || !Utils.validateEmail(email)) {
-            Utils.showNotification('Validation Error', 'Please enter a valid email address', 'error');
-            return;
-        }
-        
-        this.submitReset.disabled = true;
-        const originalText = this.submitReset.textContent;
-        this.submitReset.innerHTML = '<div class="spinner spinner-dark"></div>';
-        
-        try {
-            const result = await FirebaseService.sendPasswordReset(email);
+                return notification;
+            },
             
-            if (result.success) {
-                Utils.showNotification(
-                    'Reset Link Sent',
-                    'Check your email for password reset instructions',
-                    'success'
-                );
+            showLoading: (message = 'Processing...', submessage = 'Please wait') => {
+                const overlay = document.getElementById('loadingOverlay');
+                const text = overlay.querySelector('.loading-text');
+                const subtext = overlay.querySelector('.loading-subtext');
                 
-                setTimeout(() => {
-                    this.hideForgotPasswordModal();
-                }, 2000);
-            } else {
-                throw new Error(result.error);
-            }
-        } catch (error) {
-            Utils.showNotification('Reset Failed', error.message, 'error');
-        } finally {
-            this.submitReset.disabled = false;
-            this.submitReset.textContent = originalText;
-        }
-    },
-    
-    handleFileUploadClick(box) {
-        // Use Cloudinary widget for uploads
-        CloudinaryService.openWidget(box);
-    },
-    
-    handleWindowControl(e) {
-        const control = e.target.closest('.window-control');
-        if (!control) return;
-        
-        if (control.classList.contains('close')) {
-            Utils.showNotification('Info', 'Close window action', 'info');
-        } else if (control.classList.contains('minimize')) {
-            document.body.style.transform = 'scale(0.95)';
-            setTimeout(() => {
-                document.body.style.transform = 'scale(1)';
-            }, 300);
-        } else if (control.classList.contains('maximize')) {
-            document.body.classList.toggle('fullscreen');
-        }
-    },
-    
-    handleDockItem(e) {
-        const item = e.target.closest('.dock-item');
-        if (!item) return;
-        
-        // Remove active class from all items
-        document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
-        
-        // Add active class to clicked item
-        item.classList.add('active');
-        
-        // Handle dock item actions
-        const index = Array.from(document.querySelectorAll('.dock-item')).indexOf(item);
-        switch(index) {
-            case 0: // Home
-                window.scrollTo({ top: 0, behavior: 'smooth' });
-                break;
-            case 1: // Analytics
-                Utils.showNotification('Coming Soon', 'Analytics dashboard is under development', 'info');
-                break;
-            case 2: // Wallet
-                Utils.showNotification('Coming Soon', 'Wallet features coming soon', 'info');
-                break;
-            case 3: // Settings
-                Utils.showNotification('Settings', 'Settings panel will be available after login', 'info');
-                break;
-        }
-    },
-    
-    checkAuthState() {
-        // Check if user is already logged in
-        auth.onAuthStateChanged((user) => {
-            if (user) {
-                AppState.currentUser = user;
-                AppState.isAuthenticated = true;
-                
-                // Get user data from Firestore
-                db.collection('users').doc(user.uid).get()
-                    .then((doc) => {
-                        if (doc.exists) {
-                            const userData = doc.data();
-                            AppState.userType = userData.userType;
-                            AppState.registrationData = userData;
-                            
-                            // Update UI for logged in user
-                            this.updateUIForLoggedInUser();
-                        }
-                    })
-                    .catch(console.error);
-            }
-        });
-    },
-    
-    updateUIForLoggedInUser() {
-        if (AppState.isAuthenticated && AppState.currentUser) {
-            this.emailInput.value = AppState.currentUser.email;
-            this.emailInput.disabled = true;
+                text.textContent = message;
+                subtext.textContent = submessage;
+                overlay.classList.add('active');
+            },
             
-            const welcomeMsg = document.createElement('div');
-            welcomeMsg.className = 'logo-subtitle';
-            welcomeMsg.textContent = `Welcome back, ${AppState.currentUser.email}`;
-            welcomeMsg.style.marginTop = '10px';
-            welcomeMsg.style.color = 'var(--macos-green)';
+            hideLoading: () => {
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.classList.remove('active');
+            },
             
-            const logoContainer = document.querySelector('.logo-container');
-            if (!logoContainer.querySelector('.welcome-message')) {
-                welcomeMsg.classList.add('welcome-message');
-                logoContainer.appendChild(welcomeMsg);
+            updateProgress: (progress, elementId = 'uploadProgressFill') => {
+                const progressFill = document.getElementById(elementId);
+                if (progressFill) {
+                    progressFill.style.width = `${progress}%`;
+                }
+            },
+            
+            showProgress: (elementId = 'uploadProgress') => {
+                const progressBar = document.getElementById(elementId);
+                if (progressBar) {
+                    progressBar.classList.add('active');
+                }
+            },
+            
+            hideProgress: (elementId = 'uploadProgress') => {
+                const progressBar = document.getElementById(elementId);
+                if (progressBar) {
+                    progressBar.classList.remove('active');
+                }
+            },
+            
+            formatFileSize: (bytes) => {
+                if (bytes === 0) return '0 Bytes';
+                const k = 1024;
+                const sizes = ['Bytes', 'KB', 'MB', 'GB'];
+                const i = Math.floor(Math.log(bytes) / Math.log(k));
+                return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+            },
+            
+            debounce: (func, wait) => {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
+            
+            generateUserId: () => {
+                return 'user_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
             }
-        }
-    },
-    
-    resetLoginButton() {
-        this.loginBtn.disabled = false;
-        this.loginBtnText.style.display = 'inline';
-        this.loginSpinner.style.display = 'none';
-    },
-    
-    resetRegistrationForm() {
-        // Reset form fields
-        document.getElementById('registerForm').reset();
-        document.getElementById('regUserType').value = '';
-        
-        // Reset UI state
-        this.userTypeSelection.style.display = 'grid';
-        this.userTypeBtns.forEach(btn => btn.classList.remove('active'));
-        this.registerForm.style.display = 'none';
-        this.submitRegisterBtn.style.display = 'none';
-        this.submitRegisterBtn.disabled = false;
-        this.submitRegisterText.style.display = 'inline';
-        this.submitSpinner.style.display = 'none';
-        
-        // Reset uploaded files state
-        AppState.uploadedFiles = {
-            nrcFront: null,
-            nrcBack: null,
-            profile: null,
-            additional: null
         };
-        
-        // Clear previews
-        this.uploadBoxes.forEach(box => {
-            box.classList.remove('active');
-            const preview = box.querySelector('.upload-preview');
-            const overlay = box.querySelector('.upload-overlay');
-            const status = box.querySelector('.upload-status');
-            
-            if (preview) preview.remove();
-            if (overlay) overlay.remove();
-            if (status) {
-                status.classList.remove('active');
-            }
-        });
-        
-        // Clear validation messages
-        this.validationMessages.forEach(el => {
-            el.textContent = '';
-            el.className = 'validation-message';
-        });
-        
-        // Clear input validation states
-        document.querySelectorAll('.form-input').forEach(input => {
-            input.classList.remove('valid', 'invalid');
-        });
-        
-        // Hide progress bars
-        Utils.hideProgress('loginProgress');
-        Utils.hideProgress('uploadProgress');
-    }
-};
 
-// ===== Initialize Application =====
-document.addEventListener('DOMContentLoaded', () => {
-    // Initialize DOM Manager
-    DOMManager.init();
-    
-    // Add keyboard shortcuts
-    function addKeyboardShortcuts() {
-        document.addEventListener('keydown', (e) => {
-            // Cmd/Ctrl + Enter to submit login
-            if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
-                if (document.getElementById('loginForm')) {
-                    document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+        // ===== Firebase Service =====
+        const FirebaseService = {
+            async signIn(email, password) {
+                try {
+                    const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    AppState.currentUser = userCredential.user;
+                    AppState.isAuthenticated = true;
+                    
+                    // Get user data from Firestore
+                    const userDoc = await db.collection('users').doc(userCredential.user.uid).get();
+                    
+                    if (userDoc.exists) {
+                        const userData = userDoc.data();
+                        AppState.userType = userData.userType;
+                        AppState.registrationData = userData;
+                    }
+                    
+                    return { success: true, user: userCredential.user };
+                } catch (error) {
+                    console.error('Sign in error:', error);
+                    let errorMessage = 'Login failed. Please check your credentials.';
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'No account found with this email.';
+                    } else if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Incorrect password. Please try again.';
+                    } else if (error.code === 'auth/too-many-requests') {
+                        errorMessage = 'Too many failed attempts. Please try again later.';
+                    } else if (error.code === 'auth/network-request-failed') {
+                        errorMessage = 'Network error. Please check your internet connection.';
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                }
+            },
+            
+            async signOut() {
+                try {
+                    await auth.signOut();
+                    AppState.currentUser = null;
+                    AppState.isAuthenticated = false;
+                    AppState.userType = null;
+                    return { success: true };
+                } catch (error) {
+                    return { success: false, error: error.message };
+                }
+            },
+            
+            async registerUser(userData) {
+                try {
+                    // Create user in Firebase Auth
+                    const userCredential = await auth.createUserWithEmailAndPassword(
+                        userData.email,
+                        userData.password
+                    );
+                    
+                    // Prepare user data for Firestore
+                    const userDoc = {
+                        uid: userCredential.user.uid,
+                        fullName: userData.fullName,
+                        email: userData.email,
+                        phone: userData.phone,
+                        residence: userData.residence,
+                        nrc: userData.nrc,
+                        nrcFront: userData.nrcFront,
+                        nrcBack: userData.nrcBack,
+                        profilePhoto: userData.profilePhoto,
+                        additionalDoc: userData.additionalDoc || '',
+                        userType: userData.userType,
+                        status: userData.userType === 'agent' ? 'pending' : 'active',
+                        createdAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        updatedAt: firebase.firestore.FieldValue.serverTimestamp(),
+                        lastLogin: firebase.firestore.FieldValue.serverTimestamp()
+                    };
+                    
+                    // Save to Firestore
+                    await db.collection('users').doc(userCredential.user.uid).set(userDoc);
+                    
+                    // Update application state
+                    AppState.currentUser = userCredential.user;
+                    AppState.isAuthenticated = true;
+                    AppState.userType = userData.userType;
+                    AppState.registrationData = userDoc;
+                    
+                    return { success: true, user: userCredential.user, userDoc };
+                } catch (error) {
+                    console.error('Registration error:', error);
+                    let errorMessage = 'Registration failed. Please try again.';
+                    
+                    if (error.code === 'auth/email-already-in-use') {
+                        errorMessage = 'Email already registered. Please use a different email or login.';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMessage = 'Password is too weak. Please use at least 6 characters.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Invalid email address.';
+                    } else if (error.code === 'auth/network-request-failed') {
+                        errorMessage = 'Network error. Please check your internet connection.';
+                    } else if (error.code === 'auth/operation-not-allowed') {
+                        errorMessage = 'Registration is currently disabled. Please contact support.';
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                }
+            },
+            
+            async sendPasswordReset(email) {
+                try {
+                    await auth.sendPasswordResetEmail(email);
+                    return { success: true };
+                } catch (error) {
+                    let errorMessage = 'Failed to send reset email.';
+                    
+                    if (error.code === 'auth/user-not-found') {
+                        errorMessage = 'No account found with this email.';
+                    } else if (error.code === 'auth/invalid-email') {
+                        errorMessage = 'Invalid email address.';
+                    } else if (error.code === 'auth/network-request-failed') {
+                        errorMessage = 'Network error. Please check your internet connection.';
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                }
+            },
+            
+            async checkEmailExists(email) {
+                try {
+                    const methods = await auth.fetchSignInMethodsForEmail(email);
+                    return { exists: methods.length > 0 };
+                } catch (error) {
+                    console.error('Error checking email:', error);
+                    return { exists: false, error: error.message };
                 }
             }
+        };
+
+        // ===== Cloudinary Service (Fixed) =====
+        const CloudinaryService = {
+            widget: null,
             
-            // Escape to close modals
-            if (e.key === 'Escape') {
-                const activeModal = document.querySelector('.modal.active');
-                if (activeModal) {
-                    activeModal.classList.remove('active');
-                    document.body.style.overflow = 'auto';
+            initUploadWidget() {
+                try {
+                    this.widget = cloudinary.createUploadWidget({
+                        cloudName: cloudinaryConfig.cloudName,
+                        uploadPreset: cloudinaryConfig.uploadPreset,
+                        sources: ['local'],
+                        multiple: false,
+                        maxFiles: 1,
+                        maxFileSize: cloudinaryConfig.maxFileSize,
+                        clientAllowedFormats: cloudinaryConfig.clientAllowedFormats,
+                        showAdvancedOptions: false,
+                        cropping: false,
+                        theme: 'minimal',
+                        styles: cloudinaryConfig.styles,
+                        folder: cloudinaryConfig.folder,
+                        showPoweredBy: false,
+                        showCompletedButton: true
+                    }, (error, result) => {
+                        this.handleUploadCallback(error, result);
+                    });
+                    
+                    console.log("Cloudinary widget initialized");
+                } catch (error) {
+                    console.error("Cloudinary initialization error:", error);
+                }
+            },
+            
+            handleUploadCallback(error, result) {
+                if (error) {
+                    console.error('Cloudinary upload error:', error);
+                    // DO NOT show notification to user
+                    return;
+                }
+                
+                if (result && result.event === "success") {
+                    this.handleUploadComplete(result.info);
+                } else if (result && result.event === "close") {
+                    console.log('Cloudinary widget closed');
+                } else if (result && result.event === "abort") {
+                    console.log('Cloudinary upload aborted');
+                }
+            },
+            
+            handleUploadComplete(info) {
+                if (!AppState.activeUploadBox) {
+                    console.error('No active upload box found');
+                    return;
+                }
+                
+                const fileData = {
+                    url: info.secure_url,
+                    publicId: info.public_id,
+                    format: info.format,
+                    bytes: info.bytes,
+                    width: info.width,
+                    height: info.height,
+                    originalFilename: info.original_filename
+                };
+                
+                // Determine which upload box this belongs to
+                const type = AppState.activeUploadBox.dataset.type;
+                const stateKey = type === 'nrc-front' ? 'nrcFront' : 
+                                type === 'nrc-back' ? 'nrcBack' :
+                                type === 'profile' ? 'profile' : 'additional';
+                
+                AppState.uploadedFiles[stateKey] = fileData;
+                
+                // Update preview
+                this.updatePreview(AppState.activeUploadBox, fileData.url);
+                
+                // Show success status
+                const status = AppState.activeUploadBox.querySelector('.upload-status');
+                status.classList.add('active');
+                
+                // Update the hidden input field
+                const uploadedFilesInput = document.getElementById('uploadedFiles');
+                if (uploadedFilesInput) {
+                    const filesData = JSON.parse(uploadedFilesInput.value);
+                    filesData[stateKey] = fileData.url;
+                    uploadedFilesInput.value = JSON.stringify(filesData);
+                }
+                
+                console.log('File uploaded to Cloudinary:', fileData);
+                
+                // Reset active upload box
+                AppState.activeUploadBox = null;
+                AppState.isUploading = false;
+            },
+            
+            updatePreview(box, imageUrl) {
+                // Remove existing preview and overlay
+                const existingPreview = box.querySelector('.upload-preview');
+                const existingOverlay = box.querySelector('.upload-overlay');
+                
+                if (existingPreview) existingPreview.remove();
+                if (existingOverlay) existingOverlay.remove();
+                
+                // Create new preview
+                const preview = document.createElement('img');
+                preview.className = 'upload-preview';
+                preview.src = imageUrl;
+                preview.alt = 'Upload preview';
+                preview.onerror = () => {
+                    preview.src = 'data:image/svg+xml;base64,PHN2ZyB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgeG1sbnM9Imh0dHA6Ly93d3cudzMub3JnLzIwMDAvc3ZnIj48cmVjdCB3aWR0aD0iMjAwIiBoZWlnaHQ9IjIwMCIgZmlsbD0iI2VlZSIvPjx0ZXh0IHg9IjUwJSIgeT0iNTAlIiBkb21pbmFudC1iYXNlbGluZT0iY2VudHJhbCIgdGV4dC1hbmNob3I9Im1pZGRsZSIgZm9udC1zaXplPSIyMCIgZmlsbD0iIzk5OSI+VXBsb2FkZWQ8L3RleHQ+PC9zdmc+';
+                };
+                
+                // Create overlay with remove button
+                const overlay = document.createElement('div');
+                overlay.className = 'upload-overlay';
+                overlay.innerHTML = `
+                    <button class="remove-upload" data-type="${box.dataset.type}">
+                        <i class="fas fa-trash"></i>
+                    </button>
+                `;
+                
+                box.appendChild(preview);
+                box.appendChild(overlay);
+                box.classList.add('active');
+                
+                // Add remove functionality
+                overlay.querySelector('.remove-upload').addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    this.removeUpload(box);
+                });
+            },
+            
+            removeUpload(box) {
+                const type = box.dataset.type;
+                const stateKey = type === 'nrc-front' ? 'nrcFront' : 
+                                type === 'nrc-back' ? 'nrcBack' :
+                                type === 'profile' ? 'profile' : 'additional';
+                
+                AppState.uploadedFiles[stateKey] = null;
+                
+                // Clear preview
+                const preview = box.querySelector('.upload-preview');
+                const overlay = box.querySelector('.upload-overlay');
+                const status = box.querySelector('.upload-status');
+                
+                if (preview) preview.remove();
+                if (overlay) overlay.remove();
+                if (status) {
+                    status.classList.remove('active');
+                }
+                
+                // Clear file input
+                const fileInput = box.querySelector('.file-input');
+                if (fileInput) fileInput.value = '';
+                
+                // Remove active class
+                box.classList.remove('active');
+                
+                // Update hidden input
+                const uploadedFilesInput = document.getElementById('uploadedFiles');
+                if (uploadedFilesInput) {
+                    const filesData = JSON.parse(uploadedFilesInput.value);
+                    filesData[stateKey] = '';
+                    uploadedFilesInput.value = JSON.stringify(filesData);
+                }
+                
+                // DO NOT show notification
+                console.log('File removed from upload queue');
+            },
+            
+            openWidget(uploadBox) {
+                if (AppState.isUploading) {
+                    console.log('Already uploading, please wait');
+                    return;
+                }
+                
+                if (!this.widget) {
+                    this.initUploadWidget();
+                }
+                
+                // Mark the active box
+                document.querySelectorAll('.upload-box').forEach(box => {
+                    box.classList.remove('active');
+                });
+                
+                AppState.activeUploadBox = uploadBox;
+                AppState.isUploading = true;
+                
+                // Open widget with timeout to prevent tracking issues
+                setTimeout(() => {
+                    if (this.widget) {
+                        this.widget.open();
+                    } else {
+                        console.error('Cloudinary widget not initialized');
+                        AppState.isUploading = false;
+                    }
+                }, 100);
+            }
+        };
+
+        // ===== Validation Service =====
+        const ValidationService = {
+            validations: {
+                email: {
+                    validate: Utils.validateEmail,
+                    message: 'Please enter a valid email address'
+                },
+                phone: {
+                    validate: Utils.validatePhone,
+                    message: 'Please enter a valid phone number (at least 10 digits)'
+                },
+                password: {
+                    validate: Utils.validatePassword,
+                    message: 'Password must be at least 6 characters'
+                },
+                nrc: {
+                    validate: Utils.validateNRC,
+                    message: 'Please enter a valid NRC (format: 123456/78/9)'
+                },
+                fullName: {
+                    validate: (value) => value.trim().length >= 2,
+                    message: 'Full name must be at least 2 characters'
+                },
+                residence: {
+                    validate: (value) => value.trim().length >= 5,
+                    message: 'Please enter a valid address (at least 5 characters)'
+                }
+            },
+            
+            validateField(fieldId, value) {
+                const fieldName = fieldId.replace('reg', '').replace('Validation', '').toLowerCase();
+                const validation = this.validations[fieldName];
+                
+                if (!validation) return { valid: true, message: '' };
+                
+                const isValid = validation.validate(value);
+                return {
+                    valid: isValid,
+                    message: isValid ? '' : validation.message
+                };
+            },
+            
+            validateForm(formData) {
+                const errors = [];
+                
+                // Validate each field
+                for (const [field, value] of Object.entries(formData)) {
+                    if (field === 'userType' && !value) {
+                        errors.push('Please select a user type');
+                    }
+                    
+                    if (field === 'confirmPassword' && value !== formData.password) {
+                        errors.push('Passwords do not match');
+                    }
+                    
+                    if (field !== 'confirmPassword' && field !== 'userType') {
+                        const validation = this.validateField(field, value);
+                        if (!validation.valid) {
+                            errors.push(validation.message);
+                        }
+                    }
+                }
+                
+                // Validate file uploads
+                if (!AppState.uploadedFiles.nrcFront) {
+                    errors.push('Please upload NRC front photo');
+                }
+                if (!AppState.uploadedFiles.nrcBack) {
+                    errors.push('Please upload NRC back photo');
+                }
+                if (!AppState.uploadedFiles.profile) {
+                    errors.push('Please upload profile photo');
+                }
+                
+                return {
+                    valid: errors.length === 0,
+                    errors: errors
+                };
+            },
+            
+            updateValidationUI(fieldId, isValid, message) {
+                const input = document.getElementById(fieldId);
+                const validationEl = document.getElementById(fieldId + 'Validation');
+                
+                if (!input || !validationEl) return;
+                
+                if (isValid && message) {
+                    input.classList.remove('invalid');
+                    input.classList.add('valid');
+                    validationEl.classList.remove('invalid');
+                    validationEl.classList.add('valid');
+                    validationEl.innerHTML = `<i class="fas fa-check-circle"></i> ${message}`;
+                } else if (!isValid) {
+                    input.classList.remove('valid');
+                    input.classList.add('invalid');
+                    validationEl.classList.remove('valid');
+                    validationEl.classList.add('invalid');
+                    validationEl.innerHTML = `<i class="fas fa-exclamation-circle"></i> ${message}`;
+                } else {
+                    input.classList.remove('valid', 'invalid');
+                    validationEl.classList.remove('valid', 'invalid');
+                    validationEl.innerHTML = '';
                 }
             }
+        };
+
+        // ===== DOM Manager =====
+        const DOMManager = {
+            init() {
+                this.cacheElements();
+                this.bindEvents();
+                this.initFileUploads();
+                this.checkAuthState();
+                this.initCloudinary();
+            },
+            
+            cacheElements() {
+                // Login form elements
+                this.loginForm = document.getElementById('loginForm');
+                this.emailInput = document.getElementById('email');
+                this.passwordInput = document.getElementById('password');
+                this.togglePasswordBtn = document.getElementById('togglePassword');
+                this.loginBtn = document.getElementById('loginBtn');
+                this.loginBtnText = document.getElementById('loginBtnText');
+                this.loginSpinner = document.getElementById('loginSpinner');
+                this.loginProgress = document.getElementById('loginProgress');
+                this.loginProgressFill = document.getElementById('loginProgressFill');
+                
+                // Registration elements
+                this.registerBtn = document.getElementById('registerBtn');
+                this.registerModal = document.getElementById('registerModal');
+                this.closeRegisterModal = document.getElementById('closeRegisterModal');
+                this.cancelRegister = document.getElementById('cancelRegister');
+                this.userTypeSelection = document.getElementById('userTypeSelection');
+                this.userTypeBtns = document.querySelectorAll('.user-type-btn');
+                this.registerForm = document.getElementById('registerForm');
+                this.submitRegisterBtn = document.getElementById('submitRegister');
+                this.submitRegisterText = document.getElementById('submitRegisterText');
+                this.submitSpinner = document.getElementById('submitSpinner');
+                
+                // Forgot password elements
+                this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
+                this.forgotPasswordModal = document.getElementById('forgotPasswordModal');
+                this.closeForgotModal = document.getElementById('closeForgotModal');
+                this.cancelReset = document.getElementById('cancelReset');
+                this.submitReset = document.getElementById('submitReset');
+                
+                // Upload elements
+                this.uploadBoxes = document.querySelectorAll('.upload-box');
+                this.fileInputs = document.querySelectorAll('.file-input');
+                this.uploadProgress = document.getElementById('uploadProgress');
+                this.uploadProgressFill = document.getElementById('uploadProgressFill');
+                
+                // Validation elements
+                this.validationMessages = document.querySelectorAll('.validation-message');
+            },
+            
+            bindEvents() {
+                // Login form events
+                this.loginForm.addEventListener('submit', this.handleLogin.bind(this));
+                this.togglePasswordBtn.addEventListener('click', this.togglePasswordVisibility.bind(this));
+                
+                // Registration events
+                this.registerBtn.addEventListener('click', this.showRegisterModal.bind(this));
+                this.closeRegisterModal.addEventListener('click', this.hideRegisterModal.bind(this));
+                this.cancelRegister.addEventListener('click', this.hideRegisterModal.bind(this));
+                
+                this.userTypeBtns.forEach(btn => {
+                    btn.addEventListener('click', () => this.selectUserType(btn));
+                });
+                
+                this.submitRegisterBtn.addEventListener('click', this.handleRegistration.bind(this));
+                
+                // Forgot password events
+                this.forgotPasswordLink.addEventListener('click', (e) => {
+                    e.preventDefault();
+                    this.showForgotPasswordModal();
+                });
+                
+                this.closeForgotModal.addEventListener('click', this.hideForgotPasswordModal.bind(this));
+                this.cancelReset.addEventListener('click', this.hideForgotPasswordModal.bind(this));
+                this.submitReset.addEventListener('click', this.handlePasswordReset.bind(this));
+                
+                // Input validation events
+                this.setupInputValidation();
+                
+                // Window controls (visual only)
+                document.querySelectorAll('.window-control').forEach(control => {
+                    control.addEventListener('click', this.handleWindowControl.bind(this));
+                });
+                
+                // Dock items
+                document.querySelectorAll('.dock-item').forEach(item => {
+                    item.addEventListener('click', this.handleDockItem.bind(this));
+                });
+            },
+            
+            initFileUploads() {
+                this.uploadBoxes.forEach(box => {
+                    box.addEventListener('click', (e) => {
+                        if (!e.target.closest('.remove-upload')) {
+                            this.handleFileUploadClick(box);
+                        }
+                    });
+                });
+            },
+            
+            initCloudinary() {
+                // Initialize Cloudinary widget with error handling
+                try {
+                    CloudinaryService.initUploadWidget();
+                    console.log("Cloudinary service initialized");
+                } catch (error) {
+                    console.error("Failed to initialize Cloudinary:", error);
+                }
+            },
+            
+            setupInputValidation() {
+                // Real-time validation for registration form
+                const validateInput = Utils.debounce((input) => {
+                    const fieldId = input.id;
+                    const value = input.value.trim();
+                    
+                    if (fieldId.startsWith('reg')) {
+                        const validation = ValidationService.validateField(fieldId, value);
+                        ValidationService.updateValidationUI(fieldId, validation.valid, validation.message);
+                    }
+                }, 500);
+                
+                // Add validation listeners to registration inputs
+                document.querySelectorAll('#registerForm .form-input').forEach(input => {
+                    input.addEventListener('input', () => validateInput(input));
+                    input.addEventListener('blur', () => validateInput(input));
+                });
+                
+                // Password confirmation validation
+                const confirmPasswordInput = document.getElementById('regConfirmPassword');
+                const passwordInput = document.getElementById('regPassword');
+                
+                if (confirmPasswordInput && passwordInput) {
+                    const validatePasswordMatch = () => {
+                        const password = passwordInput.value;
+                        const confirmPassword = confirmPasswordInput.value;
+                        
+                        if (confirmPassword && password !== confirmPassword) {
+                            ValidationService.updateValidationUI(
+                                'regConfirmPassword',
+                                false,
+                                'Passwords do not match'
+                            );
+                        } else if (confirmPassword && password === confirmPassword) {
+                            ValidationService.updateValidationUI(
+                                'regConfirmPassword',
+                                true,
+                                'Passwords match'
+                            );
+                        }
+                    };
+                    
+                    confirmPasswordInput.addEventListener('input', validatePasswordMatch);
+                    passwordInput.addEventListener('input', validatePasswordMatch);
+                }
+            },
+            
+            // Event Handlers
+            async handleLogin(e) {
+                e.preventDefault();
+                
+                const email = this.emailInput.value.trim();
+                const password = this.passwordInput.value;
+                
+                // Validate inputs
+                if (!email || !password) {
+                    Utils.showNotification('Validation Error', 'Please fill in all fields', 'error');
+                    return;
+                }
+                
+                if (!Utils.validateEmail(email)) {
+                    Utils.showNotification('Validation Error', 'Please enter a valid email address', 'error');
+                    return;
+                }
+                
+                // Show loading state
+                this.loginBtn.disabled = true;
+                this.loginBtnText.style.display = 'none';
+                this.loginSpinner.style.display = 'inline-block';
+                Utils.showProgress('loginProgress');
+                Utils.updateProgress(30, 'loginProgressFill');
+                
+                try {
+                    // Sign in with Firebase
+                    const result = await FirebaseService.signIn(email, password);
+                    
+                    if (result.success) {
+                        Utils.updateProgress(100, 'loginProgressFill');
+                        
+                        // Show success notification
+                        Utils.showNotification(
+                            'Login Successful',
+                            `Welcome back to TruCash!`,
+                            'success'
+                        );
+                        
+                        // Determine redirect based on user type
+                        let redirectPage = 'customer-dashboard.html';
+                        if (AppState.userType === 'agent') {
+                            redirectPage = 'agent-dashboard.html';
+                        }
+                        
+                        // Redirect after delay
+                        setTimeout(() => {
+                            window.location.href = redirectPage;
+                        }, 1500);
+                        
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (error) {
+                    Utils.showNotification('Login Failed', error.message, 'error');
+                    this.resetLoginButton();
+                    Utils.hideProgress('loginProgress');
+                }
+            },
+            
+            togglePasswordVisibility() {
+                const type = this.passwordInput.getAttribute('type') === 'password' ? 'text' : 'password';
+                this.passwordInput.setAttribute('type', type);
+                
+                const icon = this.togglePasswordBtn.querySelector('i');
+                icon.className = type === 'password' ? 'far fa-eye' : 'far fa-eye-slash';
+            },
+            
+            showRegisterModal() {
+                this.registerModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            },
+            
+            hideRegisterModal() {
+                this.registerModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                this.resetRegistrationForm();
+            },
+            
+            selectUserType(button) {
+                // Remove active class from all buttons
+                this.userTypeBtns.forEach(btn => btn.classList.remove('active'));
+                
+                // Add active class to clicked button
+                button.classList.add('active');
+                
+                // Set user type
+                const userType = button.dataset.userType;
+                document.getElementById('regUserType').value = userType;
+                
+                // Show registration form
+                this.userTypeSelection.style.display = 'none';
+                this.registerForm.style.display = 'block';
+                this.submitRegisterBtn.style.display = 'block';
+            },
+            
+            async handleRegistration() {
+                // Collect form data
+                const formData = {
+                    fullName: document.getElementById('regFullName').value.trim(),
+                    email: document.getElementById('regEmail').value.trim(),
+                    phone: document.getElementById('regPhone').value.trim(),
+                    password: document.getElementById('regPassword').value,
+                    confirmPassword: document.getElementById('regConfirmPassword').value,
+                    residence: document.getElementById('regResidence').value.trim(),
+                    nrc: document.getElementById('regNRC').value.trim(),
+                    userType: document.getElementById('regUserType').value
+                };
+                
+                // Validate form
+                const validation = ValidationService.validateForm(formData);
+                if (!validation.valid) {
+                    validation.errors.forEach(error => {
+                        Utils.showNotification('Validation Error', error, 'error');
+                    });
+                    return;
+                }
+                
+                // Check if all required files are uploaded to Cloudinary
+                if (!AppState.uploadedFiles.nrcFront || !AppState.uploadedFiles.nrcBack || !AppState.uploadedFiles.profile) {
+                    Utils.showNotification(
+                        'Missing Documents',
+                        'Please upload all required documents (NRC front/back and profile photo)',
+                        'error'
+                    );
+                    return;
+                }
+                
+                // Show loading state
+                this.submitRegisterBtn.disabled = true;
+                this.submitRegisterText.style.display = 'none';
+                this.submitSpinner.style.display = 'inline-block';
+                Utils.showLoading('Creating your account...', 'This may take a moment');
+                
+                try {
+                    // Prepare user data with Cloudinary URLs
+                    const userData = {
+                        ...formData,
+                        nrcFront: AppState.uploadedFiles.nrcFront.url,
+                        nrcBack: AppState.uploadedFiles.nrcBack.url,
+                        profilePhoto: AppState.uploadedFiles.profile.url,
+                        additionalDoc: AppState.uploadedFiles.additional ? AppState.uploadedFiles.additional.url : ''
+                    };
+                    
+                    console.log('Registering user with data:', { ...userData, password: '***' });
+                    
+                    // Register user in Firebase
+                    const result = await FirebaseService.registerUser(userData);
+                    
+                    if (result.success) {
+                        Utils.hideLoading();
+                        Utils.showNotification(
+                            'Registration Successful',
+                            `Welcome to TruCash! Your account has been created successfully.`,
+                            'success'
+                        );
+                        
+                        // Close modal and reset
+                        setTimeout(() => {
+                            this.hideRegisterModal();
+                            
+                            // Auto-login for customers
+                            if (userData.userType === 'customer') {
+                                this.emailInput.value = userData.email;
+                                this.passwordInput.value = userData.password;
+                                
+                                // Auto login after a brief delay
+                                setTimeout(() => {
+                                    this.handleLogin(new Event('submit'));
+                                }, 1000);
+                            } else {
+                                // For agents, show pending approval message
+                                Utils.showNotification(
+                                    'Account Pending Approval',
+                                    'Your agent account is pending approval from an administrator.',
+                                    'info'
+                                );
+                            }
+                        }, 2000);
+                        
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (error) {
+                    Utils.hideLoading();
+                    Utils.showNotification('Registration Failed', error.message, 'error');
+                    this.submitRegisterBtn.disabled = false;
+                    this.submitRegisterText.style.display = 'inline';
+                    this.submitSpinner.style.display = 'none';
+                }
+            },
+            
+            showForgotPasswordModal() {
+                this.forgotPasswordModal.classList.add('active');
+                document.body.style.overflow = 'hidden';
+            },
+            
+            hideForgotPasswordModal() {
+                this.forgotPasswordModal.classList.remove('active');
+                document.body.style.overflow = 'auto';
+                document.getElementById('resetEmail').value = '';
+            },
+            
+            async handlePasswordReset() {
+                const email = document.getElementById('resetEmail').value.trim();
+                
+                if (!email || !Utils.validateEmail(email)) {
+                    Utils.showNotification('Validation Error', 'Please enter a valid email address', 'error');
+                    return;
+                }
+                
+                this.submitReset.disabled = true;
+                const originalText = this.submitReset.textContent;
+                this.submitReset.innerHTML = '<div class="spinner spinner-dark"></div>';
+                
+                try {
+                    const result = await FirebaseService.sendPasswordReset(email);
+                    
+                    if (result.success) {
+                        Utils.showNotification(
+                            'Reset Link Sent',
+                            'Check your email for password reset instructions',
+                            'success'
+                        );
+                        
+                        setTimeout(() => {
+                            this.hideForgotPasswordModal();
+                        }, 2000);
+                    } else {
+                        throw new Error(result.error);
+                    }
+                } catch (error) {
+                    Utils.showNotification('Reset Failed', error.message, 'error');
+                } finally {
+                    this.submitReset.disabled = false;
+                    this.submitReset.textContent = originalText;
+                }
+            },
+            
+            handleFileUploadClick(box) {
+                // Use Cloudinary widget for uploads (silently)
+                CloudinaryService.openWidget(box);
+            },
+            
+            handleWindowControl(e) {
+                const control = e.target.closest('.window-control');
+                if (!control) return;
+                
+                if (control.classList.contains('close')) {
+                    Utils.showNotification('Info', 'Close window action', 'info');
+                } else if (control.classList.contains('minimize')) {
+                    document.body.style.transform = 'scale(0.95)';
+                    setTimeout(() => {
+                        document.body.style.transform = 'scale(1)';
+                    }, 300);
+                } else if (control.classList.contains('maximize')) {
+                    document.body.classList.toggle('fullscreen');
+                }
+            },
+            
+            handleDockItem(e) {
+                const item = e.target.closest('.dock-item');
+                if (!item) return;
+                
+                // Remove active class from all items
+                document.querySelectorAll('.dock-item').forEach(i => i.classList.remove('active'));
+                
+                // Add active class to clicked item
+                item.classList.add('active');
+                
+                // Handle dock item actions
+                const index = Array.from(document.querySelectorAll('.dock-item')).indexOf(item);
+                switch(index) {
+                    case 0: // Home
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                        break;
+                    case 1: // Analytics
+                        Utils.showNotification('Coming Soon', 'Analytics dashboard is under development', 'info');
+                        break;
+                    case 2: // Wallet
+                        Utils.showNotification('Coming Soon', 'Wallet features coming soon', 'info');
+                        break;
+                    case 3: // Settings
+                        Utils.showNotification('Settings', 'Settings panel will be available after login', 'info');
+                        break;
+                }
+            },
+            
+            checkAuthState() {
+                // Check if user is already logged in
+                auth.onAuthStateChanged((user) => {
+                    if (user) {
+                        AppState.currentUser = user;
+                        AppState.isAuthenticated = true;
+                        
+                        // Get user data from Firestore
+                        db.collection('users').doc(user.uid).get()
+                            .then((doc) => {
+                                if (doc.exists) {
+                                    const userData = doc.data();
+                                    AppState.userType = userData.userType;
+                                    AppState.registrationData = userData;
+                                    
+                                    // Update UI for logged in user
+                                    this.updateUIForLoggedInUser();
+                                }
+                            })
+                            .catch(console.error);
+                    }
+                });
+            },
+            
+            updateUIForLoggedInUser() {
+                if (AppState.isAuthenticated && AppState.currentUser) {
+                    this.emailInput.value = AppState.currentUser.email;
+                    this.emailInput.disabled = true;
+                    
+                    const welcomeMsg = document.createElement('div');
+                    welcomeMsg.className = 'logo-subtitle';
+                    welcomeMsg.textContent = `Welcome back, ${AppState.currentUser.email}`;
+                    welcomeMsg.style.marginTop = '10px';
+                    welcomeMsg.style.color = 'var(--macos-green)';
+                    
+                    const logoContainer = document.querySelector('.logo-container');
+                    if (!logoContainer.querySelector('.welcome-message')) {
+                        welcomeMsg.classList.add('welcome-message');
+                        logoContainer.appendChild(welcomeMsg);
+                    }
+                }
+            },
+            
+            resetLoginButton() {
+                this.loginBtn.disabled = false;
+                this.loginBtnText.style.display = 'inline';
+                this.loginSpinner.style.display = 'none';
+            },
+            
+            resetRegistrationForm() {
+                // Reset form fields
+                document.getElementById('registerForm').reset();
+                document.getElementById('regUserType').value = '';
+                
+                // Reset UI state
+                this.userTypeSelection.style.display = 'grid';
+                this.userTypeBtns.forEach(btn => btn.classList.remove('active'));
+                this.registerForm.style.display = 'none';
+                this.submitRegisterBtn.style.display = 'none';
+                this.submitRegisterBtn.disabled = false;
+                this.submitRegisterText.style.display = 'inline';
+                this.submitSpinner.style.display = 'none';
+                
+                // Reset uploaded files state
+                AppState.uploadedFiles = {
+                    nrcFront: null,
+                    nrcBack: null,
+                    profile: null,
+                    additional: null
+                };
+                
+                // Clear previews
+                this.uploadBoxes.forEach(box => {
+                    box.classList.remove('active');
+                    const preview = box.querySelector('.upload-preview');
+                    const overlay = box.querySelector('.upload-overlay');
+                    const status = box.querySelector('.upload-status');
+                    
+                    if (preview) preview.remove();
+                    if (overlay) overlay.remove();
+                    if (status) {
+                        status.classList.remove('active');
+                    }
+                });
+                
+                // Clear validation messages
+                this.validationMessages.forEach(el => {
+                    el.textContent = '';
+                    el.className = 'validation-message';
+                });
+                
+                // Clear input validation states
+                document.querySelectorAll('.form-input').forEach(input => {
+                    input.classList.remove('valid', 'invalid');
+                });
+                
+                // Hide progress bars
+                Utils.hideProgress('loginProgress');
+                Utils.hideProgress('uploadProgress');
+            }
+        };
+
+        // ===== Initialize Application =====
+        document.addEventListener('DOMContentLoaded', () => {
+            // Initialize DOM Manager
+            DOMManager.init();
+            
+            // Add keyboard shortcuts
+            addKeyboardShortcuts();
+            
+            console.log('TruCash Application Initialized');
+            
+            // Check Firestore connection
+            checkFirestoreConnection();
         });
-    }
-    
-    addKeyboardShortcuts();
-    
-    console.log('TruCash Application Initialized');
-});
 
-// ===== Error Handling =====
-window.addEventListener('error', (event) => {
-    console.error('Global error:', event.error);
-    Utils.showNotification(
-        'Application Error',
-        'An unexpected error occurred. Please refresh the page.',
-        'error'
-    );
-});
+        // ===== Check Firestore Connection =====
+        function checkFirestoreConnection() {
+            // Test Firestore connection
+            db.collection('test').doc('test').get()
+                .then(() => {
+                    console.log('Firestore connection successful');
+                })
+                .catch((error) => {
+                    console.warn('Firestore connection warning:', error.message);
+                    // Don't show error to user, just log it
+                });
+        }
 
-// ===== Offline Detection =====
-window.addEventListener('online', () => {
-    Utils.showNotification('Connection Restored', 'You are back online', 'success');
-});
+        // ===== Keyboard Shortcuts =====
+        function addKeyboardShortcuts() {
+            document.addEventListener('keydown', (e) => {
+                // Cmd/Ctrl + Enter to submit login
+                if ((e.ctrlKey || e.metaKey) && e.key === 'Enter') {
+                    if (document.getElementById('loginForm')) {
+                        document.getElementById('loginForm').dispatchEvent(new Event('submit'));
+                    }
+                }
+                
+                // Escape to close modals
+                if (e.key === 'Escape') {
+                    const activeModal = document.querySelector('.modal.active');
+                    if (activeModal) {
+                        activeModal.classList.remove('active');
+                        document.body.style.overflow = 'auto';
+                    }
+                }
+            });
+        }
 
-window.addEventListener('offline', () => {
-    Utils.showNotification('Connection Lost', 'Please check your internet connection', 'warning');
-});
+        // ===== Error Handling =====
+        window.addEventListener('error', (event) => {
+            console.error('Global error:', event.error);
+            // Only show notification for critical errors
+            if (event.error.message && event.error.message.includes('Firebase')) {
+                Utils.showNotification(
+                    'Connection Error',
+                    'Unable to connect to server. Please check your internet connection.',
+                    'error'
+                );
+            }
+        });
+
+        // ===== Offline Detection =====
+        window.addEventListener('online', () => {
+            Utils.showNotification('Connection Restored', 'You are back online', 'success');
+        });
+
+        window.addEventListener('offline', () => {
+            Utils.showNotification('Connection Lost', 'Please check your internet connection', 'warning');
+        });
+
+        // ===== Prevent Cloudinary tracking errors =====
+        // Wrap Cloudinary calls to prevent tracking errors
+        const originalConsoleWarn = console.warn;
+        console.warn = function(...args) {
+            // Filter out Cloudinary tracking warnings
+            if (typeof args[0] === 'string' && 
+                (args[0].includes('Tracking Prevention') || 
+                 args[0].includes('Cloudinary') ||
+                 args[0].includes('firestore'))) {
+                return;
+            }
+            originalConsoleWarn.apply(console, args);
+        };
     </script>
 </body>
 </html>
-
-
