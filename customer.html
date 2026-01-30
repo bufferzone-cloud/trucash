@@ -1,0 +1,3492 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>TruCash | Customer Dashboard</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <!-- Cloudinary SDK -->
+    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <style>
+        /* ===== macOS Theme CSS Reset ===== */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 
+                       'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+
+        :root {
+            --macos-green-100: #f2fcf6;
+            --macos-green-200: #e6f9ed;
+            --macos-green-300: #b8eccd;
+            --macos-green-400: #34c759;
+            --macos-green-500: #2da64f;
+            --macos-green-600: #248541;
+            --macos-gray-100: #f5f5f7;
+            --macos-gray-200: #e5e5e7;
+            --macos-gray-300: #d2d2d7;
+            --macos-gray-400: #86868b;
+            --macos-gray-500: #515154;
+            --macos-gray-600: #1d1d1f;
+            --macos-blue: #007AFF;
+            --macos-blue-light: #409cff;
+            --macos-blue-dark: #0056cc;
+            --macos-red: #ff3b30;
+            --macos-purple: #5856d6;
+            --macos-yellow: #ffcc00;
+            --macos-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+            --macos-shadow-heavy: 0 8px 24px rgba(0, 0, 0, 0.12);
+            --macos-shadow-light: 0 2px 6px rgba(0, 0, 0, 0.04);
+            --macos-border-radius: 12px;
+            --macos-border-radius-small: 8px;
+            --macos-border-radius-large: 16px;
+            --macos-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
+            --macos-glass: rgba(255, 255, 255, 0.85);
+            --macos-glass-border: rgba(255, 255, 255, 0.2);
+        }
+
+        body {
+            background: linear-gradient(135deg, #f2fcf6 0%, #e6f9ed 100%);
+            color: var(--macos-gray-600);
+            min-height: 100vh;
+            line-height: 1.4;
+            position: relative;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-image: 
+                radial-gradient(at 10% 20%, rgba(52, 199, 89, 0.03) 0px, transparent 50%),
+                radial-gradient(at 90% 10%, rgba(52, 199, 89, 0.03) 0px, transparent 50%),
+                radial-gradient(at 50% 90%, rgba(52, 199, 89, 0.03) 0px, transparent 50%);
+            z-index: -1;
+        }
+
+        /* ===== Main Layout ===== */
+        .dashboard-container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ===== Sidebar ===== */
+        .sidebar {
+            background: var(--macos-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-right: 1px solid var(--macos-glass-border);
+            padding: 24px;
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+        }
+
+        .logo-container {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--macos-gray-200);
+        }
+
+        .logo-icon {
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--macos-green-400), var(--macos-green-600));
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+
+        .logo-text {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--macos-green-600);
+            letter-spacing: -0.5px;
+        }
+
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
+
+        .nav-item {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 16px;
+            border-radius: var(--macos-border-radius);
+            color: var(--macos-gray-500);
+            text-decoration: none;
+            transition: var(--macos-transition);
+            cursor: pointer;
+        }
+
+        .nav-item:hover {
+            background: var(--macos-green-100);
+            color: var(--macos-green-600);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: var(--macos-green-400);
+            color: white;
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25);
+        }
+
+        .nav-item i {
+            width: 20px;
+            text-align: center;
+        }
+
+        .nav-item span {
+            font-size: 14px;
+            font-weight: 500;
+        }
+
+        .user-profile {
+            margin-top: auto;
+            padding-top: 20px;
+            border-top: 1px solid var(--macos-gray-200);
+        }
+
+        .profile-card {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px;
+            background: var(--macos-green-100);
+            border-radius: var(--macos-border-radius);
+            border: 1px solid var(--macos-green-300);
+        }
+
+        .profile-avatar {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--macos-green-400);
+        }
+
+        .profile-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .profile-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--macos-gray-600);
+            margin-bottom: 2px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .profile-role {
+            font-size: 12px;
+            color: var(--macos-green-500);
+            font-weight: 500;
+        }
+
+        /* ===== Main Content ===== */
+        .main-content {
+            padding: 24px;
+            overflow-y: auto;
+            max-height: 100vh;
+        }
+
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--macos-gray-200);
+        }
+
+        .header-title {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--macos-green-600);
+            letter-spacing: -0.5px;
+        }
+
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .status-badge {
+            padding: 6px 12px;
+            background: var(--macos-green-100);
+            color: var(--macos-green-600);
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .status-badge i {
+            font-size: 10px;
+        }
+
+        .logout-btn {
+            padding: 8px 16px;
+            background: transparent;
+            color: var(--macos-red);
+            border: 1px solid var(--macos-gray-300);
+            border-radius: var(--macos-border-radius-small);
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: var(--macos-transition);
+        }
+
+        .logout-btn:hover {
+            background: var(--macos-red);
+            color: white;
+            border-color: var(--macos-red);
+        }
+
+        /* ===== Dashboard Cards ===== */
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+            margin-bottom: 32px;
+        }
+
+        .dashboard-card {
+            background: var(--macos-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--macos-border-radius-large);
+            padding: 24px;
+            box-shadow: var(--macos-shadow);
+            border: 1px solid var(--macos-glass-border);
+            transition: var(--macos-transition);
+        }
+
+        .dashboard-card:hover {
+            box-shadow: var(--macos-shadow-heavy);
+            transform: translateY(-2px);
+        }
+
+        .card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--macos-gray-600);
+        }
+
+        .card-value {
+            font-size: 32px;
+            font-weight: 700;
+            color: var(--macos-green-600);
+            margin-bottom: 8px;
+        }
+
+        .card-subtitle {
+            font-size: 14px;
+            color: var(--macos-gray-500);
+            margin-bottom: 16px;
+        }
+
+        .card-footer {
+            font-size: 12px;
+            color: var(--macos-gray-400);
+        }
+
+        /* ===== Sections ===== */
+        .section {
+            background: var(--macos-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: var(--macos-border-radius-large);
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: var(--macos-shadow);
+            border: 1px solid var(--macos-glass-border);
+        }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--macos-gray-200);
+        }
+
+        .section-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--macos-gray-600);
+        }
+
+        .section-subtitle {
+            font-size: 14px;
+            color: var(--macos-gray-500);
+            margin-bottom: 24px;
+        }
+
+        /* ===== Form Elements ===== */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--macos-gray-500);
+            margin-bottom: 8px;
+            margin-left: 1px;
+            letter-spacing: 0.3px;
+            text-transform: uppercase;
+        }
+
+        .form-input {
+            width: 100%;
+            padding: 12px 14px;
+            font-size: 14px;
+            border: 1px solid var(--macos-gray-200);
+            border-radius: var(--macos-border-radius-small);
+            background: rgba(255, 255, 255, 0.9);
+            transition: var(--macos-transition);
+            color: var(--macos-gray-600);
+            line-height: 1.4;
+            box-shadow: var(--macos-shadow-light);
+        }
+
+        .form-input:focus {
+            outline: none;
+            border-color: var(--macos-green-400);
+            background: #ffffff;
+            box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.15), var(--macos-shadow-light);
+        }
+
+        .form-input:disabled {
+            background: var(--macos-gray-100);
+            cursor: not-allowed;
+        }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin-bottom: 16px;
+        }
+
+        /* ===== Buttons ===== */
+        .btn {
+            padding: 12px 24px;
+            border-radius: var(--macos-border-radius-small);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--macos-transition);
+            letter-spacing: 0.3px;
+            border: 1.5px solid transparent;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .btn-primary {
+            background: linear-gradient(135deg, var(--macos-green-400) 0%, var(--macos-green-600) 100%);
+            border: none;
+            color: white;
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25);
+        }
+
+        .btn-primary:hover {
+            background: linear-gradient(135deg, var(--macos-green-500) 0%, var(--macos-green-600) 100%);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.35);
+            transform: translateY(-1px);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border-color: var(--macos-gray-300);
+            color: var(--macos-gray-600);
+        }
+
+        .btn-outline:hover {
+            background: rgba(0, 0, 0, 0.03);
+            border-color: var(--macos-gray-400);
+            transform: translateY(-1px);
+        }
+
+        .btn-small {
+            padding: 8px 16px;
+            font-size: 13px;
+        }
+
+        /* ===== Agent Validation ===== */
+        .agent-validation {
+            background: var(--macos-green-100);
+            border: 2px solid var(--macos-green-300);
+            border-radius: var(--macos-border-radius);
+            padding: 20px;
+            margin-bottom: 24px;
+        }
+
+        .agent-status {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .agent-status-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--macos-green-400);
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 14px;
+        }
+
+        .agent-info {
+            flex: 1;
+        }
+
+        .agent-name {
+            font-weight: 600;
+            color: var(--macos-green-600);
+            margin-bottom: 2px;
+        }
+
+        .agent-branch {
+            font-size: 13px;
+            color: var(--macos-gray-500);
+        }
+
+        /* ===== Loan Application ===== */
+        .collateral-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 16px;
+            margin-bottom: 20px;
+        }
+
+        .upload-box {
+            aspect-ratio: 1;
+            border: 2px dashed var(--macos-gray-300);
+            border-radius: var(--macos-border-radius);
+            background: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--macos-transition);
+            position: relative;
+            overflow: hidden;
+            box-shadow: var(--macos-shadow-light);
+        }
+
+        .upload-box:hover {
+            border-color: var(--macos-green-400);
+            background: rgba(52, 199, 89, 0.05);
+            box-shadow: var(--macos-shadow);
+            transform: translateY(-2px);
+        }
+
+        .upload-box i {
+            font-size: 24px;
+            color: var(--macos-gray-400);
+            margin-bottom: 8px;
+            transition: var(--macos-transition);
+        }
+
+        .upload-box:hover i {
+            color: var(--macos-green-400);
+        }
+
+        .upload-box span {
+            font-size: 12px;
+            color: var(--macos-gray-500);
+            text-align: center;
+            padding: 0 8px;
+        }
+
+        .upload-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--macos-border-radius-small);
+        }
+
+        /* ===== Loan Monitoring ===== */
+        .loan-stages {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 32px;
+            position: relative;
+        }
+
+        .loan-stages::before {
+            content: '';
+            position: absolute;
+            top: 15px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--macos-gray-200);
+            z-index: 1;
+        }
+
+        .stage {
+            position: relative;
+            z-index: 2;
+            text-align: center;
+            flex: 1;
+        }
+
+        .stage-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            background: var(--macos-gray-200);
+            color: var(--macos-gray-400);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 0 auto 8px;
+            transition: var(--macos-transition);
+        }
+
+        .stage.active .stage-icon {
+            background: var(--macos-green-400);
+            color: white;
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.25);
+        }
+
+        .stage-label {
+            font-size: 12px;
+            color: var(--macos-gray-500);
+            font-weight: 500;
+        }
+
+        .stage.active .stage-label {
+            color: var(--macos-green-600);
+            font-weight: 600;
+        }
+
+        .loan-details-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .detail-card {
+            background: var(--macos-green-100);
+            border-radius: var(--macos-border-radius);
+            padding: 16px;
+            border: 1px solid var(--macos-green-300);
+        }
+
+        .detail-label {
+            font-size: 12px;
+            color: var(--macos-gray-500);
+            margin-bottom: 4px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+
+        .detail-value {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--macos-green-600);
+        }
+
+        /* ===== Repayment Plan ===== */
+        .repayment-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .repayment-table th {
+            background: var(--macos-green-100);
+            color: var(--macos-green-600);
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--macos-green-300);
+            font-size: 13px;
+        }
+
+        .repayment-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--macos-gray-200);
+            font-size: 14px;
+        }
+
+        .repayment-table tr:hover {
+            background: var(--macos-green-50);
+        }
+
+        .repayment-table .overdue {
+            color: var(--macos-red);
+            font-weight: 600;
+        }
+
+        /* ===== Payment Upload ===== */
+        .payment-upload {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            margin-top: 16px;
+        }
+
+        .payment-receipt {
+            width: 100px;
+            height: 100px;
+            border-radius: var(--macos-border-radius);
+            object-fit: cover;
+            border: 2px solid var(--macos-green-300);
+        }
+
+        /* ===== Notifications ===== */
+        .notifications-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+
+        .notification-item {
+            padding: 16px;
+            border-bottom: 1px solid var(--macos-gray-200);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            transition: var(--macos-transition);
+        }
+
+        .notification-item:hover {
+            background: var(--macos-green-100);
+        }
+
+        .notification-icon {
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 12px;
+            flex-shrink: 0;
+        }
+
+        .notification-icon.success {
+            background: var(--macos-green-100);
+            color: var(--macos-green-600);
+        }
+
+        .notification-icon.warning {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .notification-icon.info {
+            background: #D1ECF1;
+            color: #0C5460;
+        }
+
+        .notification-content {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            margin-bottom: 4px;
+            color: var(--macos-gray-600);
+        }
+
+        .notification-message {
+            font-size: 13px;
+            color: var(--macos-gray-500);
+            margin-bottom: 4px;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: var(--macos-gray-400);
+        }
+
+        /* ===== Loan History ===== */
+        .history-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 16px;
+        }
+
+        .history-table th {
+            background: var(--macos-green-100);
+            color: var(--macos-green-600);
+            font-weight: 600;
+            text-align: left;
+            padding: 12px 16px;
+            border-bottom: 2px solid var(--macos-green-300);
+            font-size: 13px;
+        }
+
+        .history-table td {
+            padding: 12px 16px;
+            border-bottom: 1px solid var(--macos-gray-200);
+            font-size: 14px;
+        }
+
+        .status-badge-table {
+            padding: 4px 8px;
+            border-radius: 12px;
+            font-size: 11px;
+            font-weight: 600;
+            display: inline-block;
+        }
+
+        .status-active {
+            background: #D4EDDA;
+            color: #155724;
+        }
+
+        .status-pending {
+            background: #FFF3CD;
+            color: #856404;
+        }
+
+        .status-completed {
+            background: #D1ECF1;
+            color: #0C5460;
+        }
+
+        .status-defaulted {
+            background: #F8D7DA;
+            color: #721C24;
+        }
+
+        /* ===== Modals ===== */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            -webkit-backdrop-filter: blur(8px);
+            z-index: 1000;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .modal.active {
+            display: flex;
+            opacity: 1;
+        }
+
+        .modal-content {
+            background: var(--macos-glass);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            border-radius: var(--macos-border-radius-large);
+            width: 100%;
+            max-width: 800px;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: var(--macos-shadow-heavy);
+            border: 1px solid var(--macos-glass-border);
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .modal-header {
+            padding: 20px 24px 16px;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            position: sticky;
+            top: 0;
+            background: var(--macos-glass);
+            backdrop-filter: blur(40px);
+            z-index: 10;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--macos-gray-600);
+        }
+
+        .modal-close {
+            background: rgba(0, 0, 0, 0.05);
+            border: none;
+            font-size: 16px;
+            color: var(--macos-gray-500);
+            cursor: pointer;
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: var(--macos-transition);
+        }
+
+        .modal-close:hover {
+            background: rgba(0, 0, 0, 0.1);
+            transform: rotate(90deg);
+        }
+
+        .modal-body {
+            padding: 20px 24px;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid rgba(0, 0, 0, 0.08);
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* ===== Loading Overlay ===== */
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.9);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 2000;
+            flex-direction: column;
+            gap: 16px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 48px;
+            height: 48px;
+            border: 3px solid var(--macos-gray-200);
+            border-top-color: var(--macos-green-400);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 14px;
+            color: var(--macos-gray-600);
+            font-weight: 500;
+        }
+
+        /* ===== Notifications Toast ===== */
+        .notification-toast {
+            position: fixed;
+            top: 24px;
+            right: 24px;
+            padding: 16px 20px;
+            border-radius: var(--macos-border-radius);
+            background: var(--macos-glass);
+            backdrop-filter: blur(40px);
+            -webkit-backdrop-filter: blur(40px);
+            box-shadow: var(--macos-shadow-heavy);
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            z-index: 1001;
+            transform: translateX(calc(100% + 24px));
+            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            max-width: 320px;
+            border: 1px solid var(--macos-glass-border);
+            border-left: 4px solid var(--macos-green-400);
+        }
+
+        .notification-toast.active {
+            transform: translateX(0);
+        }
+
+        .notification-toast.error {
+            border-left-color: var(--macos-red);
+        }
+
+        /* ===== Responsive Design ===== */
+        @media (max-width: 1200px) {
+            .dashboard-container {
+                grid-template-columns: 200px 1fr;
+            }
+        }
+
+        @media (max-width: 992px) {
+            .dashboard-container {
+                grid-template-columns: 1fr;
+            }
+
+            .sidebar {
+                position: fixed;
+                left: -250px;
+                z-index: 100;
+                transition: left 0.3s ease;
+            }
+
+            .sidebar.active {
+                left: 0;
+            }
+
+            .main-content {
+                padding: 16px;
+            }
+
+            .dashboard-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .collateral-grid {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
+
+        @media (max-width: 768px) {
+            .form-row {
+                grid-template-columns: 1fr;
+            }
+
+            .collateral-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .loan-stages {
+                flex-wrap: wrap;
+                gap: 16px;
+            }
+
+            .stage {
+                flex: 0 0 calc(50% - 8px);
+            }
+
+            .loan-details-grid {
+                grid-template-columns: 1fr;
+            }
+
+            .header {
+                flex-direction: column;
+                gap: 16px;
+                align-items: flex-start;
+            }
+
+            .header-actions {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+
+        /* ===== Custom Scrollbar ===== */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--macos-gray-100);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--macos-green-300);
+            border-radius: 4px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--macos-green-400);
+        }
+    </style>
+</head>
+<body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading Dashboard...</div>
+    </div>
+
+    <!-- Main Container -->
+    <div class="dashboard-container">
+        <!-- Sidebar -->
+        <aside class="sidebar" id="sidebar">
+            <div class="logo-container">
+                <div class="logo-icon">
+                    <i class="fas fa-wallet"></i>
+                </div>
+                <div class="logo-text">TruCash</div>
+            </div>
+
+            <nav class="nav-menu">
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="profile">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="#" class="nav-item" data-section="apply">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Apply for Loan</span>
+                </a>
+                <a href="#" class="nav-item" data-section="loans">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>My Loans</span>
+                </a>
+                <a href="#" class="nav-item" data-section="payments">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payments</span>
+                </a>
+                <a href="#" class="nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="badge" id="notificationCount" style="display: none;"></span>
+                </a>
+                <a href="#" class="nav-item" data-section="history">
+                    <i class="fas fa-history"></i>
+                    <span>Loan History</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
+            </nav>
+
+            <div class="user-profile">
+                <div class="profile-card">
+                    <img src="" alt="Profile" class="profile-avatar" id="profileAvatar" onerror="this.src='https://via.placeholder.com/40'">
+                    <div class="profile-info">
+                        <div class="profile-name" id="profileName">Loading...</div>
+                        <div class="profile-role">Customer</div>
+                    </div>
+                </div>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Header -->
+            <header class="header">
+                <div class="header-title" id="pageTitle">Customer Dashboard</div>
+                <div class="header-actions">
+                    <div class="status-badge">
+                        <i class="fas fa-circle"></i>
+                        <span id="connectionStatus">Online</span>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
+                </div>
+            </header>
+
+            <!-- Dashboard Content -->
+            <div id="contentArea">
+                <!-- Dashboard Section -->
+                <section id="dashboardSection" class="content-section">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Active Loans</div>
+                                <i class="fas fa-hand-holding-usd" style="color: var(--macos-green-400);"></i>
+                            </div>
+                            <div class="card-value" id="activeLoansCount">0</div>
+                            <div class="card-subtitle">Currently active loans</div>
+                            <div class="card-footer" id="activeLoanInfo">No active loans</div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Total Borrowed</div>
+                                <i class="fas fa-coins" style="color: var(--macos-green-400);"></i>
+                            </div>
+                            <div class="card-value" id="totalBorrowed">K0.00</div>
+                            <div class="card-subtitle">Lifetime borrowed amount</div>
+                            <div class="card-footer">Across all loans</div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Current Balance</div>
+                                <i class="fas fa-balance-scale" style="color: var(--macos-green-400);"></i>
+                            </div>
+                            <div class="card-value" id="currentBalance">K0.00</div>
+                            <div class="card-subtitle">Outstanding amount</div>
+                            <div class="card-footer" id="nextPaymentInfo">No payment due</div>
+                        </div>
+
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Payment Due</div>
+                                <i class="fas fa-calendar-alt" style="color: var(--macos-green-400);"></i>
+                            </div>
+                            <div class="card-value" id="paymentDue">K0.00</div>
+                            <div class="card-subtitle">Next payment amount</div>
+                            <div class="card-footer" id="dueDateInfo">No due date</div>
+                        </div>
+                    </div>
+
+                    <!-- Agent Validation -->
+                    <div class="section" id="agentValidationSection">
+                        <div class="section-header">
+                            <div class="section-title">Agent Information</div>
+                            <button class="btn btn-outline btn-small" id="changeAgentBtn">
+                                <i class="fas fa-exchange-alt"></i>
+                                Change Agent
+                            </button>
+                        </div>
+                        <div class="agent-validation" id="agentInfo">
+                            <div class="agent-status">
+                                <div class="agent-status-icon" id="agentStatusIcon">
+                                    <i class="fas fa-user-check"></i>
+                                </div>
+                                <div class="agent-info">
+                                    <div class="agent-name" id="agentName">No agent assigned</div>
+                                    <div class="agent-branch" id="agentBranch">Please enter your Agent ID</div>
+                                </div>
+                            </div>
+                            <div class="form-group">
+                                <label for="agentIdInput" class="form-label">Agent ID</label>
+                                <input type="text" id="agentIdInput" class="form-input" placeholder="Enter your agent's unique ID">
+                                <div class="form-subtext" id="agentValidationMessage"></div>
+                            </div>
+                            <button class="btn btn-primary" id="verifyAgentBtn">
+                                <i class="fas fa-check"></i>
+                                Verify Agent
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Quick Actions -->
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Quick Actions</div>
+                        </div>
+                        <div class="form-row">
+                            <button class="btn btn-primary" id="applyLoanBtn">
+                                <i class="fas fa-plus-circle"></i>
+                                Apply for New Loan
+                            </button>
+                            <button class="btn btn-outline" id="makePaymentBtn">
+                                <i class="fas fa-credit-card"></i>
+                                Make Payment
+                            </button>
+                            <button class="btn btn-outline" id="viewStatementBtn">
+                                <i class="fas fa-file-invoice"></i>
+                                View Statement
+                            </button>
+                            <button class="btn btn-outline" id="contactSupportBtn">
+                                <i class="fas fa-headset"></i>
+                                Contact Support
+                            </button>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Profile Section (Hidden by default) -->
+                <section id="profileSection" class="content-section" style="display: none;">
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">My Profile</div>
+                            <button class="btn btn-outline btn-small" id="editProfileBtn">
+                                <i class="fas fa-edit"></i>
+                                Edit Profile
+                            </button>
+                        </div>
+                        
+                        <div class="profile-display">
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Full Name</label>
+                                    <div class="form-input" id="profileFullName">Loading...</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Email Address</label>
+                                    <div class="form-input" id="profileEmail">Loading...</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">Phone Number</label>
+                                    <div class="form-input" id="profilePhone">Loading...</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">NRC Number</label>
+                                    <div class="form-input" id="profileNRC">Loading...</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Residential Address</label>
+                                <div class="form-input" id="profileAddress">Loading...</div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label class="form-label">House Number</label>
+                                    <div class="form-input" id="profileHouseNumber">Loading...</div>
+                                </div>
+                                <div class="form-group">
+                                    <label class="form-label">Assigned Agent ID</label>
+                                    <div class="form-input" id="profileAgentId">Not assigned</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Profile Photo</label>
+                                <div class="profile-photo-container">
+                                    <img src="" alt="Profile Photo" id="profilePhoto" class="profile-avatar-large" onerror="this.src='https://via.placeholder.com/150'">
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Account Documents</div>
+                        </div>
+                        <div class="document-grid">
+                            <div class="document-item">
+                                <i class="fas fa-id-card document-icon"></i>
+                                <div class="document-info">
+                                    <div class="document-name">NRC Front</div>
+                                    <div class="document-status" id="nrcFrontStatus">Not uploaded</div>
+                                </div>
+                                <button class="btn btn-outline btn-small" onclick="viewDocument('nrcFront')">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </div>
+                            <div class="document-item">
+                                <i class="fas fa-id-card document-icon"></i>
+                                <div class="document-info">
+                                    <div class="document-name">NRC Back</div>
+                                    <div class="document-status" id="nrcBackStatus">Not uploaded</div>
+                                </div>
+                                <button class="btn btn-outline btn-small" onclick="viewDocument('nrcBack')">
+                                    <i class="fas fa-eye"></i>
+                                    View
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Apply for Loan Section (Hidden by default) -->
+                <section id="applySection" class="content-section" style="display: none;">
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Apply for New Loan</div>
+                            <div class="section-subtitle" id="loanLimitInfo">Maximum loan amount: K0.00</div>
+                        </div>
+                        
+                        <!-- Agent Validation Required -->
+                        <div class="agent-validation" id="loanAgentValidation" style="display: none;">
+                            <div class="agent-status">
+                                <div class="agent-status-icon" style="background: var(--macos-red);">
+                                    <i class="fas fa-exclamation-triangle"></i>
+                                </div>
+                                <div class="agent-info">
+                                    <div class="agent-name">Agent Validation Required</div>
+                                    <div class="agent-branch">You must verify your Agent ID before applying for a loan</div>
+                                </div>
+                            </div>
+                            <button class="btn btn-primary" id="goToAgentValidationBtn">
+                                <i class="fas fa-arrow-right"></i>
+                                Go to Agent Validation
+                            </button>
+                        </div>
+                        
+                        <!-- Loan Application Form -->
+                        <div id="loanApplicationForm" style="display: none;">
+                            <div class="form-group">
+                                <label for="loanAmount" class="form-label">Loan Amount (Kwacha)</label>
+                                <input type="number" id="loanAmount" class="form-input" placeholder="Enter amount" min="100" step="100">
+                                <div class="form-subtext" id="amountValidation"></div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <div class="form-group">
+                                    <label for="loanDuration" class="form-label">Loan Duration (Months)</label>
+                                    <select id="loanDuration" class="form-input">
+                                        <option value="3">3 Months</option>
+                                        <option value="6">6 Months</option>
+                                        <option value="9">9 Months</option>
+                                        <option value="12">12 Months</option>
+                                        <option value="18">18 Months</option>
+                                        <option value="24">24 Months</option>
+                                    </select>
+                                </div>
+                                <div class="form-group">
+                                    <label for="loanPurpose" class="form-label">Loan Purpose</label>
+                                    <select id="loanPurpose" class="form-input">
+                                        <option value="business">Business Capital</option>
+                                        <option value="education">Education</option>
+                                        <option value="medical">Medical Expenses</option>
+                                        <option value="agriculture">Agriculture</option>
+                                        <option value="home">Home Improvement</option>
+                                        <option value="vehicle">Vehicle Purchase</option>
+                                        <option value="other">Other</option>
+                                    </select>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label for="purposeDescription" class="form-label">Purpose Description</label>
+                                <textarea id="purposeDescription" class="form-input" rows="3" placeholder="Describe how you will use the loan"></textarea>
+                            </div>
+                            
+                            <div class="section">
+                                <div class="section-header">
+                                    <div class="section-title">Collateral Details</div>
+                                </div>
+                                
+                                <div class="form-row">
+                                    <div class="form-group">
+                                        <label for="collateralCategory" class="form-label">Collateral Category</label>
+                                        <select id="collateralCategory" class="form-input">
+                                            <option value="property">Property/Real Estate</option>
+                                            <option value="vehicle">Vehicle</option>
+                                            <option value="equipment">Equipment/Machinery</option>
+                                            <option value="inventory">Inventory/Stock</option>
+                                            <option value="jewelry">Jewelry</option>
+                                            <option value="other">Other Assets</option>
+                                        </select>
+                                    </div>
+                                    <div class="form-group">
+                                        <label for="collateralValue" class="form-label">Estimated Market Value (Kwacha)</label>
+                                        <input type="number" id="collateralValue" class="form-input" placeholder="Estimated value">
+                                    </div>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="collateralDescription" class="form-label">Collateral Description</label>
+                                    <textarea id="collateralDescription" class="form-input" rows="3" placeholder="Detailed description of the collateral"></textarea>
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label for="collateralLocation" class="form-label">Physical Location</label>
+                                    <input type="text" id="collateralLocation" class="form-input" placeholder="Where is the collateral kept?">
+                                </div>
+                                
+                                <div class="form-group">
+                                    <label class="form-label">Collateral Images (Minimum 3 required)</label>
+                                    <div class="collateral-grid">
+                                        <div class="upload-box" data-type="collateral-1" onclick="openCloudinaryWidget(this)">
+                                            <i class="fas fa-camera"></i>
+                                            <span>Image 1</span>
+                                            <div class="upload-status" data-index="0"></div>
+                                        </div>
+                                        <div class="upload-box" data-type="collateral-2" onclick="openCloudinaryWidget(this)">
+                                            <i class="fas fa-camera"></i>
+                                            <span>Image 2</span>
+                                            <div class="upload-status" data-index="1"></div>
+                                        </div>
+                                        <div class="upload-box" data-type="collateral-3" onclick="openCloudinaryWidget(this)">
+                                            <i class="fas fa-camera"></i>
+                                            <span>Image 3</span>
+                                            <div class="upload-status" data-index="2"></div>
+                                        </div>
+                                        <div class="upload-box" data-type="collateral-4" onclick="openCloudinaryWidget(this)">
+                                            <i class="fas fa-video"></i>
+                                            <span>Video (Optional)</span>
+                                            <div class="upload-status" data-index="3"></div>
+                                        </div>
+                                    </div>
+                                    <div class="form-subtext" id="collateralUploadStatus">Upload images to Cloudinary</div>
+                                </div>
+                            </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Terms and Conditions</label>
+                                <div class="terms-box">
+                                    <p>By submitting this application, you agree to:</p>
+                                    <ul>
+                                        <li>Provide accurate information</li>
+                                        <li>Allow verification of collateral</li>
+                                        <li>Accept interest rates as determined by TruCash</li>
+                                        <li>Make timely repayments</li>
+                                        <li>Accept penalties for late payments</li>
+                                        <li>Allow TruCash to secure the loan with provided collateral</li>
+                                    </ul>
+                                    <label class="checkbox-container">
+                                        <input type="checkbox" id="acceptTerms">
+                                        <span>I accept the terms and conditions</span>
+                                    </label>
+                                </div>
+                            </div>
+                            
+                            <div class="form-row">
+                                <button class="btn btn-outline" id="cancelLoanBtn">
+                                    <i class="fas fa-times"></i>
+                                    Cancel
+                                </button>
+                                <button class="btn btn-primary" id="submitLoanBtn">
+                                    <i class="fas fa-paper-plane"></i>
+                                    Submit Application
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- My Loans Section (Hidden by default) -->
+                <section id="loansSection" class="content-section" style="display: none;">
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Active Loans</div>
+                        </div>
+                        <div id="activeLoansList">
+                            <p>No active loans found.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Loan Monitoring</div>
+                        </div>
+                        <div id="loanMonitoring">
+                            <p>Select a loan to view details.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Repayment Plan</div>
+                        </div>
+                        <div id="repaymentPlan">
+                            <p>No repayment plan available.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Payments Section (Hidden by default) -->
+                <section id="paymentsSection" class="content-section" style="display: none;">
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Make Payment</div>
+                        </div>
+                        <div id="paymentForm">
+                            <p>No payment due at this time.</p>
+                        </div>
+                    </div>
+                    
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Payment History</div>
+                        </div>
+                        <div id="paymentHistory">
+                            <p>No payment history found.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Notifications Section (Hidden by default) -->
+                <section id="notificationsSection" class="content-section" style="display: none;">
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Notifications</div>
+                            <button class="btn btn-outline btn-small" id="markAllReadBtn">
+                                <i class="fas fa-check-double"></i>
+                                Mark All Read
+                            </button>
+                        </div>
+                        <div class="notifications-list" id="notificationsList">
+                            <p>No notifications yet.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Loan History Section (Hidden by default) -->
+                <section id="historySection" class="content-section" style="display: none;">
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Loan History</div>
+                        </div>
+                        <div id="loanHistoryTable">
+                            <p>No loan history found.</p>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Section (Hidden by default) -->
+                <section id="settingsSection" class="content-section" style="display: none;">
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Account Settings</div>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Notification Preferences</label>
+                            <div class="checkbox-group">
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="notifyLoanApproval" checked>
+                                    <span>Loan approval/rejection</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="notifyPaymentDue" checked>
+                                    <span>Payment due reminders</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="notifyPaymentReceived" checked>
+                                    <span>Payment received confirmations</span>
+                                </label>
+                                <label class="checkbox-container">
+                                    <input type="checkbox" id="notifyPenalty" checked>
+                                    <span>Penalty applied notifications</span>
+                                </label>
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Security</label>
+                            <button class="btn btn-outline" id="changePasswordBtn">
+                                <i class="fas fa-key"></i>
+                                Change Password
+                            </button>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Account Data</label>
+                            <button class="btn btn-outline" id="exportDataBtn">
+                                <i class="fas fa-download"></i>
+                                Export My Data
+                            </button>
+                        </div>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <!-- Modals -->
+    <div class="modal" id="paymentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Make Payment</h3>
+                <button class="modal-close" id="closePaymentModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <!-- Payment form will be loaded here -->
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="documentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Document View</h3>
+                <button class="modal-close" id="closeDocumentModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img src="" alt="Document" id="documentImage" style="width: 100%; border-radius: 8px;">
+            </div>
+        </div>
+    </div>
+
+    <div class="modal" id="changePasswordModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Change Password</h3>
+                <button class="modal-close" id="closePasswordModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label for="currentPassword" class="form-label">Current Password</label>
+                    <input type="password" id="currentPassword" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="newPassword" class="form-label">New Password</label>
+                    <input type="password" id="newPassword" class="form-input">
+                </div>
+                <div class="form-group">
+                    <label for="confirmNewPassword" class="form-label">Confirm New Password</label>
+                    <input type="password" id="confirmNewPassword" class="form-input">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="cancelPasswordChange">Cancel</button>
+                <button class="btn btn-primary" id="submitPasswordChange">Change Password</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notification Toast -->
+    <div class="notification-toast" id="notificationToast">
+        <i class="fas fa-info-circle"></i>
+        <div class="toast-content">
+            <div class="toast-title" id="toastTitle">Notification</div>
+            <div class="toast-message" id="toastMessage">Message here</div>
+        </div>
+        <button class="toast-close" id="toastClose">
+            <i class="fas fa-times"></i>
+        </button>
+    </div>
+
+    <!-- JavaScript Implementation -->
+    <script>
+        // ===== Firebase Configuration =====
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
+            authDomain: "trucash-9fee8.firebaseapp.com",
+            databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
+            projectId: "trucash-9fee8",
+            storageBucket: "trucash-9fee8.firebasestorage.app",
+            messagingSenderId: "622416212225",
+            appId: "1:622416212225:web:07418a9b16f955c330ab00",
+            measurementId: "G-6TEZFNFDBK"
+        };
+
+        // ===== Cloudinary Configuration =====
+        const cloudinaryConfig = {
+            cloudName: 'dd3lcymrk',
+            uploadPreset: 'h3eyhc2o',
+            folder: 'trucash/customers',
+            maxFileSize: 10485760, // 10MB
+            allowedFormats: ['jpg', 'jpeg', 'png', 'mp4', 'mov'],
+            multiple: false,
+            theme: 'white'
+        };
+
+        // ===== Application State =====
+        const AppState = {
+            currentUser: null,
+            userData: null,
+            agentData: null,
+            activeLoan: null,
+            loans: [],
+            payments: [],
+            notifications: [],
+            systemSettings: null,
+            uploadedFiles: {},
+            cloudinaryWidget: null,
+            realtimeListeners: []
+        };
+
+        // ===== Initialize Firebase =====
+        let firebaseApp, auth, db;
+        
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.database();
+            console.log("Firebase initialized successfully");
+        } catch (error) {
+            console.error("Firebase initialization error:", error);
+        }
+
+        // ===== Utility Functions =====
+        const Utils = {
+            showLoading(message = 'Loading...') {
+                const overlay = document.getElementById('loadingOverlay');
+                const text = overlay.querySelector('.loading-text');
+                text.textContent = message;
+                overlay.classList.add('active');
+            },
+            
+            hideLoading() {
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.classList.remove('active');
+            },
+            
+            showToast(title, message, type = 'info', duration = 5000) {
+                const toast = document.getElementById('notificationToast');
+                const toastTitle = document.getElementById('toastTitle');
+                const toastMessage = document.getElementById('toastMessage');
+                
+                toastTitle.textContent = title;
+                toastMessage.textContent = message;
+                
+                if (type === 'error') {
+                    toast.style.borderLeftColor = 'var(--macos-red)';
+                } else {
+                    toast.style.borderLeftColor = 'var(--macos-green-400)';
+                }
+                
+                toast.classList.add('active');
+                
+                setTimeout(() => {
+                    toast.classList.remove('active');
+                }, duration);
+                
+                document.getElementById('toastClose').onclick = () => {
+                    toast.classList.remove('active');
+                };
+            },
+            
+            formatCurrency(amount) {
+                return 'K' + parseFloat(amount || 0).toLocaleString('en-US', {
+                    minimumFractionDigits: 2,
+                    maximumFractionDigits: 2
+                });
+            },
+            
+            formatDate(timestamp) {
+                if (!timestamp) return 'N/A';
+                const date = new Date(timestamp);
+                return date.toLocaleDateString('en-US', {
+                    year: 'numeric',
+                    month: 'short',
+                    day: 'numeric'
+                });
+            },
+            
+            validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            },
+            
+            validatePhone(phone) {
+                const re = /^\+?[\d\s\-\(\)]{10,}$/;
+                return re.test(phone);
+            },
+            
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            }
+        };
+
+        // ===== Firebase Service =====
+        const FirebaseService = {
+            async checkAuth() {
+                return new Promise((resolve) => {
+                    auth.onAuthStateChanged(async (user) => {
+                        if (!user) {
+                            window.location.href = 'login.html';
+                            resolve(null);
+                            return;
+                        }
+                        
+                        try {
+                            // Get user data from Realtime Database
+                            const userRef = db.ref('users/' + user.uid);
+                            const snapshot = await userRef.once('value');
+                            
+                            if (!snapshot.exists()) {
+                                await auth.signOut();
+                                window.location.href = 'login.html';
+                                resolve(null);
+                                return;
+                            }
+                            
+                            const userData = snapshot.val();
+                            
+                            // Check if user is customer
+                            if (userData.userType !== 'customer') {
+                                Utils.showToast('Access Denied', 'This dashboard is for customers only', 'error');
+                                await auth.signOut();
+                                window.location.href = 'login.html';
+                                resolve(null);
+                                return;
+                            }
+                            
+                            AppState.currentUser = user;
+                            AppState.userData = userData;
+                            
+                            // Load system settings
+                            await this.loadSystemSettings();
+                            
+                            // Load agent data if assigned
+                            if (userData.assignedAgentId) {
+                                await this.loadAgentData(userData.assignedAgentId);
+                            }
+                            
+                            resolve(userData);
+                        } catch (error) {
+                            console.error('Auth check error:', error);
+                            resolve(null);
+                        }
+                    });
+                });
+            },
+            
+            async loadSystemSettings() {
+                try {
+                    const settingsRef = db.ref('systemSettings');
+                    const snapshot = await settingsRef.once('value');
+                    
+                    if (snapshot.exists()) {
+                        AppState.systemSettings = snapshot.val();
+                        console.log('System settings loaded:', AppState.systemSettings);
+                    }
+                } catch (error) {
+                    console.error('Error loading system settings:', error);
+                }
+            },
+            
+            async loadAgentData(agentId) {
+                try {
+                    const agentRef = db.ref('users/' + agentId);
+                    const snapshot = await agentRef.once('value');
+                    
+                    if (snapshot.exists()) {
+                        const agentData = snapshot.val();
+                        
+                        // Verify agent is active and approved
+                        if (agentData.userType === 'agent' && 
+                            agentData.status === 'active' && 
+                            agentData.isApproved === true) {
+                            AppState.agentData = agentData;
+                            return { success: true, agent: agentData };
+                        } else {
+                            return { success: false, error: 'Agent is not active or approved' };
+                        }
+                    } else {
+                        return { success: false, error: 'Agent not found' };
+                    }
+                } catch (error) {
+                    console.error('Error loading agent data:', error);
+                    return { success: false, error: 'Error loading agent information' };
+                }
+            },
+            
+            async verifyAgentId(agentId) {
+                try {
+                    // Check if agent exists and is active
+                    const agentRef = db.ref('users/' + agentId);
+                    const snapshot = await agentRef.once('value');
+                    
+                    if (!snapshot.exists()) {
+                        return { success: false, error: 'Agent ID not found' };
+                    }
+                    
+                    const agentData = snapshot.val();
+                    
+                    if (agentData.userType !== 'agent') {
+                        return { success: false, error: 'ID belongs to a non-agent user' };
+                    }
+                    
+                    if (agentData.status !== 'active') {
+                        return { success: false, error: 'Agent account is not active' };
+                    }
+                    
+                    if (agentData.isApproved !== true) {
+                        return { success: false, error: 'Agent account is not approved' };
+                    }
+                    
+                    // Update customer's assigned agent
+                    const customerRef = db.ref('users/' + AppState.currentUser.uid);
+                    await customerRef.update({
+                        assignedAgentId: agentId,
+                        agentAssignedAt: Date.now(),
+                        updatedAt: Date.now()
+                    });
+                    
+                    // Update local state
+                    AppState.userData.assignedAgentId = agentId;
+                    AppState.agentData = agentData;
+                    
+                    // Create notification for agent
+                    await this.createNotification('agent_assigned', {
+                        customerId: AppState.currentUser.uid,
+                        customerName: AppState.userData.fullName,
+                        agentId: agentId,
+                        timestamp: Date.now()
+                    });
+                    
+                    return { 
+                        success: true, 
+                        agent: agentData,
+                        message: 'Agent verified and assigned successfully'
+                    };
+                } catch (error) {
+                    console.error('Error verifying agent:', error);
+                    return { success: false, error: 'Error verifying agent' };
+                }
+            },
+            
+            async loadCustomerLoans() {
+                try {
+                    const loansRef = db.ref('loans').orderByChild('customerId').equalTo(AppState.currentUser.uid);
+                    const snapshot = await loansRef.once('value');
+                    
+                    if (snapshot.exists()) {
+                        const loans = [];
+                        snapshot.forEach((childSnapshot) => {
+                            const loan = childSnapshot.val();
+                            loan.id = childSnapshot.key;
+                            loans.push(loan);
+                        });
+                        
+                        // Sort by creation date (newest first)
+                        loans.sort((a, b) => b.createdAt - a.createdAt);
+                        
+                        AppState.loans = loans;
+                        
+                        // Find active loan
+                        AppState.activeLoan = loans.find(loan => 
+                            loan.status === 'active' || 
+                            loan.status === 'pending' || 
+                            loan.status === 'approved'
+                        );
+                        
+                        return loans;
+                    }
+                    return [];
+                } catch (error) {
+                    console.error('Error loading loans:', error);
+                    return [];
+                }
+            },
+            
+            async loadPayments() {
+                try {
+                    const paymentsRef = db.ref('payments').orderByChild('customerId').equalTo(AppState.currentUser.uid);
+                    const snapshot = await paymentsRef.once('value');
+                    
+                    if (snapshot.exists()) {
+                        const payments = [];
+                        snapshot.forEach((childSnapshot) => {
+                            const payment = childSnapshot.val();
+                            payment.id = childSnapshot.key;
+                            payments.push(payment);
+                        });
+                        
+                        // Sort by date (newest first)
+                        payments.sort((a, b) => b.timestamp - a.timestamp);
+                        
+                        AppState.payments = payments;
+                        return payments;
+                    }
+                    return [];
+                } catch (error) {
+                    console.error('Error loading payments:', error);
+                    return [];
+                }
+            },
+            
+            async loadNotifications() {
+                try {
+                    const notificationsRef = db.ref('notifications/' + AppState.currentUser.uid).orderByChild('timestamp');
+                    const snapshot = await notificationsRef.once('value');
+                    
+                    if (snapshot.exists()) {
+                        const notifications = [];
+                        snapshot.forEach((childSnapshot) => {
+                            const notification = childSnapshot.val();
+                            notification.id = childSnapshot.key;
+                            notifications.push(notification);
+                        });
+                        
+                        // Sort by timestamp (newest first)
+                        notifications.sort((a, b) => b.timestamp - a.timestamp);
+                        
+                        AppState.notifications = notifications;
+                        return notifications;
+                    }
+                    return [];
+                } catch (error) {
+                    console.error('Error loading notifications:', error);
+                    return [];
+                }
+            },
+            
+            async createNotification(type, data) {
+                try {
+                    const notificationRef = db.ref('notifications/' + AppState.currentUser.uid).push();
+                    const notificationId = notificationRef.key;
+                    
+                    const notification = {
+                        id: notificationId,
+                        type: type,
+                        data: data,
+                        timestamp: Date.now(),
+                        read: false
+                    };
+                    
+                    await notificationRef.set(notification);
+                    return { success: true, notification };
+                } catch (error) {
+                    console.error('Error creating notification:', error);
+                    return { success: false, error: error.message };
+                }
+            },
+            
+            async submitLoanApplication(loanData) {
+                try {
+                    // Validate required documents
+                    if (!AppState.userData.nrcFront || !AppState.userData.nrcBack) {
+                        return { 
+                            success: false, 
+                            error: 'Missing NRC documents. Please upload NRC front and back photos in your profile.' 
+                        };
+                    }
+                    
+                    // Validate collateral images
+                    const collateralImages = Object.values(AppState.uploadedFiles)
+                        .filter(file => file && file.type.includes('collateral'))
+                        .map(file => file.url);
+                    
+                    if (collateralImages.length < 3) {
+                        return { 
+                            success: false, 
+                            error: 'Minimum 3 collateral images required. Please upload at least 3 images.' 
+                        };
+                    }
+                    
+                    // Check loan limits from system settings
+                    if (AppState.systemSettings && AppState.systemSettings.maxLoanAmount) {
+                        if (loanData.amount > AppState.systemSettings.maxLoanAmount) {
+                            return { 
+                                success: false, 
+                                error: `Loan amount exceeds maximum limit of ${Utils.formatCurrency(AppState.systemSettings.maxLoanAmount)}` 
+                            };
+                        }
+                    }
+                    
+                    // Check for duplicate active loan
+                    if (AppState.activeLoan && AppState.activeLoan.status !== 'completed' && AppState.activeLoan.status !== 'defaulted') {
+                        return { 
+                            success: false, 
+                            error: 'You already have an active loan. Please complete it before applying for a new one.' 
+                        };
+                    }
+                    
+                    // Create loan record
+                    const loanRef = db.ref('loans').push();
+                    const loanId = loanRef.key;
+                    
+                    const loan = {
+                        id: loanId,
+                        customerId: AppState.currentUser.uid,
+                        customerName: AppState.userData.fullName,
+                        agentId: AppState.userData.assignedAgentId,
+                        agentName: AppState.agentData ? AppState.agentData.fullName : 'Not assigned',
+                        amount: loanData.amount,
+                        duration: loanData.duration,
+                        purpose: loanData.purpose,
+                        purposeDescription: loanData.purposeDescription,
+                        collateral: {
+                            category: loanData.collateralCategory,
+                            description: loanData.collateralDescription,
+                            value: loanData.collateralValue,
+                            location: loanData.collateralLocation,
+                            images: collateralImages,
+                            video: AppState.uploadedFiles['collateral-4'] ? AppState.uploadedFiles['collateral-4'].url : null
+                        },
+                        status: 'pending',
+                        stage: 'submitted',
+                        createdAt: Date.now(),
+                        updatedAt: Date.now(),
+                        documents: {
+                            nrcFront: AppState.userData.nrcFront,
+                            nrcBack: AppState.userData.nrcBack,
+                            profilePhoto: AppState.userData.profilePhoto
+                        }
+                    };
+                    
+                    await loanRef.set(loan);
+                    
+                    // Create notification for admin and agent
+                    await this.createNotification('loan_submitted', {
+                        loanId: loanId,
+                        amount: loanData.amount,
+                        timestamp: Date.now()
+                    });
+                    
+                    // Notify agent
+                    if (AppState.userData.assignedAgentId) {
+                        const agentNotificationRef = db.ref('notifications/' + AppState.userData.assignedAgentId).push();
+                        await agentNotificationRef.set({
+                            type: 'customer_loan_submitted',
+                            data: {
+                                customerId: AppState.currentUser.uid,
+                                customerName: AppState.userData.fullName,
+                                loanId: loanId,
+                                amount: loanData.amount
+                            },
+                            timestamp: Date.now(),
+                            read: false
+                        });
+                    }
+                    
+                    return { success: true, loanId: loanId, message: 'Loan application submitted successfully' };
+                } catch (error) {
+                    console.error('Error submitting loan:', error);
+                    return { success: false, error: 'Error submitting loan application' };
+                }
+            },
+            
+            async makePayment(paymentData) {
+                try {
+                    if (!AppState.activeLoan) {
+                        return { success: false, error: 'No active loan found' };
+                    }
+                    
+                    const paymentRef = db.ref('payments').push();
+                    const paymentId = paymentRef.key;
+                    
+                    const payment = {
+                        id: paymentId,
+                        loanId: AppState.activeLoan.id,
+                        customerId: AppState.currentUser.uid,
+                        customerName: AppState.userData.fullName,
+                        amount: paymentData.amount,
+                        method: paymentData.method,
+                        reference: paymentData.reference,
+                        proofUrl: paymentData.proofUrl,
+                        timestamp: Date.now(),
+                        status: 'pending',
+                        verifiedBy: null,
+                        verifiedAt: null
+                    };
+                    
+                    await paymentRef.set(payment);
+                    
+                    // Create notification
+                    await this.createNotification('payment_submitted', {
+                        paymentId: paymentId,
+                        amount: paymentData.amount,
+                        timestamp: Date.now()
+                    });
+                    
+                    return { success: true, paymentId: paymentId };
+                } catch (error) {
+                    console.error('Error making payment:', error);
+                    return { success: false, error: 'Error processing payment' };
+                }
+            },
+            
+            async updateProfile(profileData) {
+                try {
+                    const userRef = db.ref('users/' + AppState.currentUser.uid);
+                    const updates = {
+                        ...profileData,
+                        updatedAt: Date.now()
+                    };
+                    
+                    await userRef.update(updates);
+                    
+                    // Update local state
+                    AppState.userData = { ...AppState.userData, ...updates };
+                    
+                    return { success: true, message: 'Profile updated successfully' };
+                } catch (error) {
+                    console.error('Error updating profile:', error);
+                    return { success: false, error: 'Error updating profile' };
+                }
+            },
+            
+            async changePassword(currentPassword, newPassword) {
+                try {
+                    // Re-authenticate user
+                    const credential = firebase.auth.EmailAuthProvider.credential(
+                        AppState.currentUser.email,
+                        currentPassword
+                    );
+                    
+                    await AppState.currentUser.reauthenticateWithCredential(credential);
+                    
+                    // Update password
+                    await AppState.currentUser.updatePassword(newPassword);
+                    
+                    return { success: true, message: 'Password changed successfully' };
+                } catch (error) {
+                    console.error('Error changing password:', error);
+                    
+                    let errorMessage = 'Error changing password';
+                    if (error.code === 'auth/wrong-password') {
+                        errorMessage = 'Current password is incorrect';
+                    } else if (error.code === 'auth/weak-password') {
+                        errorMessage = 'New password is too weak';
+                    }
+                    
+                    return { success: false, error: errorMessage };
+                }
+            },
+            
+            async signOut() {
+                try {
+                    // Remove all real-time listeners
+                    AppState.realtimeListeners.forEach(listener => {
+                        listener();
+                    });
+                    AppState.realtimeListeners = [];
+                    
+                    // Sign out
+                    await auth.signOut();
+                    window.location.href = 'login.html';
+                } catch (error) {
+                    console.error('Error signing out:', error);
+                }
+            }
+        };
+
+        // ===== Cloudinary Service =====
+        const CloudinaryService = {
+            widget: null,
+            
+            initUploadWidget() {
+                this.widget = cloudinary.createUploadWidget({
+                    cloudName: cloudinaryConfig.cloudName,
+                    uploadPreset: cloudinaryConfig.uploadPreset,
+                    sources: ['local', 'camera', 'url'],
+                    multiple: false,
+                    maxFiles: 1,
+                    maxFileSize: cloudinaryConfig.maxFileSize,
+                    clientAllowedFormats: cloudinaryConfig.allowedFormats,
+                    showAdvancedOptions: false,
+                    cropping: false,
+                    theme: 'minimal',
+                    folder: cloudinaryConfig.folder,
+                    showCompletedButton: true,
+                    autoMinimize: false
+                }, (error, result) => {
+                    this.handleUploadCallback(error, result);
+                });
+                
+                console.log("Cloudinary widget initialized");
+            },
+            
+            handleUploadCallback(error, result) {
+                if (error) {
+                    console.error('Cloudinary upload error:', error);
+                    return;
+                }
+                
+                if (result && result.event === "success") {
+                    this.handleUploadComplete(result.info);
+                }
+            },
+            
+            handleUploadComplete(info) {
+                const activeBox = document.querySelector('.upload-box.active');
+                if (!activeBox) return;
+                
+                const type = activeBox.dataset.type;
+                const fileData = {
+                    url: info.secure_url,
+                    publicId: info.public_id,
+                    format: info.format,
+                    bytes: info.bytes,
+                    width: info.width,
+                    height: info.height,
+                    originalFilename: info.original_filename,
+                    type: type,
+                    uploadedAt: Date.now()
+                };
+                
+                AppState.uploadedFiles[type] = fileData;
+                
+                // Update preview
+                this.updatePreview(activeBox, fileData.url);
+                
+                // Update status
+                const status = activeBox.querySelector('.upload-status');
+                if (status) {
+                    status.classList.add('active');
+                }
+                
+                // Update collateral upload status
+                const collateralCount = Object.keys(AppState.uploadedFiles)
+                    .filter(key => key.includes('collateral'))
+                    .length;
+                
+                const statusElement = document.getElementById('collateralUploadStatus');
+                if (statusElement) {
+                    statusElement.textContent = `${collateralCount} collateral files uploaded`;
+                    statusElement.style.color = 'var(--macos-green-600)';
+                }
+                
+                // Remove active class
+                activeBox.classList.remove('active');
+            },
+            
+            updatePreview(box, imageUrl) {
+                // Remove existing preview
+                const existingPreview = box.querySelector('.upload-preview');
+                if (existingPreview) existingPreview.remove();
+                
+                // Create new preview
+                const preview = document.createElement('img');
+                preview.className = 'upload-preview';
+                preview.src = imageUrl;
+                preview.alt = 'Upload preview';
+                preview.onerror = () => {
+                    preview.style.display = 'none';
+                };
+                
+                box.appendChild(preview);
+                box.classList.add('active');
+            },
+            
+            openWidget(uploadBox) {
+                if (!this.widget) {
+                    this.initUploadWidget();
+                }
+                
+                // Mark the active box
+                document.querySelectorAll('.upload-box').forEach(box => {
+                    box.classList.remove('active');
+                });
+                
+                uploadBox.classList.add('active');
+                this.widget.open();
+            }
+        };
+
+        // ===== UI Manager =====
+        const UIManager = {
+            init() {
+                this.cacheElements();
+                this.bindEvents();
+                this.initAuth();
+            },
+            
+            cacheElements() {
+                // Navigation
+                this.navItems = document.querySelectorAll('.nav-item');
+                this.contentSections = document.querySelectorAll('.content-section');
+                
+                // Dashboard elements
+                this.activeLoansCount = document.getElementById('activeLoansCount');
+                this.totalBorrowed = document.getElementById('totalBorrowed');
+                this.currentBalance = document.getElementById('currentBalance');
+                this.paymentDue = document.getElementById('paymentDue');
+                
+                // Agent validation
+                this.agentName = document.getElementById('agentName');
+                this.agentBranch = document.getElementById('agentBranch');
+                this.agentIdInput = document.getElementById('agentIdInput');
+                this.verifyAgentBtn = document.getElementById('verifyAgentBtn');
+                this.agentValidationMessage = document.getElementById('agentValidationMessage');
+                
+                // Profile elements
+                this.profileName = document.getElementById('profileName');
+                this.profileFullName = document.getElementById('profileFullName');
+                this.profileEmail = document.getElementById('profileEmail');
+                this.profilePhone = document.getElementById('profilePhone');
+                this.profileNRC = document.getElementById('profileNRC');
+                this.profileAddress = document.getElementById('profileAddress');
+                this.profileHouseNumber = document.getElementById('profileHouseNumber');
+                this.profileAgentId = document.getElementById('profileAgentId');
+                this.profilePhoto = document.getElementById('profilePhoto');
+                this.profileAvatar = document.getElementById('profileAvatar');
+                
+                // Loan application
+                this.loanAmount = document.getElementById('loanAmount');
+                this.loanDuration = document.getElementById('loanDuration');
+                this.loanPurpose = document.getElementById('loanPurpose');
+                this.purposeDescription = document.getElementById('purposeDescription');
+                this.collateralCategory = document.getElementById('collateralCategory');
+                this.collateralValue = document.getElementById('collateralValue');
+                this.collateralDescription = document.getElementById('collateralDescription');
+                this.collateralLocation = document.getElementById('collateralLocation');
+                this.acceptTerms = document.getElementById('acceptTerms');
+                this.submitLoanBtn = document.getElementById('submitLoanBtn');
+                
+                // Buttons
+                this.logoutBtn = document.getElementById('logoutBtn');
+                this.applyLoanBtn = document.getElementById('applyLoanBtn');
+                this.makePaymentBtn = document.getElementById('makePaymentBtn');
+                
+                // Modals
+                this.paymentModal = document.getElementById('paymentModal');
+                this.documentModal = document.getElementById('documentModal');
+                this.changePasswordModal = document.getElementById('changePasswordModal');
+                
+                // Toast
+                this.notificationToast = document.getElementById('notificationToast');
+            },
+            
+            bindEvents() {
+                // Navigation
+                this.navItems.forEach(item => {
+                    item.addEventListener('click', (e) => {
+                        e.preventDefault();
+                        const section = item.dataset.section;
+                        this.showSection(section);
+                        
+                        // Update active nav item
+                        this.navItems.forEach(nav => nav.classList.remove('active'));
+                        item.classList.add('active');
+                    });
+                });
+                
+                // Agent validation
+                this.verifyAgentBtn.addEventListener('click', () => this.verifyAgent());
+                this.agentIdInput.addEventListener('keyup', (e) => {
+                    if (e.key === 'Enter') this.verifyAgent();
+                });
+                
+                // Loan application
+                this.submitLoanBtn.addEventListener('click', () => this.submitLoanApplication());
+                this.applyLoanBtn.addEventListener('click', () => {
+                    this.showSection('apply');
+                    this.navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.nav-item[data-section="apply"]').classList.add('active');
+                });
+                
+                // Payment
+                this.makePaymentBtn.addEventListener('click', () => this.showPaymentModal());
+                
+                // Logout
+                this.logoutBtn.addEventListener('click', () => FirebaseService.signOut());
+                
+                // Modals
+                document.getElementById('closePaymentModal').addEventListener('click', () => {
+                    this.paymentModal.classList.remove('active');
+                });
+                
+                document.getElementById('closeDocumentModal').addEventListener('click', () => {
+                    this.documentModal.classList.remove('active');
+                });
+                
+                document.getElementById('closePasswordModal').addEventListener('click', () => {
+                    this.changePasswordModal.classList.remove('active');
+                });
+                
+                // Quick action buttons
+                document.getElementById('goToAgentValidationBtn')?.addEventListener('click', () => {
+                    this.showSection('dashboard');
+                    this.navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.nav-item[data-section="dashboard"]').classList.add('active');
+                });
+                
+                // Edit profile
+                document.getElementById('editProfileBtn')?.addEventListener('click', () => {
+                    this.showEditProfileModal();
+                });
+                
+                // Change password
+                document.getElementById('changePasswordBtn')?.addEventListener('click', () => {
+                    this.changePasswordModal.classList.add('active');
+                });
+                
+                document.getElementById('submitPasswordChange')?.addEventListener('click', () => {
+                    this.changePassword();
+                });
+                
+                document.getElementById('cancelPasswordChange')?.addEventListener('click', () => {
+                    this.changePasswordModal.classList.remove('active');
+                });
+            },
+            
+            async initAuth() {
+                Utils.showLoading('Authenticating...');
+                
+                const userData = await FirebaseService.checkAuth();
+                if (!userData) return;
+                
+                // Initialize Cloudinary
+                CloudinaryService.initUploadWidget();
+                
+                // Load initial data
+                await this.loadInitialData();
+                
+                // Setup real-time listeners
+                this.setupRealtimeListeners();
+                
+                // Update UI
+                this.updateProfileUI();
+                this.updateDashboardUI();
+                this.updateAgentUI();
+                
+                Utils.hideLoading();
+                
+                Utils.showToast('Welcome Back', `Hello ${userData.fullName}!`, 'info');
+            },
+            
+            async loadInitialData() {
+                // Load loans
+                await FirebaseService.loadCustomerLoans();
+                
+                // Load payments
+                await FirebaseService.loadPayments();
+                
+                // Load notifications
+                await FirebaseService.loadNotifications();
+            },
+            
+            setupRealtimeListeners() {
+                // Listen for loan updates
+                const loansRef = db.ref('loans').orderByChild('customerId').equalTo(AppState.currentUser.uid);
+                const loansListener = loansRef.on('value', (snapshot) => {
+                    const loans = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const loan = childSnapshot.val();
+                        loan.id = childSnapshot.key;
+                        loans.push(loan);
+                    });
+                    
+                    loans.sort((a, b) => b.createdAt - a.createdAt);
+                    AppState.loans = loans;
+                    AppState.activeLoan = loans.find(loan => 
+                        loan.status === 'active' || 
+                        loan.status === 'pending' || 
+                        loan.status === 'approved'
+                    );
+                    
+                    this.updateDashboardUI();
+                    this.updateLoansUI();
+                });
+                
+                AppState.realtimeListeners.push(() => loansListener());
+                
+                // Listen for payment updates
+                const paymentsRef = db.ref('payments').orderByChild('customerId').equalTo(AppState.currentUser.uid);
+                const paymentsListener = paymentsRef.on('value', (snapshot) => {
+                    const payments = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const payment = childSnapshot.val();
+                        payment.id = childSnapshot.key;
+                        payments.push(payment);
+                    });
+                    
+                    payments.sort((a, b) => b.timestamp - a.timestamp);
+                    AppState.payments = payments;
+                    
+                    this.updatePaymentsUI();
+                });
+                
+                AppState.realtimeListeners.push(() => paymentsListener());
+                
+                // Listen for notification updates
+                const notificationsRef = db.ref('notifications/' + AppState.currentUser.uid);
+                const notificationsListener = notificationsRef.on('value', (snapshot) => {
+                    const notifications = [];
+                    snapshot.forEach((childSnapshot) => {
+                        const notification = childSnapshot.val();
+                        notification.id = childSnapshot.key;
+                        notifications.push(notification);
+                    });
+                    
+                    notifications.sort((a, b) => b.timestamp - a.timestamp);
+                    AppState.notifications = notifications;
+                    
+                    this.updateNotificationsUI();
+                    
+                    // Show unread count
+                    const unreadCount = notifications.filter(n => !n.read).length;
+                    this.updateNotificationBadge(unreadCount);
+                });
+                
+                AppState.realtimeListeners.push(() => notificationsListener());
+                
+                // Listen for user profile updates
+                const userRef = db.ref('users/' + AppState.currentUser.uid);
+                const userListener = userRef.on('value', (snapshot) => {
+                    if (snapshot.exists()) {
+                        AppState.userData = snapshot.val();
+                        this.updateProfileUI();
+                        this.updateAgentUI();
+                    }
+                });
+                
+                AppState.realtimeListeners.push(() => userListener());
+            },
+            
+            showSection(sectionId) {
+                // Hide all sections
+                this.contentSections.forEach(section => {
+                    section.style.display = 'none';
+                });
+                
+                // Show selected section
+                const section = document.getElementById(sectionId + 'Section');
+                if (section) {
+                    section.style.display = 'block';
+                }
+                
+                // Update page title
+                const title = document.getElementById('pageTitle');
+                switch(sectionId) {
+                    case 'dashboard':
+                        title.textContent = 'Customer Dashboard';
+                        break;
+                    case 'profile':
+                        title.textContent = 'My Profile';
+                        this.updateProfileUI();
+                        break;
+                    case 'apply':
+                        title.textContent = 'Apply for Loan';
+                        this.updateLoanApplicationUI();
+                        break;
+                    case 'loans':
+                        title.textContent = 'My Loans';
+                        this.updateLoansUI();
+                        break;
+                    case 'payments':
+                        title.textContent = 'Payments';
+                        this.updatePaymentsUI();
+                        break;
+                    case 'notifications':
+                        title.textContent = 'Notifications';
+                        this.updateNotificationsUI();
+                        break;
+                    case 'history':
+                        title.textContent = 'Loan History';
+                        this.updateLoanHistoryUI();
+                        break;
+                    case 'settings':
+                        title.textContent = 'Settings';
+                        break;
+                }
+            },
+            
+            updateProfileUI() {
+                if (!AppState.userData) return;
+                
+                // Update profile display
+                this.profileName.textContent = AppState.userData.fullName || 'Not set';
+                this.profileFullName.textContent = AppState.userData.fullName || 'Not set';
+                this.profileEmail.textContent = AppState.userData.email || 'Not set';
+                this.profilePhone.textContent = AppState.userData.phone || 'Not set';
+                this.profileNRC.textContent = AppState.userData.nrc || 'Not set';
+                this.profileAddress.textContent = AppState.userData.residence || 'Not set';
+                this.profileHouseNumber.textContent = AppState.userData.houseNumber || 'Not set';
+                this.profileAgentId.textContent = AppState.userData.assignedAgentId || 'Not assigned';
+                
+                // Update profile photo
+                if (AppState.userData.profilePhoto) {
+                    this.profilePhoto.src = AppState.userData.profilePhoto;
+                    this.profileAvatar.src = AppState.userData.profilePhoto;
+                }
+                
+                // Update document status
+                if (AppState.userData.nrcFront) {
+                    document.getElementById('nrcFrontStatus').textContent = 'Uploaded';
+                    document.getElementById('nrcFrontStatus').style.color = 'var(--macos-green-600)';
+                }
+                
+                if (AppState.userData.nrcBack) {
+                    document.getElementById('nrcBackStatus').textContent = 'Uploaded';
+                    document.getElementById('nrcBackStatus').style.color = 'var(--macos-green-600)';
+                }
+            },
+            
+            updateDashboardUI() {
+                if (!AppState.loans || AppState.loans.length === 0) {
+                    this.activeLoansCount.textContent = '0';
+                    this.totalBorrowed.textContent = 'K0.00';
+                    this.currentBalance.textContent = 'K0.00';
+                    this.paymentDue.textContent = 'K0.00';
+                    
+                    document.getElementById('activeLoanInfo').textContent = 'No active loans';
+                    document.getElementById('nextPaymentInfo').textContent = 'No payment due';
+                    document.getElementById('dueDateInfo').textContent = 'No due date';
+                    return;
+                }
+                
+                // Calculate dashboard metrics
+                const activeLoans = AppState.loans.filter(loan => 
+                    loan.status === 'active' || loan.status === 'approved'
+                );
+                
+                const totalBorrowed = AppState.loans.reduce((sum, loan) => sum + (loan.amount || 0), 0);
+                const totalPaid = AppState.payments
+                    .filter(p => p.status === 'verified')
+                    .reduce((sum, payment) => sum + (payment.amount || 0), 0);
+                
+                const currentBalance = totalBorrowed - totalPaid;
+                
+                // Update UI
+                this.activeLoansCount.textContent = activeLoans.length;
+                this.totalBorrowed.textContent = Utils.formatCurrency(totalBorrowed);
+                this.currentBalance.textContent = Utils.formatCurrency(currentBalance > 0 ? currentBalance : 0);
+                
+                // Find next payment due
+                if (AppState.activeLoan) {
+                    // Calculate next payment (simplified)
+                    const nextPayment = AppState.activeLoan.amount / (AppState.activeLoan.duration || 12);
+                    this.paymentDue.textContent = Utils.formatCurrency(nextPayment);
+                    
+                    document.getElementById('activeLoanInfo').textContent = 
+                        `Active loan: ${Utils.formatCurrency(AppState.activeLoan.amount)}`;
+                    
+                    document.getElementById('nextPaymentInfo').textContent = 
+                        `Next payment: ${Utils.formatCurrency(nextPayment)}`;
+                    
+                    // Calculate next due date (simplified)
+                    const nextDueDate = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
+                    document.getElementById('dueDateInfo').textContent = 
+                        `Due: ${nextDueDate.toLocaleDateString()}`;
+                }
+            },
+            
+            updateAgentUI() {
+                if (!AppState.userData) return;
+                
+                if (AppState.userData.assignedAgentId) {
+                    this.agentIdInput.value = AppState.userData.assignedAgentId;
+                    
+                    if (AppState.agentData) {
+                        this.agentName.textContent = AppState.agentData.fullName || 'Agent';
+                        this.agentBranch.textContent = AppState.agentData.branch || 'Main Branch';
+                        this.agentValidationMessage.textContent = 'Agent verified and assigned';
+                        this.agentValidationMessage.style.color = 'var(--macos-green-600)';
+                        
+                        // Update agent status icon
+                        const icon = document.getElementById('agentStatusIcon');
+                        icon.innerHTML = '<i class="fas fa-user-check"></i>';
+                        icon.style.background = 'var(--macos-green-400)';
+                    } else {
+                        this.agentName.textContent = 'Agent ID: ' + AppState.userData.assignedAgentId;
+                        this.agentBranch.textContent = 'Verification pending...';
+                        this.agentValidationMessage.textContent = 'Agent data loading...';
+                        this.agentValidationMessage.style.color = 'var(--macos-yellow)';
+                    }
+                } else {
+                    this.agentName.textContent = 'No agent assigned';
+                    this.agentBranch.textContent = 'Please enter your Agent ID';
+                    this.agentValidationMessage.textContent = '';
+                }
+            },
+            
+            async verifyAgent() {
+                const agentId = this.agentIdInput.value.trim();
+                
+                if (!agentId) {
+                    this.agentValidationMessage.textContent = 'Please enter Agent ID';
+                    this.agentValidationMessage.style.color = 'var(--macos-red)';
+                    return;
+                }
+                
+                Utils.showLoading('Verifying Agent...');
+                
+                const result = await FirebaseService.verifyAgentId(agentId);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    this.agentValidationMessage.textContent = result.message;
+                    this.agentValidationMessage.style.color = 'var(--macos-green-600)';
+                    
+                    this.agentName.textContent = result.agent.fullName;
+                    this.agentBranch.textContent = result.agent.branch || 'Main Branch';
+                    
+                    // Update agent status icon
+                    const icon = document.getElementById('agentStatusIcon');
+                    icon.innerHTML = '<i class="fas fa-user-check"></i>';
+                    icon.style.background = 'var(--macos-green-400)';
+                    
+                    Utils.showToast('Agent Verified', 'Your agent has been successfully verified and assigned', 'info');
+                    
+                    // Update loan application UI if needed
+                    this.updateLoanApplicationUI();
+                } else {
+                    this.agentValidationMessage.textContent = result.error;
+                    this.agentValidationMessage.style.color = 'var(--macos-red)';
+                    
+                    // Update agent status icon
+                    const icon = document.getElementById('agentStatusIcon');
+                    icon.innerHTML = '<i class="fas fa-exclamation-triangle"></i>';
+                    icon.style.background = 'var(--macos-red)';
+                    
+                    Utils.showToast('Agent Verification Failed', result.error, 'error');
+                }
+            },
+            
+            updateLoanApplicationUI() {
+                // Check if agent is verified
+                if (!AppState.userData.assignedAgentId || !AppState.agentData) {
+                    // Show agent validation required
+                    document.getElementById('loanAgentValidation').style.display = 'block';
+                    document.getElementById('loanApplicationForm').style.display = 'none';
+                } else {
+                    // Show loan application form
+                    document.getElementById('loanAgentValidation').style.display = 'none';
+                    document.getElementById('loanApplicationForm').style.display = 'block';
+                    
+                    // Update loan limit info
+                    if (AppState.systemSettings && AppState.systemSettings.maxLoanAmount) {
+                        document.getElementById('loanLimitInfo').textContent = 
+                            `Maximum loan amount: ${Utils.formatCurrency(AppState.systemSettings.maxLoanAmount)}`;
+                    }
+                }
+                
+                // Reset form
+                this.loanAmount.value = '';
+                this.loanDuration.value = '12';
+                this.loanPurpose.value = 'business';
+                this.purposeDescription.value = '';
+                this.collateralCategory.value = 'property';
+                this.collateralValue.value = '';
+                this.collateralDescription.value = '';
+                this.collateralLocation.value = '';
+                this.acceptTerms.checked = false;
+                
+                // Reset uploaded files
+                AppState.uploadedFiles = {};
+                document.querySelectorAll('.upload-box').forEach(box => {
+                    box.classList.remove('active');
+                    const preview = box.querySelector('.upload-preview');
+                    if (preview) preview.remove();
+                    
+                    const status = box.querySelector('.upload-status');
+                    if (status) status.classList.remove('active');
+                });
+                
+                document.getElementById('collateralUploadStatus').textContent = 'Upload images to Cloudinary';
+                document.getElementById('collateralUploadStatus').style.color = 'var(--macos-gray-500)';
+            },
+            
+            async submitLoanApplication() {
+                // Validate form
+                const amount = parseFloat(this.loanAmount.value);
+                const duration = parseInt(this.loanDuration.value);
+                const purpose = this.loanPurpose.value;
+                const purposeDescription = this.purposeDescription.value.trim();
+                const collateralCategory = this.collateralCategory.value;
+                const collateralValue = parseFloat(this.collateralValue.value);
+                const collateralDescription = this.collateralDescription.value.trim();
+                const collateralLocation = this.collateralLocation.value.trim();
+                
+                if (!amount || amount < 100) {
+                    Utils.showToast('Validation Error', 'Please enter a valid loan amount (minimum K100)', 'error');
+                    return;
+                }
+                
+                if (!purposeDescription) {
+                    Utils.showToast('Validation Error', 'Please describe the purpose of the loan', 'error');
+                    return;
+                }
+                
+                if (!collateralValue || collateralValue < amount) {
+                    Utils.showToast('Validation Error', 'Collateral value must be at least equal to loan amount', 'error');
+                    return;
+                }
+                
+                if (!collateralDescription) {
+                    Utils.showToast('Validation Error', 'Please describe the collateral', 'error');
+                    return;
+                }
+                
+                if (!collateralLocation) {
+                    Utils.showToast('Validation Error', 'Please specify collateral location', 'error');
+                    return;
+                }
+                
+                if (!this.acceptTerms.checked) {
+                    Utils.showToast('Validation Error', 'You must accept the terms and conditions', 'error');
+                    return;
+                }
+                
+                // Check collateral images
+                const collateralImages = Object.values(AppState.uploadedFiles)
+                    .filter(file => file && file.type.includes('collateral'))
+                    .map(file => file.url);
+                
+                if (collateralImages.length < 3) {
+                    Utils.showToast('Validation Error', 'Please upload at least 3 collateral images', 'error');
+                    return;
+                }
+                
+                Utils.showLoading('Submitting Loan Application...');
+                
+                const loanData = {
+                    amount: amount,
+                    duration: duration,
+                    purpose: purpose,
+                    purposeDescription: purposeDescription,
+                    collateralCategory: collateralCategory,
+                    collateralValue: collateralValue,
+                    collateralDescription: collateralDescription,
+                    collateralLocation: collateralLocation
+                };
+                
+                const result = await FirebaseService.submitLoanApplication(loanData);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showToast('Success', 'Loan application submitted successfully!', 'info');
+                    
+                    // Reset form
+                    this.updateLoanApplicationUI();
+                    
+                    // Navigate to loans section
+                    this.showSection('loans');
+                    this.navItems.forEach(nav => nav.classList.remove('active'));
+                    document.querySelector('.nav-item[data-section="loans"]').classList.add('active');
+                } else {
+                    Utils.showToast('Submission Failed', result.error, 'error');
+                }
+            },
+            
+            updateLoansUI() {
+                const loansList = document.getElementById('activeLoansList');
+                const loanMonitoring = document.getElementById('loanMonitoring');
+                const repaymentPlan = document.getElementById('repaymentPlan');
+                
+                if (!AppState.loans || AppState.loans.length === 0) {
+                    loansList.innerHTML = '<p>No loans found.</p>';
+                    loanMonitoring.innerHTML = '<p>Select a loan to view details.</p>';
+                    repaymentPlan.innerHTML = '<p>No repayment plan available.</p>';
+                    return;
+                }
+                
+                // Display active loans
+                let loansHTML = '<div class="loans-grid">';
+                AppState.loans.forEach(loan => {
+                    const statusClass = `status-${loan.status}`;
+                    loansHTML += `
+                        <div class="loan-card" data-loan-id="${loan.id}">
+                            <div class="loan-header">
+                                <div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div>
+                                <div class="loan-status ${statusClass}">${loan.status}</div>
+                            </div>
+                            <div class="loan-details">
+                                <div class="loan-purpose">${loan.purpose}</div>
+                                <div class="loan-date">Applied: ${Utils.formatDate(loan.createdAt)}</div>
+                                <div class="loan-duration">Duration: ${loan.duration} months</div>
+                            </div>
+                            <button class="btn btn-outline btn-small view-loan-btn" data-loan-id="${loan.id}">
+                                <i class="fas fa-eye"></i>
+                                View Details
+                            </button>
+                        </div>
+                    `;
+                });
+                loansHTML += '</div>';
+                loansList.innerHTML = loansHTML;
+                
+                // Add event listeners to view buttons
+                document.querySelectorAll('.view-loan-btn').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        const loanId = e.target.closest('.view-loan-btn').dataset.loanId;
+                        this.showLoanDetails(loanId);
+                    });
+                });
+                
+                // If there's an active loan, show its details
+                if (AppState.activeLoan) {
+                    this.showLoanDetails(AppState.activeLoan.id);
+                }
+            },
+            
+            showLoanDetails(loanId) {
+                const loan = AppState.loans.find(l => l.id === loanId);
+                if (!loan) return;
+                
+                const loanMonitoring = document.getElementById('loanMonitoring');
+                const repaymentPlan = document.getElementById('repaymentPlan');
+                
+                // Display loan monitoring
+                let monitoringHTML = `
+                    <div class="loan-details-grid">
+                        <div class="detail-card">
+                            <div class="detail-label">Loan Amount</div>
+                            <div class="detail-value">${Utils.formatCurrency(loan.amount)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value">${loan.status}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Stage</div>
+                            <div class="detail-value">${loan.stage || 'Submitted'}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Duration</div>
+                            <div class="detail-value">${loan.duration} months</div>
+                        </div>
+                    </div>
+                `;
+                
+                if (loan.approvedAmount) {
+                    monitoringHTML += `
+                        <div class="detail-card" style="grid-column: span 2;">
+                            <div class="detail-label">Approved Amount</div>
+                            <div class="detail-value">${Utils.formatCurrency(loan.approvedAmount)}</div>
+                        </div>
+                    `;
+                }
+                
+                if (loan.interestRate) {
+                    monitoringHTML += `
+                        <div class="detail-card">
+                            <div class="detail-label">Interest Rate</div>
+                            <div class="detail-value">${loan.interestRate}%</div>
+                        </div>
+                    `;
+                }
+                
+                if (loan.totalPayable) {
+                    monitoringHTML += `
+                        <div class="detail-card">
+                            <div class="detail-label">Total Payable</div>
+                            <div class="detail-value">${Utils.formatCurrency(loan.totalPayable)}</div>
+                        </div>
+                    `;
+                }
+                
+                loanMonitoring.innerHTML = monitoringHTML;
+                
+                // Display repayment plan
+                if (loan.repaymentPlan && loan.repaymentPlan.length > 0) {
+                    let planHTML = `
+                        <table class="repayment-table">
+                            <thead>
+                                <tr>
+                                    <th>Installment</th>
+                                    <th>Due Date</th>
+                                    <th>Principal</th>
+                                    <th>Interest</th>
+                                    <th>Total Due</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    loan.repaymentPlan.forEach(installment => {
+                        const isOverdue = installment.status === 'overdue';
+                        const rowClass = isOverdue ? 'overdue' : '';
+                        
+                        planHTML += `
+                            <tr class="${rowClass}">
+                                <td>${installment.number}</td>
+                                <td>${Utils.formatDate(installment.dueDate)}</td>
+                                <td>${Utils.formatCurrency(installment.principal)}</td>
+                                <td>${Utils.formatCurrency(installment.interest)}</td>
+                                <td>${Utils.formatCurrency(installment.totalDue)}</td>
+                                <td>${installment.status}</td>
+                            </tr>
+                        `;
+                    });
+                    
+                    planHTML += `
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    repaymentPlan.innerHTML = planHTML;
+                } else {
+                    repaymentPlan.innerHTML = '<p>Repayment plan will be generated after loan approval.</p>';
+                }
+            },
+            
+            updatePaymentsUI() {
+                const paymentForm = document.getElementById('paymentForm');
+                const paymentHistory = document.getElementById('paymentHistory');
+                
+                if (!AppState.activeLoan) {
+                    paymentForm.innerHTML = '<p>No payment due at this time.</p>';
+                    paymentHistory.innerHTML = '<p>No payment history found.</p>';
+                    return;
+                }
+                
+                // Display payment form
+                paymentForm.innerHTML = `
+                    <div class="payment-due">
+                        <div class="form-group">
+                            <label class="form-label">Amount Due</label>
+                            <div class="form-input" style="font-size: 24px; font-weight: 600;">
+                                ${Utils.formatCurrency(AppState.activeLoan.amount / (AppState.activeLoan.duration || 12))}
+                            </div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentMethod" class="form-label">Payment Method</label>
+                            <select id="paymentMethod" class="form-input">
+                                <option value="mtn_mobile_money">MTN Mobile Money</option>
+                                <option value="airtel_money">Airtel Money</option>
+                                <option value="zamtel_kwacha">Zamtel Kwacha</option>
+                                <option value="bank_transfer">Bank Transfer</option>
+                                <option value="cash">Cash</option>
+                            </select>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="paymentReference" class="form-label">Transaction Reference</label>
+                            <input type="text" id="paymentReference" class="form-input" placeholder="Enter transaction ID">
+                        </div>
+                        
+                        <div class="form-group">
+                            <label class="form-label">Payment Proof (Screenshot)</label>
+                            <div class="payment-upload">
+                                <div class="upload-box" onclick="openPaymentUpload()" style="width: 100px; height: 100px;">
+                                    <i class="fas fa-upload"></i>
+                                    <span>Upload Proof</span>
+                                </div>
+                                <div class="upload-instructions">
+                                    <p>Upload screenshot of payment confirmation</p>
+                                    <p>Max size: 10MB</p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <button class="btn btn-primary" id="submitPaymentBtn">
+                            <i class="fas fa-check"></i>
+                            Submit Payment
+                        </button>
+                    </div>
+                `;
+                
+                // Add event listener to submit payment button
+                document.getElementById('submitPaymentBtn')?.addEventListener('click', () => {
+                    this.submitPayment();
+                });
+                
+                // Display payment history
+                if (AppState.payments.length > 0) {
+                    let historyHTML = `
+                        <table class="history-table">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Amount</th>
+                                    <th>Method</th>
+                                    <th>Reference</th>
+                                    <th>Status</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                    `;
+                    
+                    AppState.payments.forEach(payment => {
+                        const statusClass = payment.status === 'verified' ? 'status-active' : 
+                                          payment.status === 'pending' ? 'status-pending' : 'status-defaulted';
+                        
+                        historyHTML += `
+                            <tr>
+                                <td>${Utils.formatDate(payment.timestamp)}</td>
+                                <td>${Utils.formatCurrency(payment.amount)}</td>
+                                <td>${payment.method}</td>
+                                <td>${payment.reference || 'N/A'}</td>
+                                <td><span class="status-badge-table ${statusClass}">${payment.status}</span></td>
+                            </tr>
+                        `;
+                    });
+                    
+                    historyHTML += `
+                            </tbody>
+                        </table>
+                    `;
+                    
+                    paymentHistory.innerHTML = historyHTML;
+                } else {
+                    paymentHistory.innerHTML = '<p>No payment history found.</p>';
+                }
+            },
+            
+            async submitPayment() {
+                const method = document.getElementById('paymentMethod').value;
+                const reference = document.getElementById('paymentReference').value.trim();
+                
+                if (!reference) {
+                    Utils.showToast('Validation Error', 'Please enter transaction reference', 'error');
+                    return;
+                }
+                
+                // For now, we'll use a mock proof URL
+                // In production, you would upload to Cloudinary
+                const proofUrl = 'https://via.placeholder.com/300';
+                
+                Utils.showLoading('Processing Payment...');
+                
+                const paymentData = {
+                    amount: AppState.activeLoan.amount / (AppState.activeLoan.duration || 12),
+                    method: method,
+                    reference: reference,
+                    proofUrl: proofUrl
+                };
+                
+                const result = await FirebaseService.makePayment(paymentData);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showToast('Success', 'Payment submitted for verification', 'info');
+                    
+                    // Reset form
+                    document.getElementById('paymentReference').value = '';
+                    
+                    // Close modal if open
+                    this.paymentModal.classList.remove('active');
+                } else {
+                    Utils.showToast('Payment Failed', result.error, 'error');
+                }
+            },
+            
+            updateNotificationsUI() {
+                const notificationsList = document.getElementById('notificationsList');
+                
+                if (!AppState.notifications || AppState.notifications.length === 0) {
+                    notificationsList.innerHTML = '<p>No notifications yet.</p>';
+                    return;
+                }
+                
+                let notificationsHTML = '';
+                AppState.notifications.forEach(notification => {
+                    const iconClass = notification.type.includes('success') ? 'success' :
+                                     notification.type.includes('warning') ? 'warning' : 'info';
+                    
+                    let title = 'Notification';
+                    let message = '';
+                    
+                    switch(notification.type) {
+                        case 'loan_submitted':
+                            title = 'Loan Application Submitted';
+                            message = `Your loan application for ${Utils.formatCurrency(notification.data.amount)} has been submitted`;
+                            break;
+                        case 'loan_approved':
+                            title = 'Loan Approved';
+                            message = `Your loan application has been approved`;
+                            break;
+                        case 'payment_submitted':
+                            title = 'Payment Submitted';
+                            message = `Your payment of ${Utils.formatCurrency(notification.data.amount)} is being verified`;
+                            break;
+                        case 'payment_verified':
+                            title = 'Payment Verified';
+                            message = `Your payment has been verified and recorded`;
+                            break;
+                        case 'agent_assigned':
+                            title = 'Agent Assigned';
+                            message = `Agent has been assigned to your account`;
+                            break;
+                        default:
+                            message = notification.data ? JSON.stringify(notification.data) : 'New notification';
+                    }
+                    
+                    notificationsHTML += `
+                        <div class="notification-item ${notification.read ? '' : 'unread'}">
+                            <div class="notification-icon ${iconClass}">
+                                <i class="fas fa-${iconClass === 'success' ? 'check-circle' : 
+                                               iconClass === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                            </div>
+                            <div class="notification-content">
+                                <div class="notification-title">${title}</div>
+                                <div class="notification-message">${message}</div>
+                                <div class="notification-time">${Utils.formatDate(notification.timestamp)}</div>
+                            </div>
+                        </div>
+                    `;
+                });
+                
+                notificationsList.innerHTML = notificationsHTML;
+            },
+            
+            updateLoanHistoryUI() {
+                const historyTable = document.getElementById('loanHistoryTable');
+                
+                if (!AppState.loans || AppState.loans.length === 0) {
+                    historyTable.innerHTML = '<p>No loan history found.</p>';
+                    return;
+                }
+                
+                let historyHTML = `
+                    <table class="history-table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Purpose</th>
+                                <th>Duration</th>
+                                <th>Status</th>
+                                <th>Agent</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                `;
+                
+                AppState.loans.forEach(loan => {
+                    const statusClass = `status-${loan.status}`;
+                    
+                    historyHTML += `
+                        <tr>
+                            <td>${Utils.formatDate(loan.createdAt)}</td>
+                            <td>${Utils.formatCurrency(loan.amount)}</td>
+                            <td>${loan.purpose}</td>
+                            <td>${loan.duration} months</td>
+                            <td><span class="status-badge-table ${statusClass}">${loan.status}</span></td>
+                            <td>${loan.agentName || 'N/A'}</td>
+                        </tr>
+                    `;
+                });
+                
+                historyHTML += `
+                        </tbody>
+                    </table>
+                `;
+                
+                historyTable.innerHTML = historyHTML;
+            },
+            
+            updateNotificationBadge(count) {
+                const badge = document.getElementById('notificationCount');
+                if (count > 0) {
+                    badge.textContent = count;
+                    badge.style.display = 'inline-block';
+                } else {
+                    badge.style.display = 'none';
+                }
+            },
+            
+            showPaymentModal() {
+                this.paymentModal.classList.add('active');
+            },
+            
+            showEditProfileModal() {
+                // Implementation for edit profile modal
+                Utils.showToast('Info', 'Edit profile functionality coming soon', 'info');
+            },
+            
+            async changePassword() {
+                const currentPassword = document.getElementById('currentPassword').value;
+                const newPassword = document.getElementById('newPassword').value;
+                const confirmPassword = document.getElementById('confirmNewPassword').value;
+                
+                if (!currentPassword || !newPassword || !confirmPassword) {
+                    Utils.showToast('Validation Error', 'Please fill all password fields', 'error');
+                    return;
+                }
+                
+                if (newPassword !== confirmPassword) {
+                    Utils.showToast('Validation Error', 'New passwords do not match', 'error');
+                    return;
+                }
+                
+                if (newPassword.length < 6) {
+                    Utils.showToast('Validation Error', 'Password must be at least 6 characters', 'error');
+                    return;
+                }
+                
+                Utils.showLoading('Changing Password...');
+                
+                const result = await FirebaseService.changePassword(currentPassword, newPassword);
+                
+                Utils.hideLoading();
+                
+                if (result.success) {
+                    Utils.showToast('Success', 'Password changed successfully', 'info');
+                    this.changePasswordModal.classList.remove('active');
+                    
+                    // Clear fields
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmNewPassword').value = '';
+                } else {
+                    Utils.showToast('Password Change Failed', result.error, 'error');
+                }
+            }
+        };
+
+        // ===== Initialize Application =====
+        document.addEventListener('DOMContentLoaded', () => {
+            UIManager.init();
+        });
+
+        // ===== Global Functions =====
+        function openCloudinaryWidget(element) {
+            CloudinaryService.openWidget(element);
+        }
+
+        function openPaymentUpload() {
+            // Implementation for payment proof upload
+            Utils.showToast('Info', 'Payment proof upload coming soon', 'info');
+        }
+
+        function viewDocument(type) {
+            const documentImage = document.getElementById('documentImage');
+            const documentModal = document.getElementById('documentModal');
+            
+            if (type === 'nrcFront' && AppState.userData.nrcFront) {
+                documentImage.src = AppState.userData.nrcFront;
+                documentModal.classList.add('active');
+            } else if (type === 'nrcBack' && AppState.userData.nrcBack) {
+                documentImage.src = AppState.userData.nrcBack;
+                documentModal.classList.add('active');
+            } else {
+                Utils.showToast('Info', 'Document not uploaded yet', 'info');
+            }
+        }
+
+        // ===== Online/Offline Detection =====
+        window.addEventListener('online', () => {
+            document.getElementById('connectionStatus').textContent = 'Online';
+            document.getElementById('connectionStatus').style.color = 'var(--macos-green-600)';
+            Utils.showToast('Connection Restored', 'You are back online', 'info');
+        });
+
+        window.addEventListener('offline', () => {
+            document.getElementById('connectionStatus').textContent = 'Offline';
+            document.getElementById('connectionStatus').style.color = 'var(--macos-red)';
+            Utils.showToast('Connection Lost', 'Please check your internet connection', 'error');
+        });
+    </script>
+</body>
+</html>
