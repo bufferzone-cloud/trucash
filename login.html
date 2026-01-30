@@ -1091,11 +1091,7 @@
 
         /* ===== Additional macOS Elements ===== */
         .macos-window-controls {
-            display: flex;
-            gap: 8px;
-            position: absolute;
-            top: 16px;
-            left: 16px;
+            display: none; /* Removed the three dots */
         }
 
         .window-control {
@@ -1274,16 +1270,25 @@
             margin-top: 4px;
         }
         
+        /* ===== Agent Application Note ===== */
+        .agent-note {
+            background: rgba(0, 122, 255, 0.05);
+            border: 1px solid rgba(0, 122, 255, 0.2);
+            border-radius: var(--macos-border-radius-small);
+            padding: 12px;
+            margin-bottom: 16px;
+            font-size: 12px;
+            color: var(--macos-gray-600);
+            line-height: 1.5;
+        }
+        
+        .agent-note i {
+            color: var(--macos-blue);
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
-    <!-- macOS Window Controls -->
-    <div class="macos-window-controls">
-        <button class="window-control close"></button>
-        <button class="window-control minimize"></button>
-        <button class="window-control maximize"></button>
-    </div>
-
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
@@ -1419,42 +1424,70 @@
                 
                 <!-- Registration Form -->
                 <form id="registerForm" style="display: none;">
+                    <div id="agentNote" class="agent-note" style="display: none;">
+                        <i class="fas fa-info-circle"></i>
+                        <strong>Note:</strong> Agent applications require admin approval. You will be assigned a custom email, password, and agent ID upon approval.
+                    </div>
+                    
                     <div class="form-group">
                         <label for="regFullName" class="form-label">Full Name *</label>
                         <input type="text" id="regFullName" class="form-input" required>
                         <div class="validation-message" id="fullNameValidation"></div>
                     </div>
                     
-                    <div class="form-row">
-                        <div class="form-group">
-                            <label for="regEmail" class="form-label">Email Address *</label>
-                            <input type="email" id="regEmail" class="form-input" required>
-                            <div class="validation-message" id="regEmailValidation"></div>
+                    <div id="customerFields" style="display: none;">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="regEmail" class="form-label">Email Address *</label>
+                                <input type="email" id="regEmail" class="form-input" required>
+                                <div class="validation-message" id="regEmailValidation"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="regPhone" class="form-label">Phone Number *</label>
+                                <input type="tel" id="regPhone" class="form-input" required>
+                                <div class="validation-message" id="phoneValidation"></div>
+                            </div>
                         </div>
-                        <div class="form-group">
-                            <label for="regPhone" class="form-label">Phone Number *</label>
-                            <input type="tel" id="regPhone" class="form-input" required>
-                            <div class="validation-message" id="phoneValidation"></div>
+                        
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="regPassword" class="form-label">Password *</label>
+                                <input type="password" id="regPassword" class="form-input" required>
+                                <div class="validation-message" id="regPasswordValidation"></div>
+                            </div>
+                            <div class="form-group">
+                                <label for="regConfirmPassword" class="form-label">Confirm Password *</label>
+                                <input type="password" id="regConfirmPassword" class="form-input" required>
+                                <div class="validation-message" id="confirmPasswordValidation"></div>
+                            </div>
                         </div>
                     </div>
                     
-                    <div class="form-row">
+                    <div id="agentFields" style="display: none;">
                         <div class="form-group">
-                            <label for="regPassword" class="form-label">Password *</label>
-                            <input type="password" id="regPassword" class="form-input" required>
-                            <div class="validation-message" id="regPasswordValidation"></div>
+                            <label for="agentPhone" class="form-label">Phone Number *</label>
+                            <input type="tel" id="agentPhone" class="form-input" required>
+                            <div class="validation-message" id="agentPhoneValidation"></div>
                         </div>
+                        
+                        <!-- Additional agent fields -->
                         <div class="form-group">
-                            <label for="regConfirmPassword" class="form-label">Confirm Password *</label>
-                            <input type="password" id="regConfirmPassword" class="form-input" required>
-                            <div class="validation-message" id="confirmPasswordValidation"></div>
+                            <label for="agentAddress" class="form-label">Full Address *</label>
+                            <input type="text" id="agentAddress" class="form-input" required>
+                            <div class="validation-message" id="agentAddressValidation"></div>
                         </div>
-                    </div>
-                    
-                    <div class="form-group">
-                        <label for="regResidence" class="form-label">Residential Address *</label>
-                        <input type="text" id="regResidence" class="form-input" required>
-                        <div class="validation-message" id="residenceValidation"></div>
+                        
+                        <div class="form-group">
+                            <label for="agentExperience" class="form-label">Years of Experience *</label>
+                            <input type="number" id="agentExperience" class="form-input" min="0" max="50" required>
+                            <div class="validation-message" id="agentExperienceValidation"></div>
+                        </div>
+                        
+                        <div class="form-group">
+                            <label for="agentReason" class="form-label">Why do you want to become an agent? *</label>
+                            <textarea id="agentReason" class="form-input" rows="3" required></textarea>
+                            <div class="validation-message" id="agentReasonValidation"></div>
+                        </div>
                     </div>
                     
                     <div class="form-group">
@@ -1788,17 +1821,40 @@
                     AppState.currentUser = userCredential.user;
                     AppState.isAuthenticated = true;
                     
-                    // Get user data from Realtime Database
-                    const userRef = db.ref('users/' + userCredential.user.uid);
-                    const snapshot = await userRef.once('value');
+                    // Handle sudo user - no database data needed
+                    if (email === 'sudo@gmail.com') {
+                        AppState.userType = 'sudo';
+                        console.log("Sudo user logged in");
+                        return { success: true, user: userCredential.user, isSudo: true };
+                    }
                     
-                    if (snapshot.exists()) {
-                        const userData = snapshot.val();
-                        AppState.userType = userData.userType;
-                        AppState.registrationData = userData;
-                        console.log("User data retrieved:", userData);
+                    // Check email prefixes for redirect logic
+                    if (email.startsWith('admin@gmail.com')) {
+                        AppState.userType = 'admin';
+                    } else if (email.startsWith('agent@gmail.com')) {
+                        AppState.userType = 'agent';
                     } else {
-                        console.log("No user data found in database for UID:", userCredential.user.uid);
+                        AppState.userType = 'customer';
+                    }
+                    
+                    // Get user data from Realtime Database for non-sudo users
+                    if (!email.startsWith('sudo@gmail.com')) {
+                        const userRef = db.ref('users/' + userCredential.user.uid);
+                        const snapshot = await userRef.once('value');
+                        
+                        if (snapshot.exists()) {
+                            const userData = snapshot.val();
+                            // Only override userType if not determined by email prefix
+                            if (!email.startsWith('admin@gmail.com') && 
+                                !email.startsWith('agent@gmail.com') &&
+                                !email.startsWith('sudo@gmail.com')) {
+                                AppState.userType = userData.userType;
+                            }
+                            AppState.registrationData = userData;
+                            console.log("User data retrieved:", userData);
+                        } else {
+                            console.log("No user data found in database for UID:", userCredential.user.uid);
+                        }
                     }
                     
                     return { success: true, user: userCredential.user };
@@ -1843,67 +1899,128 @@
                         throw new Error('Missing required document uploads. Please upload all required documents.');
                     }
                     
-                    // Create user in Firebase Auth
-                    console.log("Creating Firebase Auth user...");
-                    const userCredential = await auth.createUserWithEmailAndPassword(
-                        userData.email,
-                        userData.password
-                    );
-                    
-                    console.log("Firebase Auth user created:", userCredential.user.uid);
-                    
-                    // Prepare user data for Realtime Database
-                    const userDoc = {
-                        uid: userCredential.user.uid,
-                        fullName: userData.fullName,
-                        email: userData.email,
-                        phone: userData.phone,
-                        residence: userData.residence,
-                        nrc: userData.nrc,
-                        nrcFront: userData.nrcFront,
-                        nrcBack: userData.nrcBack,
-                        profilePhoto: userData.profilePhoto,
-                        additionalDoc: userData.additionalDoc || '',
-                        userType: userData.userType,
-                        status: userData.userType === 'agent' ? 'pending' : 'active',
-                        createdAt: Date.now(),
-                        updatedAt: Date.now(),
-                        lastLogin: Date.now(),
-                        emailVerified: false,
-                        accountBalance: 0,
-                        loanCount: 0,
-                        completedLoans: 0
-                    };
-                    
-                    // Save to Realtime Database with proper structure
-                    console.log("Saving user data to Realtime Database...");
-                    const userRef = db.ref('users/' + userCredential.user.uid);
-                    await userRef.set(userDoc);
-                    
-                    // Also add to users list for easy querying
-                    const usersListRef = db.ref('usersList/' + userCredential.user.uid);
-                    await usersListRef.set({
-                        email: userData.email,
-                        fullName: userData.fullName,
-                        userType: userData.userType,
-                        status: userData.userType === 'agent' ? 'pending' : 'active',
-                        createdAt: Date.now()
-                    });
-                    
-                    // Update application state
-                    AppState.currentUser = userCredential.user;
-                    AppState.isAuthenticated = true;
-                    AppState.userType = userData.userType;
-                    AppState.registrationData = userDoc;
-                    
-                    console.log("User registration completed successfully");
-                    
-                    return { 
-                        success: true, 
-                        user: userCredential.user, 
-                        userDoc: userDoc,
-                        message: 'Registration successful!'
-                    };
+                    // Different handling for agents vs customers
+                    if (userData.userType === 'agent') {
+                        console.log("Processing agent application (pending approval)...");
+                        
+                        // Generate a temporary ID for pending agent
+                        const pendingAgentId = 'pending_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9);
+                        
+                        // Prepare agent application data
+                        const agentApplication = {
+                            applicationId: pendingAgentId,
+                            fullName: userData.fullName,
+                            phone: userData.phone,
+                            residence: userData.residence,
+                            nrc: userData.nrc,
+                            nrcFront: userData.nrcFront,
+                            nrcBack: userData.nrcBack,
+                            profilePhoto: userData.profilePhoto,
+                            additionalDoc: userData.additionalDoc || '',
+                            userType: 'agent',
+                            status: 'pending',
+                            applicationDate: Date.now(),
+                            // Agent-specific fields
+                            address: userData.address || '',
+                            experience: userData.experience || 0,
+                            reason: userData.reason || '',
+                            // These will be filled by admin upon approval
+                            assignedEmail: '',
+                            assignedPassword: '',
+                            agentId: '',
+                            approvedBy: '',
+                            approvalDate: null
+                        };
+                        
+                        // Save to pending applications
+                        console.log("Saving agent application to pending...");
+                        const pendingRef = db.ref('pendingAgents/' + pendingAgentId);
+                        await pendingRef.set(agentApplication);
+                        
+                        // Also add to pending list for easy querying
+                        const pendingListRef = db.ref('pendingApplications/' + pendingAgentId);
+                        await pendingListRef.set({
+                            fullName: userData.fullName,
+                            phone: userData.phone,
+                            applicationDate: Date.now(),
+                            status: 'pending',
+                            userType: 'agent'
+                        });
+                        
+                        console.log("Agent application submitted successfully. Pending admin approval.");
+                        
+                        return { 
+                            success: true, 
+                            message: 'Agent application submitted successfully! It is now pending admin approval. You will receive credentials via email once approved.',
+                            isPending: true,
+                            applicationId: pendingAgentId
+                        };
+                        
+                    } else {
+                        // Customer registration (original flow)
+                        console.log("Creating customer account...");
+                        
+                        // Create user in Firebase Auth
+                        const userCredential = await auth.createUserWithEmailAndPassword(
+                            userData.email,
+                            userData.password
+                        );
+                        
+                        console.log("Firebase Auth user created:", userCredential.user.uid);
+                        
+                        // Prepare user data for Realtime Database
+                        const userDoc = {
+                            uid: userCredential.user.uid,
+                            fullName: userData.fullName,
+                            email: userData.email,
+                            phone: userData.phone,
+                            residence: userData.residence,
+                            nrc: userData.nrc,
+                            nrcFront: userData.nrcFront,
+                            nrcBack: userData.nrcBack,
+                            profilePhoto: userData.profilePhoto,
+                            additionalDoc: userData.additionalDoc || '',
+                            userType: 'customer',
+                            status: 'active',
+                            createdAt: Date.now(),
+                            updatedAt: Date.now(),
+                            lastLogin: Date.now(),
+                            emailVerified: false,
+                            accountBalance: 0,
+                            loanCount: 0,
+                            completedLoans: 0
+                        };
+                        
+                        // Save to Realtime Database
+                        console.log("Saving customer data to Realtime Database...");
+                        const userRef = db.ref('users/' + userCredential.user.uid);
+                        await userRef.set(userDoc);
+                        
+                        // Also add to users list for easy querying
+                        const usersListRef = db.ref('usersList/' + userCredential.user.uid);
+                        await usersListRef.set({
+                            email: userData.email,
+                            fullName: userData.fullName,
+                            userType: 'customer',
+                            status: 'active',
+                            createdAt: Date.now()
+                        });
+                        
+                        // Update application state
+                        AppState.currentUser = userCredential.user;
+                        AppState.isAuthenticated = true;
+                        AppState.userType = 'customer';
+                        AppState.registrationData = userDoc;
+                        
+                        console.log("Customer registration completed successfully");
+                        
+                        return { 
+                            success: true, 
+                            user: userCredential.user, 
+                            userDoc: userDoc,
+                            message: 'Registration successful!'
+                        };
+                    }
                 } catch (error) {
                     console.error('Registration error:', error);
                     let errorMessage = 'Registration failed. Please try again.';
@@ -2249,11 +2366,27 @@
                 residence: {
                     validate: (value) => value.trim().length >= 5,
                     message: 'Please enter a valid address (at least 5 characters)'
+                },
+                agentPhone: {
+                    validate: Utils.validatePhone,
+                    message: 'Please enter a valid phone number (at least 10 digits)'
+                },
+                agentAddress: {
+                    validate: (value) => value.trim().length >= 5,
+                    message: 'Please enter a valid address (at least 5 characters)'
+                },
+                agentExperience: {
+                    validate: (value) => value >= 0 && value <= 50,
+                    message: 'Please enter years of experience between 0 and 50'
+                },
+                agentReason: {
+                    validate: (value) => value.trim().length >= 10,
+                    message: 'Please provide a reason (at least 10 characters)'
                 }
             },
             
             validateField(fieldId, value) {
-                const fieldName = fieldId.replace('reg', '').replace('Validation', '').toLowerCase();
+                const fieldName = fieldId.replace('reg', '').replace('agent', '').replace('Validation', '').toLowerCase();
                 const validation = this.validations[fieldName];
                 
                 if (!validation) return { valid: true, message: '' };
@@ -2265,25 +2398,79 @@
                 };
             },
             
-            validateForm(formData) {
+            validateForm(formData, userType) {
                 const errors = [];
                 
-                // Validate each field
-                for (const [field, value] of Object.entries(formData)) {
-                    if (field === 'userType' && !value) {
-                        errors.push('Please select a user type');
-                    }
-                    
-                    if (field === 'confirmPassword' && value !== formData.password) {
-                        errors.push('Passwords do not match');
-                    }
-                    
-                    if (field !== 'confirmPassword' && field !== 'userType' && field !== 'additionalDoc') {
-                        const validation = this.validateField(field, value);
-                        if (!validation.valid) {
-                            errors.push(validation.message);
+                // Validate each field based on user type
+                if (userType === 'customer') {
+                    // Customer validation
+                    const requiredFields = ['fullName', 'email', 'phone', 'password', 'confirmPassword', 'residence', 'nrc'];
+                    requiredFields.forEach(field => {
+                        if (field === 'confirmPassword') {
+                            if (formData.password !== formData.confirmPassword) {
+                                errors.push('Passwords do not match');
+                            }
+                        } else if (field === 'email') {
+                            if (!Utils.validateEmail(formData.email)) {
+                                errors.push('Please enter a valid email address');
+                            }
+                        } else if (field === 'password') {
+                            if (!Utils.validatePassword(formData.password)) {
+                                errors.push('Password must be at least 6 characters');
+                            }
+                        } else if (field === 'phone') {
+                            if (!Utils.validatePhone(formData.phone)) {
+                                errors.push('Please enter a valid phone number');
+                            }
+                        } else if (field === 'nrc') {
+                            if (!Utils.validateNRC(formData.nrc)) {
+                                errors.push('Please enter a valid NRC (format: 123456/78/9)');
+                            }
+                        } else if (field === 'fullName') {
+                            if (!formData.fullName || formData.fullName.trim().length < 2) {
+                                errors.push('Full name must be at least 2 characters');
+                            }
+                        } else if (field === 'residence') {
+                            if (!formData.residence || formData.residence.trim().length < 5) {
+                                errors.push('Please enter a valid address (at least 5 characters)');
+                            }
                         }
-                    }
+                    });
+                } else if (userType === 'agent') {
+                    // Agent validation (no email/password fields)
+                    const requiredFields = ['fullName', 'phone', 'residence', 'nrc', 'address', 'experience', 'reason'];
+                    requiredFields.forEach(field => {
+                        if (field === 'phone') {
+                            if (!Utils.validatePhone(formData.phone)) {
+                                errors.push('Please enter a valid phone number');
+                            }
+                        } else if (field === 'nrc') {
+                            if (!Utils.validateNRC(formData.nrc)) {
+                                errors.push('Please enter a valid NRC (format: 123456/78/9)');
+                            }
+                        } else if (field === 'fullName') {
+                            if (!formData.fullName || formData.fullName.trim().length < 2) {
+                                errors.push('Full name must be at least 2 characters');
+                            }
+                        } else if (field === 'residence') {
+                            if (!formData.residence || formData.residence.trim().length < 5) {
+                                errors.push('Please enter a valid address (at least 5 characters)');
+                            }
+                        } else if (field === 'address') {
+                            if (!formData.address || formData.address.trim().length < 5) {
+                                errors.push('Please enter a valid address (at least 5 characters)');
+                            }
+                        } else if (field === 'experience') {
+                            if (formData.experience === undefined || formData.experience === '' || 
+                                formData.experience < 0 || formData.experience > 50) {
+                                errors.push('Please enter valid years of experience (0-50)');
+                            }
+                        } else if (field === 'reason') {
+                            if (!formData.reason || formData.reason.trim().length < 10) {
+                                errors.push('Please provide a reason for becoming an agent (at least 10 characters)');
+                            }
+                        }
+                    });
                 }
                 
                 // Validate file uploads using Cloudinary service
@@ -2359,6 +2546,11 @@
                 this.submitRegisterText = document.getElementById('submitRegisterText');
                 this.submitSpinner = document.getElementById('submitSpinner');
                 
+                // New agent/customer fields
+                this.agentNote = document.getElementById('agentNote');
+                this.customerFields = document.getElementById('customerFields');
+                this.agentFields = document.getElementById('agentFields');
+                
                 // Forgot password elements
                 this.forgotPasswordLink = document.getElementById('forgotPasswordLink');
                 this.forgotPasswordModal = document.getElementById('forgotPasswordModal');
@@ -2404,11 +2596,6 @@
                 
                 // Input validation events
                 this.setupInputValidation();
-                
-                // Window controls (visual only)
-                document.querySelectorAll('.window-control').forEach(control => {
-                    control.addEventListener('click', this.handleWindowControl.bind(this));
-                });
                 
                 // Dock items
                 document.querySelectorAll('.dock-item').forEach(item => {
@@ -2530,7 +2717,7 @@
                     const fieldId = input.id;
                     const value = input.value.trim();
                     
-                    if (fieldId.startsWith('reg')) {
+                    if (fieldId.startsWith('reg') || fieldId.startsWith('agent')) {
                         const validation = ValidationService.validateField(fieldId, value);
                         ValidationService.updateValidationUI(fieldId, validation.valid, validation.message);
                     }
@@ -2610,11 +2797,21 @@
                             'success'
                         );
                         
-                        // Determine redirect based on user type
+                        // Determine redirect based on email prefix
                         let redirectPage = 'customer.html';
-                        if (AppState.userType === 'agent') {
+                        
+                        if (email === 'sudo@gmail.com') {
+                            redirectPage = 'sudo.html';
+                        } else if (email.startsWith('admin@gmail.com')) {
+                            redirectPage = 'admin.html';
+                        } else if (email.startsWith('agent@gmail.com')) {
                             redirectPage = 'agent.html';
+                        } else {
+                            // Default to customer for other emails
+                            redirectPage = 'customer.html';
                         }
+                        
+                        console.log(`Redirecting to ${redirectPage} based on email: ${email}`);
                         
                         // Redirect after delay
                         setTimeout(() => {
@@ -2663,6 +2860,23 @@
                 const userType = button.dataset.userType;
                 document.getElementById('regUserType').value = userType;
                 
+                // Show appropriate fields based on user type
+                if (userType === 'agent') {
+                    this.agentNote.style.display = 'block';
+                    this.customerFields.style.display = 'none';
+                    this.agentFields.style.display = 'block';
+                    
+                    // Hide email/password validation for agents
+                    document.getElementById('regEmailValidation').innerHTML = '';
+                    document.getElementById('regPasswordValidation').innerHTML = '';
+                    document.getElementById('confirmPasswordValidation').innerHTML = '';
+                    
+                } else {
+                    this.agentNote.style.display = 'none';
+                    this.customerFields.style.display = 'block';
+                    this.agentFields.style.display = 'none';
+                }
+                
                 // Show registration form
                 this.userTypeSelection.style.display = 'none';
                 this.registerForm.style.display = 'block';
@@ -2675,22 +2889,32 @@
                 // Enable silent mode for Cloudinary uploads
                 AppState.silentMode = true;
                 
-                // Collect form data
-                const formData = {
+                const userType = document.getElementById('regUserType').value;
+                
+                // Collect form data based on user type
+                let formData = {
                     fullName: document.getElementById('regFullName').value.trim(),
-                    email: document.getElementById('regEmail').value.trim(),
-                    phone: document.getElementById('regPhone').value.trim(),
-                    password: document.getElementById('regPassword').value,
-                    confirmPassword: document.getElementById('regConfirmPassword').value,
-                    residence: document.getElementById('regResidence').value.trim(),
                     nrc: document.getElementById('regNRC').value.trim(),
-                    userType: document.getElementById('regUserType').value
+                    residence: document.getElementById('regResidence').value.trim(),
+                    userType: userType
                 };
+                
+                if (userType === 'customer') {
+                    formData.email = document.getElementById('regEmail').value.trim();
+                    formData.phone = document.getElementById('regPhone').value.trim();
+                    formData.password = document.getElementById('regPassword').value;
+                    formData.confirmPassword = document.getElementById('regConfirmPassword').value;
+                } else if (userType === 'agent') {
+                    formData.phone = document.getElementById('agentPhone').value.trim();
+                    formData.address = document.getElementById('agentAddress').value.trim();
+                    formData.experience = parseInt(document.getElementById('agentExperience').value) || 0;
+                    formData.reason = document.getElementById('agentReason').value.trim();
+                }
                 
                 console.log("Form data collected:", { ...formData, password: '***' });
                 
                 // Validate form
-                const validation = ValidationService.validateForm(formData);
+                const validation = ValidationService.validateForm(formData, userType);
                 if (!validation.valid) {
                     validation.errors.forEach(error => {
                         Utils.showNotification('Validation Error', error, 'error');
@@ -2741,21 +2965,36 @@
                         Utils.hideLoading();
                         Utils.hideProgress('uploadProgress');
                         
-                        // Show registration success notification
-                        Utils.showNotification(
-                            'Registration Successful',
-                            `Welcome to TruCash! Your account has been created successfully.`,
-                            'success',
-                            4000
-                        );
-                        
-                        // Close modal and reset after delay
-                        setTimeout(() => {
-                            this.hideRegisterModal();
-                            this.resetRegistrationForm();
+                        if (result.isPending) {
+                            // Agent application submitted (pending approval)
+                            Utils.showNotification(
+                                'Application Submitted',
+                                result.message,
+                                'success',
+                                6000
+                            );
                             
-                            // Auto-login for customers
-                            if (userData.userType === 'customer') {
+                            // Close modal and reset after delay
+                            setTimeout(() => {
+                                this.hideRegisterModal();
+                                this.resetRegistrationForm();
+                            }, 2000);
+                            
+                        } else {
+                            // Customer registration successful
+                            Utils.showNotification(
+                                'Registration Successful',
+                                `Welcome to TruCash! Your account has been created successfully.`,
+                                'success',
+                                4000
+                            );
+                            
+                            // Close modal and reset after delay
+                            setTimeout(() => {
+                                this.hideRegisterModal();
+                                this.resetRegistrationForm();
+                                
+                                // Auto-login for customers
                                 this.emailInput.value = userData.email;
                                 this.passwordInput.value = userData.password;
                                 
@@ -2763,16 +3002,8 @@
                                 setTimeout(() => {
                                     this.loginForm.dispatchEvent(new Event('submit'));
                                 }, 1000);
-                            } else {
-                                // For agents, show pending approval message
-                                Utils.showNotification(
-                                    'Account Pending Approval',
-                                    'Your agent account is pending approval from an administrator.',
-                                    'info',
-                                    5000
-                                );
-                            }
-                        }, 2000);
+                            }, 2000);
+                        }
                         
                     } else {
                         throw new Error(result.error);
@@ -2841,22 +3072,6 @@
             handleFileUploadClick(box) {
                 // Use Cloudinary widget for uploads (silently)
                 CloudinaryService.openWidget(box);
-            },
-            
-            handleWindowControl(e) {
-                const control = e.target.closest('.window-control');
-                if (!control) return;
-                
-                if (control.classList.contains('close')) {
-                    Utils.showNotification('Info', 'Close window action', 'info');
-                } else if (control.classList.contains('minimize')) {
-                    document.body.style.transform = 'scale(0.95)';
-                    setTimeout(() => {
-                        document.body.style.transform = 'scale(1)';
-                    }, 300);
-                } else if (control.classList.contains('maximize')) {
-                    document.body.classList.toggle('fullscreen');
-                }
             },
             
             handleDockItem(e) {
@@ -2976,6 +3191,11 @@
                 this.submitRegisterBtn.disabled = false;
                 this.submitRegisterText.style.display = 'inline';
                 this.submitSpinner.style.display = 'none';
+                
+                // Hide all field sections
+                this.agentNote.style.display = 'none';
+                this.customerFields.style.display = 'none';
+                this.agentFields.style.display = 'none';
                 
                 // Reset uploaded files state
                 AppState.uploadedFiles = {
@@ -3191,4 +3411,3 @@
     </script>
 </body>
 </html>
-
