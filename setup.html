@@ -1,0 +1,67 @@
+<!-- Create a temporary setup.html file with this code -->
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Create SUDO User</title>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    <script>
+        const firebaseConfig = {
+            apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
+            authDomain: "trucash-9fee8.firebaseapp.com",
+            databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
+            projectId: "trucash-9fee8",
+            storageBucket: "trucash-9fee8.firebasestorage.app",
+            messagingSenderId: "622416212225",
+            appId: "1:622416212225:web:07418a9b16f955c330ab00",
+            measurementId: "G-6TEZFNFDBK"
+        };
+        
+        // Initialize Firebase
+        const app = firebase.initializeApp(firebaseConfig);
+        const auth = firebase.auth();
+        const db = firebase.database();
+        
+        async function createSudoUser() {
+            const email = "sudo@gmail.com";
+            const password = "YourSecurePassword123!"; // CHANGE THIS!
+            
+            try {
+                // Create Firebase Auth user
+                const userCredential = await auth.createUserWithEmailAndPassword(email, password);
+                console.log("Auth user created:", userCredential.user.uid);
+                
+                // Create user record in database
+                const userData = {
+                    uid: userCredential.user.uid,
+                    email: email,
+                    fullName: "SUDO Admin",
+                    userType: "sudo",
+                    role: "super_admin",
+                    permissions: ["all"],
+                    status: "active",
+                    createdAt: Date.now(),
+                    createdBy: "system",
+                    lastLogin: null
+                };
+                
+                await db.ref('users/' + userCredential.user.uid).set(userData);
+                console.log("SUDO user created successfully!");
+                alert("SUDO user created successfully!\nEmail: sudo@gmail.com\nPassword: [your password]");
+                
+            } catch (error) {
+                console.error("Error creating SUDO user:", error);
+                alert("Error: " + error.message);
+            }
+        }
+        
+        // Run on page load
+        window.onload = createSudoUser;
+    </script>
+</head>
+<body>
+    <h1>Creating SUDO User...</h1>
+    <p>Check console for details.</p>
+</body>
+</html>
