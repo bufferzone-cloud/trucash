@@ -3446,62 +3446,7 @@
         };
 
         // ===== Firebase Service =====
-        const FirebaseService = {
-            // Authentication
-            async checkAuth() {
-                return new Promise((resolve) => {
-                    auth.onAuthStateChanged(async (user) => {
-                        if (user) {
-                            AppState.currentUser = user;
-                            AppState.isAuthenticated = true;
-                            await this.loadAdminData(user.uid);
-                            resolve(true);
-                        } else {
-                            // Redirect to login if not authenticated
-                            window.location.href = 'index.html';
-                            resolve(false);
-                        }
-                    });
-                });
-            },
-            
-            async loadAdminData(uid) {
-                try {
-                    const adminRef = db.ref('admins/' + uid);
-                    const snapshot = await adminRef.once('value');
-                    if (snapshot.exists()) {
-                        AppState.adminData = snapshot.val();
-                        this.updateAdminUI();
-                    } else {
-                        // Check if admin exists in users
-                        const userRef = db.ref('users/' + uid);
-                        const userSnapshot = await userRef.once('value');
-                        if (userSnapshot.exists() && userSnapshot.val().userType === 'admin') {
-                            AppState.adminData = userSnapshot.val();
-                            this.updateAdminUI();
-                        } else {
-                            Utils.showToast('Access Denied', 'Admin access required', 'error');
-                            setTimeout(() => {
-                                auth.signOut();
-                                window.location.href = 'index.html';
-                            }, 2000);
-                        }
-                    }
-                } catch (error) {
-                    console.error('Error loading admin data:', error);
-                }
-            },
-            
-            async logout() {
-                try {
-                    await auth.signOut();
-                    window.location.href = 'index.html';
-                } catch (error) {
-                    console.error('Logout error:', error);
-                    Utils.showToast('Logout Failed', 'Please try again', 'error');
-                }
-            },
-            
+       
             // Real-time Listeners
             setupRealTimeListeners() {
                 // Listen for applications
@@ -8028,8 +7973,7 @@
         async function initializeApp() {
             try {
                 // Check authentication
-                const isAuthenticated = await FirebaseService.checkAuth();
-                if (!isAuthenticated) return;
+               
                 
                 // Setup real-time listeners
                 FirebaseService.setupRealTimeListeners();
