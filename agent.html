@@ -2298,88 +2298,107 @@
 
         // ===== Firebase Service =====
         const FirebaseService = {
-           async checkAuth() {
-    return new Promise((resolve) => {
-        auth.onAuthStateChanged(async (user) => {
-            if (!user) {
-                window.location.href = 'login.html';
-                resolve(null);
-                return;
-            }
-            
-            try {
-                // Get agent data from Firebase
-                const agentRef = db.ref('users/' + user.uid);
-                const snapshot = await agentRef.once('value');
-                
-                if (!snapshot.exists()) {
-                    await auth.signOut();
-                    window.location.href = 'login.html';
-                    resolve(null);
-                    return;
+          async checkAuth() {
+    return new Promise((resolve, reject) => {
+        // Use the existing auth state first
+        const currentUser = auth.currentUser;
+        
+        if (!currentUser) {
+            // No user is currently signed in
+            window.location.href = 'login.html';
+            resolve(null);
+            return;
+        }
+        
+        // We have a signed-in user, verify their agent status
+        this.verifyAgentStatus(currentUser.uid)
+            .then((agentData) => {
+                if (agentData) {
+                    AppState.currentUser = currentUser;
+                    AppState.agentData = agentData;
+                    AppState.agentId = currentUser.uid;
+                    resolve(agentData);
+                } else {
+                    // Agent data not found or invalid
+                    auth.signOut().then(() => {
+                        window.location.href = 'login.html';
+                        resolve(null);
+                    });
                 }
-                
-                const agentData = snapshot.val();
-                
-                // Verify agent role
-                if (agentData.userType !== 'agent') {
-                    ToastManager.show('Access Denied', 'This dashboard is for agents only', 'error');
-                    await auth.signOut();
-                    window.location.href = 'login.html';
-                    resolve(null);
-                    return;
-                }
-                
-                // Check agent status - more flexible approach
-                // Allow login if status is active OR if agent is approved
-                const isActive = agentData.status === 'active';
-                const isApproved = agentData.isApproved === true || agentData.isApproved === "true";
-                const isVerified = agentData.verified === true || agentData.verified === "true";
-                
-                // If agent is not active and not approved/verified, show error
-                if (!isActive && !isApproved && !isVerified) {
-                    ToastManager.show('Account Pending', 
-                        'Your agent account is pending approval. Please wait for admin approval.', 
-                        'warning');
-                    await auth.signOut();
-                    window.location.href = 'login.html';
-                    resolve(null);
-                    return;
-                }
-                
-                // If agent is suspended/banned, show error
-                if (agentData.status === 'suspended' || agentData.status === 'banned') {
-                    ToastManager.show('Account Suspended', 
-                        'Your agent account has been suspended. Please contact support.', 
-                        'error');
-                    await auth.signOut();
-                    window.location.href = 'login.html';
-                    resolve(null);
-                    return;
-                }
-                
-                // Store agent data
-                AppState.currentUser = user;
-                AppState.agentData = agentData;
-                AppState.agentId = user.uid;
-                
-                // Load system settings
-                await this.loadSystemSettings();
-                
-                // Show appropriate message based on status
-                if (!isActive && (isApproved || isVerified)) {
-                    ToastManager.show('Account Pending Activation', 
-                        'Your account is approved but pending activation. Limited functionality available.', 
-                        'warning');
-                }
-                
-                resolve(agentData);
-            } catch (error) {
+            })
+            .catch((error) => {
                 console.error('Auth check error:', error);
-                resolve(null);
-            }
-        });
+                auth.signOut().then(() => {
+                    window.location.href = 'login.html';
+                    resolve(null);
+                });
+            });
     });
+},
+
+async verifyAgentStatus(userId) {
+    try {
+        const agentRef = db.ref('users/' + userId);
+        const snapshot = await agentRef.once('value');
+        
+        if (!snapshot.exists()) {
+            console.log('No user data found in database');
+            return null;
+        }
+        
+        const agentData = snapshot.val();
+        
+        // Check user type
+        if (agentData.userType !== 'agent') {
+            ToastManager.show('Access Denied', 'This dashboard is for agents only', 'error');
+            return null;
+        }
+        
+        // Check account status
+        const status = agentData.status || 'pending';
+        const isApproved = agentData.isApproved === true || agentData.isApproved === "true";
+        
+        // Handle different statuses
+        switch (status) {
+            case 'active':
+                return agentData;
+                
+            case 'pending':
+                if (isApproved) {
+                    ToastManager.show('Account Pending Activation', 
+                        'Your account is approved but pending final activation. Some features may be limited.', 
+                        'warning');
+                    return agentData;
+                } else {
+                    ToastManager.show('Account Pending Approval', 
+                        'Your agent account is pending admin approval. Please wait for approval.', 
+                        'warning');
+                    return null;
+                }
+                
+            case 'suspended':
+                ToastManager.show('Account Suspended', 
+                    'Your agent account has been suspended. Please contact support.', 
+                    'error');
+                return null;
+                
+            case 'banned':
+                ToastManager.show('Account Banned', 
+                    'Your agent account has been banned. Please contact support.', 
+                    'error');
+                return null;
+                
+            default:
+                ToastManager.show('Account Status Unknown', 
+                    'Your account status could not be determined. Please contact support.', 
+                    'error');
+                return null;
+        }
+        
+    } catch (error) {
+        console.error('Error verifying agent status:', error);
+        return null;
+    }
 },
             
             async loadSystemSettings() {
@@ -3106,40 +3125,47 @@
                 }
             },
             
-           async initAuth() {
+          async initAuth() {
     Utils.showLoading('Authenticating Agent...');
     
-    const agentData = await FirebaseService.checkAuth();
-    if (!agentData) return;
-    
-    // Check if agent is fully active
-    const isActive = agentData.status === 'active';
-    const isApproved = agentData.isApproved === true || agentData.isApproved === "true";
-    
-    // Initialize Cloudinary
-    CloudinaryService.initUploadWidget();
-    
-    // Load initial data
-    await this.loadInitialData();
-    
-    // Setup real-time listeners
-    this.setupRealtimeListeners();
-    
-    // Update UI
-    this.updateProfileUI();
-    this.updateDashboardUI();
-    
-    Utils.hideLoading();
-    
-    // Show appropriate welcome message
-    if (isActive && isApproved) {
-        ToastManager.show('Welcome Agent', `Hello ${agentData.fullName}!`, 'success');
-    } else if (isApproved && !isActive) {
-        ToastManager.show('Account Pending', 
-            'Your account is approved but awaiting final activation. Some features may be limited.', 
-            'warning');
-    } else {
-        ToastManager.show('Welcome', `Hello ${agentData.fullName}!`, 'info');
+    try {
+        const agentData = await FirebaseService.checkAuth();
+        
+        if (!agentData) {
+            // Authentication failed or user is not an agent
+            Utils.hideLoading();
+            return;
+        }
+        
+        // Authentication successful
+        console.log('Agent authenticated:', agentData);
+        
+        // Initialize Cloudinary
+        CloudinaryService.initUploadWidget();
+        
+        // Load initial data
+        await this.loadInitialData();
+        
+        // Setup real-time listeners
+        this.setupRealtimeListeners();
+        
+        // Update UI
+        this.updateProfileUI();
+        this.updateDashboardUI();
+        
+        Utils.hideLoading();
+        
+        // Show welcome message
+        if (agentData.status === 'active') {
+            ToastManager.show('Welcome Agent', `Hello ${agentData.fullName || 'Agent'}!`, 'success');
+        } else {
+            ToastManager.show('Welcome', `Hello ${agentData.fullName || 'Agent'}! (Limited Access)`, 'info');
+        }
+        
+    } catch (error) {
+        console.error('Authentication initialization error:', error);
+        Utils.hideLoading();
+        ToastManager.show('Authentication Error', 'Failed to authenticate. Please try again.', 'error');
     }
 },
             
