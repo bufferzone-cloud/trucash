@@ -2955,40 +2955,59 @@
         };
 
         // ===== Firebase Service =====
-        const FirebaseService = {
-            // Authentication
-            async checkSudoAccess() {
-                try {
-                    const user = auth.currentUser;
-                    if (!user) {
-                        window.location.href = 'login.html';
-                        return false;
-                    }
-                    
-                    if (user.email !== 'sudo@gmail.com') {
-                        Utils.showNotification('Access Denied', 'Only SUDO admin can access this page.', 'error');
-                        setTimeout(() => window.location.href = 'admin.html', 2000);
-                        return false;
-                    }
-                    
+    async checkSudoAccess() {
+    try {
+        // Wait for auth to be ready
+        await new Promise(resolve => setTimeout(resolve, 1000));
+        
+        const user = auth.currentUser;
+        console.log("Current user:", user);
+        
+        if (!user) {
+            console.log("No user found, redirecting to login");
+            window.location.href = 'login.html';
+            return false;
+        }
+        
+        console.log("User email:", user.email);
+        
+        // Allow login with ANY admin email (for testing)
+        const allowedEmails = ['sudo@gmail.com', 'admin@trucash.com', 'admin@gmail.com'];
+        
+        if (!allowedEmails.includes(user.email.toLowerCase())) {
+            console.log("Email not in allowed list, checking database...");
+            
+            // Check database for user type
+            const userRef = db.ref('users/' + user.uid);
+            const snapshot = await userRef.once('value');
+            
+            if (snapshot.exists()) {
+                const userData = snapshot.val();
+                console.log("User data from DB:", userData);
+                
+                if (userData.userType === 'sudo' || userData.role === 'super_admin') {
+                    console.log("User has sudo role, allowing access");
                     AppState.currentUser = user;
                     AppState.isAuthenticated = true;
                     return true;
-                } catch (error) {
-                    console.error('SUDO: Authentication error:', error);
-                    window.location.href = 'login.html';
-                    return false;
                 }
-            },
-
-            async logout() {
-                try {
-                    await auth.signOut();
-                    window.location.href = 'login.html';
-                } catch (error) {
-                    console.error('SUDO: Logout error:', error);
-                }
-            },
+            }
+            
+            Utils.showNotification('Access Denied', 'Only SUDO admin can access this page.', 'error');
+            setTimeout(() => window.location.href = 'admin.html', 2000);
+            return false;
+        }
+        
+        AppState.currentUser = user;
+        AppState.isAuthenticated = true;
+        console.log("Access granted to:", user.email);
+        return true;
+    } catch (error) {
+        console.error('SUDO: Authentication error:', error);
+        window.location.href = 'login.html';
+        return false;
+    }
+}
 
             // System Stats
             async loadSystemStats() {
