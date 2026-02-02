@@ -2187,122 +2187,180 @@
                 }
             },
             
-            async loadAgentData(agentId) {
-                try {
-                    const agentRef = db.ref('users/' + agentId);
-                    const snapshot = await agentRef.once('value');
-                    
-                    if (snapshot.exists()) {
-                        const agentData = snapshot.val();
-                        
-                        if (agentData.userType === 'agent') {
-                            AppState.agentData = agentData;
-                            return { success: true, data: agentData };
-                        } else {
-                            return { success: false, error: 'User is not an agent' };
-                        }
-                    } else {
-                        return { success: false, error: 'Agent not found' };
-                    }
-                } catch (error) {
-                    console.error('Error loading agent data:', error);
-                    return { success: false, error: 'Error loading agent information' };
+           async loadAgentData(agentIdentifier) {
+    try {
+        // Check if it's a Firebase UID (typically 28 characters)
+        if (agentIdentifier && agentIdentifier.length === 28) {
+            // It's likely a Firebase UID
+            const agentRef = db.ref('users/' + agentIdentifier);
+            const snapshot = await agentRef.once('value');
+            
+            if (snapshot.exists()) {
+                const agentData = snapshot.val();
+                if (agentData.userType === 'agent') {
+                    AppState.agentData = agentData;
+                    return { success: true, data: agentData };
+                } else {
+                    return { success: false, error: 'User is not an agent' };
                 }
-            },
+            }
+        }
+        
+        // If not found by UID, try to search by custom agent ID
+        return await this.searchAgentById(agentIdentifier);
+        
+    } catch (error) {
+        console.error('Error loading agent data:', error);
+        return { success: false, error: 'Error loading agent information' };
+    }
+},
             
             async verifyAgentId(agentId) {
-                try {
-                    Utils.showLoading('Verifying Agent ID...');
-                    
-                    const result = await this.loadAgentData(agentId);
-                    
-                    if (!result.success) {
-                        Utils.hideLoading();
-                        return result;
-                    }
-                    
-                    const agentData = result.data;
-                    
-                    // Check if agent is active and approved
-                    if (agentData.status !== 'active') {
-                        Utils.hideLoading();
-                        return { success: false, error: 'Agent account is not active' };
-                    }
-                    
-                    if (agentData.isApproved !== true) {
-                        Utils.hideLoading();
-                        return { success: false, error: 'Agent account is not approved' };
-                    }
-                    
-                    // Update customer's assigned agent
-                    const customerRef = db.ref('users/' + AppState.currentUser.uid);
-                    await customerRef.update({
-                        assignedAgentId: agentId,
-                        agentAssignedAt: Date.now(),
-                        updatedAt: Date.now()
-                    });
-                    
-                    // Update local state
-                    AppState.userData.assignedAgentId = agentId;
-                    AppState.agentData = agentData;
-                    
-                    // Create notification for customer
-                    await this.createNotification(
-                        AppState.currentUser.uid,
-                        'agent_assigned',
-                        {
-                            agentId: agentId,
-                            agentName: agentData.fullName,
-                            timestamp: Date.now()
-                        }
-                    );
-                    
-                    // Create notification for agent
-                    await this.createNotification(
-                        agentId,
-                        'customer_assigned',
-                        {
-                            customerId: AppState.currentUser.uid,
-                            customerName: AppState.userData.fullName,
-                            timestamp: Date.now()
-                        }
-                    );
-                    
-                    Utils.hideLoading();
-                    return { 
-                        success: true, 
-                        data: agentData,
-                        message: 'Agent verified and assigned successfully'
-                    };
-                    
-                } catch (error) {
-                    console.error('Error verifying agent:', error);
-                    Utils.hideLoading();
-                    return { success: false, error: 'Error verifying agent' };
-                }
-            },
+    try {
+        Utils.showLoading('Verifying Agent ID...');
+        
+        // Search for agent using the improved search method
+        const result = await this.searchAgentById(agentId);
+        
+        if (!result.success) {
+            Utils.hideLoading();
+            return result;
+        }
+        
+        const agentData = result.data;
+        
+        // Check if agent is active and approved
+        if (agentData.status !== 'active') {
+            Utils.hideLoading();
+            return { success: false, error: 'Agent account is not active' };
+        }
+        
+        // Update customer's assigned agent using the agent's UID
+        const customerRef = db.ref('users/' + AppState.currentUser.uid);
+        await customerRef.update({
+            assignedAgentId: agentData.uid, // Store the agent's Firebase UID
+            agentAssignedAt: Date.now(),
+            updatedAt: Date.now(),
+            agentCustomId: agentData.agentId // Also store the custom agent ID for display
+        });
+        
+        // Update local state
+        AppState.userData.assignedAgentId = agentData.uid;
+        AppState.userData.agentCustomId = agentData.agentId;
+        AppState.agentData = agentData;
+        
+        // Create notification for customer
+        await this.createNotification(
+            AppState.currentUser.uid,
+            'agent_assigned',
+            {
+                agentId: agentData.uid,
+                agentName: agentData.fullName,
+                agentCustomId: agentData.agentId,
+                timestamp: Date.now()
+            }
+        );
+        
+        // Create notification for agent
+        await this.createNotification(
+            agentData.uid,
+            'customer_assigned',
+            {
+                customerId: AppState.currentUser.uid,
+                customerName: AppState.userData.fullName,
+                timestamp: Date.now()
+            }
+        );
+        
+        Utils.hideLoading();
+        return { 
+            success: true, 
+            data: agentData,
+            message: 'Agent verified and assigned successfully'
+        };
+        
+    } catch (error) {
+        console.error('Error verifying agent:', error);
+        Utils.hideLoading();
+        return { success: false, error: 'Error verifying agent' };
+    }
+},
             
             async searchAgentById(agentId) {
-                try {
-                    const agentRef = db.ref('users/' + agentId);
-                    const snapshot = await agentRef.once('value');
+    try {
+        // First, try to find agent by their custom agentId field
+        const agentsRef = db.ref('agents');
+        const snapshot = await agentsRef
+            .orderByChild('agentId')
+            .equalTo(agentId)
+            .once('value');
+        
+        if (snapshot.exists()) {
+            let agentData = null;
+            let agentKey = null;
+            
+            // Get the first matching agent
+            snapshot.forEach((childSnapshot) => {
+                agentData = childSnapshot.val();
+                agentKey = childSnapshot.key;
+            });
+            
+            // Check if it's actually an agent
+            if (agentData.userType === 'agent') {
+                // Add the Firebase UID to the agent data
+                agentData.uid = agentKey;
+                return { success: true, data: agentData };
+            } else {
+                return { success: false, error: 'User found but is not an agent' };
+            }
+        }
+        
+        // If not found by agentId, try to search by any matching field
+        // This is a fallback search
+        const allAgentsRef = db.ref('agents');
+        const allSnapshot = await allAgentsRef.once('value');
+        
+        if (allSnapshot.exists()) {
+            let foundAgent = null;
+            let foundKey = null;
+            
+            allSnapshot.forEach((childSnapshot) => {
+                const user = childSnapshot.val();
+                const uid = childSnapshot.key;
+                
+                // Check if it's an agent and matches the search criteria
+                if (user.userType === 'agent') {
+                    // Check multiple fields for a match
+                    const searchFields = [
+                        user.agentId,
+                        user.email,
+                        user.phone,
+                        user.fullName
+                    ];
                     
-                    if (snapshot.exists()) {
-                        const agentData = snapshot.val();
-                        
-                        if (agentData.userType !== 'agent') {
-                            return { success: false, error: 'ID belongs to a non-agent user' };
-                        }
-                        
-                        return { success: true, data: agentData };
-                    } else {
-                        return { success: false, error: 'Agent ID not found' };
+                    const isMatch = searchFields.some(field => 
+                        field && field.toString().toLowerCase().includes(agentId.toLowerCase())
+                    );
+                    
+                    if (isMatch) {
+                        foundAgent = user;
+                        foundAgent.uid = uid;
+                        foundKey = uid;
                     }
-                } catch (error) {
-                    console.error('Error searching agent:', error);
-                    return { success: false, error: 'Error searching for agent' };
                 }
-            },
+            });
+            
+            if (foundAgent) {
+                return { success: true, data: foundAgent };
+            }
+        }
+        
+        return { success: false, error: 'Agent ID not found' };
+    } catch (error) {
+        console.error('Error searching agent:', error);
+        return { success: false, error: 'Error searching for agent' };
+    }
+},
             
             async loadCustomerLoans() {
                 try {
