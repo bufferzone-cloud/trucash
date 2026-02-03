@@ -1475,13 +1475,7 @@
                                     <span class="status-badge status-active" id="dbStatus">Connected</span>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <label class="form-label">Authentication Service</label>
-                                <div class="d-flex align-center justify-between">
-                                    <span>Firebase Auth</span>
-                                    <span class="status-badge status-active" id="authStatus">Online</span>
-                                </div>
-                            </div>
+                            
                             <div class="form-group">
                                 <label class="form-label">Active Sessions</label>
                                 <div class="d-flex align-center justify-between">
@@ -3326,7 +3320,7 @@ const FirebaseManager = {
             console.log('SUDO: Firebase initialized successfully');
             
             // Setup authentication state observer
-            this.setupAuthObserver();
+          
             
             // Initialize real-time listeners
             this.initializeRealtimeListeners();
@@ -5273,40 +5267,9 @@ const UIManager = {
         }
     },
 
-    // Update user info in header
-    updateUserInfo() {
-        const user = AppStateManager.state.currentUser;
-        if (user) {
-            const userName = document.getElementById('userName');
-            const userRole = document.getElementById('userRole');
-            const userAvatar = document.getElementById('userAvatar');
-            
-            if (userName) userName.textContent = user.displayName || 'SUDO Admin';
-            if (userRole) userRole.textContent = AppStateManager.state.userRole || 'Full System Control';
-            
-            if (userAvatar) {
-                if (user.photoURL) {
-                    userAvatar.style.backgroundImage = `url(${user.photoURL})`;
-                    userAvatar.style.backgroundSize = 'cover';
-                    userAvatar.textContent = '';
-                } else {
-                    userAvatar.textContent = user.displayName?.charAt(0) || 'S';
-                }
-            }
-        }
-    },
 
-    // Show/hide login form
-    showLoginForm() {
-        // You would typically redirect to login page
-        // For SPA, you could show a login modal
-        console.log('SUDO: Show login form');
-    },
 
-    showMainContent() {
-        // Show main content when authenticated
-        document.body.classList.add('authenticated');
-    },
+ 
 
     // Update loan applications table
     updateLoanApplications(loans) {
