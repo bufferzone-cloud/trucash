@@ -2,7 +2,7 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>TruCash | SUDO Super Control Admin</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDK -->
@@ -17,423 +17,284 @@
     <!-- Cloudinary Upload Widget -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* ===== COMPACT macOS Theme CSS Reset ===== */
+        /* ===== MAC OS THEME VARIABLES ===== */
+        :root {
+            /* Mac OS Colors */
+            --macos-background: #f5f5f7;
+            --macos-surface: #ffffff;
+            --macos-surface-secondary: #fbfbfd;
+            --macos-border: #d2d2d7;
+            --macos-border-light: #e8e8ed;
+            --macos-text-primary: #1d1d1f;
+            --macos-text-secondary: #86868b;
+            --macos-text-tertiary: #a1a1a6;
+            
+            /* Mac OS Accent Colors */
+            --macos-blue: #007aff;
+            --macos-blue-light: #409cff;
+            --macos-blue-dark: #0056d6;
+            --macos-green: #34c759;
+            --macos-red: #ff3b30;
+            --macos-orange: #ff9500;
+            --macos-yellow: #ffcc00;
+            --macos-purple: #af52de;
+            --macos-pink: #ff2d55;
+            --macos-gray-100: #f5f5f7;
+            --macos-gray-200: #e5e5ea;
+            --macos-gray-300: #d1d1d6;
+            --macos-gray-400: #c7c7cc;
+            --macos-gray-500: #aeaeb2;
+            --macos-gray-600: #8e8e93;
+            
+            /* Shadows - Mac OS style */
+            --macos-shadow-sm: 0 2px 10px rgba(0, 0, 0, 0.05);
+            --macos-shadow-md: 0 5px 20px rgba(0, 0, 0, 0.08);
+            --macos-shadow-lg: 0 10px 30px rgba(0, 0, 0, 0.1);
+            --macos-shadow-xl: 0 20px 60px rgba(0, 0, 0, 0.12);
+            
+            /* Border Radius - Mac OS style */
+            --macos-radius-sm: 8px;
+            --macos-radius-md: 12px;
+            --macos-radius-lg: 18px;
+            --macos-radius-xl: 24px;
+            --macos-radius-full: 9999px;
+            
+            /* Transitions */
+            --macos-transition-fast: 150ms cubic-bezier(0.4, 0, 0.2, 1);
+            --macos-transition: 300ms cubic-bezier(0.4, 0, 0.2, 1);
+            --macos-transition-slow: 500ms cubic-bezier(0.4, 0, 0.2, 1);
+            
+            /* Spacing */
+            --macos-space-xs: 4px;
+            --macos-space-sm: 8px;
+            --macos-space-md: 16px;
+            --macos-space-lg: 24px;
+            --macos-space-xl: 32px;
+            --macos-space-2xl: 48px;
+            
+            /* Typography */
+            --macos-font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'SF Pro Text', 'Helvetica Neue', Arial, sans-serif;
+            --macos-font-mono: 'SF Mono', 'Monaco', 'Inconsolata', 'Fira Mono', monospace;
+        }
+
+        /* ===== BASE RESET & TYPOGRAPHY ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'SF Pro Display', 
-                       'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-touch-callout: none;
         }
 
-        :root {
-            --macos-gray-50: #fafafa;
-            --macos-gray-100: #f5f5f7;
-            --macos-gray-150: #ececee;
-            --macos-gray-200: #e5e5e7;
-            --macos-gray-250: #dcdce0;
-            --macos-gray-300: #d2d2d7;
-            --macos-gray-350: #c8c8cc;
-            --macos-gray-400: #86868b;
-            --macos-gray-450: #717176;
-            --macos-gray-500: #515154;
-            --macos-gray-550: #424246;
-            --macos-gray-600: #1d1d1f;
-            --macos-blue: #007AFF;
-            --macos-blue-light: #409cff;
-            --macos-blue-dark: #0056cc;
-            --macos-blue-pale: #e6f2ff;
-            --macos-green: #34c759;
-            --macos-green-light: #52d76e;
-            --macos-green-pale: #e6f7eb;
-            --macos-red: #ff3b30;
-            --macos-red-light: #ff6257;
-            --macos-red-pale: #ffe6e5;
-            --macos-purple: #5856d6;
-            --macos-purple-light: #7a78e0;
-            --macos-purple-pale: #efeffd;
-            --macos-yellow: #ffcc00;
-            --macos-yellow-light: #ffd633;
-            --macos-yellow-pale: #fff9e6;
-            --macos-orange: #ff9500;
-            --macos-orange-light: #ffaa33;
-            --macos-orange-pale: #fff2e6;
-            --macos-pink: #ff2d55;
-            --macos-pink-light: #ff5470;
-            --macos-pink-pale: #ffe6eb;
-            --macos-teal: #5ac8fa;
-            --macos-cyan: #32d7e0;
-            --macos-indigo: #5856d6;
-            
-            --macos-shadow-xs: 0 1px 2px rgba(0, 0, 0, 0.04);
-            --macos-shadow-sm: 0 2px 4px rgba(0, 0, 0, 0.06);
-            --macos-shadow: 0 3px 8px rgba(0, 0, 0, 0.08);
-            --macos-shadow-md: 0 4px 12px rgba(0, 0, 0, 0.1);
-            --macos-shadow-lg: 0 6px 18px rgba(0, 0, 0, 0.12);
-            --macos-shadow-xl: 0 8px 24px rgba(0, 0, 0, 0.14);
-            --macos-shadow-2xl: 0 12px 32px rgba(0, 0, 0, 0.16);
-            --macos-shadow-inner: inset 0 1px 2px rgba(0, 0, 0, 0.06);
-            --macos-shadow-button: 0 1px 3px rgba(0, 122, 255, 0.2);
-            --macos-shadow-button-hover: 0 2px 6px rgba(0, 122, 255, 0.25);
-            
-            --macos-border-radius-xs: 4px;
-            --macos-border-radius-sm: 6px;
-            --macos-border-radius: 8px;
-            --macos-border-radius-md: 10px;
-            --macos-border-radius-lg: 12px;
-            --macos-border-radius-xl: 14px;
-            --macos-border-radius-2xl: 16px;
-            --macos-border-radius-3xl: 20px;
-            --macos-border-radius-full: 9999px;
-            
-            --macos-transition-fast: all 0.15s cubic-bezier(0.4, 0, 0.2, 1);
-            --macos-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
-            --macos-transition-slow: all 0.35s cubic-bezier(0.4, 0, 0.2, 1);
-            --macos-transition-bounce: all 0.3s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-            
-            --macos-glass: rgba(255, 255, 255, 0.92);
-            --macos-glass-heavy: rgba(255, 255, 255, 0.98);
-            --macos-glass-light: rgba(255, 255, 255, 0.85);
-            --macos-glass-border: rgba(255, 255, 255, 0.2);
-            --macos-glass-border-heavy: rgba(255, 255, 255, 0.3);
-            --macos-glass-shadow: 0 8px 32px rgba(0, 0, 0, 0.08);
-            
-            --macos-danger-bg: rgba(255, 59, 48, 0.08);
-            --macos-warning-bg: rgba(255, 204, 0, 0.08);
-            --macos-success-bg: rgba(52, 199, 89, 0.08);
-            --macos-info-bg: rgba(0, 122, 255, 0.08);
-            --macos-purple-bg: rgba(88, 86, 214, 0.08);
-            --macos-orange-bg: rgba(255, 149, 0, 0.08);
-            --macos-pink-bg: rgba(255, 45, 85, 0.08);
-            --macos-teal-bg: rgba(90, 200, 250, 0.08);
-            
-            --macos-sidebar-width: 260px;
-            --macos-sidebar-width-compact: 220px;
-            --macos-sidebar-width-mobile: 280px;
-            --macos-header-height: 56px;
-            --macos-header-height-mobile: 52px;
-            --macos-tab-height: 40px;
-            --macos-tab-height-compact: 36px;
-            --macos-tab-padding: 8px 12px;
-            --macos-tab-padding-compact: 6px 10px;
-            --macos-card-padding: 16px;
-            --macos-card-padding-compact: 12px;
-            --macos-modal-padding: 20px;
-            --macos-modal-padding-compact: 16px;
-            
-            --macos-font-size-xs: 10px;
-            --macos-font-size-sm: 11px;
-            --macos-font-size: 12px;
-            --macos-font-size-md: 13px;
-            --macos-font-size-lg: 14px;
-            --macos-font-size-xl: 15px;
-            --macos-font-size-2xl: 16px;
-            --macos-font-size-3xl: 17px;
-            --macos-font-size-4xl: 18px;
-            --macos-font-size-5xl: 20px;
-            --macos-font-size-6xl: 22px;
-            --macos-font-size-7xl: 24px;
-            --macos-font-size-8xl: 26px;
-            --macos-font-size-9xl: 28px;
-            
-            --macos-line-height-tight: 1.2;
-            --macos-line-height-normal: 1.4;
-            --macos-line-height-relaxed: 1.5;
-            --macos-line-height-loose: 1.6;
-            
-            --macos-z-index-dropdown: 1000;
-            --macos-z-index-sticky: 1020;
-            --macos-z-index-fixed: 1030;
-            --macos-z-index-modal-backdrop: 1040;
-            --macos-z-index-modal: 1050;
-            --macos-z-index-popover: 1060;
-            --macos-z-index-tooltip: 1070;
-            --macos-z-index-notification: 1080;
-            --macos-z-index-toast: 1090;
-            --macos-z-index-max: 9999;
-        }
-
-        /* ===== Base Styles ===== */
         html {
             font-size: 14px;
-            scroll-behavior: smooth;
             -webkit-text-size-adjust: 100%;
-            text-size-adjust: 100%;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
 
         body {
-            background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%);
-            color: var(--macos-gray-600);
+            font-family: var(--macos-font-sans);
+            background-color: var(--macos-background);
+            color: var(--macos-text-primary);
+            line-height: 1.5;
             min-height: 100vh;
-            line-height: var(--macos-line-height-normal);
-            position: relative;
             overflow-x: hidden;
-            touch-action: manipulation;
-            -webkit-overflow-scrolling: touch;
+            position: relative;
+            padding-bottom: env(safe-area-inset-bottom);
         }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-image: 
-                radial-gradient(at 10% 20%, rgba(120, 119, 198, 0.02) 0px, transparent 50%),
-                radial-gradient(at 90% 10%, rgba(0, 122, 255, 0.02) 0px, transparent 50%),
-                radial-gradient(at 50% 90%, rgba(76, 175, 80, 0.02) 0px, transparent 50%);
-            z-index: -1;
+        @media (min-width: 768px) {
+            html {
+                font-size: 15px;
+            }
         }
 
-        /* ===== Enhanced Typography ===== */
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 600;
-            line-height: var(--macos-line-height-tight);
-            color: var(--macos-gray-600);
-            letter-spacing: -0.01em;
+        @media (min-width: 1200px) {
+            html {
+                font-size: 16px;
+            }
         }
 
-        h1 { font-size: var(--macos-font-size-7xl); }
-        h2 { font-size: var(--macos-font-size-6xl); }
-        h3 { font-size: var(--macos-font-size-5xl); }
-        h4 { font-size: var(--macos-font-size-4xl); }
-        h5 { font-size: var(--macos-font-size-3xl); }
-        h6 { font-size: var(--macos-font-size-2xl); }
-
-        p {
-            margin-bottom: 0.75rem;
-            line-height: var(--macos-line-height-relaxed);
-        }
-
-        small, .text-small {
-            font-size: var(--macos-font-size-sm);
-            color: var(--macos-gray-500);
-        }
-
-        /* ===== Enhanced SUDO Header ===== */
-        .sudo-header {
-            background: var(--macos-glass-heavy);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.4);
-            box-shadow: var(--macos-shadow-sm);
-            padding: 0 var(--macos-card-padding);
-            height: var(--macos-header-height);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
+        /* ===== LOADING OVERLAY ===== */
+        .loading-overlay {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
-            z-index: var(--macos-z-index-fixed);
-            transition: var(--macos-transition);
+            bottom: 0;
+            background: var(--macos-surface);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity var(--macos-transition);
+        }
+
+        .loading-overlay.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .loading-spinner {
+            width: 60px;
+            height: 60px;
+            border: 3px solid var(--macos-gray-200);
+            border-top-color: var(--macos-blue);
+            border-radius: 50%;
+            animation: macos-spin 1s linear infinite;
+            margin-bottom: var(--macos-space-lg);
+        }
+
+        .loading-text {
+            font-size: 1.1rem;
+            color: var(--macos-text-secondary);
+            font-weight: 500;
+            text-align: center;
+            max-width: 300px;
+            line-height: 1.4;
+        }
+
+        @keyframes macos-spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* ===== SUDO HEADER ===== */
+        .sudo-header {
+            background: var(--macos-surface);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--macos-border-light);
+            padding: var(--macos-space-sm) var(--macos-space-lg);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            height: 60px;
+            transition: all var(--macos-transition);
+        }
+
+        .sudo-header.scrolled {
+            box-shadow: var(--macos-shadow-sm);
         }
 
         .sudo-logo {
             display: flex;
             align-items: center;
-            gap: 10px;
-            min-width: 0;
+            gap: var(--macos-space-md);
         }
 
         .sudo-icon {
-            width: 32px;
-            height: 32px;
-            background: linear-gradient(135deg, var(--macos-red) 0%, var(--macos-orange) 100%);
-            border-radius: var(--macos-border-radius-md);
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--macos-blue), var(--macos-purple));
+            border-radius: var(--macos-radius-md);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-size: var(--macos-font-size-md);
-            font-weight: 800;
-            box-shadow: var(--macos-shadow-button);
-            flex-shrink: 0;
-        }
-
-        .sudo-title-wrapper {
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
+            font-weight: 700;
+            font-size: 1.2rem;
+            box-shadow: var(--macos-shadow-sm);
         }
 
         .sudo-title {
-            font-size: var(--macos-font-size-2xl);
-            font-weight: 800;
-            color: var(--macos-gray-600);
-            letter-spacing: -0.02em;
-            line-height: 1;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 1.3rem;
+            font-weight: 700;
+            color: var(--macos-text-primary);
+            letter-spacing: -0.3px;
         }
 
         .sudo-subtitle {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-450);
-            font-weight: 600;
-            letter-spacing: 0.05em;
-            text-transform: uppercase;
-            margin-top: 2px;
-            line-height: 1;
+            font-size: 0.85rem;
+            color: var(--macos-text-tertiary);
+            font-weight: 500;
+            letter-spacing: 0.2px;
         }
 
-        /* ===== Mobile Menu Toggle ===== */
-        .mobile-menu-toggle {
-            display: none;
-            width: 32px;
-            height: 32px;
-            border: none;
-            background: var(--macos-gray-100);
-            border-radius: var(--macos-border-radius);
-            align-items: center;
-            justify-content: center;
-            color: var(--macos-gray-600);
-            cursor: pointer;
-            transition: var(--macos-transition);
-            flex-shrink: 0;
-        }
-
-        .mobile-menu-toggle:hover {
-            background: var(--macos-gray-200);
-            transform: rotate(90deg);
-        }
-
-        .mobile-menu-toggle.active {
-            background: var(--macos-blue);
-            color: white;
-        }
-
-        /* ===== Header Actions ===== */
         .header-actions {
             display: flex;
             align-items: center;
-            gap: 12px;
-            flex-shrink: 0;
+            gap: var(--macos-space-xl);
         }
 
         .live-status {
             display: flex;
             align-items: center;
-            gap: 5px;
-            font-size: var(--macos-font-size-xs);
-            padding: 5px 10px;
-            background: var(--macos-success-bg);
-            color: var(--macos-green);
-            border-radius: var(--macos-border-radius-full);
-            font-weight: 700;
+            gap: var(--macos-space-sm);
+            padding: var(--macos-space-xs) var(--macos-space-sm);
+            background: rgba(52, 199, 89, 0.1);
+            border-radius: var(--macos-radius-full);
             border: 1px solid rgba(52, 199, 89, 0.2);
-            white-space: nowrap;
         }
 
         .live-dot {
-            width: 6px;
-            height: 6px;
+            width: 8px;
+            height: 8px;
             background: var(--macos-green);
             border-radius: 50%;
             animation: pulse 2s infinite;
-            position: relative;
         }
 
-        .live-dot::after {
-            content: '';
-            position: absolute;
-            top: -2px;
-            left: -2px;
-            right: -2px;
-            bottom: -2px;
-            background: var(--macos-green);
-            border-radius: 50%;
-            opacity: 0.3;
-            animation: pulse-ring 2s infinite;
+        .live-status span {
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--macos-green);
+            letter-spacing: 0.5px;
         }
 
         @keyframes pulse {
-            0%, 100% { opacity: 1; }
+            0% { opacity: 1; }
             50% { opacity: 0.5; }
-        }
-
-        @keyframes pulse-ring {
-            0% { transform: scale(1); opacity: 0.3; }
-            100% { transform: scale(1.5); opacity: 0; }
+            100% { opacity: 1; }
         }
 
         .user-info {
             display: flex;
             align-items: center;
-            gap: 8px;
-            min-width: 0;
+            gap: var(--macos-space-md);
         }
 
         .user-avatar {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--macos-blue) 0%, var(--macos-purple) 100%);
+            width: 36px;
+            height: 36px;
+            background: linear-gradient(135deg, var(--macos-blue), var(--macos-purple));
+            border-radius: var(--macos-radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            font-weight: 700;
-            font-size: var(--macos-font-size);
-            flex-shrink: 0;
-            box-shadow: var(--macos-shadow-xs);
-            border: 2px solid white;
-        }
-
-        .user-details {
-            display: flex;
-            flex-direction: column;
-            min-width: 0;
-        }
-
-        .user-name {
-            font-size: var(--macos-font-size);
             font-weight: 600;
-            color: var(--macos-gray-600);
-            line-height: 1.2;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            font-size: 0.9rem;
+            box-shadow: var(--macos-shadow-sm);
+            flex-shrink: 0;
         }
 
-        .user-role {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-450);
-            line-height: 1;
-        }
-
-        /* ===== Main Layout ===== */
+        /* ===== MAIN CONTAINER ===== */
         .sudo-container {
             display: flex;
-            min-height: calc(100vh - var(--macos-header-height));
-            margin-top: var(--macos-header-height);
+            min-height: calc(100vh - 60px);
             position: relative;
         }
 
-        /* ===== Enhanced Sidebar Navigation with Persistent Tabs ===== */
+        /* ===== SIDEBAR NAVIGATION ===== */
         .sudo-sidebar {
-            width: var(--macos-sidebar-width);
-            background: var(--macos-glass);
-            backdrop-filter: blur(30px) saturate(180%);
-            -webkit-backdrop-filter: blur(30px) saturate(180%);
-            border-right: 1px solid rgba(255, 255, 255, 0.4);
-            padding: 16px 0;
-            position: fixed;
-            top: var(--macos-header-height);
-            left: 0;
-            bottom: 0;
+            width: 260px;
+            background: var(--macos-surface);
+            border-right: 1px solid var(--macos-border-light);
+            padding: var(--macos-space-lg) 0;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            position: sticky;
+            top: 60px;
+            height: calc(100vh - 60px);
             overflow-y: auto;
-            overflow-x: hidden;
-            z-index: var(--macos-z-index-sticky);
-            transition: var(--macos-transition);
-            box-shadow: var(--macos-shadow-sm);
+            scrollbar-width: thin;
+            scrollbar-color: var(--macos-gray-300) transparent;
+            transition: transform var(--macos-transition);
         }
 
         .sudo-sidebar::-webkit-scrollbar {
@@ -445,485 +306,158 @@
         }
 
         .sudo-sidebar::-webkit-scrollbar-thumb {
-            background: var(--macos-gray-300);
-            border-radius: var(--macos-border-radius-full);
+            background-color: var(--macos-gray-300);
+            border-radius: var(--macos-radius-full);
         }
 
-        .sudo-sidebar::-webkit-scrollbar-thumb:hover {
-            background: var(--macos-gray-400);
+        .sudo-sidebar.closed {
+            transform: translateX(-100%);
         }
 
-        /* ===== Persistent Tab Navigation ===== */
-        .nav-persistent-tabs {
-            position: sticky;
-            top: 0;
-            background: var(--macos-glass-heavy);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            z-index: 10;
-            padding: 8px 0;
-            margin-bottom: 8px;
-        }
-
-        .nav-tabs-container {
-            display: flex;
-            gap: 4px;
-            padding: 0 12px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        .nav-tabs-container::-webkit-scrollbar {
-            display: none;
-        }
-
-        .nav-tab {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: var(--macos-tab-padding-compact);
-            color: var(--macos-gray-500);
-            text-decoration: none;
-            border-radius: var(--macos-border-radius-md);
-            transition: var(--macos-transition);
-            white-space: nowrap;
-            cursor: pointer;
-            user-select: none;
-            border: 1px solid transparent;
-            font-size: var(--macos-font-size);
-            font-weight: 500;
-            flex-shrink: 0;
-            position: relative;
-        }
-
-        .nav-tab:hover {
-            background: var(--macos-gray-100);
-            color: var(--macos-gray-600);
-            transform: translateY(-1px);
-        }
-
-        .nav-tab.active {
-            background: var(--macos-blue);
-            color: white;
-            border-color: var(--macos-blue);
-            box-shadow: var(--macos-shadow-button);
-        }
-
-        .nav-tab.active .tab-icon {
-            color: white;
-        }
-
-        .nav-tab.active .tab-badge {
-            background: rgba(255, 255, 255, 0.3);
-            color: white;
-        }
-
-        .nav-tab.has-badge::after {
-            content: '';
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            width: 6px;
-            height: 6px;
-            background: var(--macos-red);
-            border-radius: 50%;
-            border: 2px solid var(--macos-glass);
-        }
-
-        .tab-icon {
-            width: 16px;
-            height: 16px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: inherit;
-            font-size: var(--macos-font-size);
-            flex-shrink: 0;
-        }
-
-        .tab-text {
-            font-size: var(--macos-font-size);
-            font-weight: 500;
-            flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-
-        .tab-badge {
-            background: var(--macos-gray-200);
-            color: var(--macos-gray-600);
-            font-size: var(--macos-font-size-xs);
-            padding: 1px 4px;
-            border-radius: var(--macos-border-radius-full);
-            min-width: 16px;
-            text-align: center;
-            font-weight: 700;
-            flex-shrink: 0;
-        }
-
-        /* ===== Enhanced Navigation Sections ===== */
         .nav-section {
-            margin-bottom: 16px;
-            padding: 0 12px;
+            padding: 0 var(--macos-space-lg);
+            margin-bottom: var(--macos-space-xl);
         }
 
         .nav-section:last-child {
+            margin-top: auto;
             margin-bottom: 0;
         }
 
         .nav-title {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-450);
-            font-weight: 700;
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--macos-text-tertiary);
             text-transform: uppercase;
-            letter-spacing: 0.05em;
-            margin-bottom: 8px;
-            padding-left: 8px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-        }
-
-        .nav-title::before {
-            content: '';
-            width: 3px;
-            height: 3px;
-            background: var(--macos-gray-400);
-            border-radius: 50%;
-        }
-
-        .nav-items {
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+            letter-spacing: 0.5px;
+            margin-bottom: var(--macos-space-md);
+            padding-left: var(--macos-space-sm);
         }
 
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 10px;
-            padding: 8px 12px;
-            color: var(--macos-gray-500);
-            text-decoration: none;
-            border-radius: var(--macos-border-radius);
-            transition: var(--macos-transition);
+            gap: var(--macos-space-md);
+            padding: var(--macos-space-sm) var(--macos-space-md);
+            margin-bottom: var(--macos-space-xs);
+            border-radius: var(--macos-radius-md);
             cursor: pointer;
-            user-select: none;
-            border: 1px solid transparent;
+            transition: all var(--macos-transition-fast);
             position: relative;
+            user-select: none;
         }
 
-        .nav-item:hover {
+        .nav-item:hover:not(.active) {
             background: var(--macos-gray-100);
-            color: var(--macos-gray-600);
-            transform: translateX(2px);
         }
 
         .nav-item.active {
-            background: white;
-            color: var(--macos-blue);
-            border-color: var(--macos-blue);
-            box-shadow: var(--macos-shadow-xs);
+            background: var(--macos-blue);
+            color: white;
+            box-shadow: var(--macos-shadow-sm);
         }
 
         .nav-item.active .nav-icon {
-            color: var(--macos-blue);
+            color: white;
         }
 
-        .nav-item.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 50%;
-            transform: translateY(-50%);
-            width: 3px;
-            height: 16px;
-            background: var(--macos-blue);
-            border-radius: 0 var(--macos-border-radius-sm) var(--macos-border-radius-sm) 0;
+        .nav-item.active .nav-text {
+            color: white;
         }
 
         .nav-icon {
-            width: 16px;
-            height: 16px;
+            width: 20px;
+            height: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--macos-gray-450);
-            font-size: var(--macos-font-size);
+            color: var(--macos-text-secondary);
+            transition: color var(--macos-transition-fast);
             flex-shrink: 0;
         }
 
         .nav-text {
-            font-size: var(--macos-font-size);
+            font-size: 0.95rem;
             font-weight: 500;
+            color: var(--macos-text-primary);
+            transition: color var(--macos-transition-fast);
             flex: 1;
-            min-width: 0;
-            overflow: hidden;
-            text-overflow: ellipsis;
+        }
+
+        .nav-item.active .nav-text {
+            color: white;
         }
 
         .nav-badge {
             background: var(--macos-red);
             color: white;
-            font-size: var(--macos-font-size-xs);
-            padding: 1px 4px;
-            border-radius: var(--macos-border-radius-full);
-            min-width: 16px;
+            font-size: 0.7rem;
+            font-weight: 600;
+            padding: 2px 6px;
+            border-radius: var(--macos-radius-full);
+            min-width: 20px;
             text-align: center;
-            font-weight: 700;
-            flex-shrink: 0;
         }
 
-        .nav-item[data-action="logout"] {
-            margin-top: 8px;
-            border: 1px solid var(--macos-gray-200);
-            color: var(--macos-red);
-        }
-
-        .nav-item[data-action="logout"]:hover {
-            background: var(--macos-red-pale);
-            border-color: var(--macos-red);
-            color: var(--macos-red);
-        }
-
-        .nav-item[data-action="logout"] .nav-icon {
-            color: var(--macos-red);
-        }
-
-        /* ===== Main Content Area ===== */
+        /* ===== MAIN CONTENT AREA ===== */
         .sudo-main {
             flex: 1;
-            margin-left: var(--macos-sidebar-width);
-            padding: 16px;
-            min-width: 0;
-            transition: var(--macos-transition);
+            padding: var(--macos-space-xl);
+            overflow-y: auto;
+            background: var(--macos-background);
+            min-height: calc(100vh - 60px);
         }
 
-        /* ===== Persistent Content Tabs ===== */
-        .content-tabs-wrapper {
-            position: sticky;
-            top: 0;
-            background: var(--macos-glass-heavy);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(255, 255, 255, 0.3);
-            z-index: 100;
-            margin: -16px -16px 16px -16px;
-            padding: 8px 16px;
-        }
-
-        .content-tabs {
-            display: flex;
-            gap: 4px;
-            overflow-x: auto;
-            scrollbar-width: none;
-            -ms-overflow-style: none;
-        }
-
-        .content-tabs::-webkit-scrollbar {
-            display: none;
-        }
-
-        .content-tab {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 6px 12px;
-            color: var(--macos-gray-500);
-            text-decoration: none;
-            border-radius: var(--macos-border-radius-md);
-            transition: var(--macos-transition);
-            white-space: nowrap;
-            cursor: pointer;
-            user-select: none;
-            border: 1px solid transparent;
-            font-size: var(--macos-font-size);
-            font-weight: 500;
-            flex-shrink: 0;
-            background: transparent;
-            position: relative;
-        }
-
-        .content-tab:hover {
-            background: var(--macos-gray-100);
-            color: var(--macos-gray-600);
-            transform: translateY(-1px);
-        }
-
-        .content-tab.active {
-            background: white;
-            color: var(--macos-blue);
-            border-color: var(--macos-blue);
-            box-shadow: var(--macos-shadow-xs);
-        }
-
-        .content-tab.active .content-tab-icon {
-            color: var(--macos-blue);
-        }
-
-        .content-tab-icon {
-            width: 14px;
-            height: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: inherit;
-            font-size: var(--macos-font-size-sm);
-            flex-shrink: 0;
-        }
-
-        .content-tab-text {
-            font-size: var(--macos-font-size);
-            font-weight: 500;
-            white-space: nowrap;
-        }
-
-        .content-tab-close {
-            width: 14px;
-            height: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
-            background: transparent;
-            border: none;
-            color: var(--macos-gray-400);
-            cursor: pointer;
-            font-size: var(--macos-font-size-xs);
-            opacity: 0;
-            transition: var(--macos-transition-fast);
-            flex-shrink: 0;
-            margin-left: 2px;
-        }
-
-        .content-tab:hover .content-tab-close {
-            opacity: 1;
-        }
-
-        .content-tab-close:hover {
-            background: var(--macos-gray-200);
-            color: var(--macos-gray-600);
-        }
-
-        /* ===== Content Sections ===== */
         .content-section {
             display: none;
-            animation: fadeInUp 0.3s ease;
-            min-height: calc(100vh - var(--macos-header-height) - 120px);
+            animation: fadeIn var(--macos-transition);
         }
 
         .content-section.active {
             display: block;
         }
 
-        @keyframes fadeInUp {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
-            }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
-
         @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
         }
 
-        @keyframes slideInRight {
-            from { transform: translateX(20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes slideInLeft {
-            from { transform: translateX(-20px); opacity: 0; }
-            to { transform: translateX(0); opacity: 1; }
-        }
-
-        @keyframes scaleIn {
-            from { transform: scale(0.95); opacity: 0; }
-            to { transform: scale(1); opacity: 1; }
-        }
-
-        /* ===== Enhanced Section Headers ===== */
+        /* ===== SECTION HEADERS ===== */
         .section-header {
-            margin-bottom: 20px;
-            padding-bottom: 12px;
-            border-bottom: 1px solid var(--macos-gray-200);
-            position: relative;
-        }
-
-        .section-header::after {
-            content: '';
-            position: absolute;
-            bottom: -1px;
-            left: 0;
-            width: 60px;
-            height: 2px;
-            background: var(--macos-blue);
-            border-radius: var(--macos-border-radius-full);
+            margin-bottom: var(--macos-space-2xl);
         }
 
         .section-title {
-            font-size: var(--macos-font-size-6xl);
+            font-size: 2rem;
             font-weight: 700;
-            color: var(--macos-gray-600);
-            margin-bottom: 4px;
-            letter-spacing: -0.02em;
+            color: var(--macos-text-primary);
+            margin-bottom: var(--macos-space-sm);
+            letter-spacing: -0.5px;
             line-height: 1.2;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .section-title-icon {
-            width: 24px;
-            height: 24px;
-            background: var(--macos-blue);
-            border-radius: var(--macos-border-radius-sm);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-size: var(--macos-font-size);
-            flex-shrink: 0;
         }
 
         .section-subtitle {
-            font-size: var(--macos-font-size);
-            color: var(--macos-gray-500);
-            line-height: 1.4;
+            font-size: 1rem;
+            color: var(--macos-text-secondary);
+            font-weight: 400;
             max-width: 600px;
+            line-height: 1.5;
         }
 
-        .section-actions {
-            display: flex;
-            gap: 8px;
-            margin-top: 12px;
-            flex-wrap: wrap;
-        }
-
-        /* ===== Compact Stats Grid ===== */
+        /* ===== STATS GRID ===== */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 12px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+            gap: var(--macos-space-lg);
+            margin-bottom: var(--macos-space-2xl);
         }
 
         .stat-card {
-            background: var(--macos-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: var(--macos-border-radius-lg);
-            padding: var(--macos-card-padding-compact);
-            transition: var(--macos-transition);
+            background: var(--macos-surface);
+            border-radius: var(--macos-radius-lg);
+            padding: var(--macos-space-lg);
+            border: 1px solid var(--macos-border-light);
+            transition: all var(--macos-transition);
             position: relative;
             overflow: hidden;
         }
@@ -936,411 +470,214 @@
             right: 0;
             height: 3px;
             background: linear-gradient(90deg, var(--macos-blue), var(--macos-purple));
-            border-radius: var(--macos-border-radius-full) var(--macos-border-radius-full) 0 0;
+            opacity: 0;
+            transition: opacity var(--macos-transition);
         }
 
         .stat-card:hover {
             transform: translateY(-2px);
             box-shadow: var(--macos-shadow-md);
-            border-color: rgba(255, 255, 255, 0.6);
+            border-color: var(--macos-border);
         }
 
-        .stat-card.users::before { background: linear-gradient(90deg, var(--macos-blue), var(--macos-teal)); }
-        .stat-card.agents::before { background: linear-gradient(90deg, var(--macos-green), var(--macos-cyan)); }
-        .stat-card.transactions::before { background: linear-gradient(90deg, var(--macos-orange), var(--macos-yellow)); }
-        .stat-card.revenue::before { background: linear-gradient(90deg, var(--macos-purple), var(--macos-pink)); }
+        .stat-card:hover::before {
+            opacity: 1;
+        }
 
         .stat-header {
             display: flex;
             justify-content: space-between;
             align-items: flex-start;
-            margin-bottom: 8px;
-        }
-
-        .stat-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: var(--macos-border-radius-md);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: var(--macos-font-size-lg);
-            flex-shrink: 0;
-        }
-
-        .stat-icon.users { background: var(--macos-info-bg); color: var(--macos-blue); }
-        .stat-icon.agents { background: var(--macos-success-bg); color: var(--macos-green); }
-        .stat-icon.transactions { background: var(--macos-warning-bg); color: var(--macos-yellow); }
-        .stat-icon.revenue { background: var(--macos-purple-bg); color: var(--macos-purple); }
-
-        .stat-value {
-            font-size: var(--macos-font-size-6xl);
-            font-weight: 800;
-            color: var(--macos-gray-600);
-            line-height: 1;
-            margin-bottom: 2px;
-            letter-spacing: -0.02em;
+            margin-bottom: var(--macos-space-md);
         }
 
         .stat-label {
-            font-size: var(--macos-font-size-sm);
-            color: var(--macos-gray-500);
+            font-size: 0.9rem;
+            color: var(--macos-text-secondary);
             font-weight: 500;
-            margin-bottom: 6px;
+            margin-bottom: var(--macos-space-xs);
         }
+
+        .stat-value {
+            font-size: 2.2rem;
+            font-weight: 700;
+            color: var(--macos-text-primary);
+            line-height: 1;
+        }
+
+        .stat-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: var(--macos-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .stat-icon.users { background: rgba(0, 122, 255, 0.1); color: var(--macos-blue); }
+        .stat-icon.agents { background: rgba(52, 199, 89, 0.1); color: var(--macos-green); }
+        .stat-icon.transactions { background: rgba(255, 149, 0, 0.1); color: var(--macos-orange); }
+        .stat-icon.revenue { background: rgba(175, 82, 222, 0.1); color: var(--macos-purple); }
 
         .stat-change {
             display: flex;
             align-items: center;
-            gap: 4px;
-            font-size: var(--macos-font-size-xs);
-            font-weight: 700;
-            padding: 2px 6px;
-            border-radius: var(--macos-border-radius-full);
-            background: var(--macos-gray-100);
-            width: fit-content;
+            gap: var(--macos-space-xs);
+            font-size: 0.85rem;
+            padding-top: var(--macos-space-md);
+            border-top: 1px solid var(--macos-border-light);
         }
 
         .stat-change.positive {
-            background: var(--macos-success-bg);
             color: var(--macos-green);
         }
 
         .stat-change.negative {
-            background: var(--macos-danger-bg);
             color: var(--macos-red);
         }
 
-        /* ===== Enhanced Cards Grid ===== */
+        /* ===== CARDS GRID ===== */
         .cards-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
-            gap: 16px;
-            margin-bottom: 20px;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: var(--macos-space-lg);
+            margin-bottom: var(--macos-space-2xl);
         }
 
         .card {
-            background: var(--macos-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: var(--macos-border-radius-xl);
+            background: var(--macos-surface);
+            border-radius: var(--macos-radius-lg);
+            border: 1px solid var(--macos-border-light);
             overflow: hidden;
-            transition: var(--macos-transition);
-            position: relative;
+            transition: all var(--macos-transition);
         }
 
         .card:hover {
-            box-shadow: var(--macos-shadow-md);
             transform: translateY(-2px);
-            border-color: rgba(255, 255, 255, 0.6);
+            box-shadow: var(--macos-shadow-md);
+            border-color: var(--macos-border);
         }
 
         .card-header {
-            padding: var(--macos-card-padding-compact);
-            border-bottom: 1px solid var(--macos-gray-200);
+            padding: var(--macos-space-lg);
+            border-bottom: 1px solid var(--macos-border-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.6);
         }
 
         .card-title {
-            font-size: var(--macos-font-size-lg);
+            font-size: 1.2rem;
             font-weight: 600;
-            color: var(--macos-gray-600);
-            display: flex;
-            align-items: center;
-            gap: 6px;
+            color: var(--macos-text-primary);
         }
 
-        .card-title-icon {
-            width: 16px;
-            height: 16px;
-            color: var(--macos-blue);
+        .card-body {
+            padding: var(--macos-space-lg);
         }
 
         .card-actions {
             display: flex;
-            gap: 6px;
+            gap: var(--macos-space-sm);
         }
 
-        .card-body {
-            padding: var(--macos-card-padding-compact);
+        /* ===== CHART CONTAINERS ===== */
+        .chart-container {
+            background: var(--macos-surface);
+            border-radius: var(--macos-radius-lg);
+            border: 1px solid var(--macos-border-light);
+            padding: var(--macos-space-lg);
+            margin-bottom: var(--macos-space-xl);
+            transition: all var(--macos-transition);
         }
 
-        /* ===== Enhanced Form Elements ===== */
+        .chart-container:hover {
+            border-color: var(--macos-border);
+            box-shadow: var(--macos-shadow-sm);
+        }
+
+        .chart-title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--macos-text-primary);
+            margin-bottom: var(--macos-space-lg);
+        }
+
+        /* ===== FORMS ===== */
         .form-group {
-            margin-bottom: 12px;
+            margin-bottom: var(--macos-space-lg);
         }
 
         .form-label {
             display: block;
-            font-size: var(--macos-font-size-sm);
-            font-weight: 600;
-            color: var(--macos-gray-500);
-            margin-bottom: 6px;
-        }
-
-        .form-label.required::after {
-            content: '*';
-            color: var(--macos-red);
-            margin-left: 2px;
+            font-size: 0.9rem;
+            font-weight: 500;
+            color: var(--macos-text-secondary);
+            margin-bottom: var(--macos-space-sm);
         }
 
         .form-control {
             width: 100%;
-            padding: 8px 12px;
-            font-size: var(--macos-font-size);
-            border: 1px solid var(--macos-gray-300);
-            border-radius: var(--macos-border-radius);
-            background: white;
-            transition: var(--macos-transition);
-            color: var(--macos-gray-600);
-            box-shadow: var(--macos-shadow-inner);
+            padding: var(--macos-space-md);
+            font-size: 0.95rem;
+            font-family: var(--macos-font-sans);
+            background: var(--macos-surface);
+            border: 1px solid var(--macos-border);
+            border-radius: var(--macos-radius-md);
+            color: var(--macos-text-primary);
+            transition: all var(--macos-transition-fast);
         }
 
         .form-control:focus {
             outline: none;
             border-color: var(--macos-blue);
-            background: white;
             box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.1);
         }
 
         .form-control::placeholder {
-            color: var(--macos-gray-400);
+            color: var(--macos-text-tertiary);
         }
 
         .form-control:disabled {
             background: var(--macos-gray-100);
-            color: var(--macos-gray-400);
+            color: var(--macos-text-tertiary);
             cursor: not-allowed;
-        }
-
-        .form-control.error {
-            border-color: var(--macos-red);
-            box-shadow: 0 0 0 3px rgba(255, 59, 48, 0.1);
-        }
-
-        .form-control.success {
-            border-color: var(--macos-green);
-            box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.1);
-        }
-
-        .form-select {
-            appearance: none;
-            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='14' height='14' viewBox='0 0 24 24' fill='none' stroke='%2386868b' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='6 9 12 15 18 9'%3E%3C/polyline%3E%3C/svg%3E");
-            background-repeat: no-repeat;
-            background-position: right 10px center;
-            background-size: 14px;
-            padding-right: 32px;
-        }
-
-        .form-textarea {
-            min-height: 80px;
-            resize: vertical;
-            line-height: var(--macos-line-height-relaxed);
         }
 
         .form-row {
             display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: var(--macos-space-md);
+            margin-bottom: var(--macos-space-lg);
         }
 
-        .form-hint {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-400);
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+        .form-textarea {
+            min-height: 100px;
+            resize: vertical;
+            line-height: 1.5;
         }
 
-        .form-hint.error {
-            color: var(--macos-red);
-        }
-
-        .form-hint.success {
-            color: var(--macos-green);
-        }
-
-        .form-check {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .form-check-input {
-            width: 16px;
-            height: 16px;
-            border: 1px solid var(--macos-gray-300);
-            border-radius: var(--macos-border-radius-sm);
-            background: white;
-            transition: var(--macos-transition-fast);
-            position: relative;
-            flex-shrink: 0;
-        }
-
-        .form-check-input:checked {
-            background: var(--macos-blue);
-            border-color: var(--macos-blue);
-        }
-
-        .form-check-input:checked::after {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            color: white;
-            font-size: 10px;
-            font-weight: bold;
-        }
-
-        .form-check-label {
-            font-size: var(--macos-font-size);
-            color: var(--macos-gray-600);
-        }
-
-        /* ===== Enhanced Tables ===== */
-        .table-container {
-            background: var(--macos-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: var(--macos-border-radius-lg);
-            overflow: hidden;
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .table-responsive {
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        .table {
-            width: 100%;
-            border-collapse: separate;
-            border-spacing: 0;
-            min-width: 600px;
-        }
-
-        .table th {
-            background: rgba(255, 255, 255, 0.8);
-            padding: 10px 12px;
-            text-align: left;
-            font-size: var(--macos-font-size-xs);
-            font-weight: 700;
-            color: var(--macos-gray-500);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            border-bottom: 1px solid var(--macos-gray-200);
-            position: sticky;
-            top: 0;
-            z-index: 1;
-            white-space: nowrap;
-        }
-
-        .table td {
-            padding: 10px 12px;
-            font-size: var(--macos-font-size);
-            color: var(--macos-gray-600);
-            border-bottom: 1px solid var(--macos-gray-150);
-            vertical-align: middle;
-        }
-
-        .table tbody tr {
-            transition: var(--macos-transition-fast);
-        }
-
-        .table tbody tr:hover {
-            background: rgba(0, 122, 255, 0.03);
-        }
-
-        .table tbody tr:last-child td {
-            border-bottom: none;
-        }
-
-        .table-compact th,
-        .table-compact td {
-            padding: 6px 8px;
-        }
-
-        /* ===== Status Badges ===== */
-        .status-badge {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-            padding: 3px 8px;
-            font-size: var(--macos-font-size-xs);
-            font-weight: 700;
-            border-radius: var(--macos-border-radius-full);
-            border: 1px solid transparent;
-            white-space: nowrap;
-        }
-
-        .status-badge i {
-            font-size: var(--macos-font-size-xs);
-        }
-
-        .status-active { 
-            background: var(--macos-success-bg); 
-            color: var(--macos-green);
-            border-color: rgba(52, 199, 89, 0.2);
-        }
-
-        .status-inactive { 
-            background: var(--macos-gray-150); 
-            color: var(--macos-gray-500);
-            border-color: var(--macos-gray-200);
-        }
-
-        .status-pending { 
-            background: var(--macos-warning-bg); 
-            color: var(--macos-yellow);
-            border-color: rgba(255, 204, 0, 0.2);
-        }
-
-        .status-suspended { 
-            background: var(--macos-orange-bg); 
-            color: var(--macos-orange);
-            border-color: rgba(255, 149, 0, 0.2);
-        }
-
-        .status-banned { 
-            background: var(--macos-danger-bg); 
-            color: var(--macos-red);
-            border-color: rgba(255, 59, 48, 0.2);
-        }
-
-        .status-completed { 
-            background: var(--macos-info-bg); 
-            color: var(--macos-blue);
-            border-color: rgba(0, 122, 255, 0.2);
-        }
-
-        /* ===== Enhanced Buttons ===== */
+        /* ===== BUTTONS ===== */
         .btn {
-            padding: 7px 14px;
-            border-radius: var(--macos-border-radius);
-            font-size: var(--macos-font-size);
-            font-weight: 600;
-            cursor: pointer;
-            transition: var(--macos-transition);
-            border: 1px solid transparent;
             display: inline-flex;
             align-items: center;
             justify-content: center;
-            gap: 6px;
-            text-decoration: none;
+            gap: var(--macos-space-sm);
+            padding: var(--macos-space-sm) var(--macos-space-lg);
+            font-size: 0.95rem;
+            font-weight: 500;
+            font-family: var(--macos-font-sans);
+            border: none;
+            border-radius: var(--macos-radius-md);
+            cursor: pointer;
+            transition: all var(--macos-transition-fast);
             user-select: none;
+            white-space: nowrap;
+            text-decoration: none;
             position: relative;
             overflow: hidden;
-            white-space: nowrap;
         }
 
         .btn::after {
@@ -1373,148 +710,84 @@
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--macos-blue) 0%, var(--macos-blue-light) 100%);
+            background: var(--macos-blue);
             color: white;
-            border-color: var(--macos-blue);
-            box-shadow: var(--macos-shadow-button);
+            box-shadow: 0 2px 8px rgba(0, 122, 255, 0.3);
         }
 
         .btn-primary:hover {
-            background: linear-gradient(135deg, var(--macos-blue-dark) 0%, var(--macos-blue) 100%);
-            box-shadow: var(--macos-shadow-button-hover);
+            background: var(--macos-blue-light);
             transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(0, 122, 255, 0.4);
         }
 
         .btn-primary:active {
             transform: translateY(0);
-        }
-
-        .btn-secondary {
-            background: white;
-            color: var(--macos-gray-600);
-            border-color: var(--macos-gray-300);
-            box-shadow: var(--macos-shadow-xs);
-        }
-
-        .btn-secondary:hover {
-            background: var(--macos-gray-50);
-            border-color: var(--macos-gray-400);
-            transform: translateY(-1px);
-        }
-
-        .btn-danger {
-            background: linear-gradient(135deg, var(--macos-red) 0%, var(--macos-red-light) 100%);
-            color: white;
-            border-color: var(--macos-red);
-            box-shadow: 0 1px 3px rgba(255, 59, 48, 0.2);
-        }
-
-        .btn-danger:hover {
-            background: linear-gradient(135deg, #cc2e25 0%, var(--macos-red) 100%);
-            box-shadow: 0 2px 6px rgba(255, 59, 48, 0.25);
-            transform: translateY(-1px);
+            box-shadow: 0 1px 4px rgba(0, 122, 255, 0.3);
         }
 
         .btn-success {
-            background: linear-gradient(135deg, var(--macos-green) 0%, var(--macos-green-light) 100%);
+            background: var(--macos-green);
             color: white;
-            border-color: var(--macos-green);
-            box-shadow: 0 1px 3px rgba(52, 199, 89, 0.2);
+            box-shadow: 0 2px 8px rgba(52, 199, 89, 0.3);
         }
 
         .btn-success:hover {
-            background: linear-gradient(135deg, #27ae60 0%, var(--macos-green) 100%);
-            box-shadow: 0 2px 6px rgba(52, 199, 89, 0.25);
+            background: #30b453;
             transform: translateY(-1px);
-        }
-
-        .btn-warning {
-            background: linear-gradient(135deg, var(--macos-yellow) 0%, var(--macos-yellow-light) 100%);
-            color: var(--macos-gray-700);
-            border-color: var(--macos-yellow);
-            box-shadow: 0 1px 3px rgba(255, 204, 0, 0.2);
-        }
-
-        .btn-warning:hover {
-            background: linear-gradient(135deg, #e6b800 0%, var(--macos-yellow) 100%);
-            box-shadow: 0 2px 6px rgba(255, 204, 0, 0.25);
-            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(52, 199, 89, 0.4);
         }
 
         .btn-outline {
             background: transparent;
-            border: 1.5px solid var(--macos-gray-300);
-            color: var(--macos-gray-600);
+            color: var(--macos-blue);
+            border: 1px solid var(--macos-blue);
         }
 
         .btn-outline:hover {
-            background: var(--macos-gray-50);
-            border-color: var(--macos-gray-400);
+            background: rgba(0, 122, 255, 0.1);
             transform: translateY(-1px);
         }
 
-        .btn-outline-primary {
-            background: transparent;
-            border: 1.5px solid var(--macos-blue);
-            color: var(--macos-blue);
+        .btn-danger {
+            background: var(--macos-red);
+            color: white;
+            box-shadow: 0 2px 8px rgba(255, 59, 48, 0.3);
         }
 
-        .btn-outline-primary:hover {
-            background: rgba(0, 122, 255, 0.05);
-            border-color: var(--macos-blue-dark);
-            color: var(--macos-blue-dark);
+        .btn-danger:hover {
+            background: #ff261a;
+            transform: translateY(-1px);
+            box-shadow: 0 4px 12px rgba(255, 59, 48, 0.4);
         }
 
         .btn-sm {
-            padding: 4px 10px;
-            font-size: var(--macos-font-size-sm);
-            gap: 4px;
+            padding: var(--macos-space-xs) var(--macos-space-md);
+            font-size: 0.85rem;
         }
 
         .btn-lg {
-            padding: 10px 18px;
-            font-size: var(--macos-font-size-lg);
-            gap: 8px;
-        }
-
-        .btn-icon {
-            width: 28px;
-            height: 28px;
-            padding: 0;
-            justify-content: center;
-            border-radius: var(--macos-border-radius);
-        }
-
-        .btn-icon-sm {
-            width: 24px;
-            height: 24px;
-            padding: 0;
-            font-size: var(--macos-font-size-sm);
+            padding: var(--macos-space-md) var(--macos-space-xl);
+            font-size: 1.1rem;
         }
 
         .btn-block {
             width: 100%;
         }
 
-        .btn:disabled,
-        .btn.disabled {
+        .btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none !important;
+            box-shadow: none !important;
         }
 
-        .action-buttons {
-            display: flex;
-            gap: 6px;
-        }
-
-        /* ===== Enhanced Toggle Switches ===== */
+        /* ===== TOGGLE SWITCH ===== */
         .toggle-switch {
             position: relative;
             display: inline-block;
-            width: 44px;
-            height: 24px;
-            flex-shrink: 0;
+            width: 52px;
+            height: 28px;
         }
 
         .toggle-switch input {
@@ -1530,570 +803,404 @@
             left: 0;
             right: 0;
             bottom: 0;
-            background-color: var(--macos-gray-300);
+            background: var(--macos-gray-300);
             transition: var(--macos-transition);
-            border-radius: var(--macos-border-radius-full);
+            border-radius: var(--macos-radius-full);
         }
 
-        .toggle-slider:before {
+        .toggle-slider::before {
             position: absolute;
             content: "";
-            height: 18px;
-            width: 18px;
+            height: 22px;
+            width: 22px;
             left: 3px;
             bottom: 3px;
-            background-color: white;
+            background: white;
             transition: var(--macos-transition);
             border-radius: 50%;
-            box-shadow: var(--macos-shadow-xs);
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.2);
         }
 
         input:checked + .toggle-slider {
-            background-color: var(--macos-green);
+            background: var(--macos-blue);
         }
 
-        input:checked + .toggle-slider:before {
-            transform: translateX(20px);
+        input:checked + .toggle-slider::before {
+            transform: translateX(24px);
         }
 
-        input:disabled + .toggle-slider {
+        input:focus + .toggle-slider {
+            box-shadow: 0 0 0 3px rgba(0, 122, 255, 0.2);
+        }
+
+        /* ===== ALERTS ===== */
+        .alert {
+            padding: var(--macos-space-md) var(--macos-space-lg);
+            border-radius: var(--macos-radius-md);
+            margin-bottom: var(--macos-space-lg);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--macos-space-md);
+            border: 1px solid transparent;
+        }
+
+        .alert-info {
+            background: rgba(0, 122, 255, 0.1);
+            border-color: rgba(0, 122, 255, 0.2);
+            color: var(--macos-blue);
+        }
+
+        .alert-success {
+            background: rgba(52, 199, 89, 0.1);
+            border-color: rgba(52, 199, 89, 0.2);
+            color: var(--macos-green);
+        }
+
+        .alert-warning {
+            background: rgba(255, 149, 0, 0.1);
+            border-color: rgba(255, 149, 0, 0.2);
+            color: var(--macos-orange);
+        }
+
+        .alert-danger {
+            background: rgba(255, 59, 48, 0.1);
+            border-color: rgba(255, 59, 48, 0.2);
+            color: var(--macos-red);
+        }
+
+        .alert-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        /* ===== TABLES ===== */
+        .table-container {
+            background: var(--macos-surface);
+            border-radius: var(--macos-radius-lg);
+            border: 1px solid var(--macos-border-light);
+            overflow: hidden;
+            margin-bottom: var(--macos-space-lg);
+            overflow-x: auto;
+        }
+
+        .table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+
+        .table thead {
+            background: var(--macos-gray-100);
+            border-bottom: 2px solid var(--macos-border-light);
+        }
+
+        .table th {
+            padding: var(--macos-space-md) var(--macos-space-lg);
+            text-align: left;
+            font-size: 0.85rem;
+            font-weight: 600;
+            color: var(--macos-text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            white-space: nowrap;
+        }
+
+        .table td {
+            padding: var(--macos-space-md) var(--macos-space-lg);
+            border-bottom: 1px solid var(--macos-border-light);
+            font-size: 0.95rem;
+            color: var(--macos-text-primary);
+        }
+
+        .table tbody tr {
+            transition: background var(--macos-transition-fast);
+        }
+
+        .table tbody tr:hover {
+            background: var(--macos-gray-100);
+        }
+
+        .table tbody tr:last-child td {
+            border-bottom: none;
+        }
+
+        /* ===== PAGINATION ===== */
+        .pagination {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: var(--macos-space-sm);
+            padding: var(--macos-space-lg) 0;
+        }
+
+        .pagination button {
+            min-width: 36px;
+            height: 36px;
+            padding: 0 var(--macos-space-sm);
+            border: 1px solid var(--macos-border);
+            background: var(--macos-surface);
+            color: var(--macos-text-primary);
+            border-radius: var(--macos-radius-md);
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 500;
+            transition: all var(--macos-transition-fast);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination button:hover:not(:disabled) {
+            background: var(--macos-gray-100);
+            border-color: var(--macos-border);
+        }
+
+        .pagination button.active {
+            background: var(--macos-blue);
+            color: white;
+            border-color: var(--macos-blue);
+        }
+
+        .pagination button:disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
 
-        .toggle-switch-sm {
-            width: 36px;
-            height: 20px;
-        }
-
-        .toggle-switch-sm .toggle-slider:before {
-            height: 14px;
-            width: 14px;
-            left: 3px;
-            bottom: 3px;
-        }
-
-        .toggle-switch-sm input:checked + .toggle-slider:before {
-            transform: translateX(16px);
-        }
-
-        /* ===== Enhanced Charts ===== */
-        .chart-container {
-            background: var(--macos-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            border-radius: var(--macos-border-radius-lg);
-            padding: var(--macos-card-padding-compact);
-            margin-bottom: 16px;
-            position: relative;
-        }
-
-        .chart-container:hover {
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        .chart-title {
-            font-size: var(--macos-font-size-lg);
-            font-weight: 600;
-            color: var(--macos-gray-600);
-            margin-bottom: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .chart-actions {
-            display: flex;
-            gap: 6px;
-        }
-
-        .chart-wrapper {
-            position: relative;
-            height: 200px;
-            width: 100%;
-        }
-
-        /* ===== Enhanced Modals ===== */
+        /* ===== MODALS ===== */
         .modal {
-            display: none;
             position: fixed;
             top: 0;
             left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.3);
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            z-index: var(--macos-z-index-modal);
-            justify-content: center;
+            display: none;
             align-items: center;
-            padding: 16px;
+            justify-content: center;
+            z-index: 1000;
+            padding: var(--macos-space-lg);
             opacity: 0;
-            transition: opacity 0.3s ease;
-            animation: modalBackdropIn 0.3s ease;
-        }
-
-        @keyframes modalBackdropIn {
-            from { background: rgba(0, 0, 0, 0); }
-            to { background: rgba(0, 0, 0, 0.3); }
+            transition: opacity var(--macos-transition);
         }
 
         .modal.active {
             display: flex;
             opacity: 1;
+            animation: modalFadeIn var(--macos-transition);
+        }
+
+        @keyframes modalFadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
         }
 
         .modal-content {
-            background: var(--macos-glass-heavy);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border-radius: var(--macos-border-radius-2xl);
+            background: var(--macos-surface);
+            border-radius: var(--macos-radius-xl);
             width: 100%;
             max-width: 600px;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow: hidden;
-            box-shadow: var(--macos-shadow-2xl);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            animation: modalSlideUp 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            flex-direction: column;
+            box-shadow: var(--macos-shadow-xl);
+            transform: scale(0.95);
+            transition: transform var(--macos-transition);
+            border: 1px solid var(--macos-border-light);
         }
 
-        @keyframes modalSlideUp {
-            from { 
-                opacity: 0; 
-                transform: translateY(60px) scale(0.95); 
-            }
-            to { 
-                opacity: 1; 
-                transform: translateY(0) scale(1); 
-            }
+        .modal.active .modal-content {
+            transform: scale(1);
         }
 
         .modal-header {
-            padding: var(--macos-modal-padding-compact);
-            border-bottom: 1px solid var(--macos-gray-200);
+            padding: var(--macos-space-lg) var(--macos-space-xl);
+            border-bottom: 1px solid var(--macos-border-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            background: rgba(255, 255, 255, 0.6);
-            position: sticky;
-            top: 0;
-            z-index: 1;
         }
 
         .modal-title {
-            font-size: var(--macos-font-size-lg);
-            font-weight: 600;
-            color: var(--macos-gray-600);
-            display: flex;
-            align-items: center;
-            gap: 8px;
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--macos-text-primary);
+            margin: 0;
         }
 
         .modal-close {
-            width: 28px;
-            height: 28px;
+            width: 32px;
+            height: 32px;
             border: none;
             background: var(--macos-gray-100);
-            border-radius: var(--macos-border-radius);
+            border-radius: var(--macos-radius-full);
             display: flex;
             align-items: center;
             justify-content: center;
-            color: var(--macos-gray-600);
+            color: var(--macos-text-secondary);
             cursor: pointer;
-            transition: var(--macos-transition);
-            flex-shrink: 0;
+            transition: all var(--macos-transition-fast);
+            font-size: 1rem;
         }
 
         .modal-close:hover {
             background: var(--macos-gray-200);
-            transform: rotate(90deg);
+            color: var(--macos-text-primary);
         }
 
         .modal-body {
-            padding: var(--macos-modal-padding-compact);
+            padding: var(--macos-space-xl);
             overflow-y: auto;
-            flex: 1;
+            max-height: calc(90vh - 120px);
         }
 
         .modal-footer {
-            padding: var(--macos-modal-padding-compact);
-            border-top: 1px solid var(--macos-gray-200);
+            padding: var(--macos-space-lg) var(--macos-space-xl);
+            border-top: 1px solid var(--macos-border-light);
             display: flex;
             justify-content: flex-end;
-            gap: 8px;
-            background: rgba(255, 255, 255, 0.6);
-        }
-
-        .modal-lg .modal-content {
-            max-width: 800px;
-        }
-
-        .modal-sm .modal-content {
-            max-width: 400px;
-        }
-
-        /* ===== Enhanced Loading Overlay ===== */
-        .loading-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
-            -webkit-backdrop-filter: blur(10px);
-            display: none;
-            justify-content: center;
-            align-items: center;
-            z-index: var(--macos-z-index-max);
-            flex-direction: column;
-            gap: 16px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-        }
-
-        .loading-overlay.active {
-            display: flex;
-            opacity: 1;
-            animation: fadeIn 0.3s ease;
-        }
-
-        .loading-spinner {
-            width: 48px;
-            height: 48px;
-            border: 3px solid var(--macos-gray-200);
-            border-top-color: var(--macos-blue);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-            position: relative;
-        }
-
-        .loading-spinner::after {
-            content: '';
-            position: absolute;
-            top: -3px;
-            left: -3px;
-            right: -3px;
-            bottom: -3px;
-            border: 3px solid transparent;
-            border-top-color: var(--macos-purple);
-            border-radius: 50%;
-            animation: spin 1.5s linear infinite reverse;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        .loading-text {
-            font-size: var(--macos-font-size-lg);
-            color: var(--macos-gray-600);
-            font-weight: 500;
-            text-align: center;
-        }
-
-        .loading-subtext {
-            font-size: var(--macos-font-size-sm);
-            color: var(--macos-gray-500);
-            text-align: center;
-            max-width: 300px;
-            line-height: 1.4;
-        }
-
-        /* ===== Enhanced Notifications ===== */
-        .notification-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: var(--macos-z-index-notification);
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            max-width: 320px;
-            width: calc(100% - 40px);
-        }
-
-        .notification {
-            background: var(--macos-glass-heavy);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
-            border-radius: var(--macos-border-radius-lg);
-            padding: 12px;
-            box-shadow: var(--macos-shadow-xl);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            transform: translateX(calc(100% + 20px));
-            transition: transform 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            display: flex;
-            align-items: flex-start;
-            gap: 10px;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .notification::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 4px;
-            height: 100%;
-        }
-
-        .notification.active {
-            transform: translateX(0);
-        }
-
-        .notification.success {
-            border-left: 4px solid var(--macos-green);
-        }
-
-        .notification.success::before {
-            background: var(--macos-green);
-        }
-
-        .notification.error {
-            border-left: 4px solid var(--macos-red);
-        }
-
-        .notification.error::before {
-            background: var(--macos-red);
-        }
-
-        .notification.info {
-            border-left: 4px solid var(--macos-blue);
-        }
-
-        .notification.info::before {
-            background: var(--macos-blue);
-        }
-
-        .notification.warning {
-            border-left: 4px solid var(--macos-yellow);
-        }
-
-        .notification.warning::before {
-            background: var(--macos-yellow);
-        }
-
-        .notification-icon {
-            width: 20px;
-            height: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: var(--macos-font-size-lg);
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .notification.success .notification-icon {
-            color: var(--macos-green);
-        }
-
-        .notification.error .notification-icon {
-            color: var(--macos-red);
-        }
-
-        .notification.info .notification-icon {
-            color: var(--macos-blue);
-        }
-
-        .notification.warning .notification-icon {
-            color: var(--macos-yellow);
-        }
-
-        .notification-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .notification-title {
-            font-weight: 700;
-            font-size: var(--macos-font-size);
-            margin-bottom: 2px;
-            color: var(--macos-gray-600);
-            line-height: 1.2;
-        }
-
-        .notification-message {
-            font-size: var(--macos-font-size-sm);
-            color: var(--macos-gray-500);
-            line-height: 1.4;
-        }
-
-        .notification-close {
-            width: 20px;
-            height: 20px;
-            border: none;
-            background: transparent;
-            color: var(--macos-gray-400);
-            cursor: pointer;
-            font-size: var(--macos-font-size);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--macos-border-radius-sm);
-            transition: var(--macos-transition-fast);
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
-        .notification-close:hover {
+            gap: var(--macos-space-md);
             background: var(--macos-gray-100);
-            color: var(--macos-gray-600);
         }
 
-        /* ===== Enhanced Code Editor ===== */
+        /* ===== CODE EDITOR ===== */
         .code-editor {
-            background: #1e1e1e;
-            color: #d4d4d4;
-            font-family: 'Monaco', 'Menlo', 'Ubuntu Mono', monospace;
-            border-radius: var(--macos-border-radius-lg);
+            background: var(--macos-gray-100);
+            border-radius: var(--macos-radius-md);
+            border: 1px solid var(--macos-border-light);
             overflow: hidden;
-            margin-bottom: 12px;
-            border: 1px solid #3e3e42;
         }
 
         .code-header {
-            background: #252526;
-            padding: 8px 12px;
+            padding: var(--macos-space-md) var(--macos-space-lg);
+            background: var(--macos-surface);
+            border-bottom: 1px solid var(--macos-border-light);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            border-bottom: 1px solid #3e3e42;
         }
 
         .code-language {
-            font-size: var(--macos-font-size-xs);
-            font-weight: 700;
-            color: #888;
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
+            font-family: var(--macos-font-mono);
+            font-size: 0.85rem;
+            color: var(--macos-text-secondary);
+            font-weight: 500;
         }
 
         .code-body {
-            padding: 12px;
-            font-size: var(--macos-font-size-sm);
-            line-height: 1.5;
-            max-height: 250px;
-            overflow-y: auto;
+            padding: var(--macos-space-lg);
+            overflow-x: auto;
         }
 
         .code-body pre {
             margin: 0;
-            white-space: pre-wrap;
-            word-wrap: break-word;
+            font-family: var(--macos-font-mono);
+            font-size: 0.9rem;
+            line-height: 1.5;
+            color: var(--macos-text-primary);
         }
 
-        .code-body::-webkit-scrollbar {
-            width: 6px;
-        }
-
-        .code-body::-webkit-scrollbar-track {
-            background: #252526;
-        }
-
-        .code-body::-webkit-scrollbar-thumb {
-            background: #3e3e42;
-            border-radius: var(--macos-border-radius-full);
-        }
-
-        /* ===== Enhanced Alert Boxes ===== */
-        .alert {
-            padding: 10px 12px;
-            border-radius: var(--macos-border-radius);
-            margin-bottom: 12px;
-            border-left: 4px solid;
-            background: white;
-            display: flex;
-            align-items: flex-start;
-            gap: 8px;
-            border: 1px solid;
-            border-left-width: 4px;
-            border-right: none;
-            border-top: none;
-            border-bottom: none;
-        }
-
-        .alert-icon {
-            width: 16px;
-            height: 16px;
-            display: flex;
+        /* ===== STATUS BADGES ===== */
+        .status-badge {
+            display: inline-flex;
             align-items: center;
-            justify-content: center;
-            font-size: var(--macos-font-size);
-            flex-shrink: 0;
-            margin-top: 1px;
+            gap: var(--macos-space-xs);
+            padding: 4px 12px;
+            border-radius: var(--macos-radius-full);
+            font-size: 0.85rem;
+            font-weight: 500;
+            white-space: nowrap;
         }
 
-        .alert-content {
-            flex: 1;
-            min-width: 0;
-        }
-
-        .alert-title {
-            font-weight: 600;
-            font-size: var(--macos-font-size);
-            margin-bottom: 2px;
-            color: inherit;
-        }
-
-        .alert-message {
-            font-size: var(--macos-font-size-sm);
-            color: inherit;
-            opacity: 0.9;
-            line-height: 1.4;
-        }
-
-        .alert-danger {
-            background: var(--macos-danger-bg);
-            border-color: var(--macos-red);
-            color: var(--macos-red);
-        }
-
-        .alert-warning {
-            background: var(--macos-warning-bg);
-            border-color: var(--macos-yellow);
-            color: var(--macos-yellow);
-        }
-
-        .alert-success {
-            background: var(--macos-success-bg);
-            border-color: var(--macos-green);
+        .status-active {
+            background: rgba(52, 199, 89, 0.1);
             color: var(--macos-green);
+            border: 1px solid rgba(52, 199, 89, 0.2);
         }
 
-        .alert-info {
-            background: var(--macos-info-bg);
-            border-color: var(--macos-blue);
-            color: var(--macos-blue);
+        .status-pending {
+            background: rgba(255, 149, 0, 0.1);
+            color: var(--macos-orange);
+            border: 1px solid rgba(255, 149, 0, 0.2);
         }
 
-        /* ===== Enhanced Mobile Responsiveness ===== */
-        @media (max-width: 1200px) {
-            :root {
-                --macos-sidebar-width: 240px;
+        .status-inactive {
+            background: rgba(142, 142, 147, 0.1);
+            color: var(--macos-gray-600);
+            border: 1px solid rgba(142, 142, 147, 0.2);
+        }
+
+        .status-suspended {
+            background: rgba(255, 59, 48, 0.1);
+            color: var(--macos-red);
+            border: 1px solid rgba(255, 59, 48, 0.2);
+        }
+
+        /* ===== UTILITY CLASSES ===== */
+        .d-flex { display: flex; }
+        .flex-column { flex-direction: column; }
+        .flex-wrap { flex-wrap: wrap; }
+        .align-center { align-items: center; }
+        .align-start { align-items: flex-start; }
+        .align-end { align-items: flex-end; }
+        .justify-between { justify-content: space-between; }
+        .justify-center { justify-content: center; }
+        .justify-end { justify-content: flex-end; }
+        .gap-4 { gap: 4px; }
+        .gap-8 { gap: 8px; }
+        .gap-16 { gap: 16px; }
+        .gap-24 { gap: 24px; }
+        .gap-32 { gap: 32px; }
+        
+        .mb-4 { margin-bottom: 4px; }
+        .mb-8 { margin-bottom: 8px; }
+        .mb-16 { margin-bottom: 16px; }
+        .mb-24 { margin-bottom: 24px; }
+        .mb-32 { margin-bottom: 32px; }
+        
+        .mt-4 { margin-top: 4px; }
+        .mt-8 { margin-top: 8px; }
+        .mt-16 { margin-top: 16px; }
+        .mt-24 { margin-top: 24px; }
+        
+        .ml-auto { margin-left: auto; }
+        .mr-auto { margin-right: auto; }
+        
+        .w-100 { width: 100%; }
+        .w-auto { width: auto; }
+        
+        .text-left { text-align: left; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        
+        .font-semibold { font-weight: 600; }
+        .font-bold { font-weight: 700; }
+        
+        .text-muted { color: var(--macos-text-secondary); }
+        .text-primary { color: var(--macos-blue); }
+        .text-success { color: var(--macos-green); }
+        .text-danger { color: var(--macos-red); }
+        .text-warning { color: var(--macos-orange); }
+        
+        /* ===== MOBILE RESPONSIVENESS ===== */
+        @media (max-width: 768px) {
+            .sudo-container {
+                flex-direction: column;
             }
             
-            .cards-grid {
-                grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            }
-        }
-
-        @media (max-width: 992px) {
             .sudo-sidebar {
+                position: fixed;
+                top: 60px;
+                left: 0;
+                right: 0;
+                width: 100%;
+                height: auto;
+                max-height: calc(100vh - 60px);
+                z-index: 90;
                 transform: translateX(-100%);
-                z-index: var(--macos-z-index-modal);
-                width: var(--macos-sidebar-width-mobile);
-                box-shadow: var(--macos-shadow-xl);
                 border-right: none;
+                border-bottom: 1px solid var(--macos-border-light);
             }
             
             .sudo-sidebar.active {
@@ -2101,485 +1208,310 @@
             }
             
             .sudo-main {
-                margin-left: 0;
-                width: 100%;
+                padding: var(--macos-space-md);
             }
             
-            .mobile-menu-toggle {
-                display: flex;
+            .section-title {
+                font-size: 1.5rem;
             }
             
-            .content-tabs-wrapper {
-                top: var(--macos-header-height);
+            .section-subtitle {
+                font-size: 0.9rem;
+            }
+            
+            .stats-grid {
+                grid-template-columns: 1fr;
+                gap: var(--macos-space-md);
+            }
+            
+            .cards-grid {
+                grid-template-columns: 1fr;
+                gap: var(--macos-space-md);
+            }
+            
+            .stat-value {
+                font-size: 1.8rem;
+            }
+            
+            .modal-content {
+                margin: var(--macos-space-md);
+                max-height: 85vh;
+            }
+            
+            .modal-body {
+                max-height: calc(85vh - 120px);
+                padding: var(--macos-space-md);
+            }
+            
+            .table-container {
+                margin-left: -12px;
+                margin-right: -12px;
+                border-radius: 0;
+                border-left: none;
+                border-right: none;
             }
             
             .form-row {
                 grid-template-columns: 1fr;
             }
-        }
-
-        @media (max-width: 768px) {
+            
+            .header-actions {
+                gap: var(--macos-space-md);
+            }
+            
             .sudo-header {
-                padding: 0 12px;
-                height: var(--macos-header-height-mobile);
-            }
-            
-            .sudo-container {
-                margin-top: var(--macos-header-height-mobile);
-            }
-            
-            .sudo-main {
-                padding: 12px;
-            }
-            
-            .cards-grid {
-                grid-template-columns: 1fr;
-                gap: 12px;
-            }
-            
-            .stats-grid {
-                grid-template-columns: repeat(2, 1fr);
-                gap: 8px;
-            }
-            
-            .card-header,
-            .card-body {
-                padding: 12px;
-            }
-            
-            .modal-content {
-                max-height: 90vh;
-                border-radius: var(--macos-border-radius-xl);
+                padding: var(--macos-space-sm) var(--macos-space-md);
             }
             
             .modal-header,
-            .modal-body,
             .modal-footer {
-                padding: 12px;
-            }
-            
-            .section-title {
-                font-size: var(--macos-font-size-5xl);
-            }
-            
-            .stat-value {
-                font-size: var(--macos-font-size-5xl);
-            }
-            
-            .action-buttons {
-                flex-wrap: wrap;
-            }
-            
-            .table-responsive {
-                margin: 0 -12px;
-                padding: 0 12px;
+                padding: var(--macos-space-md);
             }
         }
 
-        @media (max-width: 576px) {
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-            
-            .sudo-logo {
-                min-width: 0;
-            }
-            
-            .sudo-title {
-                font-size: var(--macos-font-size-xl);
-            }
-            
-            .sudo-subtitle {
-                font-size: 9px;
-            }
-            
-            .header-actions {
-                gap: 8px;
-            }
-            
-            .live-status {
-                padding: 4px 8px;
-                font-size: 10px;
-            }
-            
-            .user-details {
-                display: none;
-            }
-            
-            .modal {
-                padding: 8px;
-            }
-            
-            .notification-container {
-                top: 16px;
-                right: 16px;
-                width: calc(100% - 32px);
-            }
-            
-            .btn {
-                padding: 6px 12px;
-                font-size: var(--macos-font-size-sm);
-            }
-            
-            .section-actions {
-                gap: 6px;
-            }
-        }
-
-        @media (max-width: 375px) {
+        @media (max-width: 480px) {
             .sudo-header {
-                padding: 0 8px;
-            }
-            
-            .sudo-main {
-                padding: 8px;
-            }
-            
-            .mobile-menu-toggle {
-                width: 28px;
-                height: 28px;
+                height: 56px;
             }
             
             .sudo-icon {
-                width: 28px;
-                height: 28px;
-                font-size: var(--macos-font-size);
+                width: 36px;
+                height: 36px;
+                font-size: 1rem;
             }
             
-            .btn-sm {
-                padding: 3px 8px;
-                font-size: 11px;
+            .sudo-title {
+                font-size: 1.1rem;
             }
             
-            .content-tab {
-                padding: 5px 10px;
-                font-size: var(--macos-font-size-sm);
+            .sudo-subtitle {
+                font-size: 0.75rem;
+            }
+            
+            .user-avatar {
+                width: 32px;
+                height: 32px;
+                font-size: 0.8rem;
+            }
+            
+            .live-status span {
+                display: none;
+            }
+            
+            .btn {
+                padding: var(--macos-space-sm) var(--macos-space-md);
+                font-size: 0.9rem;
+            }
+            
+            .modal {
+                padding: var(--macos-space-sm);
+            }
+            
+            .modal-content {
+                margin: var(--macos-space-sm);
             }
         }
 
-        /* ===== Touch Device Optimizations ===== */
-        @media (hover: none) and (pointer: coarse) {
-            .btn:hover {
-                transform: none !important;
+        /* ===== DARK MODE SUPPORT (optional) ===== */
+        @media (prefers-color-scheme: dark) {
+            :root {
+                --macos-background: #000000;
+                --macos-surface: #1c1c1e;
+                --macos-surface-secondary: #2c2c2e;
+                --macos-border: #38383a;
+                --macos-border-light: #2c2c2e;
+                --macos-text-primary: #f5f5f7;
+                --macos-text-secondary: #98989d;
+                --macos-text-tertiary: #6c6c70;
+                
+                --macos-gray-100: #1c1c1e;
+                --macos-gray-200: #2c2c2e;
+                --macos-gray-300: #3a3a3c;
+                --macos-gray-400: #48484a;
+                --macos-gray-500: #636366;
+                --macos-gray-600: #8e8e93;
             }
             
-            .card:hover {
-                transform: none !important;
+            .card:hover,
+            .stat-card:hover,
+            .chart-container:hover {
+                border-color: var(--macos-gray-400);
             }
             
-            .nav-item:hover,
-            .nav-tab:hover,
-            .content-tab:hover {
-                transform: none !important;
+            .form-control {
+                background: var(--macos-surface-secondary);
+                border-color: var(--macos-gray-400);
             }
             
-            .stat-card:hover {
-                transform: none !important;
+            .code-editor {
+                background: var(--macos-surface-secondary);
             }
             
-            .form-control,
-            .btn,
-            .nav-item,
-            .nav-tab,
-            .content-tab {
-                min-height: 44px;
-            }
-            
-            .toggle-switch {
-                min-height: 44px;
-                display: flex;
-                align-items: center;
-            }
-            
-            .form-check {
-                min-height: 44px;
-            }
-            
-            .table th,
-            .table td {
-                padding: 12px 8px;
+            .modal-close:hover {
+                background: var(--macos-gray-300);
             }
         }
 
-        /* ===== Enhanced Utility Classes ===== */
-        .d-none { display: none !important; }
-        .d-inline { display: inline !important; }
-        .d-inline-block { display: inline-block !important; }
-        .d-block { display: block !important; }
-        .d-flex { display: flex !important; }
-        .d-inline-flex { display: inline-flex !important; }
-        .d-grid { display: grid !important; }
-        
-        .flex-column { flex-direction: column !important; }
-        .flex-row { flex-direction: row !important; }
-        .flex-wrap { flex-wrap: wrap !important; }
-        .flex-nowrap { flex-wrap: nowrap !important; }
-        .flex-1 { flex: 1 !important; }
-        .flex-auto { flex: 1 1 auto !important; }
-        .flex-none { flex: none !important; }
-        
-        .items-start { align-items: flex-start !important; }
-        .items-end { align-items: flex-end !important; }
-        .items-center { align-items: center !important; }
-        .items-baseline { align-items: baseline !important; }
-        .items-stretch { align-items: stretch !important; }
-        
-        .justify-start { justify-content: flex-start !important; }
-        .justify-end { justify-content: flex-end !important; }
-        .justify-center { justify-content: center !important; }
-        .justify-between { justify-content: space-between !important; }
-        .justify-around { justify-content: space-around !important; }
-        .justify-evenly { justify-content: space-evenly !important; }
-        
-        .gap-0 { gap: 0 !important; }
-        .gap-1 { gap: 4px !important; }
-        .gap-2 { gap: 8px !important; }
-        .gap-3 { gap: 12px !important; }
-        .gap-4 { gap: 16px !important; }
-        .gap-5 { gap: 20px !important; }
-        .gap-6 { gap: 24px !important; }
-        .gap-8 { gap: 32px !important; }
-        
-        .w-25 { width: 25% !important; }
-        .w-50 { width: 50% !important; }
-        .w-75 { width: 75% !important; }
-        .w-100 { width: 100% !important; }
-        .w-auto { width: auto !important; }
-        
-        .h-25 { height: 25% !important; }
-        .h-50 { height: 50% !important; }
-        .h-75 { height: 75% !important; }
-        .h-100 { height: 100% !important; }
-        .h-auto { height: auto !important; }
-        
-        .m-0 { margin: 0 !important; }
-        .m-1 { margin: 4px !important; }
-        .m-2 { margin: 8px !important; }
-        .m-3 { margin: 12px !important; }
-        .m-4 { margin: 16px !important; }
-        .m-auto { margin: auto !important; }
-        
-        .mt-0 { margin-top: 0 !important; }
-        .mt-1 { margin-top: 4px !important; }
-        .mt-2 { margin-top: 8px !important; }
-        .mt-3 { margin-top: 12px !important; }
-        .mt-4 { margin-top: 16px !important; }
-        .mt-5 { margin-top: 20px !important; }
-        .mt-6 { margin-top: 24px !important; }
-        .mt-8 { margin-top: 32px !important; }
-        
-        .mb-0 { margin-bottom: 0 !important; }
-        .mb-1 { margin-bottom: 4px !important; }
-        .mb-2 { margin-bottom: 8px !important; }
-        .mb-3 { margin-bottom: 12px !important; }
-        .mb-4 { margin-bottom: 16px !important; }
-        .mb-5 { margin-bottom: 20px !important; }
-        .mb-6 { margin-bottom: 24px !important; }
-        .mb-8 { margin-bottom: 32px !important; }
-        
-        .ml-0 { margin-left: 0 !important; }
-        .ml-1 { margin-left: 4px !important; }
-        .ml-2 { margin-left: 8px !important; }
-        .ml-3 { margin-left: 12px !important; }
-        .ml-4 { margin-left: 16px !important; }
-        .ml-auto { margin-left: auto !important; }
-        
-        .mr-0 { margin-right: 0 !important; }
-        .mr-1 { margin-right: 4px !important; }
-        .mr-2 { margin-right: 8px !important; }
-        .mr-3 { margin-right: 12px !important; }
-        .mr-4 { margin-right: 16px !important; }
-        .mr-auto { margin-right: auto !important; }
-        
-        .p-0 { padding: 0 !important; }
-        .p-1 { padding: 4px !important; }
-        .p-2 { padding: 8px !important; }
-        .p-3 { padding: 12px !important; }
-        .p-4 { padding: 16px !important; }
-        .p-5 { padding: 20px !important; }
-        .p-6 { padding: 24px !important; }
-        
-        .pt-0 { padding-top: 0 !important; }
-        .pt-1 { padding-top: 4px !important; }
-        .pt-2 { padding-top: 8px !important; }
-        .pt-3 { padding-top: 12px !important; }
-        .pt-4 { padding-top: 16px !important; }
-        .pt-5 { padding-top: 20px !important; }
-        
-        .pb-0 { padding-bottom: 0 !important; }
-        .pb-1 { padding-bottom: 4px !important; }
-        .pb-2 { padding-bottom: 8px !important; }
-        .pb-3 { padding-bottom: 12px !important; }
-        .pb-4 { padding-bottom: 16px !important; }
-        .pb-5 { padding-bottom: 20px !important; }
-        
-        .pl-0 { padding-left: 0 !important; }
-        .pl-1 { padding-left: 4px !important; }
-        .pl-2 { padding-left: 8px !important; }
-        .pl-3 { padding-left: 12px !important; }
-        .pl-4 { padding-left: 16px !important; }
-        
-        .pr-0 { padding-right: 0 !important; }
-        .pr-1 { padding-right: 4px !important; }
-        .pr-2 { padding-right: 8px !important; }
-        .pr-3 { padding-right: 12px !important; }
-        .pr-4 { padding-right: 16px !important; }
-        
-        .text-left { text-align: left !important; }
-        .text-center { text-align: center !important; }
-        .text-right { text-align: right !important; }
-        .text-justify { text-align: justify !important; }
-        
-        .text-nowrap { white-space: nowrap !important; }
-        .text-truncate {
-            overflow: hidden !important;
-            text-overflow: ellipsis !important;
-            white-space: nowrap !important;
+        /* ===== NOTIFICATION CONTAINER ===== */
+        #notificationContainer {
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            z-index: 10000;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            max-width: 350px;
+            width: 100%;
         }
-        
-        .text-lowercase { text-transform: lowercase !important; }
-        .text-uppercase { text-transform: uppercase !important; }
-        .text-capitalize { text-transform: capitalize !important; }
-        
-        .font-weight-light { font-weight: 300 !important; }
-        .font-weight-normal { font-weight: 400 !important; }
-        .font-weight-medium { font-weight: 500 !important; }
-        .font-weight-semibold { font-weight: 600 !important; }
-        .font-weight-bold { font-weight: 700 !important; }
-        .font-weight-bolder { font-weight: 800 !important; }
-        
-        .font-size-xs { font-size: var(--macos-font-size-xs) !important; }
-        .font-size-sm { font-size: var(--macos-font-size-sm) !important; }
-        .font-size-base { font-size: var(--macos-font-size) !important; }
-        .font-size-md { font-size: var(--macos-font-size-md) !important; }
-        .font-size-lg { font-size: var(--macos-font-size-lg) !important; }
-        .font-size-xl { font-size: var(--macos-font-size-xl) !important; }
-        .font-size-2xl { font-size: var(--macos-font-size-2xl) !important; }
-        
-        .text-muted { color: var(--macos-gray-500) !important; }
-        .text-primary { color: var(--macos-blue) !important; }
-        .text-success { color: var(--macos-green) !important; }
-        .text-danger { color: var(--macos-red) !important; }
-        .text-warning { color: var(--macos-yellow) !important; }
-        .text-info { color: var(--macos-blue) !important; }
-        .text-purple { color: var(--macos-purple) !important; }
-        .text-orange { color: var(--macos-orange) !important; }
-        .text-pink { color: var(--macos-pink) !important; }
-        .text-teal { color: var(--macos-teal) !important; }
-        .text-cyan { color: var(--macos-cyan) !important; }
-        .text-white { color: white !important; }
-        .text-black { color: var(--macos-gray-600) !important; }
-        
-        .bg-transparent { background: transparent !important; }
-        .bg-white { background: white !important; }
-        .bg-gray-50 { background: var(--macos-gray-50) !important; }
-        .bg-gray-100 { background: var(--macos-gray-100) !important; }
-        .bg-gray-200 { background: var(--macos-gray-200) !important; }
-        .bg-primary { background: var(--macos-blue) !important; }
-        .bg-success { background: var(--macos-green) !important; }
-        .bg-danger { background: var(--macos-red) !important; }
-        .bg-warning { background: var(--macos-yellow) !important; }
-        .bg-info { background: var(--macos-blue) !important; }
-        .bg-purple { background: var(--macos-purple) !important; }
-        .bg-orange { background: var(--macos-orange) !important; }
-        .bg-pink { background: var(--macos-pink) !important; }
-        
-        .border { border: 1px solid var(--macos-gray-300) !important; }
-        .border-0 { border: 0 !important; }
-        .border-top { border-top: 1px solid var(--macos-gray-300) !important; }
-        .border-right { border-right: 1px solid var(--macos-gray-300) !important; }
-        .border-bottom { border-bottom: 1px solid var(--macos-gray-300) !important; }
-        .border-left { border-left: 1px solid var(--macos-gray-300) !important; }
-        
-        .border-primary { border-color: var(--macos-blue) !important; }
-        .border-success { border-color: var(--macos-green) !important; }
-        .border-danger { border-color: var(--macos-red) !important; }
-        .border-warning { border-color: var(--macos-yellow) !important; }
-        .border-info { border-color: var(--macos-blue) !important; }
-        .border-purple { border-color: var(--macos-purple) !important; }
-        .border-orange { border-color: var(--macos-orange) !important; }
-        .border-pink { border-color: var(--macos-pink) !important; }
-        
-        .rounded { border-radius: var(--macos-border-radius) !important; }
-        .rounded-sm { border-radius: var(--macos-border-radius-sm) !important; }
-        .rounded-md { border-radius: var(--macos-border-radius-md) !important; }
-        .rounded-lg { border-radius: var(--macos-border-radius-lg) !important; }
-        .rounded-xl { border-radius: var(--macos-border-radius-xl) !important; }
-        .rounded-2xl { border-radius: var(--macos-border-radius-2xl) !important; }
-        .rounded-full { border-radius: var(--macos-border-radius-full) !important; }
-        
-        .rounded-top { border-top-left-radius: var(--macos-border-radius) !important; border-top-right-radius: var(--macos-border-radius) !important; }
-        .rounded-bottom { border-bottom-left-radius: var(--macos-border-radius) !important; border-bottom-right-radius: var(--macos-border-radius) !important; }
-        .rounded-left { border-top-left-radius: var(--macos-border-radius) !important; border-bottom-left-radius: var(--macos-border-radius) !important; }
-        .rounded-right { border-top-right-radius: var(--macos-border-radius) !important; border-bottom-right-radius: var(--macos-border-radius) !important; }
-        
-        .shadow-none { box-shadow: none !important; }
-        .shadow-xs { box-shadow: var(--macos-shadow-xs) !important; }
-        .shadow-sm { box-shadow: var(--macos-shadow-sm) !important; }
-        .shadow { box-shadow: var(--macos-shadow) !important; }
-        .shadow-md { box-shadow: var(--macos-shadow-md) !important; }
-        .shadow-lg { box-shadow: var(--macos-shadow-lg) !important; }
-        .shadow-xl { box-shadow: var(--macos-shadow-xl) !important; }
-        .shadow-2xl { box-shadow: var(--macos-shadow-2xl) !important; }
-        .shadow-inner { box-shadow: var(--macos-shadow-inner) !important; }
-        
-        .opacity-0 { opacity: 0 !important; }
-        .opacity-25 { opacity: 0.25 !important; }
-        .opacity-50 { opacity: 0.5 !important; }
-        .opacity-75 { opacity: 0.75 !important; }
-        .opacity-100 { opacity: 1 !important; }
-        
-        .overflow-hidden { overflow: hidden !important; }
-        .overflow-visible { overflow: visible !important; }
-        .overflow-auto { overflow: auto !important; }
-        .overflow-x-auto { overflow-x: auto !important; }
-        .overflow-y-auto { overflow-y: auto !important; }
-        .overflow-x-hidden { overflow-x: hidden !important; }
-        .overflow-y-hidden { overflow-y: hidden !important; }
-        
-        .position-static { position: static !important; }
-        .position-relative { position: relative !important; }
-        .position-absolute { position: absolute !important; }
-        .position-fixed { position: fixed !important; }
-        .position-sticky { position: sticky !important; }
-        
-        .top-0 { top: 0 !important; }
-        .right-0 { right: 0 !important; }
-        .bottom-0 { bottom: 0 !important; }
-        .left-0 { left: 0 !important; }
-        
-        .z-index-0 { z-index: 0 !important; }
-        .z-index-10 { z-index: 10 !important; }
-        .z-index-20 { z-index: 20 !important; }
-        .z-index-30 { z-index: 30 !important; }
-        .z-index-40 { z-index: 40 !important; }
-        .z-index-50 { z-index: 50 !important; }
-        .z-index-auto { z-index: auto !important; }
-        
-        .cursor-pointer { cursor: pointer !important; }
-        .cursor-default { cursor: default !important; }
-        .cursor-not-allowed { cursor: not-allowed !important; }
-        .cursor-help { cursor: help !important; }
-        .cursor-move { cursor: move !important; }
-        
-        .pointer-events-none { pointer-events: none !important; }
-        .pointer-events-auto { pointer-events: auto !important; }
-        
-        .user-select-none { user-select: none !important; }
-        .user-select-text { user-select: text !important; }
-        .user-select-all { user-select: all !important; }
-        
-        .visibility-visible { visibility: visible !important; }
-        .visibility-hidden { visibility: hidden !important; }
-        .visibility-collapse { visibility: collapse !important; }
-        
-        .transition-none { transition: none !important; }
-        .transition-all { transition: var(--macos-transition) !important; }
-        .transition-fast { transition: var(--macos-transition-fast) !important; }
-        .transition-slow { transition: var(--macos-transition-slow) !important; }
-        .transition-bounce { transition: var(--macos-transition-bounce) !important; }
 
-        /* ===== Enhanced Scrollbars ===== */
+        .notification {
+            background: var(--macos-surface);
+            border-radius: var(--macos-radius-md);
+            padding: var(--macos-space-md) var(--macos-space-lg);
+            border-left: 4px solid var(--macos-blue);
+            box-shadow: var(--macos-shadow-md);
+            display: flex;
+            align-items: flex-start;
+            gap: var(--macos-space-md);
+            animation: slideInRight 0.3s ease;
+            border: 1px solid var(--macos-border-light);
+        }
+
+        .notification.success {
+            border-left-color: var(--macos-green);
+        }
+
+        .notification.error {
+            border-left-color: var(--macos-red);
+        }
+
+        .notification.warning {
+            border-left-color: var(--macos-orange);
+        }
+
+        .notification.info {
+            border-left-color: var(--macos-blue);
+        }
+
+        .notification-icon {
+            font-size: 1.2rem;
+            flex-shrink: 0;
+            margin-top: 2px;
+        }
+
+        .notification-content {
+            flex: 1;
+        }
+
+        .notification-title {
+            font-weight: 600;
+            color: var(--macos-text-primary);
+            margin-bottom: 4px;
+        }
+
+        .notification-message {
+            font-size: 0.9rem;
+            color: var(--macos-text-secondary);
+            line-height: 1.4;
+        }
+
+        .notification-close {
+            background: none;
+            border: none;
+            color: var(--macos-text-tertiary);
+            cursor: pointer;
+            padding: 4px;
+            font-size: 1rem;
+            transition: color var(--macos-transition-fast);
+            flex-shrink: 0;
+        }
+
+        .notification-close:hover {
+            color: var(--macos-text-primary);
+        }
+
+        @keyframes slideInRight {
+            from {
+                transform: translateX(100%);
+                opacity: 0;
+            }
+            to {
+                transform: translateX(0);
+                opacity: 1;
+            }
+        }
+
+        /* ===== EXPORT OPTIONS ===== */
+        .export-options {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: var(--macos-space-lg);
+        }
+
+        .export-option {
+            background: var(--macos-gray-100);
+            border-radius: var(--macos-radius-md);
+            padding: var(--macos-space-lg);
+            border: 1px solid var(--macos-border-light);
+            cursor: pointer;
+            transition: all var(--macos-transition);
+            text-align: center;
+        }
+
+        .export-option:hover {
+            transform: translateY(-2px);
+            border-color: var(--macos-blue);
+            background: rgba(0, 122, 255, 0.05);
+        }
+
+        .export-icon {
+            width: 48px;
+            height: 48px;
+            background: var(--macos-blue);
+            border-radius: var(--macos-radius-md);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto var(--macos-space-md);
+        }
+
+        /* ===== SMOOTH SCROLLING ===== */
+        html {
+            scroll-behavior: smooth;
+        }
+
+        /* ===== FOCUS VISIBLE ===== */
+        *:focus-visible {
+            outline: 2px solid var(--macos-blue);
+            outline-offset: 2px;
+        }
+
+        /* ===== SELECTION ===== */
+        ::selection {
+            background: rgba(0, 122, 255, 0.2);
+            color: var(--macos-text-primary);
+        }
+
+        /* ===== PLACEHOLDER ANIMATION ===== */
+        @keyframes placeholderShimmer {
+            0% {
+                background-position: -200px 0;
+            }
+            100% {
+                background-position: 200px 0;
+            }
+        }
+
+        .loading-placeholder {
+            background: linear-gradient(90deg, var(--macos-gray-100) 25%, var(--macos-gray-200) 50%, var(--macos-gray-100) 75%);
+            background-size: 200px 100%;
+            animation: placeholderShimmer 1.5s infinite;
+        }
+
+        /* ===== CUSTOM SCROLLBAR ===== */
         ::-webkit-scrollbar {
             width: 8px;
             height: 8px;
@@ -2587,408 +1519,47 @@
 
         ::-webkit-scrollbar-track {
             background: var(--macos-gray-100);
-            border-radius: var(--macos-border-radius-full);
+            border-radius: var(--macos-radius-full);
         }
 
         ::-webkit-scrollbar-thumb {
             background: var(--macos-gray-300);
-            border-radius: var(--macos-border-radius-full);
-            border: 2px solid var(--macos-gray-100);
+            border-radius: var(--macos-radius-full);
         }
 
         ::-webkit-scrollbar-thumb:hover {
             background: var(--macos-gray-400);
         }
 
-        ::-webkit-scrollbar-corner {
-            background: var(--macos-gray-100);
-        }
-
-        /* ===== Enhanced File Upload Styles ===== */
-        .file-upload-container {
-            border: 2px dashed var(--macos-gray-300);
-            border-radius: var(--macos-border-radius-lg);
-            padding: 20px;
-            text-align: center;
-            transition: var(--macos-transition);
-            cursor: pointer;
-            background: white;
-        }
-
-        .file-upload-container:hover,
-        .file-upload-container.dragover {
-            border-color: var(--macos-blue);
-            background: var(--macos-info-bg);
-            transform: translateY(-2px);
-        }
-
-        .file-upload-icon {
-            font-size: 32px;
-            color: var(--macos-gray-300);
-            margin-bottom: 8px;
-        }
-
-        .file-upload-text {
-            color: var(--macos-gray-500);
-            margin-bottom: 4px;
-            font-size: var(--macos-font-size);
-        }
-
-        .file-upload-hint {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-400);
-        }
-
-        .uploaded-files {
-            margin-top: 12px;
-        }
-
-        .uploaded-file {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 8px 12px;
-            background: var(--macos-gray-100);
-            border-radius: var(--macos-border-radius);
-            margin-bottom: 6px;
-            transition: var(--macos-transition-fast);
-        }
-
-        .uploaded-file:hover {
-            background: var(--macos-gray-200);
-        }
-
-        .file-info {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            min-width: 0;
-        }
-
-        .file-icon {
-            color: var(--macos-blue);
-            flex-shrink: 0;
-        }
-
-        .file-name {
-            font-size: var(--macos-font-size);
-            color: var(--macos-gray-600);
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-            min-width: 0;
-        }
-
-        .file-size {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-500);
-            white-space: nowrap;
-        }
-
-        /* ===== Enhanced Progress Bars ===== */
-        .progress-container {
-            background: var(--macos-gray-200);
-            border-radius: var(--macos-border-radius-full);
-            overflow: hidden;
-            height: 6px;
-            margin: 6px 0;
-            position: relative;
-        }
-
-        .progress-bar {
-            background: linear-gradient(90deg, var(--macos-blue), var(--macos-purple));
-            height: 100%;
-            transition: width 0.3s ease;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .progress-bar::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            bottom: 0;
-            right: 0;
-            background-image: linear-gradient(
-                -45deg,
-                rgba(255, 255, 255, 0.2) 25%,
-                transparent 25%,
-                transparent 50%,
-                rgba(255, 255, 255, 0.2) 50%,
-                rgba(255, 255, 255, 0.2) 75%,
-                transparent 75%,
-                transparent
-            );
-            background-size: 20px 20px;
-            animation: progress-stripes 1s linear infinite;
-        }
-
-        @keyframes progress-stripes {
-            0% { background-position: 0 0; }
-            100% { background-position: 20px 0; }
-        }
-
-        .progress-text {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-500);
-            text-align: center;
-            margin-top: 2px;
-        }
-
-        /* ===== Enhanced Search Filters ===== */
-        .filter-container {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-            align-items: flex-end;
-        }
-
-        .filter-group {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            min-width: 0;
-        }
-
-        .filter-label {
-            font-size: var(--macos-font-size-xs);
-            color: var(--macos-gray-500);
-            font-weight: 600;
-            white-space: nowrap;
-        }
-
-        /* ===== Enhanced Data Export Styles ===== */
-        .export-options {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .export-option {
-            padding: 16px;
-            background: var(--macos-glass);
-            border-radius: var(--macos-border-radius-lg);
-            text-align: center;
-            cursor: pointer;
-            transition: var(--macos-transition);
-            border: 1px solid rgba(255, 255, 255, 0.4);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            gap: 8px;
-        }
-
-        .export-option:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--macos-shadow-md);
-            border-color: rgba(255, 255, 255, 0.6);
-        }
-
-        .export-icon {
-            font-size: 24px;
-            color: var(--macos-blue);
-            margin-bottom: 4px;
-        }
-
-        /* ===== Enhanced Pagination ===== */
-        .pagination {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 4px;
-            margin-top: 16px;
-            flex-wrap: wrap;
-        }
-
-        .page-btn {
-            min-width: 32px;
-            height: 32px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: var(--macos-border-radius);
-            border: 1px solid var(--macos-gray-300);
-            background: white;
-            cursor: pointer;
-            transition: var(--macos-transition);
-            font-size: var(--macos-font-size);
-            font-weight: 500;
-        }
-
-        .page-btn:hover:not(.disabled):not(.active) {
-            border-color: var(--macos-blue);
-            color: var(--macos-blue);
-            transform: translateY(-1px);
-        }
-
-        .page-btn.active {
-            background: var(--macos-blue);
-            color: white;
-            border-color: var(--macos-blue);
-            box-shadow: var(--macos-shadow-button);
-        }
-
-        .page-btn.disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        /* ===== Enhanced Tooltips ===== */
-        [data-tooltip] {
-            position: relative;
-        }
-
-        [data-tooltip]::before {
-            content: attr(data-tooltip);
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            padding: 6px 8px;
-            background: var(--macos-gray-600);
-            color: white;
-            font-size: var(--macos-font-size-xs);
-            border-radius: var(--macos-border-radius);
-            white-space: nowrap;
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--macos-transition-fast);
-            z-index: var(--macos-z-index-tooltip);
-            pointer-events: none;
-            margin-bottom: 8px;
-            box-shadow: var(--macos-shadow-md);
-        }
-
-        [data-tooltip]::after {
-            content: '';
-            position: absolute;
-            bottom: 100%;
-            left: 50%;
-            transform: translateX(-50%);
-            border: 4px solid transparent;
-            border-top-color: var(--macos-gray-600);
-            opacity: 0;
-            visibility: hidden;
-            transition: var(--macos-transition-fast);
-            z-index: var(--macos-z-index-tooltip);
-            pointer-events: none;
-            margin-bottom: 0;
-        }
-
-        [data-tooltip]:hover::before,
-        [data-tooltip]:hover::after {
-            opacity: 1;
-            visibility: visible;
-        }
-
-        /* ===== Enhanced Animations ===== */
-        .animate-fade-in {
-            animation: fadeIn 0.3s ease;
-        }
-
-        .animate-slide-up {
-            animation: fadeInUp 0.3s ease;
-        }
-
-        .animate-slide-in-right {
-            animation: slideInRight 0.3s ease;
-        }
-
-        .animate-slide-in-left {
-            animation: slideInLeft 0.3s ease;
-        }
-
-        .animate-scale-in {
-            animation: scaleIn 0.3s ease;
-        }
-
-        .animate-pulse {
-            animation: pulse 2s infinite;
-        }
-
-        .animate-spin {
-            animation: spin 1s linear infinite;
-        }
-
-        .animate-bounce {
-            animation: bounce 1s infinite;
-        }
-
-        @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
-            50% { transform: translateY(-10px); }
-        }
-
-        /* ===== Print Styles ===== */
+        /* ===== PRINT STYLES ===== */
         @media print {
             .sudo-sidebar,
             .sudo-header,
-            .content-tabs-wrapper,
             .btn,
-            .card-actions,
             .modal,
-            .notification-container {
+            #notificationContainer {
                 display: none !important;
             }
             
+            .sudo-container {
+                display: block;
+            }
+            
             .sudo-main {
-                margin-left: 0;
                 padding: 0;
+                background: white;
             }
             
-            .card {
-                box-shadow: none !important;
-                border: 1px solid #ddd !important;
-            }
-            
-            .table {
+            .card,
+            .stat-card,
+            .chart-container {
+                break-inside: avoid;
                 border: 1px solid #ddd;
-            }
-            
-            .table th,
-            .table td {
-                border: 1px solid #ddd;
-            }
-            
-            body {
-                background: white !important;
-                color: black !important;
-            }
-            
-            a {
-                color: black !important;
-                text-decoration: underline;
+                box-shadow: none;
             }
         }
 
-        /* ===== High Contrast Mode Support ===== */
-        @media (prefers-contrast: high) {
-            :root {
-                --macos-blue: #0047ab;
-                --macos-green: #006400;
-                --macos-red: #8b0000;
-                --macos-yellow: #8b8000;
-                --macos-purple: #4b0082;
-            }
-            
-            .btn {
-                border-width: 2px;
-            }
-            
-            .form-control {
-                border-width: 2px;
-            }
-            
-            .card {
-                border-width: 2px;
-            }
-        }
-
-        /* ===== Reduced Motion Support ===== */
+        /* ===== ACCESSIBILITY ===== */
         @media (prefers-reduced-motion: reduce) {
             *,
             *::before,
@@ -2996,44 +1567,20 @@
                 animation-duration: 0.01ms !important;
                 animation-iteration-count: 1 !important;
                 transition-duration: 0.01ms !important;
-            }
-            
-            .btn:hover,
-            .card:hover,
-            .nav-item:hover,
-            .nav-tab:hover,
-            .content-tab:hover,
-            .stat-card:hover,
-            .export-option:hover,
-            .page-btn:hover {
-                transform: none !important;
+                scroll-behavior: auto !important;
             }
         }
 
-        /* ===== Dark Mode Support (but keeping white background per requirements) ===== */
-        @media (prefers-color-scheme: dark) {
-            /* Override to ensure white background is maintained */
-            body {
-                background: linear-gradient(135deg, #f8f9fa 0%, #f1f3f5 100%) !important;
-                color: var(--macos-gray-600) !important;
-            }
-            
-            .sudo-header,
-            .sudo-sidebar,
-            .card,
-            .stat-card,
-            .chart-container,
-            .table-container,
-            .modal-content,
-            .notification {
-                background: var(--macos-glass) !important;
-                color: var(--macos-gray-600) !important;
-            }
-            
-            .form-control {
-                background: white !important;
-                color: var(--macos-gray-600) !important;
-            }
+        .visually-hidden {
+            position: absolute;
+            width: 1px;
+            height: 1px;
+            padding: 0;
+            margin: -1px;
+            overflow: hidden;
+            clip: rect(0, 0, 0, 0);
+            white-space: nowrap;
+            border: 0;
         }
     </style>
 </head>
@@ -3042,17 +1589,13 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <div class="loading-text" id="loadingText">Loading SUDO Control Panel...</div>
-        <div class="loading-subtext" id="loadingSubtext">Initializing system modules</div>
     </div>
 
     <!-- SUDO Header -->
     <header class="sudo-header">
         <div class="sudo-logo">
-            <button class="mobile-menu-toggle" id="mobileMenuToggle">
-                <i class="fas fa-bars"></i>
-            </button>
             <div class="sudo-icon">SU</div>
-            <div class="sudo-title-wrapper">
+            <div>
                 <div class="sudo-title">TruCash SUDO</div>
                 <div class="sudo-subtitle">Super Control Admin</div>
             </div>
@@ -3064,9 +1607,9 @@
             </div>
             <div class="user-info">
                 <div class="user-avatar" id="userAvatar">SU</div>
-                <div class="user-details">
-                    <div class="user-name" id="userName">SUDO Admin</div>
-                    <div class="user-role" id="userRole">Full System Control</div>
+                <div>
+                    <div style="font-size: 13px; font-weight: 600;" id="userName">SUDO Admin</div>
+                    <div style="font-size: 11px; color: var(--macos-gray-400);" id="userRole">Full System Control</div>
                 </div>
             </div>
         </div>
@@ -3075,129 +1618,90 @@
     <!-- Main Container -->
     <div class="sudo-container">
         <!-- Sidebar Navigation -->
-        <nav class="sudo-sidebar" id="sudoSidebar">
-            <!-- Persistent Tabs -->
-            <div class="nav-persistent-tabs">
-                <div class="nav-tabs-container">
-                    <div class="nav-tab active" data-section="dashboard">
-                        <i class="fas fa-tachometer-alt tab-icon"></i>
-                        <span class="tab-text">Overview</span>
-                    </div>
-                    <div class="nav-tab" data-section="analytics">
-                        <i class="fas fa-chart-line tab-icon"></i>
-                        <span class="tab-text">Analytics</span>
-                    </div>
-                    <div class="nav-tab" data-section="admins">
-                        <i class="fas fa-user-shield tab-icon"></i>
-                        <span class="tab-text">Admins</span>
-                        <span class="tab-badge">3</span>
-                    </div>
-                    <div class="nav-tab" data-section="agents">
-                        <i class="fas fa-id-badge tab-icon"></i>
-                        <span class="tab-text">Agents</span>
-                    </div>
-                    <div class="nav-tab" data-section="customers">
-                        <i class="fas fa-users tab-icon"></i>
-                        <span class="tab-text">Customers</span>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Navigation Sections -->
+        <nav class="sudo-sidebar">
             <div class="nav-section">
                 <div class="nav-title">Dashboard</div>
-                <div class="nav-items">
-                    <div class="nav-item active" data-section="dashboard">
-                        <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>
-                        <div class="nav-text">Overview</div>
-                    </div>
-                    <div class="nav-item" data-section="analytics">
-                        <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
-                        <div class="nav-text">Analytics</div>
-                    </div>
+                <div class="nav-item active" data-section="dashboard">
+                    <div class="nav-icon"><i class="fas fa-tachometer-alt"></i></div>
+                    <div class="nav-text">Overview</div>
+                </div>
+                <div class="nav-item" data-section="analytics">
+                    <div class="nav-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="nav-text">Analytics</div>
                 </div>
             </div>
 
             <div class="nav-section">
                 <div class="nav-title">User Management</div>
-                <div class="nav-items">
-                    <div class="nav-item" data-section="admins">
-                        <div class="nav-icon"><i class="fas fa-user-shield"></i></div>
-                        <div class="nav-text">Admin Accounts</div>
-                        <div class="nav-badge">3</div>
-                    </div>
-                    <div class="nav-item" data-section="agents">
-                        <div class="nav-icon"><i class="fas fa-id-badge"></i></div>
-                        <div class="nav-text">Agent Accounts</div>
-                    </div>
-                    <div class="nav-item" data-section="customers">
-                        <div class="nav-icon"><i class="fas fa-users"></i></div>
-                        <div class="nav-text">Customer Accounts</div>
-                    </div>
+                <div class="nav-item" data-section="admins">
+                    <div class="nav-icon"><i class="fas fa-user-shield"></i></div>
+                    <div class="nav-text">Admin Accounts</div>
+                </div>
+                <div class="nav-item" data-section="agents">
+                    <div class="nav-icon"><i class="fas fa-id-badge"></i></div>
+                    <div class="nav-text">Agent Accounts</div>
+                </div>
+                <div class="nav-item" data-section="customers">
+                    <div class="nav-icon"><i class="fas fa-users"></i></div>
+                    <div class="nav-text">Customer Accounts</div>
                 </div>
             </div>
 
             <div class="nav-section">
                 <div class="nav-title">System Control</div>
-                <div class="nav-items">
-                    <div class="nav-item" data-section="features">
-                        <div class="nav-icon"><i class="fas fa-toggle-on"></i></div>
-                        <div class="nav-text">Feature Flags</div>
-                    </div>
-                    <div class="nav-item" data-section="financial">
-                        <div class="nav-icon"><i class="fas fa-money-bill-wave"></i></div>
-                        <div class="nav-text">Financial Settings</div>
-                    </div>
-                    <div class="nav-item" data-section="repayment">
-                        <div class="nav-icon"><i class="fas fa-calendar-check"></i></div>
-                        <div class="nav-text">Repayment Plans</div>
-                    </div>
-                    <div class="nav-item" data-section="notifications">
-                        <div class="nav-icon"><i class="fas fa-bell"></i></div>
-                        <div class="nav-text">Notifications</div>
-                    </div>
-                    <div class="nav-item" data-section="ui-settings">
-                        <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>
-                        <div class="nav-text">UI Behavior</div>
-                    </div>
+                <div class="nav-item" data-section="features">
+                    <div class="nav-icon"><i class="fas fa-toggle-on"></i></div>
+                    <div class="nav-text">Feature Flags</div>
+                </div>
+                <div class="nav-item" data-section="financial">
+                    <div class="nav-icon"><i class="fas fa-money-bill-wave"></i></div>
+                    <div class="nav-text">Financial Settings</div>
+                </div>
+                <div class="nav-item" data-section="repayment">
+                    <div class="nav-icon"><i class="fas fa-calendar-check"></i></div>
+                    <div class="nav-text">Repayment Plans</div>
+                </div>
+                <div class="nav-item" data-section="notifications">
+                    <div class="nav-icon"><i class="fas fa-bell"></i></div>
+                    <div class="nav-text">Notifications</div>
+                </div>
+                <div class="nav-item" data-section="ui-settings">
+                    <div class="nav-icon"><i class="fas fa-sliders-h"></i></div>
+                    <div class="nav-text">UI Behavior</div>
                 </div>
             </div>
 
             <div class="nav-section">
                 <div class="nav-title">Security & Monitoring</div>
-                <div class="nav-items">
-                    <div class="nav-item" data-section="security">
-                        <div class="nav-icon"><i class="fas fa-shield-alt"></i></div>
-                        <div class="nav-text">Security Settings</div>
-                    </div>
-                    <div class="nav-item" data-section="audit">
-                        <div class="nav-icon"><i class="fas fa-history"></i></div>
-                        <div class="nav-text">Audit Logs</div>
-                        <div class="nav-badge" id="auditBadge">0</div>
-                    </div>
-                    <div class="nav-item" data-section="backup">
-                        <div class="nav-icon"><i class="fas fa-database"></i></div>
-                        <div class="nav-text">Backup & Export</div>
-                    </div>
+                <div class="nav-item" data-section="security">
+                    <div class="nav-icon"><i class="fas fa-shield-alt"></i></div>
+                    <div class="nav-text">Security Settings</div>
+                </div>
+                <div class="nav-item" data-section="audit">
+                    <div class="nav-icon"><i class="fas fa-history"></i></div>
+                    <div class="nav-text">Audit Logs</div>
+                    <div class="nav-badge" id="auditBadge">0</div>
+                </div>
+                <div class="nav-item" data-section="backup">
+                    <div class="nav-icon"><i class="fas fa-database"></i></div>
+                    <div class="nav-text">Backup & Export</div>
                 </div>
             </div>
 
             <div class="nav-section">
                 <div class="nav-title">Manual Intervention</div>
-                <div class="nav-items">
-                    <div class="nav-item" data-section="manual">
-                        <div class="nav-icon"><i class="fas fa-hands-helping"></i></div>
-                        <div class="nav-text">Manual Adjustments</div>
-                    </div>
-                    <div class="nav-item" data-section="disputes">
-                        <div class="nav-icon"><i class="fas fa-gavel"></i></div>
-                        <div class="nav-text">Dispute Resolution</div>
-                        <div class="nav-badge" id="disputeBadge">0</div>
-                    </div>
+                <div class="nav-item" data-section="manual">
+                    <div class="nav-icon"><i class="fas fa-hands-helping"></i></div>
+                    <div class="nav-text">Manual Adjustments</div>
+                </div>
+                <div class="nav-item" data-section="disputes">
+                    <div class="nav-icon"><i class="fas fa-gavel"></i></div>
+                    <div class="nav-text">Dispute Resolution</div>
+                    <div class="nav-badge" id="disputeBadge">0</div>
                 </div>
             </div>
 
-            <div class="nav-section" style="margin-top: auto; padding-top: 16px; border-top: 1px solid var(--macos-gray-200);">
+            <div class="nav-section" style="margin-top: auto;">
                 <div class="nav-item" data-action="logout">
                     <div class="nav-icon"><i class="fas fa-sign-out-alt"></i></div>
                     <div class="nav-text">Logout</div>
@@ -3207,43 +1711,15 @@
 
         <!-- Main Content -->
         <main class="sudo-main">
-            <!-- Persistent Content Tabs -->
-            <div class="content-tabs-wrapper">
-                <div class="content-tabs" id="contentTabs">
-                    <!-- Tabs will be dynamically added here -->
-                    <div class="content-tab active" data-section="dashboard">
-                        <i class="fas fa-tachometer-alt content-tab-icon"></i>
-                        <span class="content-tab-text">Dashboard</span>
-                        <button class="content-tab-close" onclick="closeContentTab('dashboard')">
-                            <i class="fas fa-times"></i>
-                        </button>
-                    </div>
-                </div>
-            </div>
-
             <!-- Dashboard Section -->
             <section id="dashboard" class="content-section active">
                 <div class="section-header">
-                    <h1 class="section-title">
-                        <span class="section-title-icon"><i class="fas fa-tachometer-alt"></i></span>
-                        System Overview
-                    </h1>
+                    <h1 class="section-title">System Overview</h1>
                     <div class="section-subtitle">Real-time monitoring of the entire TruCash platform</div>
-                    <div class="section-actions">
-                        <button class="btn btn-primary btn-sm" onclick="refreshSystemHealth()">
-                            <i class="fas fa-sync-alt"></i> Refresh
-                        </button>
-                        <button class="btn btn-outline btn-sm" onclick="openCreateAdminModal()">
-                            <i class="fas fa-user-plus"></i> Create Admin
-                        </button>
-                        <button class="btn btn-outline btn-sm" onclick="openCreateAgentModal()">
-                            <i class="fas fa-id-card"></i> Create Agent
-                        </button>
-                    </div>
                 </div>
 
                 <div class="stats-grid">
-                    <div class="stat-card users">
+                    <div class="stat-card">
                         <div class="stat-header">
                             <div>
                                 <div class="stat-label">Total Users</div>
@@ -3257,7 +1733,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-card agents">
+                    <div class="stat-card">
                         <div class="stat-header">
                             <div>
                                 <div class="stat-label">Active Agents</div>
@@ -3271,7 +1747,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-card transactions">
+                    <div class="stat-card">
                         <div class="stat-header">
                             <div>
                                 <div class="stat-label">Transactions Today</div>
@@ -3285,7 +1761,7 @@
                         </div>
                     </div>
 
-                    <div class="stat-card revenue">
+                    <div class="stat-card">
                         <div class="stat-header">
                             <div>
                                 <div class="stat-label">Platform Revenue</div>
@@ -3303,20 +1779,17 @@
                 <div class="cards-grid">
                     <div class="card">
                         <div class="card-header">
-                            <div class="card-title">
-                                <i class="fas fa-heartbeat card-title-icon"></i>
-                                System Health
-                            </div>
+                            <div class="card-title">System Health</div>
                             <div class="card-actions">
-                                <button class="btn btn-icon btn-sm" onclick="refreshSystemHealth()" data-tooltip="Refresh">
-                                    <i class="fas fa-sync-alt"></i>
+                                <button class="btn btn-sm btn-outline" onclick="refreshSystemHealth()">
+                                    <i class="fas fa-sync-alt"></i> Refresh
                                 </button>
                             </div>
                         </div>
                         <div class="card-body">
                             <div class="form-group">
                                 <label class="form-label">Database Connection</label>
-                                <div class="d-flex items-center justify-between">
+                                <div class="d-flex align-center justify-between">
                                     <span>Firebase Realtime Database</span>
                                     <span class="status-badge status-active" id="dbStatus">Connected</span>
                                 </div>
@@ -3324,16 +1797,16 @@
                             
                             <div class="form-group">
                                 <label class="form-label">Active Sessions</label>
-                                <div class="d-flex items-center justify-between">
+                                <div class="d-flex align-center justify-between">
                                     <span>Current Active Users</span>
-                                    <span class="font-weight-bold" id="activeSessions">0</span>
+                                    <span class="font-semibold" id="activeSessions">0</span>
                                 </div>
                             </div>
                             <div class="form-group">
                                 <label class="form-label">System Load</label>
-                                <div class="d-flex items-center justify-between">
+                                <div class="d-flex align-center justify-between">
                                     <span>API Response Time</span>
-                                    <span class="font-weight-bold" id="apiResponseTime">0ms</span>
+                                    <span class="font-semibold" id="apiResponseTime">0ms</span>
                                 </div>
                             </div>
                         </div>
@@ -3341,31 +1814,28 @@
 
                     <div class="card">
                         <div class="card-header">
-                            <div class="card-title">
-                                <i class="fas fa-bolt card-title-icon"></i>
-                                Quick Actions
-                            </div>
+                            <div class="card-title">Quick Actions</div>
                         </div>
                         <div class="card-body">
-                            <div class="d-flex flex-wrap gap-2 mb-3">
-                                <button class="btn btn-primary btn-sm" onclick="openCreateAdminModal()">
+                            <div class="d-flex flex-wrap gap-8 mb-16">
+                                <button class="btn btn-primary" onclick="openCreateAdminModal()">
                                     <i class="fas fa-user-plus"></i> Create Admin
                                 </button>
-                                <button class="btn btn-success btn-sm" onclick="openCreateAgentModal()">
+                                <button class="btn btn-success" onclick="openCreateAgentModal()">
                                     <i class="fas fa-id-card"></i> Create Agent
                                 </button>
-                                <button class="btn btn-outline btn-sm" onclick="openManualAdjustmentModal()">
+                                <button class="btn btn-outline" onclick="openManualAdjustmentModal()">
                                     <i class="fas fa-edit"></i> Manual Adjustment
                                 </button>
                             </div>
-                            <div class="d-flex flex-wrap gap-2">
-                                <button class="btn btn-outline btn-sm" onclick="openFeatureFlagModal()">
+                            <div class="d-flex flex-wrap gap-8">
+                                <button class="btn btn-outline" onclick="openFeatureFlagModal()">
                                     <i class="fas fa-toggle-on"></i> Feature Flags
                                 </button>
-                                <button class="btn btn-outline btn-sm" onclick="viewAuditLogs()">
+                                <button class="btn btn-outline" onclick="viewAuditLogs()">
                                     <i class="fas fa-history"></i> View Audit Logs
                                 </button>
-                                <button class="btn btn-outline btn-sm" onclick="openBackupModal()">
+                                <button class="btn btn-outline" onclick="openBackupModal()">
                                     <i class="fas fa-download"></i> Export Data
                                 </button>
                             </div>
@@ -3374,76 +1844,49 @@
                 </div>
 
                 <div class="chart-container">
-                    <div class="chart-title">
-                        Real-time System Activity
-                        <div class="chart-actions">
-                            <button class="btn btn-icon btn-sm" data-tooltip="Refresh Chart">
-                                <i class="fas fa-sync-alt"></i>
-                            </button>
-                            <button class="btn btn-icon btn-sm" data-tooltip="Download Data">
-                                <i class="fas fa-download"></i>
-                            </button>
-                        </div>
-                    </div>
-                    <div class="chart-wrapper">
-                        <canvas id="activityChart"></canvas>
-                    </div>
+                    <div class="chart-title">Real-time System Activity</div>
+                    <canvas id="activityChart"></canvas>
                 </div>
             </section>
 
             <!-- Admin Management Section -->
             <section id="admins" class="content-section">
                 <div class="section-header">
-                    <h1 class="section-title">
-                        <span class="section-title-icon"><i class="fas fa-user-shield"></i></span>
-                        Admin Accounts Management
-                    </h1>
+                    <h1 class="section-title">Admin Accounts Management</h1>
                     <div class="section-subtitle">Create, edit, suspend, and delete admin accounts</div>
-                    <div class="section-actions">
-                        <button class="btn btn-primary btn-sm" onclick="openCreateAdminModal()">
+                </div>
+
+                <div class="d-flex justify-between align-center mb-24">
+                    <div>
+                        <button class="btn btn-primary" onclick="openCreateAdminModal()">
                             <i class="fas fa-user-plus"></i> Create New Admin
+                        </button>
+                    </div>
+                    <div class="d-flex gap-8">
+                        <input type="text" class="form-control" style="width: 300px;" placeholder="Search admins..." id="adminSearch" onkeyup="searchAdmins()">
+                        <button class="btn btn-outline" onclick="refreshAdminList()">
+                            <i class="fas fa-sync-alt"></i>
                         </button>
                     </div>
                 </div>
 
-                <div class="filter-container">
-                    <div class="filter-group" style="flex: 1; max-width: 300px;">
-                        <label class="filter-label">Search Admins</label>
-                        <input type="text" class="form-control" placeholder="Search by name, email, ID..." id="adminSearch" onkeyup="searchAdmins()">
-                    </div>
-                    <div class="filter-group">
-                        <label class="filter-label">Status</label>
-                        <select class="form-control form-select" id="adminStatusFilter" onchange="filterAdmins()">
-                            <option value="all">All Status</option>
-                            <option value="active">Active</option>
-                            <option value="suspended">Suspended</option>
-                            <option value="inactive">Inactive</option>
-                        </select>
-                    </div>
-                    <button class="btn btn-icon" onclick="refreshAdminList()" data-tooltip="Refresh List">
-                        <i class="fas fa-sync-alt"></i>
-                    </button>
-                </div>
-
                 <div class="table-container">
-                    <div class="table-responsive">
-                        <table class="table" id="adminsTable">
-                            <thead>
-                                <tr>
-                                    <th>Admin ID</th>
-                                    <th>Full Name</th>
-                                    <th>Email</th>
-                                    <th>Role</th>
-                                    <th>Status</th>
-                                    <th>Last Login</th>
-                                    <th>Actions</th>
-                                </tr>
-                            </thead>
-                            <tbody id="adminsTableBody">
-                                <!-- Admin rows will be inserted here -->
-                            </tbody>
-                        </table>
-                    </div>
+                    <table class="table" id="adminsTable">
+                        <thead>
+                            <tr>
+                                <th>Admin ID</th>
+                                <th>Full Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Last Login</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="adminsTableBody">
+                            <!-- Admin rows will be inserted here -->
+                        </tbody>
+                    </table>
                 </div>
                 <div class="pagination" id="adminPagination"></div>
             </section>
