@@ -1168,6 +1168,110 @@
             border: 1px solid #ccc;
             border-radius: 6px;
         }
+
+        /* ===== Loan Status Tabs ===== */
+        .loan-tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .loan-tab {
+            padding: 8px 16px;
+            background: var(--ios-gray-1);
+            border-radius: 20px;
+            font-size: 13px;
+            cursor: pointer;
+            transition: var(--ios-transition);
+        }
+        .loan-tab.active {
+            background: var(--ios-green);
+            color: white;
+        }
+
+        /* ===== Loan Cards ===== */
+        .loan-card {
+            background: var(--ios-white);
+            border-radius: var(--ios-border-radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--ios-gray-2);
+            transition: var(--ios-transition);
+            cursor: pointer;
+        }
+        .loan-card:hover {
+            box-shadow: var(--ios-card-shadow-hover);
+            transform: translateY(-2px);
+        }
+        .loan-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .loan-id {
+            font-weight: 600;
+            color: var(--ios-gray-6);
+        }
+        .loan-amount {
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ios-green);
+        }
+        .loan-dates {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--ios-gray-5);
+            margin-top: 8px;
+        }
+
+        /* ===== Agreement Styles ===== */
+        .agreement-wrapper {
+            font-family: 'Times New Roman', serif;
+            background: #fefefe;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            color: #2c3e50;
+        }
+        .agreement-wrapper h1, .agreement-wrapper h2 {
+            text-align: center;
+            color: #1a5276;
+            margin-bottom: 10px;
+        }
+        .agreement-wrapper h3 {
+            background: #1a5276;
+            color: white;
+            padding: 8px 12px;
+            border-radius: 4px;
+            margin: 20px 0 10px;
+        }
+        .agreement-wrapper .detail {
+            margin: 8px 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+        .agreement-wrapper .label {
+            font-weight: bold;
+            width: 200px;
+            color: #1a5276;
+        }
+        .agreement-wrapper .value {
+            flex: 1;
+        }
+        .agreement-wrapper .signature-line {
+            border-bottom: 1px solid #000;
+            width: 250px;
+            margin: 5px 0;
+        }
+        .agreement-wrapper .logo {
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .agreement-wrapper .logo img {
+            max-width: 150px;
+        }
     </style>
 </head>
 <body>
@@ -1420,6 +1524,7 @@
 
                 <!-- Profile Section -->
                 <section id="profileSection" class="content-section d-none">
+                    <!-- (unchanged, keep original profile section) -->
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">My Profile</div>
@@ -1530,7 +1635,7 @@
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="loanDuration" class="form-label">Loan Duration</label>
+                                    <label for="loanDuration" class="form-label">Loan Duration (Months)</label>
                                     <select id="loanDuration" class="form-input">
                                         <option value="1">1 Month</option>
                                         <option value="3">3 Months</option>
@@ -1659,12 +1764,18 @@
 
                 <!-- My Loans Section -->
                 <section id="loansSection" class="content-section d-none">
+                    <div class="loan-tabs">
+                        <span class="loan-tab active" data-status="active">Active</span>
+                        <span class="loan-tab" data-status="pending">Pending</span>
+                        <span class="loan-tab" data-status="approved">Approved</span>
+                        <span class="loan-tab" data-status="rejected">Rejected</span>
+                    </div>
                     <div class="section">
                         <div class="section-header">
-                            <div class="section-title">Active Loans</div>
+                            <div class="section-title" id="loanStatusTitle">Active Loans</div>
                         </div>
-                        <div id="activeLoansList">
-                            <p class="text-muted text-center py-4">No active loans found.</p>
+                        <div id="loansList">
+                            <p class="text-muted text-center py-4">No loans found.</p>
                         </div>
                     </div>
                     
@@ -1685,9 +1796,10 @@
                             <div class="section-title">Make Payment</div>
                         </div>
                         <div id="paymentFormContainer">
+                            <!-- Will be populated dynamically with loan selection -->
                             <div class="text-center py-4">
                                 <i class="fas fa-credit-card" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
-                                <p class="text-muted">No payment due at this time</p>
+                                <p class="text-muted">No active loans to pay</p>
                             </div>
                         </div>
                     </div>
@@ -1785,6 +1897,7 @@
 
                 <!-- Settings Section -->
                 <section id="settingsSection" class="content-section d-none">
+                    <!-- (unchanged, keep original settings) -->
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Account Settings</div>
@@ -2015,6 +2128,24 @@
         </div>
     </div>
 
+    <!-- NEW: Loan Details Modal -->
+    <div class="modal" id="loanDetailsModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 class="modal-title">Loan Details</h3>
+                <button class="modal-close" id="closeLoanDetailsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="loanDetailsModalBody">
+                <div class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3">Loading...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
     <script>
         // ===== Firebase Configuration =====
@@ -2071,7 +2202,9 @@
             cloudinaryWidget: null,
             realtimeListeners: [],
             currentSection: 'dashboard',
-            pendingLoanData: null // store loan data before agreement
+            pendingLoanData: null,
+            selectedLoanForPayment: null,
+            currentLoanStatusFilter: 'active'
         };
 
         // ===== Initialize Firebase =====
@@ -2183,7 +2316,9 @@
                 return 'LN' + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
             },
             calculateMonthlyPayment(principal, annualRate, months) {
-                const monthlyRate = annualRate / 12 / 100;
+                // Using agreement rates: 35% monthly, so annualRate is actually monthlyRate * 12
+                // We'll compute based on monthly rate directly
+                const monthlyRate = 0.35; // 35% per month
                 const payment = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
                 return payment || 0;
             },
@@ -2193,6 +2328,12 @@
                 } catch (e) {
                     return null;
                 }
+            },
+            // New: Calculate total interest based on monthly 35%
+            calculateTotalInterest(principal, months) {
+                const monthlyRate = 0.35;
+                const totalPayable = principal * Math.pow(1 + monthlyRate, months);
+                return totalPayable - principal;
             }
         };
 
@@ -2259,7 +2400,7 @@
                         AppState.systemSettings = {
                             maxLoanAmount: 50000,
                             minLoanAmount: 100,
-                            interestRate: 15,
+                            interestRate: 35, // monthly 35%
                             maxLoanDuration: 24,
                             minLoanDuration: 1
                         };
@@ -2486,7 +2627,7 @@
                     return { success: false, error: error.message };
                 }
             },
-            // NEW: Upload signed agreement HTML to Firebase Storage
+            // Upload signed agreement HTML to Firebase Storage
             async uploadSignedAgreement(htmlContent) {
                 try {
                     const fileName = `loan_agreements/${AppState.currentUser.uid}_${Date.now()}.html`;
@@ -2500,7 +2641,7 @@
                     return { success: false, error: error.message };
                 }
             },
-            async submitLoanApplication(loanData, signedAgreementUrl) {
+            async submitLoanApplication(loanData, signedAgreementUrl, witnessData) {
                 try {
                     Utils.showLoading('Submitting Loan Application...');
                     if (!AppState.userData.nrcFront || !AppState.userData.nrcBack) {
@@ -2541,10 +2682,11 @@
                             error: 'You already have an active or pending loan. Please complete it before applying for a new one.' 
                         };
                     }
-                    const interestRate = AppState.systemSettings?.interestRate || 15;
-                    const totalInterest = (loanData.amount * interestRate * loanData.duration) / (12 * 100);
+                    // Use agreement rates: 35% monthly
+                    const monthlyRate = 0.35;
+                    const totalInterest = Utils.calculateTotalInterest(loanData.amount, loanData.duration);
                     const totalPayable = loanData.amount + totalInterest;
-                    const monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, interestRate, loanData.duration);
+                    const monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, monthlyRate * 12, loanData.duration); // pass annualized for compatibility
                     const loanId = Utils.generateLoanId();
                     const loanRef = db.ref('loans/' + loanId);
                     const loan = {
@@ -2558,7 +2700,7 @@
                         amount: loanData.amount,
                         approvedAmount: loanData.amount,
                         duration: loanData.duration,
-                        interestRate: interestRate,
+                        interestRate: 35, // monthly
                         totalInterest: totalInterest,
                         totalPayable: totalPayable,
                         monthlyPayment: monthlyPayment,
@@ -2580,8 +2722,9 @@
                             nrcBack: AppState.userData.nrcBack,
                             profilePhoto: AppState.userData.profilePhoto
                         },
-                        repaymentSchedule: this.generateRepaymentSchedule(loanData.amount, interestRate, loanData.duration),
-                        signedAgreementUrl: signedAgreementUrl // store agreement URL
+                        repaymentSchedule: this.generateRepaymentSchedule(loanData.amount, monthlyRate, loanData.duration),
+                        signedAgreementUrl: signedAgreementUrl,
+                        witness: witnessData // store witness info
                     };
                     await loanRef.set(loan);
                     await this.createNotification(
@@ -2615,10 +2758,9 @@
                     return { success: false, error: 'Failed to submit loan application' };
                 }
             },
-            generateRepaymentSchedule(principal, annualRate, months) {
+            generateRepaymentSchedule(principal, monthlyRate, months) {
                 const schedule = [];
-                const monthlyRate = annualRate / 12 / 100;
-                const monthlyPayment = Utils.calculateMonthlyPayment(principal, annualRate, months);
+                const monthlyPayment = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
                 let balance = principal;
                 const startDate = new Date();
                 for (let i = 1; i <= months; i++) {
@@ -2773,7 +2915,7 @@
             }
         };
 
-        // ===== Enhanced Cloudinary Service (unchanged) =====
+        // ===== Cloudinary Service =====
         const CloudinaryService = {
             widget: null,
             initUploadWidget() {
@@ -3071,9 +3213,12 @@
                 this.editProfileModal = document.getElementById('editProfileModal');
                 this.loanAgreementModal = document.getElementById('loanAgreementModal');
                 this.closeLoanAgreementModal = document.getElementById('closeLoanAgreementModal');
+                this.loanDetailsModal = document.getElementById('loanDetailsModal');
+                this.closeLoanDetailsModal = document.getElementById('closeLoanDetailsModal');
                 this.showCertificateBtn = document.getElementById('showCertificateBtn');
                 this.certificateContainer = document.getElementById('certificateContainer');
                 this.notificationBadge = document.getElementById('notificationCount');
+                this.loanTabs = document.querySelectorAll('.loan-tab');
             },
             bindEvents() {
                 this.menuToggle?.addEventListener('click', () => {
@@ -3191,7 +3336,22 @@
                 this.closeLoanAgreementModal?.addEventListener('click', () => {
                     this.loanAgreementModal.classList.remove('active');
                 });
-                // Submit signed agreement button (will be added dynamically)
+                // Loan details modal close
+                this.closeLoanDetailsModal?.addEventListener('click', () => {
+                    this.loanDetailsModal.classList.remove('active');
+                });
+                // Loan tabs
+                this.loanTabs.forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        const status = tab.dataset.status;
+                        AppState.currentLoanStatusFilter = status;
+                        this.loanTabs.forEach(t => t.classList.remove('active'));
+                        tab.classList.add('active');
+                        document.getElementById('loanStatusTitle').textContent = 
+                            status.charAt(0).toUpperCase() + status.slice(1) + ' Loans';
+                        this.updateLoansUI();
+                    });
+                });
             },
             async initAuth() {
                 Utils.showLoading('Authenticating...');
@@ -3565,7 +3725,7 @@
                 if (this.submitLoanBtn) this.submitLoanBtn.disabled = !isValid;
                 return isValid;
             },
-            // New: Prepare and show loan agreement modal
+            // Prepare and show loan agreement modal
             prepareLoanAgreement() {
                 if (!this.validateLoanForm()) {
                     Utils.showToast('Validation Error', 'Please fix the errors in the form', 'error');
@@ -3595,86 +3755,62 @@
                 const year = today.getFullYear();
                 const borrower = AppState.userData;
                 const agent = AppState.agentData;
+                const totalInterest = Utils.calculateTotalInterest(loanData.amount, loanData.duration);
+                const totalPayable = loanData.amount + totalInterest;
+                const monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, 0.35*12, loanData.duration);
                 const agreementHTML = `
-                    <div style="font-family: Arial, sans-serif; padding: 20px;">
-                        <h1 style="text-align: center;">TrueCash Money Lender Firm</h1>
-                        <h2 style="text-align: center;">Loan Agreement Form</h2>
+                    <div class="agreement-wrapper">
+                        <div class="logo">
+                            <i class="fas fa-wallet" style="font-size: 50px; color: #1a5276;"></i>
+                            <h1>TrueCash Money Lender Firm</h1>
+                        </div>
+                        <h2>Loan Agreement Form</h2>
                         <p>This Loan Agreement ("Agreement") is made and entered into on this 
                         ${day} day of ${month}, ${year}.</p>
                         
-                        <div class="section">
-                            <h3>1. Lender Details</h3>
-                            <p><span class="label">Lending Firm:</span> TrueCash Money Lender</p>
-                            <p><span class="label">Representatives:</span></p>
-                            <ul>
-                                <li>Eng. Hambayi</li>
-                                <li>Dr. Ilunga</li>
-                                <li>Mr. Mukandawire</li>
-                            </ul>
-                        </div>
+                        <h3>1. Lender Details</h3>
+                        <div class="detail"><span class="label">Lending Firm:</span> TrueCash Money Lender</div>
+                        <div class="detail"><span class="label">Representatives:</span> Eng. Hambayi, Dr. Ilunga, Mr. Mukandawire</div>
                         
-                        <div class="section">
-                            <h3>2. Borrower Details</h3>
-                            <p>Full Name: ${borrower.fullName || ''}</p>
-                            <p>NRC Number: ${borrower.nrc || ''}</p>
-                            <p>Address: ${borrower.residence || ''}, ${borrower.houseNumber || ''}</p>
-                        </div>
+                        <h3>2. Borrower Details</h3>
+                        <div class="detail"><span class="label">Full Name:</span> ${borrower.fullName || ''}</div>
+                        <div class="detail"><span class="label">NRC Number:</span> ${borrower.nrc || ''}</div>
+                        <div class="detail"><span class="label">Address:</span> ${borrower.residence || ''}, ${borrower.houseNumber || ''}</div>
                         
-                        <div class="section">
-                            <h3>3. Loan Terms</h3>
-                            <p>Loan Amount: ZMW ${loanData.amount}</p>
-                            <p>Interest Rate:</p>
-                            <ul>
-                                <li>Weekly: 10%</li>
-                                <li>Monthly: 35%</li>
-                            </ul>
-                            <p>Repayment Date: ${new Date(today.setMonth(today.getMonth() + loanData.duration)).toLocaleDateString()}</p>
-                        </div>
+                        <h3>3. Loan Terms</h3>
+                        <div class="detail"><span class="label">Loan Amount:</span> ZMW ${Utils.formatCurrency(loanData.amount)}</div>
+                        <div class="detail"><span class="label">Interest Rate:</span></div>
+                        <ul>
+                            <li>Weekly: 10%</li>
+                            <li>Monthly: 35%</li>
+                        </ul>
+                        <div class="detail"><span class="label">Total Interest:</span> ZMW ${Utils.formatCurrency(totalInterest)}</div>
+                        <div class="detail"><span class="label">Total Payable:</span> ZMW ${Utils.formatCurrency(totalPayable)}</div>
+                        <div class="detail"><span class="label">Monthly Payment:</span> ZMW ${Utils.formatCurrency(monthlyPayment)}</div>
+                        <div class="detail"><span class="label">Repayment Date:</span> ${new Date(today.setMonth(today.getMonth() + loanData.duration)).toLocaleDateString()}</div>
                         
-                        <div class="section">
-                            <h3>4. Collateral Details</h3>
-                            <p>Collateral Item: ${loanData.collateralCategory}</p>
-                            <p>Description of Collateral: ${loanData.collateralDescription}</p>
-                            <p>Estimated Value: ZMW ${loanData.collateralValue}</p>
-                            <p>Location: ${loanData.collateralLocation}</p>
-                        </div>
+                        <h3>4. Collateral Details</h3>
+                        <div class="detail"><span class="label">Collateral Item:</span> ${loanData.collateralCategory}</div>
+                        <div class="detail"><span class="label">Description:</span> ${loanData.collateralDescription}</div>
+                        <div class="detail"><span class="label">Estimated Value:</span> ZMW ${Utils.formatCurrency(loanData.collateralValue)}</div>
+                        <div class="detail"><span class="label">Location:</span> ${loanData.collateralLocation}</div>
                         
-                        <div class="section">
-                            <h3>5. Terms and Conditions</h3>
-                            <p><b>1. Repayment:</b> The Borrower agrees to repay the full loan amount with interest as specified by the repayment date.</p>
-                            <p><b>2. Default:</b></p>
-                            <ul>
-                                <li>If the Borrower fails to repay on time, the Lender has the right to:</li>
-                                <li>Sell the collateral to recover the loan.</li>
-                                <li>Take legal action, including reporting the default to court.</li>
-                            </ul>
-                            <p><b>3. Third-Party Witness:</b> A third-party witness is required to validate the agreement.</p>
-                        </div>
+                        <h3>5. Terms and Conditions</h3>
+                        <p><b>1. Repayment:</b> The Borrower agrees to repay the full loan amount with interest as specified by the repayment date.</p>
+                        <p><b>2. Default:</b> If the Borrower fails to repay on time, the Lender has the right to sell the collateral to recover the loan and take legal action.</p>
+                        <p><b>3. Third-Party Witness:</b> A third-party witness is required to validate the agreement.</p>
                         
-                        <div class="section">
-                            <h3>6. Signatures</h3>
-                            <p><b>Lender Representatives:</b></p>
-                            <p>Eng. Hambayi<br><div style="border-bottom:1px solid #000; width:250px; margin-top:30px;"></div> Date: ____________</p>
-                            <p>Dr. Ilunga<br><div style="border-bottom:1px solid #000; width:250px; margin-top:30px;"></div> Date: ____________</p>
-                            <p>Mr. Mukandawire<br><div style="border-bottom:1px solid #000; width:250px; margin-top:30px;"></div> Date: ____________</p>
-                            
-                            <p><b>Borrower:</b></p>
-                            <p>Name: ${borrower.fullName || ''}</p>
-                            <p>NRC Number: ${borrower.nrc || ''}</p>
-                            <div style="border-bottom:1px solid #000; width:250px; margin-top:30px;"></div> Date: ____________
-                            
-                            <p><b>Witness:</b></p>
-                            <p>Name: <span id="witnessNameDisplay"></span></p>
-                            <p>NRC Number: <span id="witnessNrcDisplay"></span></p>
-                            <div style="border-bottom:1px solid #000; width:250px; margin-top:30px;"></div> Date: ____________
-                        </div>
+                        <h3>6. Signatures</h3>
+                        <p><b>Lender Representatives:</b> (to be signed by admin)</p>
                         
-                        <div class="section">
-                            <h3>Collateral Information</h3>
-                            <p>Item: ${loanData.collateralCategory}</p>
-                            <p>Estimated Value: ZMW ${loanData.collateralValue}</p>
-                            <p>Witnessed By (Name): <span id="witnessNameDisplay2"></span></p>
-                        </div>
+                        <p><b>Borrower Signature:</b><br>
+                        <div class="signature-line"></div> Date: ____________</p>
+                        
+                        <p><b>Witness Signature:</b><br>
+                        <div class="signature-line"></div> Date: ____________</p>
+                        
+                        <p><b>Witness Name:</b> ________________________</p>
+                        <p><b>Witness NRC:</b> ________________________</p>
                         
                         <p style="margin-top:30px;">
                             <b>Acknowledgment:</b><br>
@@ -3682,7 +3818,7 @@
                         </p>
                         
                         <hr>
-                        <h4>Sign below:</h4>
+                        <h4>Please sign below using the pads:</h4>
                         <div>
                             <label>Borrower Signature:</label>
                             <div class="signature-container">
@@ -3746,15 +3882,15 @@
                     Utils.showToast('Witness Info', 'Please fill witness name and NRC', 'error');
                     return;
                 }
-                // Build final HTML with signatures
-                const agreementHTML = document.getElementById('loanAgreementBody').innerHTML; // This contains the canvas, but we need to embed signatures as images
-                // Better: create a new HTML string with embedded signature images
                 const borrower = AppState.userData;
                 const loanData = AppState.pendingLoanData;
                 const today = new Date();
                 const day = today.getDate();
                 const month = today.toLocaleString('default', { month: 'long' });
                 const year = today.getFullYear();
+                const totalInterest = Utils.calculateTotalInterest(loanData.amount, loanData.duration);
+                const totalPayable = loanData.amount + totalInterest;
+                const monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, 0.35*12, loanData.duration);
                 const finalHTML = `
                     <!DOCTYPE html>
                     <html>
@@ -3787,8 +3923,11 @@
                         
                         <div class="section">
                             <h3>3. Loan Terms</h3>
-                            <p>Loan Amount: ZMW ${loanData.amount}</p>
+                            <p>Loan Amount: ZMW ${Utils.formatCurrency(loanData.amount)}</p>
                             <p>Interest Rate: Weekly 10%, Monthly 35%</p>
+                            <p>Total Interest: ZMW ${Utils.formatCurrency(totalInterest)}</p>
+                            <p>Total Payable: ZMW ${Utils.formatCurrency(totalPayable)}</p>
+                            <p>Monthly Payment: ZMW ${Utils.formatCurrency(monthlyPayment)}</p>
                             <p>Repayment Date: ${new Date(today.setMonth(today.getMonth() + loanData.duration)).toLocaleDateString()}</p>
                         </div>
                         
@@ -3796,7 +3935,7 @@
                             <h3>4. Collateral Details</h3>
                             <p>Collateral Item: ${loanData.collateralCategory}</p>
                             <p>Description: ${loanData.collateralDescription}</p>
-                            <p>Estimated Value: ZMW ${loanData.collateralValue}</p>
+                            <p>Estimated Value: ZMW ${Utils.formatCurrency(loanData.collateralValue)}</p>
                             <p>Location: ${loanData.collateralLocation}</p>
                         </div>
                         
@@ -3826,7 +3965,8 @@
                     return;
                 }
                 // Proceed with loan submission
-                const result = await FirebaseService.submitLoanApplication(loanData, uploadResult.url);
+                const witnessData = { name: witnessName, nrc: witnessNrc };
+                const result = await FirebaseService.submitLoanApplication(loanData, uploadResult.url, witnessData);
                 Utils.hideLoading();
                 if (result.success) {
                     Utils.showToast('Success', result.message || 'Loan application submitted!', 'info');
@@ -3851,18 +3991,179 @@
                     Utils.showToast('Submission Failed', result.error || 'Failed to submit application', 'error');
                 }
             },
-            updateLoansUI() { /* unchanged - keep original code */ },
-            showLoanDetails(loanId) { /* unchanged - keep original code */ },
-            updatePaymentsUI() { /* unchanged - keep original code */ },
-            async submitPayment() { /* unchanged - keep original code */ },
-            updateNotificationsUI() { /* unchanged - keep original code */ },
-            updateNotificationBadge() { /* unchanged - keep original code */ },
-            async markNotificationAsRead(notificationId) { /* unchanged - keep original code */ },
-            updateLoanHistoryUI() { /* unchanged - keep original code */ },
-            showPaymentModal() { this.paymentModal.classList.add('active'); },
-            showEditProfileModal() { /* unchanged - keep original code */ },
-            async saveProfileChanges() { /* unchanged - keep original code */ },
-            async changePassword() { /* unchanged - keep original code */ }
+            updateLoansUI() {
+                const loans = AppState.activeLoans.filter(loan => {
+                    if (AppState.currentLoanStatusFilter === 'active') return loan.status === 'active';
+                    if (AppState.currentLoanStatusFilter === 'pending') return loan.status === 'pending';
+                    if (AppState.currentLoanStatusFilter === 'approved') return loan.status === 'approved';
+                    if (AppState.currentLoanStatusFilter === 'rejected') return loan.status === 'rejected';
+                    return true;
+                });
+                const loansList = document.getElementById('loansList');
+                if (loans.length === 0) {
+                    loansList.innerHTML = '<p class="text-muted text-center py-4">No loans found for this status.</p>';
+                    return;
+                }
+                let html = '';
+                loans.forEach(loan => {
+                    html += `
+                        <div class="loan-card" onclick="UIManager.showLoanDetails('${loan.id}')">
+                            <div class="loan-card-header">
+                                <span class="loan-id">${loan.id}</span>
+                                <span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span>
+                            </div>
+                            <div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div>
+                            <div class="loan-dates">
+                                <span>Created: ${Utils.formatDate(loan.createdAt)}</span>
+                                <span>Due: ${loan.repaymentSchedule && loan.repaymentSchedule[0] ? Utils.formatDate(loan.repaymentSchedule[0].dueDate) : 'N/A'}</span>
+                            </div>
+                        </div>
+                    `;
+                });
+                loansList.innerHTML = html;
+            },
+            async showLoanDetails(loanId) {
+                const loan = AppState.activeLoans.find(l => l.id === loanId) || AppState.completedLoans.find(l => l.id === loanId);
+                if (!loan) return;
+                const modalBody = document.getElementById('loanDetailsModalBody');
+                let scheduleHtml = '';
+                if (loan.repaymentSchedule) {
+                    scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Total</th><th>Status</th></tr>';
+                    loan.repaymentSchedule.forEach(inst => {
+                        scheduleHtml += `<tr>
+                            <td>${inst.installment}</td>
+                            <td>${Utils.formatDate(inst.dueDate)}</td>
+                            <td>${Utils.formatCurrency(inst.principal)}</td>
+                            <td>${Utils.formatCurrency(inst.interest)}</td>
+                            <td>${Utils.formatCurrency(inst.totalDue)}</td>
+                            <td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td>
+                        </tr>`;
+                    });
+                    scheduleHtml += '</table>';
+                }
+                modalBody.innerHTML = `
+                    <h3>Loan ID: ${loan.id}</h3>
+                    <p><strong>Amount:</strong> ${Utils.formatCurrency(loan.amount)}</p>
+                    <p><strong>Status:</strong> <span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span></p>
+                    <p><strong>Duration:</strong> ${loan.duration} months</p>
+                    <p><strong>Monthly Payment:</strong> ${Utils.formatCurrency(loan.monthlyPayment)}</p>
+                    <p><strong>Total Payable:</strong> ${Utils.formatCurrency(loan.totalPayable)}</p>
+                    <p><strong>Created:</strong> ${Utils.formatDate(loan.createdAt)}</p>
+                    ${loan.witness ? `<p><strong>Witness:</strong> ${loan.witness.name} (${loan.witness.nrc})</p>` : ''}
+                    ${loan.signedAgreementUrl ? `<p><a href="${loan.signedAgreementUrl}" target="_blank">View Signed Agreement</a></p>` : ''}
+                    ${scheduleHtml}
+                    ${loan.status === 'active' ? `<button class="btn btn-primary mt-3" onclick="UIManager.preparePaymentForLoan('${loan.id}')">Make Payment</button>` : ''}
+                `;
+                this.loanDetailsModal.classList.add('active');
+            },
+            preparePaymentForLoan(loanId) {
+                this.loanDetailsModal.classList.remove('active');
+                AppState.selectedLoanForPayment = loanId;
+                this.showPaymentModal();
+            },
+            updatePaymentsUI() {
+                const container = document.getElementById('paymentFormContainer');
+                const activeLoans = AppState.activeLoans.filter(l => l.status === 'active');
+                if (activeLoans.length === 0) {
+                    container.innerHTML = '<div class="text-center py-4"><i class="fas fa-credit-card" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No active loans to pay</p></div>';
+                } else {
+                    let options = '<option value="">Select a loan</option>';
+                    activeLoans.forEach(loan => {
+                        options += `<option value="${loan.id}">${loan.id} - ${Utils.formatCurrency(loan.amount)} (Due: ${Utils.formatCurrency(loan.monthlyPayment)})</option>`;
+                    });
+                    container.innerHTML = `
+                        <div class="form-group">
+                            <label class="form-label">Select Loan</label>
+                            <select id="paymentLoanSelect" class="form-input">${options}</select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Amount (Kwacha)</label>
+                            <input type="number" id="paymentAmount" class="form-input" placeholder="Enter amount">
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Payment Method</label>
+                            <select id="paymentMethod" class="form-input">
+                                <option value="cash">Cash</option>
+                                <option value="mobile">Mobile Money</option>
+                                <option value="bank">Bank Transfer</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label class="form-label">Reference (optional)</label>
+                            <input type="text" id="paymentReference" class="form-input" placeholder="Transaction ID">
+                        </div>
+                        <button class="btn btn-primary w-100" onclick="UIManager.submitPayment()">Submit Payment</button>
+                    `;
+                    if (AppState.selectedLoanForPayment) {
+                        document.getElementById('paymentLoanSelect').value = AppState.selectedLoanForPayment;
+                    }
+                }
+                // Payment history
+                const historyEl = document.getElementById('paymentHistory');
+                if (AppState.payments.length === 0) {
+                    historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-history" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No payment history found</p></div>';
+                } else {
+                    let historyHtml = '<table class="data-table"><tr><th>Date</th><th>Loan</th><th>Amount</th><th>Method</th><th>Status</th></tr>';
+                    AppState.payments.slice(0, 10).forEach(p => {
+                        historyHtml += `<tr>
+                            <td>${Utils.formatDate(p.timestamp)}</td>
+                            <td>${p.loanId}</td>
+                            <td>${Utils.formatCurrency(p.amount)}</td>
+                            <td>${p.method}</td>
+                            <td><span class="status-badge-tag ${p.status === 'verified' ? 'status-active' : 'status-pending'}">${p.status}</span></td>
+                        </tr>`;
+                    });
+                    historyHtml += '</table>';
+                    historyEl.innerHTML = historyHtml;
+                }
+            },
+            async submitPayment() {
+                const loanId = document.getElementById('paymentLoanSelect')?.value;
+                const amount = parseFloat(document.getElementById('paymentAmount')?.value);
+                const method = document.getElementById('paymentMethod')?.value;
+                const reference = document.getElementById('paymentReference')?.value;
+                if (!loanId || !amount || amount <= 0) {
+                    Utils.showToast('Error', 'Please select a loan and enter a valid amount', 'error');
+                    return;
+                }
+                const result = await FirebaseService.makePayment({
+                    loanId,
+                    amount,
+                    method,
+                    reference,
+                    proofUrl: ''
+                });
+                if (result.success) {
+                    Utils.showToast('Success', result.message, 'info');
+                    document.getElementById('paymentAmount').value = '';
+                    document.getElementById('paymentReference').value = '';
+                    this.paymentModal.classList.remove('active');
+                } else {
+                    Utils.showToast('Error', result.error, 'error');
+                }
+            },
+            updateNotificationsUI() {
+                // Keep original implementation
+            },
+            updateNotificationBadge() {
+                // Keep original implementation
+            },
+            updateLoanHistoryUI() {
+                // Keep original implementation
+            },
+            showPaymentModal() {
+                this.paymentModal.classList.add('active');
+                this.updatePaymentsUI(); // refresh payment form
+            },
+            showEditProfileModal() {
+                // Keep original implementation
+            },
+            async saveProfileChanges() {
+                // Keep original implementation
+            },
+            async changePassword() {
+                // Keep original implementation
+            }
         };
 
         // ===== Initialize Application =====
