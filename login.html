@@ -13,7 +13,7 @@
     <!-- Cloudinary Upload Widget -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* ===== iOS White Theme CSS (unchanged) ===== */
+        /* ===== iOS White Theme CSS Reset ===== */
         * {
             margin: 0;
             padding: 0;
@@ -2369,9 +2369,9 @@
             
             generateAgentEmail: (fullName) => {
                 const nameParts = fullName.toLowerCase().split(' ');
-                const firstName = nameParts[0] || 'agent';
-                const lastName = nameParts[nameParts.length - 1] || 'user';
-                const randomNum = Math.floor(Math.random() * 9999) + 1; // Increased randomness
+                const firstName = nameParts[0];
+                const lastName = nameParts[nameParts.length - 1];
+                const randomNum = Math.floor(Math.random() * 999) + 1;
                 return `agent.${firstName}.${lastName}.${randomNum}@trucash.com`;
             },
             
@@ -2477,74 +2477,62 @@
                 greetingElement.classList.remove('visible');
                 quickActions.classList.remove('visible');
                 AppState.userGreeting = null;
+            },
+            
+            // NEW: Sanitize email for use as Firebase key (replace '.' with ',')
+            sanitizeEmail: (email) => {
+                return email.replace(/\./g, ',');
             }
         };
 
-        // ===== Firebase Service =====
+        // ===== Firebase Service (FIXED: using email mapping instead of queries) =====
         const FirebaseService = {
             async checkEmailExists(email) {
                 try {
-                    // First check Firebase Auth
-                    const methods = await auth.fetchSignInMethodsForEmail(email);
+                    // Special case for sudo
+                    if (email.toLowerCase() === 'sudo@gmail.com') {
+                        const methods = await auth.fetchSignInMethodsForEmail(email);
+                        return { 
+                            exists: methods.length > 0,
+                            isSudo: true,
+                            userType: 'sudo'
+                        };
+                    }
                     
-                    if (methods.length > 0) {
-                        // For sudo@gmail.com, we don't need to check database
-                        if (email.toLowerCase() === 'sudo@gmail.com') {
+                    // Look up by email mapping
+                    const emailKey = Utils.sanitizeEmail(email);
+                    const uidSnapshot = await db.ref('userEmails/' + emailKey).once('value');
+                    
+                    if (uidSnapshot.exists()) {
+                        const uid = uidSnapshot.val();
+                        // Try users collection first
+                        const userSnapshot = await db.ref('users/' + uid).once('value');
+                        if (userSnapshot.exists()) {
+                            const userData = userSnapshot.val();
                             return { 
                                 exists: true, 
-                                isSudo: true,
-                                userType: 'sudo'
-                            };
-                        }
-                        
-                        // Check Realtime Database for user data
-                        const usersSnapshot = await db.ref('users').orderByChild('email').equalTo(email).once('value');
-                        
-                        if (usersSnapshot.exists()) {
-                            let userData = null;
-                            usersSnapshot.forEach((childSnapshot) => {
-                                userData = childSnapshot.val();
-                                return true; // Break after first match
-                            });
-                            
-                            return {
-                                exists: true,
                                 userData: userData,
-                                userType: userData?.userType || 'customer'
+                                userType: userData.userType || 'customer'
                             };
                         }
-                        
-                        // Check agents collection (backward compatibility)
-                        const agentsSnapshot = await db.ref('agents').orderByChild('email').equalTo(email).once('value');
-                        
-                        if (agentsSnapshot.exists()) {
-                            let agentData = null;
-                            agentsSnapshot.forEach((childSnapshot) => {
-                                agentData = childSnapshot.val();
-                                return true;
-                            });
-                            
-                            return {
-                                exists: true,
+                        // Then agents collection
+                        const agentSnapshot = await db.ref('agents/' + uid).once('value');
+                        if (agentSnapshot.exists()) {
+                            const agentData = agentSnapshot.val();
+                            return { 
+                                exists: true, 
                                 userData: agentData,
                                 userType: 'agent'
                             };
                         }
-                        
-                        // User exists in Auth but not in database – treat as customer
-                        return {
-                            exists: true,
-                            userType: 'customer'
-                        };
                     }
                     
-                    return { exists: false };
+                    // Fallback to auth check
+                    const methods = await auth.fetchSignInMethodsForEmail(email);
+                    return { exists: methods.length > 0 };
                 } catch (error) {
                     console.error('Error checking email:', error);
-                    return { 
-                        exists: false, 
-                        error: error.message 
-                    };
+                    return { exists: false, error: error.message };
                 }
             },
             
@@ -2567,8 +2555,9 @@
                         };
                     }
                     
-                    // Get user data from Realtime Database
-                    const userRef = db.ref('users/' + userCredential.user.uid);
+                    // Get user data from Realtime Database using uid
+                    const uid = userCredential.user.uid;
+                    const userRef = db.ref('users/' + uid);
                     const snapshot = await userRef.once('value');
                     
                     if (snapshot.exists()) {
@@ -2577,21 +2566,12 @@
                         AppState.userData = userData;
                         console.log("User data retrieved:", userData);
                     } else {
-                        // Try agents collection by email
-                        const agentsRef = db.ref('agents').orderByChild('email').equalTo(email).once('value');
-                        const agentSnapshot = await agentsRef;
-                        
+                        // Try agents collection
+                        const agentRef = db.ref('agents/' + uid);
+                        const agentSnapshot = await agentRef.once('value');
                         if (agentSnapshot.exists()) {
-                            agentSnapshot.forEach((childSnapshot) => {
-                                AppState.userType = 'agent';
-                                AppState.userData = childSnapshot.val();
-                                return true;
-                            });
-                        } else {
-                            // User exists in Auth but no data – default to customer
-                            AppState.userType = 'customer';
-                            AppState.userData = null;
-                            console.warn("User exists in Auth but no database record – defaulting to customer");
+                            AppState.userType = 'agent';
+                            AppState.userData = agentSnapshot.val();
                         }
                     }
                     
@@ -2685,7 +2665,11 @@
                     const userRef = db.ref('users/' + userCredential.user.uid);
                     await userRef.set(userDoc);
                     
-                    // Add to users list for easy querying
+                    // Add email mapping
+                    const emailKey = Utils.sanitizeEmail(userData.email);
+                    await db.ref('userEmails/' + emailKey).set(userCredential.user.uid);
+                    
+                    // Add to users list for easy querying (optional)
                     const usersListRef = db.ref('usersList/' + userCredential.user.uid);
                     await usersListRef.set({
                         email: userData.email,
@@ -2909,6 +2893,10 @@
                     const userRef = db.ref('users/' + userCredential.user.uid);
                     await userRef.set(agentDoc);
                     
+                    // Add email mapping
+                    const emailKey = Utils.sanitizeEmail(credentials.email);
+                    await db.ref('userEmails/' + emailKey).set(userCredential.user.uid);
+                    
                     // Add to agents collection
                     const agentsRef = db.ref('agents/' + userCredential.user.uid);
                     await agentsRef.set({
@@ -2976,28 +2964,21 @@
                 try {
                     console.log("Searching for user with email:", email);
                     
-                    // Search in users collection
-                    const usersSnapshot = await db.ref('users').orderByChild('email').equalTo(email).once('value');
+                    const emailKey = Utils.sanitizeEmail(email);
+                    const uidSnapshot = await db.ref('userEmails/' + emailKey).once('value');
                     
-                    if (usersSnapshot.exists()) {
-                        let userData = null;
-                        usersSnapshot.forEach((childSnapshot) => {
-                            userData = childSnapshot.val();
-                            return true;
-                        });
-                        return { success: true, userData: userData, collection: 'users' };
-                    }
-                    
-                    // Search in agents collection
-                    const agentsSnapshot = await db.ref('agents').orderByChild('email').equalTo(email).once('value');
-                    
-                    if (agentsSnapshot.exists()) {
-                        let agentData = null;
-                        agentsSnapshot.forEach((childSnapshot) => {
-                            agentData = childSnapshot.val();
-                            return true;
-                        });
-                        return { success: true, userData: agentData, collection: 'agents' };
+                    if (uidSnapshot.exists()) {
+                        const uid = uidSnapshot.val();
+                        // Check users
+                        const userSnapshot = await db.ref('users/' + uid).once('value');
+                        if (userSnapshot.exists()) {
+                            return { success: true, userData: userSnapshot.val(), collection: 'users' };
+                        }
+                        // Check agents
+                        const agentSnapshot = await db.ref('agents/' + uid).once('value');
+                        if (agentSnapshot.exists()) {
+                            return { success: true, userData: agentSnapshot.val(), collection: 'agents' };
+                        }
                     }
                     
                     return { success: false, error: 'User not found' };
@@ -3008,7 +2989,7 @@
             }
         };
 
-        // ===== Cloudinary Service =====
+        // ===== Cloudinary Service (unchanged) =====
         const CloudinaryService = {
             widget: null,
             
@@ -3233,7 +3214,7 @@
             }
         };
 
-        // ===== Validation Service =====
+        // ===== Validation Service (unchanged) =====
         const ValidationService = {
             validations: {
                 email: {
@@ -3336,7 +3317,7 @@
             }
         };
 
-        // ===== Admin Approval Service =====
+        // ===== Admin Approval Service (unchanged) =====
         const AdminApprovalService = {
             async loadPendingApplications() {
                 try {
@@ -3668,7 +3649,7 @@
             }
         };
 
-        // ===== DOM Manager =====
+        // ===== DOM Manager (with minor adjustments) =====
         const DOMManager = {
             init() {
                 this.cacheElements();
@@ -3679,9 +3660,6 @@
                 this.testFirebaseConnection();
                 this.setupTimeUpdater();
                 this.setupEmailCheck();
-                // FIXED: Call global functions directly (not as methods of this)
-                addKeyboardShortcuts();
-                initServiceWorker();
             },
             
             cacheElements() {
@@ -3834,16 +3812,12 @@
                         if (result.exists) {
                             if (result.isSudo) {
                                 Utils.showUserGreeting(email, null);
+                            } else if (result.userData) {
+                                Utils.showUserGreeting(email, result.userData);
                             } else {
-                                // Try to get user data from database
-                                const searchResult = await FirebaseService.searchUserByEmail(email);
-                                if (searchResult.success && searchResult.userData) {
-                                    Utils.showUserGreeting(email, searchResult.userData);
-                                } else {
-                                    // User exists in auth but not in database yet
-                                    const userType = Utils.determineUserTypeFromEmail(email);
-                                    Utils.showUserGreeting(email, { userType: userType });
-                                }
+                                // User exists in auth but not in database (unlikely with mapping)
+                                const userType = Utils.determineUserTypeFromEmail(email);
+                                Utils.showUserGreeting(email, { userType: userType });
                             }
                         } else {
                             Utils.hideUserGreeting();
@@ -3999,7 +3973,7 @@
             
             setupTimeUpdater() {
                 Utils.updateTime();
-                setInterval(Utils.updateTime, 60000); // Update every minute
+                setInterval(Utils.updateTime, 60000);
             },
             
             // Event Handlers
@@ -4038,7 +4012,7 @@
                         );
                         
                         // Determine redirect based on user type
-                        const userType = result.userType || AppState.userType || 'customer';
+                        const userType = result.userType || AppState.userType;
                         let redirectPage = Utils.determineRedirectPage(userType);
                         
                         console.log(`User type: ${userType}, Redirecting to: ${redirectPage}`);
@@ -4186,12 +4160,16 @@
                                 4000
                             );
                             
-                            // FIXED: Redirect directly instead of re-submitting login
                             setTimeout(() => {
                                 this.hideRegisterModal();
                                 this.resetRegistrationForm();
-                                // User is already logged in after registration, so redirect
-                                window.location.href = Utils.determineRedirectPage('customer');
+                                
+                                this.emailInput.value = userData.email;
+                                this.passwordInput.value = userData.password;
+                                
+                                setTimeout(() => {
+                                    this.loginForm.dispatchEvent(new Event('submit'));
+                                }, 1000);
                             }, 2000);
                         } else {
                             Utils.showNotification(
@@ -4329,6 +4307,15 @@
                                     const userData = snapshot.val();
                                     AppState.userType = userData.userType;
                                     AppState.userData = userData;
+                                } else {
+                                    // Check agents
+                                    db.ref('agents/' + user.uid).once('value')
+                                        .then((agentSnapshot) => {
+                                            if (agentSnapshot.exists()) {
+                                                AppState.userType = 'agent';
+                                                AppState.userData = agentSnapshot.val();
+                                            }
+                                        });
                                 }
                             })
                             .catch(console.error);
@@ -4435,6 +4422,9 @@
             console.log("DOM loaded, initializing TruCash application...");
             
             DOMManager.init();
+            
+            addKeyboardShortcuts();
+            initServiceWorker();
             
             console.log('TruCash Application Initialized Successfully');
         });
