@@ -13,7 +13,7 @@
     <!-- Cloudinary Upload Widget -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* ===== iOS White Theme CSS Reset ===== */
+        /* ===== iOS White Theme CSS (unchanged) ===== */
         * {
             margin: 0;
             padding: 0;
@@ -2125,7 +2125,7 @@
         </div>
     </div>
 
-    <!-- JavaScript Implementation -->
+    <!-- JavaScript Implementation (FIXED) -->
     <script>
         // ===== Firebase Configuration =====
         const firebaseConfig = {
@@ -2369,9 +2369,9 @@
             
             generateAgentEmail: (fullName) => {
                 const nameParts = fullName.toLowerCase().split(' ');
-                const firstName = nameParts[0];
-                const lastName = nameParts[nameParts.length - 1];
-                const randomNum = Math.floor(Math.random() * 999) + 1;
+                const firstName = nameParts[0] || 'agent';
+                const lastName = nameParts[nameParts.length - 1] || 'user';
+                const randomNum = Math.floor(Math.random() * 9999) + 1; // Increased randomness
                 return `agent.${firstName}.${lastName}.${randomNum}@trucash.com`;
             },
             
@@ -2514,7 +2514,7 @@
                             };
                         }
                         
-                        // Check agents collection
+                        // Check agents collection (backward compatibility)
                         const agentsSnapshot = await db.ref('agents').orderByChild('email').equalTo(email).once('value');
                         
                         if (agentsSnapshot.exists()) {
@@ -2531,6 +2531,7 @@
                             };
                         }
                         
+                        // User exists in Auth but not in database – treat as customer
                         return {
                             exists: true,
                             userType: 'customer'
@@ -2576,7 +2577,7 @@
                         AppState.userData = userData;
                         console.log("User data retrieved:", userData);
                     } else {
-                        // Try agents collection
+                        // Try agents collection by email
                         const agentsRef = db.ref('agents').orderByChild('email').equalTo(email).once('value');
                         const agentSnapshot = await agentsRef;
                         
@@ -2586,6 +2587,11 @@
                                 AppState.userData = childSnapshot.val();
                                 return true;
                             });
+                        } else {
+                            // User exists in Auth but no data – default to customer
+                            AppState.userType = 'customer';
+                            AppState.userData = null;
+                            console.warn("User exists in Auth but no database record – defaulting to customer");
                         }
                     }
                     
@@ -3673,6 +3679,9 @@
                 this.testFirebaseConnection();
                 this.setupTimeUpdater();
                 this.setupEmailCheck();
+                // FIXED: Call global functions directly (not as methods of this)
+                addKeyboardShortcuts();
+                initServiceWorker();
             },
             
             cacheElements() {
@@ -4029,7 +4038,7 @@
                         );
                         
                         // Determine redirect based on user type
-                        const userType = result.userType || AppState.userType;
+                        const userType = result.userType || AppState.userType || 'customer';
                         let redirectPage = Utils.determineRedirectPage(userType);
                         
                         console.log(`User type: ${userType}, Redirecting to: ${redirectPage}`);
@@ -4177,16 +4186,12 @@
                                 4000
                             );
                             
+                            // FIXED: Redirect directly instead of re-submitting login
                             setTimeout(() => {
                                 this.hideRegisterModal();
                                 this.resetRegistrationForm();
-                                
-                                this.emailInput.value = userData.email;
-                                this.passwordInput.value = userData.password;
-                                
-                                setTimeout(() => {
-                                    this.loginForm.dispatchEvent(new Event('submit'));
-                                }, 1000);
+                                // User is already logged in after registration, so redirect
+                                window.location.href = Utils.determineRedirectPage('customer');
                             }, 2000);
                         } else {
                             Utils.showNotification(
@@ -4431,9 +4436,6 @@
             
             DOMManager.init();
             
-            this.addKeyboardShortcuts();
-            this.initServiceWorker();
-            
             console.log('TruCash Application Initialized Successfully');
         });
 
@@ -4538,4 +4540,3 @@
     </script>
 </body>
 </html>
-
