@@ -61,6 +61,7 @@
                        'Helvetica Neue', 'Segoe UI', Roboto, Arial, sans-serif;
             position: relative;
             overscroll-behavior-y: none;
+            padding-bottom: var(--ios-safe-area-inset-bottom);
         }
 
         body::before {
@@ -137,11 +138,13 @@
             max-width: 1200px;
             margin: 0 auto;
             width: 100%;
+            padding-bottom: 80px; /* space for bottom nav */
         }
 
         @media (min-width: 768px) {
             .main-content {
                 padding: 24px;
+                padding-bottom: 24px;
             }
         }
 
@@ -179,6 +182,7 @@
             .main-content {
                 flex: 1;
                 padding: 24px;
+                padding-bottom: 24px;
             }
         }
 
@@ -473,12 +477,22 @@
             margin-bottom: 16px;
         }
 
+        /* Agent Information - Floating Card Style */
         .agent-validation {
             background: linear-gradient(135deg, rgba(52, 199, 89, 0.05), rgba(52, 199, 89, 0.02));
             border: 1px solid var(--ios-green-light);
             border-radius: var(--ios-border-radius);
             padding: 18px;
             margin-bottom: 20px;
+            box-shadow: var(--ios-card-shadow-hover);
+            transition: var(--ios-transition);
+            max-width: 400px; /* smaller, floating card */
+            margin-left: auto;
+            margin-right: auto;
+        }
+        .agent-validation:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(52,199,89,0.15);
         }
 
         .agent-details-grid {
@@ -610,6 +624,16 @@
         }
 
         .btn-block {
+            width: 100%;
+        }
+
+        /* Quick Actions 2x2 grid */
+        .quick-actions-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+        }
+        .quick-actions-grid .btn {
             width: 100%;
         }
 
@@ -1134,7 +1158,7 @@
             padding: 30px;
             box-shadow: var(--ios-card-shadow);
             max-width: 900px;
-            margin: 0 auto;
+            margin: 20px auto 0;
         }
 
         .certificate-container h1 {
@@ -1271,6 +1295,102 @@
         }
         .agreement-wrapper .logo img {
             max-width: 150px;
+        }
+
+        /* ===== Settings Section Redesign ===== */
+        .settings-group {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius);
+            padding: 16px;
+            margin-bottom: 16px;
+            border: 1px solid var(--ios-gray-2);
+        }
+        .settings-group-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ios-gray-6);
+            margin-bottom: 12px;
+            letter-spacing: -0.2px;
+        }
+        .settings-item {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px solid var(--ios-gray-2);
+        }
+        .settings-item:last-child {
+            border-bottom: none;
+        }
+        .settings-item-label {
+            font-size: 14px;
+            color: var(--ios-gray-6);
+        }
+        .settings-item-value {
+            font-size: 14px;
+            color: var(--ios-gray-5);
+        }
+
+        /* ===== Loan Details Modal Enhanced ===== */
+        .loan-detail-section {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius-small);
+            padding: 16px;
+            margin-bottom: 16px;
+        }
+        .loan-detail-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            margin-bottom: 12px;
+            color: var(--ios-green);
+        }
+        .loan-detail-row {
+            display: flex;
+            margin-bottom: 8px;
+        }
+        .loan-detail-label {
+            width: 120px;
+            font-weight: 600;
+            color: var(--ios-gray-5);
+        }
+        .loan-detail-value {
+            flex: 1;
+            color: var(--ios-gray-6);
+        }
+
+        /* ===== Account Documents 2x2 Grid ===== */
+        .documents-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 16px;
+        }
+        .document-card {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius-small);
+            padding: 12px;
+            text-align: center;
+            border: 1px solid var(--ios-gray-2);
+        }
+        .document-thumb {
+            width: 80px;
+            height: 80px;
+            object-fit: cover;
+            border-radius: var(--ios-border-radius-small);
+            margin: 0 auto 10px;
+            border: 2px solid var(--ios-green);
+            background: white;
+        }
+        .document-name {
+            font-weight: 600;
+            font-size: 13px;
+        }
+        .document-status {
+            font-size: 11px;
+            color: var(--ios-gray-5);
+            margin-bottom: 8px;
+        }
+        .document-actions .btn {
+            width: 100%;
         }
     </style>
 </head>
@@ -1428,80 +1548,70 @@
                         </div>
                     </div>
 
-                    <!-- Enhanced Agent Validation -->
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">Agent Information</div>
-                            <button class="btn btn-outline btn-small" id="changeAgentBtn">
-                                <i class="fas fa-exchange-alt"></i>
-                                Change Agent
-                            </button>
+                    <!-- Enhanced Agent Validation - Floating Card -->
+                    <div class="agent-validation" id="agentValidation">
+                        <div class="agent-status d-flex align-items-center mb-3">
+                            <div class="agent-status-icon" id="agentStatusIcon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--ios-gray-2); display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
+                                <i class="fas fa-user" style="color: var(--ios-gray-5);"></i>
+                            </div>
+                            <div class="agent-info flex-grow-1">
+                                <div class="agent-name" id="agentName" style="font-weight: 600; color: var(--ios-gray-6); margin-bottom: 2px;">No agent assigned</div>
+                                <div class="agent-branch" id="agentBranch" style="font-size: 12px; color: var(--ios-gray-5);">Enter Agent ID to verify</div>
+                            </div>
                         </div>
-                        
-                        <div class="agent-validation" id="agentValidation">
-                            <div class="agent-status d-flex align-items-center mb-3">
-                                <div class="agent-status-icon" id="agentStatusIcon" style="width: 40px; height: 40px; border-radius: 50%; background: var(--ios-gray-2); display: flex; align-items: center; justify-content: center; margin-right: 12px; flex-shrink: 0;">
-                                    <i class="fas fa-user" style="color: var(--ios-gray-5);"></i>
+
+                        <div id="agentDetailsContainer" class="d-none">
+                            <div class="agent-details-grid">
+                                <div class="agent-detail-item">
+                                    <span class="agent-detail-label">Phone</span>
+                                    <span class="agent-detail-value" id="agentPhone">-</span>
                                 </div>
-                                <div class="agent-info flex-grow-1">
-                                    <div class="agent-name" id="agentName" style="font-weight: 600; color: var(--ios-gray-6); margin-bottom: 2px;">No agent assigned</div>
-                                    <div class="agent-branch" id="agentBranch" style="font-size: 12px; color: var(--ios-gray-5);">Enter Agent ID to verify</div>
+                                <div class="agent-detail-item">
+                                    <span class="agent-detail-label">Branch</span>
+                                    <span class="agent-detail-value" id="agentBranchName">-</span>
+                                </div>
+                                <div class="agent-detail-item">
+                                    <span class="agent-detail-label">Status</span>
+                                    <span class="agent-detail-value text-success" id="agentStatus">-</span>
+                                </div>
+                                <div class="agent-detail-item">
+                                    <span class="agent-detail-label">Assigned</span>
+                                    <span class="agent-detail-value" id="agentAssignedDate">-</span>
                                 </div>
                             </div>
+                        </div>
 
-                            <div id="agentDetailsContainer" class="d-none">
-                                <div class="agent-details-grid">
-                                    <div class="agent-detail-item">
-                                        <span class="agent-detail-label">Phone</span>
-                                        <span class="agent-detail-value" id="agentPhone">-</span>
-                                    </div>
-                                    <div class="agent-detail-item">
-                                        <span class="agent-detail-label">Branch</span>
-                                        <span class="agent-detail-value" id="agentBranchName">-</span>
-                                    </div>
-                                    <div class="agent-detail-item">
-                                        <span class="agent-detail-label">Status</span>
-                                        <span class="agent-detail-value text-success" id="agentStatus">-</span>
-                                    </div>
-                                    <div class="agent-detail-item">
-                                        <span class="agent-detail-label">Assigned</span>
-                                        <span class="agent-detail-value" id="agentAssignedDate">-</span>
-                                    </div>
-                                </div>
-                            </div>
-
-                            <div class="form-group mt-3">
-                                <label for="agentIdInput" class="form-label">Agent ID</label>
-                                <div class="input-group">
-                                    <input type="text" id="agentIdInput" class="form-input" placeholder="Enter agent's unique ID" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
-                                    <button class="btn btn-primary" id="verifyAgentBtn" style="border-top-left-radius: 0; border-bottom-left-radius: 0; white-space: nowrap;">
-                                        <i class="fas fa-search"></i>
-                                        Verify
-                                    </button>
-                                </div>
-                                <div class="form-text text-muted mt-1" style="font-size: 11px;">Enter the ID provided by your agent</div>
-                                <div id="agentValidationMessage" class="mt-2" style="font-size: 12px;"></div>
-                            </div>
-
-                            <div class="d-flex gap-2 mt-3">
-                                <button class="btn btn-outline btn-small flex-grow-1" id="contactAgentBtn">
-                                    <i class="fas fa-phone"></i>
-                                    Contact Agent
-                                </button>
-                                <button class="btn btn-outline btn-small flex-grow-1" id="viewAgentProfileBtn">
-                                    <i class="fas fa-eye"></i>
-                                    View Profile
+                        <div class="form-group mt-3">
+                            <label for="agentIdInput" class="form-label">Agent ID</label>
+                            <div class="input-group">
+                                <input type="text" id="agentIdInput" class="form-input" placeholder="Enter agent's unique ID" style="border-top-right-radius: 0; border-bottom-right-radius: 0;">
+                                <button class="btn btn-primary" id="verifyAgentBtn" style="border-top-left-radius: 0; border-bottom-left-radius: 0; white-space: nowrap;">
+                                    <i class="fas fa-search"></i>
+                                    Verify
                                 </button>
                             </div>
+                            <div class="form-text text-muted mt-1" style="font-size: 11px;">Enter the ID provided by your agent</div>
+                            <div id="agentValidationMessage" class="mt-2" style="font-size: 12px;"></div>
+                        </div>
+
+                        <div class="d-flex gap-2 mt-3">
+                            <button class="btn btn-outline btn-small flex-grow-1" id="contactAgentBtn">
+                                <i class="fas fa-phone"></i>
+                                Contact Agent
+                            </button>
+                            <button class="btn btn-outline btn-small flex-grow-1" id="viewAgentProfileBtn">
+                                <i class="fas fa-eye"></i>
+                                View Profile
+                            </button>
                         </div>
                     </div>
 
-                    <!-- Quick Actions -->
+                    <!-- Quick Actions - 2x2 Grid -->
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Quick Actions</div>
                         </div>
-                        <div class="form-row">
+                        <div class="quick-actions-grid">
                             <button class="btn btn-primary" id="applyLoanBtn">
                                 <i class="fas fa-plus-circle"></i>
                                 Apply for New Loan
@@ -1524,7 +1634,6 @@
 
                 <!-- Profile Section -->
                 <section id="profileSection" class="content-section d-none">
-                    <!-- (unchanged, keep original profile section) -->
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">My Profile</div>
@@ -1586,32 +1695,39 @@
                         <div class="section-header">
                             <div class="section-title">Account Documents</div>
                         </div>
-                        <div class="document-grid">
-                            <div class="document-item d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-id-card" style="color: var(--ios-green); margin-right: 10px;"></i>
-                                    <div>
-                                        <div class="document-name" style="font-weight: 600;">NRC Front</div>
-                                        <div class="document-status text-muted" id="nrcFrontStatus" style="font-size: 11px;">Not uploaded</div>
-                                    </div>
+                        <div class="documents-grid">
+                            <div class="document-card">
+                                <img src="" alt="NRC Front" id="nrcFrontImg" class="document-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23e5e5ea%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%238e8e93%22>?</text></svg>'">
+                                <div class="document-name">NRC Front</div>
+                                <div class="document-status" id="nrcFrontStatus">Not uploaded</div>
+                                <div class="document-actions">
+                                    <button class="btn btn-outline btn-small" onclick="viewDocument('nrcFront')">View</button>
                                 </div>
-                                <button class="btn btn-outline btn-small" onclick="viewDocument('nrcFront')">
-                                    <i class="fas fa-eye"></i>
-                                    View
-                                </button>
                             </div>
-                            <div class="document-item d-flex align-items-center justify-content-between mb-2 p-2 border rounded">
-                                <div class="d-flex align-items-center">
-                                    <i class="fas fa-id-card" style="color: var(--ios-green); margin-right: 10px;"></i>
-                                    <div>
-                                        <div class="document-name" style="font-weight: 600;">NRC Back</div>
-                                        <div class="document-status text-muted" id="nrcBackStatus" style="font-size: 11px;">Not uploaded</div>
-                                    </div>
+                            <div class="document-card">
+                                <img src="" alt="NRC Back" id="nrcBackImg" class="document-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23e5e5ea%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22%238e8e93%22>?</text></svg>'">
+                                <div class="document-name">NRC Back</div>
+                                <div class="document-status" id="nrcBackStatus">Not uploaded</div>
+                                <div class="document-actions">
+                                    <button class="btn btn-outline btn-small" onclick="viewDocument('nrcBack')">View</button>
                                 </div>
-                                <button class="btn btn-outline btn-small" onclick="viewDocument('nrcBack')">
-                                    <i class="fas fa-eye"></i>
-                                    View
-                                </button>
+                            </div>
+                            <!-- Placeholder for future documents -->
+                            <div class="document-card">
+                                <img src="" alt="Passport" class="document-thumb" style="opacity:0.3;">
+                                <div class="document-name">Passport</div>
+                                <div class="document-status">Optional</div>
+                                <div class="document-actions">
+                                    <button class="btn btn-outline btn-small" disabled>Upload</button>
+                                </div>
+                            </div>
+                            <div class="document-card">
+                                <img src="" alt="Utility Bill" class="document-thumb" style="opacity:0.3;">
+                                <div class="document-name">Utility Bill</div>
+                                <div class="document-status">Optional</div>
+                                <div class="document-actions">
+                                    <button class="btn btn-outline btn-small" disabled>Upload</button>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -1635,8 +1751,11 @@
                             
                             <div class="form-row">
                                 <div class="form-group">
-                                    <label for="loanDuration" class="form-label">Loan Duration (Months)</label>
+                                    <label for="loanDuration" class="form-label">Loan Duration</label>
                                     <select id="loanDuration" class="form-input">
+                                        <option value="1w">1 Week</option>
+                                        <option value="2w">2 Weeks</option>
+                                        <option value="3w">3 Weeks</option>
                                         <option value="1">1 Month</option>
                                         <option value="3">3 Months</option>
                                         <option value="6" selected>6 Months</option>
@@ -1861,6 +1980,12 @@
                                 Our Verified Docx
                             </button>
                         </div>
+                        <div class="about-content">
+                            <p><strong>TruCash Money Lender Firm</strong> is a licensed financial institution dedicated to providing quick and secure loans to individuals and businesses in Zambia. Founded in 2018, we have helped thousands of customers achieve their financial goals with transparent terms and competitive interest rates.</p>
+                            <p>Our team is led by experienced professionals: Eng. Hambayi, Dr. Ilunga, and Mr. Mukandawire. We are committed to integrity, customer satisfaction, and financial inclusion.</p>
+                            <p><strong>Contact us:</strong> <i class="fas fa-phone"></i> +260 123 456 789 | <i class="fas fa-envelope"></i> support@trucash.co.zm</p>
+                            <p><strong>Address:</strong> 5230 Hillcrest Extension, Ndola, Copperbelt Province, Zambia</p>
+                        </div>
                         <div class="certificate-container" id="certificateContainer" style="display: none;">
                             <h1>Tax Registration Certificate</h1>
                             <p>This is to certify that the taxpayer shown herein has been registered with Zambia Revenue Authority.</p>
@@ -1895,55 +2020,49 @@
                     </div>
                 </section>
 
-                <!-- Settings Section -->
+                <!-- Settings Section - Redesigned -->
                 <section id="settingsSection" class="content-section d-none">
-                    <!-- (unchanged, keep original settings) -->
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">Account Settings</div>
+                    <div class="settings-group">
+                        <div class="settings-group-title">Notification Preferences</div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Loan approval/rejection</span>
+                            <label class="switch"><input type="checkbox" id="notifyLoanApproval" checked><span class="slider round"></span></label>
                         </div>
-                        <div class="form-group">
-                            <label class="form-label">Notification Preferences</label>
-                            <div class="checkbox-group">
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input" id="notifyLoanApproval" checked>
-                                    <label class="form-check-label" for="notifyLoanApproval">Loan approval/rejection</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input" id="notifyPaymentDue" checked>
-                                    <label class="form-check-label" for="notifyPaymentDue">Payment due reminders</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input" id="notifyPaymentReceived" checked>
-                                    <label class="form-check-label" for="notifyPaymentReceived">Payment received confirmations</label>
-                                </div>
-                                <div class="form-check mb-2">
-                                    <input type="checkbox" class="form-check-input" id="notifyPenalty" checked>
-                                    <label class="form-check-label" for="notifyPenalty">Penalty applied notifications</label>
-                                </div>
-                            </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Payment due reminders</span>
+                            <label class="switch"><input type="checkbox" id="notifyPaymentDue" checked><span class="slider round"></span></label>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Security</label>
-                            <button class="btn btn-outline" id="changePasswordBtn">
-                                <i class="fas fa-key"></i>
-                                Change Password
-                            </button>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Payment received confirmations</span>
+                            <label class="switch"><input type="checkbox" id="notifyPaymentReceived" checked><span class="slider round"></span></label>
                         </div>
-                        
-                        <div class="form-group">
-                            <label class="form-label">Account Data</label>
-                            <div class="d-flex gap-2">
-                                <button class="btn btn-outline flex-grow-1" id="exportDataBtn">
-                                    <i class="fas fa-download"></i>
-                                    Export Data
-                                </button>
-                                <button class="btn btn-outline flex-grow-1" id="deleteAccountBtn">
-                                    <i class="fas fa-trash"></i>
-                                    Delete Account
-                                </button>
-                            </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Penalty applied notifications</span>
+                            <label class="switch"><input type="checkbox" id="notifyPenalty" checked><span class="slider round"></span></label>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <div class="settings-group-title">Security</div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Change Password</span>
+                            <button class="btn btn-outline btn-small" id="changePasswordBtn">Change</button>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Two-Factor Authentication</span>
+                            <span class="settings-item-value">Coming soon</span>
+                        </div>
+                    </div>
+                    
+                    <div class="settings-group">
+                        <div class="settings-group-title">Account Data</div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Export Data</span>
+                            <button class="btn btn-outline btn-small" id="exportDataBtn">Export</button>
+                        </div>
+                        <div class="settings-item">
+                            <span class="settings-item-label">Delete Account</span>
+                            <button class="btn btn-outline btn-small text-danger" id="deleteAccountBtn">Delete</button>
                         </div>
                     </div>
                 </section>
@@ -1977,7 +2096,7 @@
 
     <!-- Modals -->
 
-    <!-- Payment Modal (unchanged) -->
+    <!-- Payment Modal (enhanced with proof upload) -->
     <div class="modal" id="paymentModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -1988,10 +2107,7 @@
             </div>
             <div class="modal-body">
                 <div id="paymentModalContent">
-                    <div class="text-center py-4">
-                        <div class="loading-spinner"></div>
-                        <p class="mt-3">Loading payment details...</p>
-                    </div>
+                    <!-- dynamic content -->
                 </div>
             </div>
         </div>
@@ -2128,7 +2244,7 @@
         </div>
     </div>
 
-    <!-- NEW: Loan Details Modal -->
+    <!-- NEW: Loan Details Modal (enhanced) -->
     <div class="modal" id="loanDetailsModal">
         <div class="modal-content large">
             <div class="modal-header">
@@ -2142,6 +2258,45 @@
                     <div class="loading-spinner"></div>
                     <p class="mt-3">Loading...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Statement Modal -->
+    <div class="modal" id="statementModal">
+        <div class="modal-content large">
+            <div class="modal-header">
+                <h3 class="modal-title">Account Statement</h3>
+                <button class="modal-close" id="closeStatementModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body" id="statementBody">
+                <div class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3">Generating statement...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Support Modal -->
+    <div class="modal" id="supportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Customer Support</h3>
+                <button class="modal-close" id="closeSupportModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body text-center">
+                <i class="fas fa-headset" style="font-size: 48px; color: var(--ios-green); margin-bottom: 16px;"></i>
+                <h4>We're here to help!</h4>
+                <p><i class="fas fa-phone"></i> Call us: +260 123 456 789</p>
+                <p><i class="fas fa-envelope"></i> Email: support@trucash.co.zm</p>
+                <p><i class="fas fa-comment"></i> Live Chat: Available 8am-6pm</p>
+                <hr>
+                <p class="text-muted">Or visit our branch at: 5230 Hillcrest Extension, Ndola</p>
             </div>
         </div>
     </div>
@@ -2221,7 +2376,7 @@
             showToast('System Error', 'Failed to initialize application', 'error');
         }
 
-        // ===== Enhanced Utility Functions (unchanged, keep all) =====
+        // ===== Enhanced Utility Functions =====
         const Utils = {
             showLoading(message = 'Loading...') {
                 const overlay = document.getElementById('loadingOverlay');
@@ -2316,9 +2471,9 @@
                 return 'LN' + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
             },
             calculateMonthlyPayment(principal, annualRate, months) {
-                // Using agreement rates: 35% monthly, so annualRate is actually monthlyRate * 12
-                // We'll compute based on monthly rate directly
-                const monthlyRate = 0.35; // 35% per month
+                // annualRate is for compatibility, we'll use monthly 35% directly
+                const monthlyRate = 0.35;
+                if (months <= 0) return 0;
                 const payment = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
                 return payment || 0;
             },
@@ -2329,15 +2484,31 @@
                     return null;
                 }
             },
-            // New: Calculate total interest based on monthly 35%
-            calculateTotalInterest(principal, months) {
-                const monthlyRate = 0.35;
-                const totalPayable = principal * Math.pow(1 + monthlyRate, months);
+            // New: Calculate total interest based on duration (weeks or months)
+            calculateTotalInterest(principal, durationStr) {
+                let months = 0;
+                let rate = 0;
+                if (durationStr.endsWith('w')) {
+                    const weeks = parseInt(durationStr);
+                    months = weeks / 4; // approximate
+                    rate = 0.35; // monthly rate
+                } else {
+                    months = parseInt(durationStr);
+                    rate = 0.35;
+                }
+                const totalPayable = principal * Math.pow(1 + rate, months);
                 return totalPayable - principal;
+            },
+            // Parse duration string to months for schedule
+            durationToMonths(durationStr) {
+                if (durationStr.endsWith('w')) {
+                    return parseInt(durationStr) / 4;
+                }
+                return parseInt(durationStr);
             }
         };
 
-        // ===== Firebase Service (extended with agreement upload) =====
+        // ===== Firebase Service (extended) =====
         const FirebaseService = {
             async checkAuth() {
                 return new Promise((resolve) => {
@@ -2682,11 +2853,24 @@
                             error: 'You already have an active or pending loan. Please complete it before applying for a new one.' 
                         };
                     }
-                    // Use agreement rates: 35% monthly
+                    // Use agreement rates: 35% monthly, 10% weekly
                     const monthlyRate = 0.35;
-                    const totalInterest = Utils.calculateTotalInterest(loanData.amount, loanData.duration);
-                    const totalPayable = loanData.amount + totalInterest;
-                    const monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, monthlyRate * 12, loanData.duration); // pass annualized for compatibility
+                    const weeksRate = 0.10; // weekly
+                    let totalInterest, totalPayable, monthlyPayment;
+                    const durationStr = loanData.duration;
+                    let months = 0;
+                    if (durationStr.endsWith('w')) {
+                        const weeks = parseInt(durationStr);
+                        months = weeks / 4; // approx for schedule
+                        totalInterest = loanData.amount * Math.pow(1 + weeksRate, weeks) - loanData.amount;
+                        totalPayable = loanData.amount + totalInterest;
+                        monthlyPayment = totalPayable / weeks; // approximate
+                    } else {
+                        months = parseInt(durationStr);
+                        totalInterest = loanData.amount * Math.pow(1 + monthlyRate, months) - loanData.amount;
+                        totalPayable = loanData.amount + totalInterest;
+                        monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, monthlyRate * 12, months);
+                    }
                     const loanId = Utils.generateLoanId();
                     const loanRef = db.ref('loans/' + loanId);
                     const loan = {
@@ -2700,7 +2884,7 @@
                         amount: loanData.amount,
                         approvedAmount: loanData.amount,
                         duration: loanData.duration,
-                        interestRate: 35, // monthly
+                        interestRate: durationStr.endsWith('w') ? 10 : 35, // weekly or monthly
                         totalInterest: totalInterest,
                         totalPayable: totalPayable,
                         monthlyPayment: monthlyPayment,
@@ -2722,7 +2906,7 @@
                             nrcBack: AppState.userData.nrcBack,
                             profilePhoto: AppState.userData.profilePhoto
                         },
-                        repaymentSchedule: this.generateRepaymentSchedule(loanData.amount, monthlyRate, loanData.duration),
+                        repaymentSchedule: this.generateRepaymentSchedule(loanData.amount, monthlyRate, months, durationStr),
                         signedAgreementUrl: signedAgreementUrl,
                         witness: witnessData // store witness info
                     };
@@ -2758,23 +2942,35 @@
                     return { success: false, error: 'Failed to submit loan application' };
                 }
             },
-            generateRepaymentSchedule(principal, monthlyRate, months) {
+            generateRepaymentSchedule(principal, monthlyRate, months, durationStr) {
                 const schedule = [];
-                const monthlyPayment = principal * monthlyRate * Math.pow(1 + monthlyRate, months) / (Math.pow(1 + monthlyRate, months) - 1);
+                let periods = months;
+                let ratePerPeriod = monthlyRate;
+                let paymentPeriods = months;
+                if (durationStr.endsWith('w')) {
+                    periods = parseInt(durationStr);
+                    ratePerPeriod = 0.10; // weekly
+                    paymentPeriods = periods;
+                }
+                const payment = principal * ratePerPeriod * Math.pow(1 + ratePerPeriod, paymentPeriods) / (Math.pow(1 + ratePerPeriod, paymentPeriods) - 1);
                 let balance = principal;
                 const startDate = new Date();
-                for (let i = 1; i <= months; i++) {
-                    const interest = balance * monthlyRate;
-                    const principalPayment = monthlyPayment - interest;
+                for (let i = 1; i <= paymentPeriods; i++) {
+                    const interest = balance * ratePerPeriod;
+                    const principalPayment = payment - interest;
                     balance -= principalPayment;
                     const dueDate = new Date(startDate);
-                    dueDate.setMonth(dueDate.getMonth() + i);
+                    if (durationStr.endsWith('w')) {
+                        dueDate.setDate(dueDate.getDate() + i * 7);
+                    } else {
+                        dueDate.setMonth(dueDate.getMonth() + i);
+                    }
                     schedule.push({
                         installment: i,
                         dueDate: dueDate.getTime(),
                         principal: principalPayment,
                         interest: interest,
-                        totalDue: monthlyPayment,
+                        totalDue: payment,
                         status: 'pending',
                         paidAmount: 0,
                         paidAt: null
@@ -3059,6 +3255,34 @@
                     Utils.hideLoading();
                     Utils.showToast('Error', 'Failed to update profile photo', 'error');
                 }
+            },
+            openPaymentProofWidget(callback) {
+                if (!this.widget) this.initUploadWidget();
+                const customWidget = cloudinary.createUploadWidget({
+                    cloudName: cloudinaryConfig.cloudName,
+                    uploadPreset: cloudinaryConfig.uploadPreset,
+                    sources: ['local', 'camera'],
+                    multiple: false,
+                    maxFiles: 1,
+                    maxFileSize: 5242880,
+                    clientAllowedFormats: ['jpg', 'jpeg', 'png'],
+                    cropping: true,
+                    croppingAspectRatio: 1,
+                    theme: cloudinaryConfig.theme,
+                    styles: cloudinaryConfig.styles,
+                    folder: cloudinaryConfig.folder + '/payment_proofs',
+                    showPoweredBy: false
+                }, (error, result) => {
+                    if (error) {
+                        console.error('Payment proof upload error:', error);
+                        Utils.showToast('Upload Error', 'Failed to upload proof', 'error');
+                        return;
+                    }
+                    if (result && result.event === "success") {
+                        callback(result.info.secure_url);
+                    }
+                });
+                customWidget.open();
             }
         };
 
@@ -3151,7 +3375,7 @@
             }
         };
 
-        // ===== Enhanced UI Manager (modified to include agreement flow) =====
+        // ===== Enhanced UI Manager =====
         const UIManager = {
             init() {
                 this.cacheElements();
@@ -3202,6 +3426,8 @@
                 this.sidebarLogoutBtn = document.getElementById('sidebarLogoutBtn');
                 this.applyLoanBtn = document.getElementById('applyLoanBtn');
                 this.makePaymentBtn = document.getElementById('makePaymentBtn');
+                this.viewStatementBtn = document.getElementById('viewStatementBtn');
+                this.contactSupportBtn = document.getElementById('contactSupportBtn');
                 this.editProfileBtn = document.getElementById('editProfileBtn');
                 this.changeAgentBtn = document.getElementById('changeAgentBtn');
                 this.contactAgentBtn = document.getElementById('contactAgentBtn');
@@ -3215,6 +3441,8 @@
                 this.closeLoanAgreementModal = document.getElementById('closeLoanAgreementModal');
                 this.loanDetailsModal = document.getElementById('loanDetailsModal');
                 this.closeLoanDetailsModal = document.getElementById('closeLoanDetailsModal');
+                this.statementModal = document.getElementById('statementModal');
+                this.supportModal = document.getElementById('supportModal');
                 this.showCertificateBtn = document.getElementById('showCertificateBtn');
                 this.certificateContainer = document.getElementById('certificateContainer');
                 this.notificationBadge = document.getElementById('notificationCount');
@@ -3269,11 +3497,12 @@
                 this.applyLoanBtn.addEventListener('click', () => {
                     this.showSection('apply');
                 });
-                // Modified: submit button now shows agreement modal first
                 this.submitLoanBtn.addEventListener('click', () => this.prepareLoanAgreement());
                 this.acceptTerms.addEventListener('change', () => this.validateLoanForm());
                 this.loanAmount.addEventListener('input', () => this.validateLoanForm());
                 this.makePaymentBtn.addEventListener('click', () => this.showPaymentModal());
+                this.viewStatementBtn.addEventListener('click', () => this.showStatementModal());
+                this.contactSupportBtn.addEventListener('click', () => this.showSupportModal());
                 this.editProfileBtn.addEventListener('click', () => this.showEditProfileModal());
                 this.logoutBtn.addEventListener('click', () => FirebaseService.signOut());
                 this.sidebarLogoutBtn.addEventListener('click', () => FirebaseService.signOut());
@@ -3324,7 +3553,6 @@
                         }
                     }
                 });
-                // About Us certificate toggle
                 this.showCertificateBtn?.addEventListener('click', () => {
                     if (this.certificateContainer.style.display === 'none') {
                         this.certificateContainer.style.display = 'block';
@@ -3332,15 +3560,18 @@
                         this.certificateContainer.style.display = 'none';
                     }
                 });
-                // Loan agreement modal close
                 this.closeLoanAgreementModal?.addEventListener('click', () => {
                     this.loanAgreementModal.classList.remove('active');
                 });
-                // Loan details modal close
                 this.closeLoanDetailsModal?.addEventListener('click', () => {
                     this.loanDetailsModal.classList.remove('active');
                 });
-                // Loan tabs
+                document.getElementById('closeStatementModal')?.addEventListener('click', () => {
+                    this.statementModal.classList.remove('active');
+                });
+                document.getElementById('closeSupportModal')?.addEventListener('click', () => {
+                    this.supportModal.classList.remove('active');
+                });
                 this.loanTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         const status = tab.dataset.status;
@@ -3500,6 +3731,8 @@
                 document.getElementById('nrcFrontStatus').className = user.nrcFront ? 'document-status text-success' : 'document-status text-muted';
                 document.getElementById('nrcBackStatus').textContent = user.nrcBack ? 'Uploaded' : 'Not uploaded';
                 document.getElementById('nrcBackStatus').className = user.nrcBack ? 'document-status text-success' : 'document-status text-muted';
+                if (user.nrcFront) document.getElementById('nrcFrontImg').src = user.nrcFront;
+                if (user.nrcBack) document.getElementById('nrcBackImg').src = user.nrcBack;
             },
             updateDashboardUI() {
                 const activeLoans = AppState.activeLoans || [];
@@ -3725,16 +3958,14 @@
                 if (this.submitLoanBtn) this.submitLoanBtn.disabled = !isValid;
                 return isValid;
             },
-            // Prepare and show loan agreement modal
             prepareLoanAgreement() {
                 if (!this.validateLoanForm()) {
                     Utils.showToast('Validation Error', 'Please fix the errors in the form', 'error');
                     return;
                 }
-                // Gather loan data
                 const loanData = {
                     amount: parseFloat(document.getElementById('loanAmount').value),
-                    duration: parseInt(document.getElementById('loanDuration').value),
+                    duration: document.getElementById('loanDuration').value,
                     purpose: document.getElementById('loanPurpose').value,
                     purposeDescription: document.getElementById('purposeDescription').value.trim(),
                     collateralCategory: document.getElementById('collateralCategory').value,
@@ -3742,13 +3973,11 @@
                     collateralDescription: document.getElementById('collateralDescription').value.trim(),
                     collateralLocation: document.getElementById('collateralLocation').value.trim()
                 };
-                // Validate required fields
                 if (!loanData.purposeDescription || !loanData.collateralDescription || !loanData.collateralLocation) {
                     Utils.showToast('Validation Error', 'Please fill all collateral details', 'error');
                     return;
                 }
                 AppState.pendingLoanData = loanData;
-                // Build agreement HTML
                 const today = new Date();
                 const day = today.getDate();
                 const month = today.toLocaleString('default', { month: 'long' });
@@ -3757,7 +3986,7 @@
                 const agent = AppState.agentData;
                 const totalInterest = Utils.calculateTotalInterest(loanData.amount, loanData.duration);
                 const totalPayable = loanData.amount + totalInterest;
-                const monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, 0.35*12, loanData.duration);
+                const monthlyPayment = loanData.duration.endsWith('w') ? totalPayable / parseInt(loanData.duration) : Utils.calculateMonthlyPayment(loanData.amount, 0.35*12, parseInt(loanData.duration));
                 const agreementHTML = `
                     <div class="agreement-wrapper">
                         <div class="logo">
@@ -3779,15 +4008,11 @@
                         
                         <h3>3. Loan Terms</h3>
                         <div class="detail"><span class="label">Loan Amount:</span> ZMW ${Utils.formatCurrency(loanData.amount)}</div>
-                        <div class="detail"><span class="label">Interest Rate:</span></div>
-                        <ul>
-                            <li>Weekly: 10%</li>
-                            <li>Monthly: 35%</li>
-                        </ul>
+                        <div class="detail"><span class="label">Interest Rate:</span> ${loanData.duration.endsWith('w') ? '10% weekly' : '35% monthly'}</div>
                         <div class="detail"><span class="label">Total Interest:</span> ZMW ${Utils.formatCurrency(totalInterest)}</div>
                         <div class="detail"><span class="label">Total Payable:</span> ZMW ${Utils.formatCurrency(totalPayable)}</div>
-                        <div class="detail"><span class="label">Monthly Payment:</span> ZMW ${Utils.formatCurrency(monthlyPayment)}</div>
-                        <div class="detail"><span class="label">Repayment Date:</span> ${new Date(today.setMonth(today.getMonth() + loanData.duration)).toLocaleDateString()}</div>
+                        <div class="detail"><span class="label">${loanData.duration.endsWith('w') ? 'Weekly' : 'Monthly'} Payment:</span> ZMW ${Utils.formatCurrency(monthlyPayment)}</div>
+                        <div class="detail"><span class="label">Repayment Date:</span> ${new Date(today.setDate(today.getDate() + (loanData.duration.endsWith('w') ? parseInt(loanData.duration)*7 : parseInt(loanData.duration)*30))).toLocaleDateString()}</div>
                         
                         <h3>4. Collateral Details</h3>
                         <div class="detail"><span class="label">Collateral Item:</span> ${loanData.collateralCategory}</div>
@@ -3855,10 +4080,8 @@
                 `;
                 const body = document.getElementById('loanAgreementBody');
                 body.innerHTML = agreementHTML;
-                // Initialize signature pads
                 this.signaturePadBorrower = SignaturePad.init('borrowerSignatureCanvas', 'clearBorrowerSignature');
                 this.signaturePadWitness = SignaturePad.init('witnessSignatureCanvas', 'clearWitnessSignature');
-                // Attach event listeners for submit/cancel
                 document.getElementById('cancelAgreement').addEventListener('click', () => {
                     this.loanAgreementModal.classList.remove('active');
                 });
@@ -3890,7 +4113,7 @@
                 const year = today.getFullYear();
                 const totalInterest = Utils.calculateTotalInterest(loanData.amount, loanData.duration);
                 const totalPayable = loanData.amount + totalInterest;
-                const monthlyPayment = Utils.calculateMonthlyPayment(loanData.amount, 0.35*12, loanData.duration);
+                const monthlyPayment = loanData.duration.endsWith('w') ? totalPayable / parseInt(loanData.duration) : Utils.calculateMonthlyPayment(loanData.amount, 0.35*12, parseInt(loanData.duration));
                 const finalHTML = `
                     <!DOCTYPE html>
                     <html>
@@ -3924,11 +4147,11 @@
                         <div class="section">
                             <h3>3. Loan Terms</h3>
                             <p>Loan Amount: ZMW ${Utils.formatCurrency(loanData.amount)}</p>
-                            <p>Interest Rate: Weekly 10%, Monthly 35%</p>
+                            <p>Interest Rate: ${loanData.duration.endsWith('w') ? '10% weekly' : '35% monthly'}</p>
                             <p>Total Interest: ZMW ${Utils.formatCurrency(totalInterest)}</p>
                             <p>Total Payable: ZMW ${Utils.formatCurrency(totalPayable)}</p>
-                            <p>Monthly Payment: ZMW ${Utils.formatCurrency(monthlyPayment)}</p>
-                            <p>Repayment Date: ${new Date(today.setMonth(today.getMonth() + loanData.duration)).toLocaleDateString()}</p>
+                            <p>${loanData.duration.endsWith('w') ? 'Weekly' : 'Monthly'} Payment: ZMW ${Utils.formatCurrency(monthlyPayment)}</p>
+                            <p>Repayment Date: ${new Date(today.setDate(today.getDate() + (loanData.duration.endsWith('w') ? parseInt(loanData.duration)*7 : parseInt(loanData.duration)*30))).toLocaleDateString()}</p>
                         </div>
                         
                         <div class="section">
@@ -3964,13 +4187,11 @@
                     Utils.showToast('Upload Error', 'Failed to upload signed agreement', 'error');
                     return;
                 }
-                // Proceed with loan submission
                 const witnessData = { name: witnessName, nrc: witnessNrc };
                 const result = await FirebaseService.submitLoanApplication(loanData, uploadResult.url, witnessData);
                 Utils.hideLoading();
                 if (result.success) {
                     Utils.showToast('Success', result.message || 'Loan application submitted!', 'info');
-                    // Reset form
                     this.loanAmount.value = '';
                     document.getElementById('purposeDescription').value = '';
                     document.getElementById('collateralDescription').value = '';
@@ -4041,18 +4262,35 @@
                     });
                     scheduleHtml += '</table>';
                 }
+                const signedAgreementButton = loan.signedAgreementUrl ? 
+                    `<button class="btn btn-outline" onclick="window.open('${loan.signedAgreementUrl}', '_blank')"><i class="fas fa-file-pdf"></i> View Signed Agreement</button>` : '';
+                const printButton = loan.signedAgreementUrl ? 
+                    `<button class="btn btn-outline" onclick="printAgreement('${loan.signedAgreementUrl}')"><i class="fas fa-print"></i> Print</button>` : '';
                 modalBody.innerHTML = `
-                    <h3>Loan ID: ${loan.id}</h3>
-                    <p><strong>Amount:</strong> ${Utils.formatCurrency(loan.amount)}</p>
-                    <p><strong>Status:</strong> <span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span></p>
-                    <p><strong>Duration:</strong> ${loan.duration} months</p>
-                    <p><strong>Monthly Payment:</strong> ${Utils.formatCurrency(loan.monthlyPayment)}</p>
-                    <p><strong>Total Payable:</strong> ${Utils.formatCurrency(loan.totalPayable)}</p>
-                    <p><strong>Created:</strong> ${Utils.formatDate(loan.createdAt)}</p>
-                    ${loan.witness ? `<p><strong>Witness:</strong> ${loan.witness.name} (${loan.witness.nrc})</p>` : ''}
-                    ${loan.signedAgreementUrl ? `<p><a href="${loan.signedAgreementUrl}" target="_blank">View Signed Agreement</a></p>` : ''}
+                    <div class="loan-detail-section">
+                        <h4>Loan Information</h4>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Loan ID:</span><span class="loan-detail-value">${loan.id}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Amount:</span><span class="loan-detail-value">${Utils.formatCurrency(loan.amount)}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Status:</span><span class="loan-detail-value"><span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span></span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Duration:</span><span class="loan-detail-value">${loan.duration}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">${loan.duration.endsWith('w') ? 'Weekly' : 'Monthly'} Payment:</span><span class="loan-detail-value">${Utils.formatCurrency(loan.monthlyPayment)}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Total Payable:</span><span class="loan-detail-value">${Utils.formatCurrency(loan.totalPayable)}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Created:</span><span class="loan-detail-value">${Utils.formatDate(loan.createdAt)}</span></div>
+                        ${loan.witness ? `<div class="loan-detail-row"><span class="loan-detail-label">Witness:</span><span class="loan-detail-value">${loan.witness.name} (${loan.witness.nrc})</span></div>` : ''}
+                    </div>
+                    <div class="loan-detail-section">
+                        <h4>Collateral</h4>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Category:</span><span class="loan-detail-value">${loan.collateral.category}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Description:</span><span class="loan-detail-value">${loan.collateral.description}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Value:</span><span class="loan-detail-value">${Utils.formatCurrency(loan.collateral.value)}</span></div>
+                        <div class="loan-detail-row"><span class="loan-detail-label">Location:</span><span class="loan-detail-value">${loan.collateral.location}</span></div>
+                    </div>
                     ${scheduleHtml}
-                    ${loan.status === 'active' ? `<button class="btn btn-primary mt-3" onclick="UIManager.preparePaymentForLoan('${loan.id}')">Make Payment</button>` : ''}
+                    <div class="d-flex gap-2 mt-3">
+                        ${signedAgreementButton}
+                        ${printButton}
+                        ${loan.status === 'active' ? `<button class="btn btn-primary flex-grow-1" onclick="UIManager.preparePaymentForLoan('${loan.id}')">Make Payment</button>` : ''}
+                    </div>
                 `;
                 this.loanDetailsModal.classList.add('active');
             },
@@ -4092,18 +4330,27 @@
                             <label class="form-label">Reference (optional)</label>
                             <input type="text" id="paymentReference" class="form-input" placeholder="Transaction ID">
                         </div>
+                        <div class="form-group">
+                            <label class="form-label">Upload Payment Proof (Screenshot)</label>
+                            <button class="btn btn-outline w-100" id="uploadProofBtn" onclick="UIManager.uploadPaymentProof()">
+                                <i class="fas fa-cloud-upload-alt"></i> Upload Proof
+                            </button>
+                            <input type="hidden" id="paymentProofUrl" value="">
+                            <div id="proofPreview" class="text-center mt-2" style="display:none;">
+                                <img src="" alt="Proof" style="max-width:100px; max-height:100px; border-radius:6px;">
+                            </div>
+                        </div>
                         <button class="btn btn-primary w-100" onclick="UIManager.submitPayment()">Submit Payment</button>
                     `;
                     if (AppState.selectedLoanForPayment) {
                         document.getElementById('paymentLoanSelect').value = AppState.selectedLoanForPayment;
                     }
                 }
-                // Payment history
                 const historyEl = document.getElementById('paymentHistory');
                 if (AppState.payments.length === 0) {
                     historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-history" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No payment history found</p></div>';
                 } else {
-                    let historyHtml = '<table class="data-table"><tr><th>Date</th><th>Loan</th><th>Amount</th><th>Method</th><th>Status</th></tr>';
+                    let historyHtml = '<table class="data-table"><tr><th>Date</th><th>Loan</th><th>Amount</th><th>Method</th><th>Status</th><th>Proof</th></tr>';
                     AppState.payments.slice(0, 10).forEach(p => {
                         historyHtml += `<tr>
                             <td>${Utils.formatDate(p.timestamp)}</td>
@@ -4111,19 +4358,33 @@
                             <td>${Utils.formatCurrency(p.amount)}</td>
                             <td>${p.method}</td>
                             <td><span class="status-badge-tag ${p.status === 'verified' ? 'status-active' : 'status-pending'}">${p.status}</span></td>
+                            <td>${p.proofUrl ? `<a href="${p.proofUrl}" target="_blank"><i class="fas fa-image"></i></a>` : '-'}</td>
                         </tr>`;
                     });
                     historyHtml += '</table>';
                     historyEl.innerHTML = historyHtml;
                 }
             },
+            uploadPaymentProof() {
+                CloudinaryService.openPaymentProofWidget((url) => {
+                    document.getElementById('paymentProofUrl').value = url;
+                    const preview = document.getElementById('proofPreview');
+                    preview.style.display = 'block';
+                    preview.querySelector('img').src = url;
+                });
+            },
             async submitPayment() {
                 const loanId = document.getElementById('paymentLoanSelect')?.value;
                 const amount = parseFloat(document.getElementById('paymentAmount')?.value);
                 const method = document.getElementById('paymentMethod')?.value;
                 const reference = document.getElementById('paymentReference')?.value;
+                const proofUrl = document.getElementById('paymentProofUrl')?.value;
                 if (!loanId || !amount || amount <= 0) {
                     Utils.showToast('Error', 'Please select a loan and enter a valid amount', 'error');
+                    return;
+                }
+                if (!proofUrl) {
+                    Utils.showToast('Error', 'Please upload payment proof', 'error');
                     return;
                 }
                 const result = await FirebaseService.makePayment({
@@ -4131,38 +4392,126 @@
                     amount,
                     method,
                     reference,
-                    proofUrl: ''
+                    proofUrl
                 });
                 if (result.success) {
                     Utils.showToast('Success', result.message, 'info');
                     document.getElementById('paymentAmount').value = '';
                     document.getElementById('paymentReference').value = '';
+                    document.getElementById('paymentProofUrl').value = '';
+                    document.getElementById('proofPreview').style.display = 'none';
                     this.paymentModal.classList.remove('active');
                 } else {
                     Utils.showToast('Error', result.error, 'error');
                 }
             },
             updateNotificationsUI() {
-                // Keep original implementation
+                // unchanged
             },
             updateNotificationBadge() {
-                // Keep original implementation
+                const unread = AppState.notifications.filter(n => !n.read).length;
+                const badge = document.getElementById('notificationCount');
+                if (unread > 0) {
+                    badge.textContent = unread > 9 ? '9+' : unread;
+                    badge.style.display = 'inline';
+                } else {
+                    badge.style.display = 'none';
+                }
             },
             updateLoanHistoryUI() {
-                // Keep original implementation
+                const historyEl = document.getElementById('loanHistoryTable');
+                if (AppState.completedLoans.length === 0) {
+                    historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-file-alt" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No loan history found</p></div>';
+                } else {
+                    let html = '<table class="data-table"><tr><th>Loan ID</th><th>Amount</th><th>Status</th><th>Date</th><th>Actions</th></tr>';
+                    AppState.completedLoans.forEach(loan => {
+                        html += `<tr>
+                            <td>${loan.id}</td>
+                            <td>${Utils.formatCurrency(loan.amount)}</td>
+                            <td><span class="status-badge-tag ${loan.status === 'completed' ? 'status-completed' : loan.status === 'defaulted' ? 'status-rejected' : 'status-rejected'}">${loan.status}</span></td>
+                            <td>${Utils.formatDate(loan.createdAt)}</td>
+                            <td><button class="btn btn-outline btn-small" onclick="UIManager.showLoanDetails('${loan.id}')">View</button></td>
+                        </tr>`;
+                    });
+                    html += '</table>';
+                    historyEl.innerHTML = html;
+                }
             },
             showPaymentModal() {
                 this.paymentModal.classList.add('active');
-                this.updatePaymentsUI(); // refresh payment form
+                this.updatePaymentsUI();
+            },
+            showStatementModal() {
+                const modalBody = document.getElementById('statementBody');
+                let html = '<h4>Account Statement</h4>';
+                html += '<h5>Loans</h5><table class="data-table"><tr><th>ID</th><th>Amount</th><th>Status</th><th>Date</th></tr>';
+                AppState.activeLoans.concat(AppState.completedLoans).forEach(loan => {
+                    html += `<tr><td>${loan.id}</td><td>${Utils.formatCurrency(loan.amount)}</td><td>${loan.status}</td><td>${Utils.formatDate(loan.createdAt)}</td></tr>`;
+                });
+                html += '</table>';
+                html += '<h5 class="mt-4">Payments</h5><table class="data-table"><tr><th>Date</th><th>Loan</th><th>Amount</th><th>Status</th></tr>';
+                AppState.payments.forEach(p => {
+                    html += `<tr><td>${Utils.formatDate(p.timestamp)}</td><td>${p.loanId}</td><td>${Utils.formatCurrency(p.amount)}</td><td>${p.status}</td></tr>`;
+                });
+                html += '</table>';
+                modalBody.innerHTML = html;
+                this.statementModal.classList.add('active');
+            },
+            showSupportModal() {
+                this.supportModal.classList.add('active');
             },
             showEditProfileModal() {
-                // Keep original implementation
+                const modal = this.editProfileModal;
+                document.getElementById('editFullName').value = AppState.userData.fullName || '';
+                document.getElementById('editPhone').value = AppState.userData.phone || '';
+                document.getElementById('editAddress').value = AppState.userData.residence || '';
+                document.getElementById('editHouseNumber').value = AppState.userData.houseNumber || '';
+                document.getElementById('editNRC').value = AppState.userData.nrc || '';
+                document.getElementById('currentProfilePhoto').src = AppState.userData.profilePhoto || '';
+                modal.classList.add('active');
             },
             async saveProfileChanges() {
-                // Keep original implementation
+                const fullName = document.getElementById('editFullName').value.trim();
+                const phone = document.getElementById('editPhone').value.trim();
+                const residence = document.getElementById('editAddress').value.trim();
+                const houseNumber = document.getElementById('editHouseNumber').value.trim();
+                const nrc = document.getElementById('editNRC').value.trim();
+                if (!fullName || !phone) {
+                    Utils.showToast('Error', 'Full name and phone are required', 'error');
+                    return;
+                }
+                const result = await FirebaseService.updateProfile({
+                    fullName, phone, residence, houseNumber, nrc
+                });
+                if (result.success) {
+                    Utils.showToast('Success', 'Profile updated', 'info');
+                    this.editProfileModal.classList.remove('active');
+                } else {
+                    Utils.showToast('Error', result.error, 'error');
+                }
             },
             async changePassword() {
-                // Keep original implementation
+                const current = document.getElementById('currentPassword').value;
+                const newPass = document.getElementById('newPassword').value;
+                const confirm = document.getElementById('confirmNewPassword').value;
+                if (!current || !newPass || !confirm) {
+                    Utils.showToast('Error', 'All fields required', 'error');
+                    return;
+                }
+                if (newPass !== confirm) {
+                    Utils.showToast('Error', 'New passwords do not match', 'error');
+                    return;
+                }
+                const result = await FirebaseService.changePassword(current, newPass);
+                if (result.success) {
+                    Utils.showToast('Success', result.message, 'info');
+                    this.changePasswordModal.classList.remove('active');
+                    document.getElementById('currentPassword').value = '';
+                    document.getElementById('newPassword').value = '';
+                    document.getElementById('confirmNewPassword').value = '';
+                } else {
+                    Utils.showToast('Error', result.error, 'error');
+                }
             }
         };
 
@@ -4171,12 +4520,9 @@
             UIManager.init();
         });
 
-        // ===== Global Functions (unchanged) =====
+        // ===== Global Functions =====
         function openCloudinaryWidget(element) {
             CloudinaryService.openWidget(element);
-        }
-        function openPaymentProofUpload() {
-            Utils.showToast('Info', 'Payment proof upload coming soon', 'info');
         }
         function viewDocument(type) {
             const documentImage = document.getElementById('documentImage');
@@ -4204,6 +4550,10 @@
                 Utils.showToast('Amount Limit', `Maximum loan amount is ${Utils.formatCurrency(maxAmount)}`, 'warning');
             }
             UIManager.validateLoanForm();
+        }
+        function printAgreement(url) {
+            const printWindow = window.open(url, '_blank');
+            printWindow.onload = () => printWindow.print();
         }
 
         window.addEventListener('online', () => {
