@@ -748,6 +748,56 @@
             width: 0%;
             transition: width 0.3s;
         }
+
+        /* Agent application cards */
+        .app-card {
+            background: var(--ios-card);
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--ios-gray2);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .app-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .app-avatar {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            background: var(--ios-gray1);
+            object-fit: cover;
+        }
+        .app-info {
+            flex: 1;
+        }
+        .app-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .app-meta {
+            font-size: 13px;
+            color: var(--ios-gray5);
+        }
+        .app-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        /* Payment proof */
+        .proof-thumb {
+            width: 60px;
+            height: 60px;
+            border-radius: 10px;
+            object-fit: cover;
+            cursor: pointer;
+            border: 1px solid var(--ios-gray3);
+        }
     </style>
 </head>
 <body>
@@ -870,10 +920,12 @@
                 <input type="text" id="agentSearch" placeholder="Search agents...">
                 <button class="btn btn-small btn-outline" id="clearAgentSearch"><i class="fas fa-times"></i></button>
             </div>
+            <div class="tab-bar">
+                <span class="tab active" data-status="active">Active</span>
+                <span class="tab" data-status="pending">Pending</span>
+                <span class="tab" data-status="banned">Banned</span>
+            </div>
             <div class="action-row">
-                <button class="btn btn-outline btn-small" id="filterActiveAgents">Active</button>
-                <button class="btn btn-outline btn-small" id="filterPendingAgents">Pending</button>
-                <button class="btn btn-outline btn-small" id="filterBannedAgents">Banned</button>
                 <button class="btn btn-primary btn-small" id="createAgentBtn"><i class="fas fa-plus"></i> Create Agent</button>
                 <button class="btn btn-outline btn-small" id="exportAgents"><i class="fas fa-download"></i> Export</button>
             </div>
@@ -1072,6 +1124,24 @@
                     <div class="form-group"><label>Agent ID (manual) *</label><input type="text" id="agentCustomId" class="form-input" required></div>
                     <div class="form-group"><label>Password *</label><input type="password" id="agentPassword" class="form-input" required></div>
                     <div class="form-group"><label>Branch</label><input type="text" id="agentBranch" class="form-input" value="Main"></div>
+                    <!-- Cloudinary uploads for agent documents (optional but recommended) -->
+                    <div class="doc-grid">
+                        <div class="upload-box" data-type="agent-nrc-front" onclick="openCloudinaryUpload('agent-nrc-front')">
+                            <i class="fas fa-id-card"></i><span>NRC Front</span>
+                            <div class="upload-preview" id="agentNrcFrontPreview"></div>
+                        </div>
+                        <div class="upload-box" data-type="agent-nrc-back" onclick="openCloudinaryUpload('agent-nrc-back')">
+                            <i class="fas fa-id-card"></i><span>NRC Back</span>
+                            <div class="upload-preview" id="agentNrcBackPreview"></div>
+                        </div>
+                        <div class="upload-box" data-type="agent-profile" onclick="openCloudinaryUpload('agent-profile')">
+                            <i class="fas fa-user"></i><span>Profile Photo</span>
+                            <div class="upload-preview" id="agentProfilePreview"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="agentNrcFrontUrl">
+                    <input type="hidden" id="agentNrcBackUrl">
+                    <input type="hidden" id="agentProfileUrl">
                     <div class="progress-bar" id="agentCreateProgress"><div class="progress-fill"></div></div>
                 </form>
                 <button class="btn btn-primary" id="submitAgent">Create Agent</button>
@@ -1095,13 +1165,31 @@
                     <div class="form-group"><label>Address *</label><input type="text" id="custAddress" class="form-input" required></div>
                     <div class="form-group"><label>Password *</label><input type="password" id="custPassword" class="form-input" required></div>
                     <div class="form-group"><label>Agent (optional)</label><select id="custAgent" class="form-select"></select></div>
+                    <!-- Document uploads -->
+                    <div class="doc-grid">
+                        <div class="upload-box" data-type="cust-nrc-front" onclick="openCloudinaryUpload('cust-nrc-front')">
+                            <i class="fas fa-id-card"></i><span>NRC Front</span>
+                            <div class="upload-preview" id="custNrcFrontPreview"></div>
+                        </div>
+                        <div class="upload-box" data-type="cust-nrc-back" onclick="openCloudinaryUpload('cust-nrc-back')">
+                            <i class="fas fa-id-card"></i><span>NRC Back</span>
+                            <div class="upload-preview" id="custNrcBackPreview"></div>
+                        </div>
+                        <div class="upload-box" data-type="cust-profile" onclick="openCloudinaryUpload('cust-profile')">
+                            <i class="fas fa-user"></i><span>Profile Photo</span>
+                            <div class="upload-preview" id="custProfilePreview"></div>
+                        </div>
+                    </div>
+                    <input type="hidden" id="custNrcFrontUrl">
+                    <input type="hidden" id="custNrcBackUrl">
+                    <input type="hidden" id="custProfileUrl">
                 </form>
                 <button class="btn btn-primary" id="submitCustomer">Create Customer</button>
             </div>
         </div>
     </div>
 
-    <!-- Agent Details Modal -->
+    <!-- Agent Details Modal (enhanced) -->
     <div class="modal-overlay" id="agentDetailsModal">
         <div class="modal-container" style="max-width: 900px;">
             <div class="modal-header">
@@ -1112,7 +1200,7 @@
         </div>
     </div>
 
-    <!-- Customer Details Modal -->
+    <!-- Customer Details Modal (enhanced) -->
     <div class="modal-overlay" id="customerDetailsModal">
         <div class="modal-container" style="max-width: 900px;">
             <div class="modal-header">
@@ -1123,7 +1211,7 @@
         </div>
     </div>
 
-    <!-- Loan Details Modal -->
+    <!-- Loan Details Modal (enhanced) -->
     <div class="modal-overlay" id="loanDetailsModal">
         <div class="modal-container" style="max-width: 1000px;">
             <div class="modal-header">
@@ -1134,9 +1222,9 @@
         </div>
     </div>
 
-    <!-- Payment Details Modal -->
+    <!-- Payment Details Modal (enhanced) -->
     <div class="modal-overlay" id="paymentDetailsModal">
-        <div class="modal-container">
+        <div class="modal-container" style="max-width: 900px;">
             <div class="modal-header">
                 <span>Payment Details</span>
                 <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
@@ -1145,23 +1233,14 @@
         </div>
     </div>
 
-    <!-- Signature Modal for Lender -->
-    <div class="modal-overlay" id="signAgreementModal">
-        <div class="modal-container">
+    <!-- Agent Application Details Modal (for pending agents) -->
+    <div class="modal-overlay" id="agentApplicationModal">
+        <div class="modal-container" style="max-width: 900px;">
             <div class="modal-header">
-                <span>Sign Loan Agreement (Lender)</span>
-                <span class="modal-close" onclick="closeModal('signAgreementModal')"><i class="fas fa-times"></i></span>
+                <span>Agent Application</span>
+                <span class="modal-close" onclick="closeModal('agentApplicationModal')"><i class="fas fa-times"></i></span>
             </div>
-            <div class="modal-body">
-                <div id="agreementPreview" style="max-height:300px; overflow:auto; border:1px solid #ddd; padding:12px; margin-bottom:16px;"></div>
-                <div class="signature-pad">
-                    <canvas id="lenderSignatureCanvas" class="signature-canvas"></canvas>
-                    <div class="signature-tools">
-                        <button class="btn btn-outline btn-small" id="clearLenderSig">Clear</button>
-                    </div>
-                </div>
-                <button class="btn btn-primary" id="submitLenderSignature">Sign & Save</button>
-            </div>
+            <div class="modal-body" id="agentApplicationContent"></div>
         </div>
     </div>
 
@@ -1207,7 +1286,7 @@
     <!-- ========== FIREBASE CONFIG ========== -->
     <script>
         // =========================================================================
-        // PRODUCTION-GRADE ADMIN PANEL - TRUCASH
+        // PRODUCTION-GRADE ADMIN PANEL - TRUCASH (ENHANCED)
         // =========================================================================
         
         // Firebase configuration
@@ -1243,12 +1322,13 @@
         let allPayments = [];
         let allCommissionHistory = [];
         let allAuditLogs = [];
+        let allAgentApplications = []; // pending applications
         let systemSettings = {};
 
         // Filters
         let currentLoanFilter = 'all';
         let currentPaymentFilter = 'pending';
-        let agentFilter = 'all';
+        let agentFilter = 'active';
         let customerFilter = 'all';
 
         // Charts instances
@@ -1309,7 +1389,7 @@
                     adminEmail: currentUser.email,
                     action,
                     details,
-                    ip: 'admin' // would get from server in production
+                    ip: 'admin'
                 };
                 await db.ref('auditLogs/' + Utils.generateId('LOG')).set(log);
             }
@@ -1328,6 +1408,12 @@
                 allCustomers = Object.entries(users)
                     .filter(([_,u]) => u.userType === 'customer')
                     .map(([id,u]) => ({...u, id}));
+
+                // Load agent applications (pending)
+                const appsSnap = await db.ref('agentApplications').once('value');
+                allAgentApplications = Object.entries(appsSnap.val() || {})
+                    .filter(([_,a]) => a.status === 'pending')
+                    .map(([id,a]) => ({...a, id}));
 
                 // Load loans
                 const loansSnap = await db.ref('loans').once('value');
@@ -1377,6 +1463,12 @@
                 allCommissionHistory = Object.entries(snap.val() || {}).map(([id,c]) => ({...c, id}));
                 updateUI();
             });
+            db.ref('agentApplications').on('value', (snap) => {
+                allAgentApplications = Object.entries(snap.val() || {})
+                    .filter(([_,a]) => a.status === 'pending')
+                    .map(([id,a]) => ({...a, id}));
+                updateUI();
+            });
             db.ref('auditLogs').on('value', (snap) => {
                 allAuditLogs = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id})).sort((a,b) => b.timestamp - a.timestamp);
                 if (document.getElementById('auditSection').classList.contains('active')) renderAuditLogs();
@@ -1395,6 +1487,7 @@
             renderProfit();
             renderAssignments();
             renderAuditLogs();
+            renderAgentApplications(); // new
         }
 
         function updateDashboardStats() {
@@ -1406,14 +1499,37 @@
             document.getElementById('statPendingPayments').innerText = pendingPayments;
 
             const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
-            const pendingAgents = allAgents.filter(a => a.status === 'pending').length;
+            const pendingAgents = allAgentApplications.length;
             const totalPending = pendingLoans + pendingAgents + pendingPayments;
             document.getElementById('pendingCount').innerText = totalPending;
             document.getElementById('pendingSummary').innerHTML = `
                 <div>Pending Loans: ${pendingLoans}</div>
-                <div>Pending Agents: ${pendingAgents}</div>
+                <div>Pending Agent Apps: ${pendingAgents}</div>
                 <div>Pending Payments: ${pendingPayments}</div>
             `;
+        }
+
+        // New: Render pending agent applications in Agents section
+        function renderAgentApplications() {
+            const container = document.getElementById('agentsList');
+            if (!container) return;
+            if (agentFilter === 'pending') {
+                // Show pending applications
+                container.innerHTML = allAgentApplications.map(app => `
+                    <div class="app-card" onclick="showAgentApplication('${app.id}')">
+                        <img src="${app.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(app.fullName||'A')+'&background=007AFF&color=fff'}" class="app-avatar">
+                        <div class="app-info">
+                            <div class="app-name">${app.fullName}</div>
+                            <div class="app-meta">${app.phone} · Submitted ${Utils.formatDate(app.submittedAt)}</div>
+                        </div>
+                        <div class="app-actions">
+                            <span class="status-badge pending">Pending</span>
+                        </div>
+                    </div>
+                `).join('') || '<p class="text-muted text-center">No pending applications</p>';
+            } else {
+                renderAgents(); // render normal agents
+            }
         }
 
         function renderCustomers() {
@@ -1450,7 +1566,12 @@
         function renderAgents() {
             const searchTerm = document.getElementById('agentSearch')?.value.toLowerCase() || '';
             let filtered = allAgents;
-            if (agentFilter !== 'all') filtered = filtered.filter(a => a.status === agentFilter);
+            if (agentFilter === 'active') filtered = filtered.filter(a => a.status === 'active');
+            if (agentFilter === 'banned') filtered = filtered.filter(a => a.status === 'banned');
+            if (agentFilter === 'pending') {
+                renderAgentApplications(); // handled separately
+                return;
+            }
             if (searchTerm) {
                 filtered = filtered.filter(a => 
                     (a.fullName?.toLowerCase().includes(searchTerm)) ||
@@ -1514,10 +1635,11 @@
             container.innerHTML = filtered.map(p => `
                 <div class="floating-card" onclick="showPaymentDetails('${p.id}')">
                     <div class="profile-row">
-                        <div>
+                        <div style="flex:1">
                             <div><strong>${p.customerName}</strong> - ${Utils.formatCurrency(p.amount)}</div>
                             <div class="profile-meta">Loan: ${p.loanId} · ${p.method}</div>
                         </div>
+                        ${p.proofUrl ? `<img src="${p.proofUrl}" class="proof-thumb" onclick="event.stopPropagation(); window.open('${p.proofUrl}')">` : ''}
                         <span class="status-badge ${p.status}">${p.status}</span>
                     </div>
                 </div>
@@ -1548,7 +1670,7 @@
             document.getElementById('overdue').innerText = Utils.formatCurrency(overdue);
             document.getElementById('defaulted').innerText = Utils.formatCurrency(defaulted);
 
-            // Charts
+            // Charts (simplified)
             const ctxLoan = document.getElementById('loanTrendChart')?.getContext('2d');
             if (ctxLoan) {
                 if (loanTrendChart) loanTrendChart.destroy();
@@ -1891,6 +2013,100 @@
             openModal('paymentDetailsModal');
         };
 
+        window.showAgentApplication = async (appId) => {
+            const app = allAgentApplications.find(a => a.id === appId);
+            if (!app) return;
+            const content = `
+                <div class="profile-row">
+                    <img src="${app.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(app.fullName)}" class="profile-img" style="width:80px;height:80px;">
+                    <div>
+                        <h3>${app.fullName}</h3>
+                        <p>${app.phone} · ${app.email || ''}</p>
+                        <p>NRC: ${app.nrc}</p>
+                        <p>Address: ${app.residence}</p>
+                        <p>Submitted: ${Utils.formatDateTime(app.submittedAt)}</p>
+                        <p>Status: <span class="status-badge pending">Pending</span></p>
+                    </div>
+                </div>
+                <hr>
+                <h4>Documents</h4>
+                <div class="doc-grid">
+                    <div class="doc-thumb" onclick="window.open('${app.nrcFront}')"><img src="${app.nrcFront}"><span class="label">NRC Front</span></div>
+                    <div class="doc-thumb" onclick="window.open('${app.nrcBack}')"><img src="${app.nrcBack}"><span class="label">NRC Back</span></div>
+                    <div class="doc-thumb" onclick="window.open('${app.profilePhoto}')"><img src="${app.profilePhoto}"><span class="label">Profile</span></div>
+                </div>
+                <div class="action-row mt-4">
+                    <button class="btn btn-success" onclick="approveAgentApplication('${app.id}')">Approve & Generate Credentials</button>
+                    <button class="btn btn-danger" onclick="rejectAgentApplication('${app.id}')">Reject</button>
+                    <button class="btn btn-outline" onclick="closeModal('agentApplicationModal')">Close</button>
+                </div>
+            `;
+            document.getElementById('agentApplicationContent').innerHTML = content;
+            openModal('agentApplicationModal');
+        };
+
+        // ========== AGENT APPLICATION ACTIONS ==========
+        window.approveAgentApplication = async (appId) => {
+            // Generate credentials (similar to login.html)
+            const app = allAgentApplications.find(a => a.id === appId);
+            if (!app) return;
+            // Generate agent ID and email
+            const agentId = 'AG' + Date.now().toString().slice(-6) + Math.random().toString(36).substr(2,3).toUpperCase();
+            const agentEmail = `agent.${app.fullName.toLowerCase().replace(/ /g,'.')}.${Date.now().toString().slice(-4)}@trucash.com`;
+            const agentPassword = Math.random().toString(36).slice(-8) + 'A1!';
+
+            if (confirm(`Approve ${app.fullName}? Credentials will be generated.\nEmail: ${agentEmail}\nPassword: ${agentPassword}\n\nCopy these details before proceeding.`)) {
+                Utils.showLoading('Creating agent account...');
+                try {
+                    // Create Firebase Auth user
+                    const cred = await auth.createUserWithEmailAndPassword(agentEmail, agentPassword);
+                    const uid = cred.user.uid;
+                    // Save to users
+                    const agentData = {
+                        fullName: app.fullName,
+                        phone: app.phone,
+                        email: agentEmail,
+                        nrc: app.nrc,
+                        residence: app.residence,
+                        nrcFront: app.nrcFront,
+                        nrcBack: app.nrcBack,
+                        profilePhoto: app.profilePhoto,
+                        userType: 'agent',
+                        agentId: agentId,
+                        status: 'active',
+                        createdAt: Date.now()
+                    };
+                    await db.ref('users/' + uid).set(agentData);
+                    // Update application status
+                    await db.ref('agentApplications/' + appId).update({
+                        status: 'approved',
+                        reviewedAt: Date.now(),
+                        reviewedBy: currentUser?.email,
+                        assignedCredentials: { email: agentEmail, agentId }
+                    });
+                    // Remove from pending list
+                    await db.ref('pendingApplications/' + appId).remove();
+                    Utils.logAudit('APPROVE_AGENT', { appId, agentId });
+                    Utils.showToast('Success', `Agent ${app.fullName} approved and account created.`, 'success');
+                    closeModal('agentApplicationModal');
+                } catch (e) {
+                    Utils.showToast('Error', e.message, 'error');
+                } finally {
+                    Utils.hideLoading();
+                }
+            }
+        };
+
+        window.rejectAgentApplication = async (appId) => {
+            if (confirm('Reject this application?')) {
+                await db.ref('agentApplications/' + appId).update({ status: 'rejected', reviewedAt: Date.now() });
+                await db.ref('pendingApplications/' + appId).remove();
+                Utils.logAudit('REJECT_AGENT', { appId });
+                Utils.showToast('Rejected', 'Application rejected', 'info');
+                closeModal('agentApplicationModal');
+            }
+        };
+
         window.showCommissionMath = (agentId) => {
             const agent = allAgents.find(a => a.id === agentId);
             if (!agent) return;
@@ -1974,49 +2190,6 @@
             closeModal('loanDetailsModal');
         };
 
-        window.signLoanAsLender = (loanId) => {
-            const loan = allLoans.find(l => l.id === loanId);
-            if (!loan) return;
-            document.getElementById('agreementPreview').innerHTML = `<iframe src="${loan.signedAgreementUrl}" style="width:100%; height:250px;"></iframe>`;
-            window.currentLoanForSign = loanId;
-            openModal('signAgreementModal');
-        };
-
-        // Signature pad
-        const lenderSigPad = (() => {
-            const canvas = document.getElementById('lenderSignatureCanvas');
-            if (!canvas) return null;
-            const ctx = canvas.getContext('2d');
-            let drawing = false;
-            canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-            canvas.addEventListener('mousemove', (e) => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
-            canvas.addEventListener('mouseup', () => drawing = false);
-            canvas.addEventListener('mouseleave', () => drawing = false);
-            document.getElementById('clearLenderSig').addEventListener('click', () => ctx.clearRect(0,0,canvas.width,canvas.height));
-            return { clear: () => ctx.clearRect(0,0,canvas.width,canvas.height), getData: () => canvas.toDataURL() };
-        })();
-
-        document.getElementById('submitLenderSignature').addEventListener('click', async () => {
-            if (!lenderSigPad) return;
-            const sigData = lenderSigPad.getData();
-            const loanId = window.currentLoanForSign;
-            if (!loanId) return;
-            Utils.showLoading('Saving signature...');
-            try {
-                await db.ref('loans/' + loanId).update({
-                    lenderSignature: sigData,
-                    lenderSignedAt: Date.now(),
-                    lenderSignedBy: currentUser?.uid
-                });
-                await Utils.logAudit('LENDER_SIGN_LOAN', { loanId });
-                Utils.showToast('Success', 'Loan signed by lender', 'success');
-            } catch (e) {
-                Utils.showToast('Error', e.message, 'error');
-            }
-            Utils.hideLoading();
-            closeModal('signAgreementModal');
-        });
-
         window.confirmPayment = async (id) => {
             if (!confirm('Confirm this payment?')) return;
             const payment = allPayments.find(p => p.id === id);
@@ -2034,7 +2207,6 @@
                 const loan = loanSnap.val();
                 let newTotalPaid = (loan.totalPaid || 0) + payment.amount;
                 let newInterestPaid = (loan.interestPaid || 0);
-                // simplistic: allocate all to interest until full interest paid
                 const remainingInterest = (loan.totalInterest || 0) - newInterestPaid;
                 if (payment.amount <= remainingInterest) {
                     newInterestPaid += payment.amount;
@@ -2150,11 +2322,6 @@
                     paidBy: currentUser?.uid,
                     status: 'paid'
                 });
-                // Update agent's totalCommission
-                const agentRef = db.ref('users/' + agentId);
-                const agentSnap = await agentRef.once('value');
-                const agent = agentSnap.val();
-                await agentRef.update({ totalCommission: (agent.totalCommission || 0) + amount });
                 await Utils.logAudit('PAY_COMMISSION', { agentId, amount });
                 Utils.showToast('Success', 'Commission paid', 'success');
             } catch (e) {
@@ -2175,10 +2342,6 @@
                     assignedAgentId: agentId,
                     agentName: agent?.fullName
                 });
-                const agentRef = db.ref('users/' + agentId);
-                const agentSnap = await agentRef.once('value');
-                const agentData = agentSnap.val();
-                await agentRef.update({ totalCustomers: (agentData.totalCustomers || 0) + 1 });
                 await Utils.logAudit('ASSIGN_AGENT', { customerId, agentId });
                 Utils.showToast('Success', 'Agent assigned', 'success');
             } catch (e) {
@@ -2263,6 +2426,10 @@
             const password = document.getElementById('agentPassword').value.trim();
             const branch = document.getElementById('agentBranch').value.trim();
 
+            const nrcFront = document.getElementById('agentNrcFrontUrl').value;
+            const nrcBack = document.getElementById('agentNrcBackUrl').value;
+            const profile = document.getElementById('agentProfileUrl').value;
+
             if (!name || !phone || !nrc || !email || !agentId || !password) {
                 Utils.showToast('Error', 'All fields required', 'error');
                 return;
@@ -2285,9 +2452,9 @@
                     userType: 'agent',
                     status: 'active',
                     createdAt: Date.now(),
-                    totalCustomers: 0,
-                    totalLoans: 0,
-                    totalCommission: 0
+                    nrcFront,
+                    nrcBack,
+                    profilePhoto: profile
                 });
                 await Utils.logAudit('CREATE_AGENT', { agentId: uid, email });
                 Utils.showToast('Success', 'Agent created', 'success');
@@ -2299,6 +2466,10 @@
                 document.getElementById('agentCustomId').value = '';
                 document.getElementById('agentPassword').value = '';
                 document.getElementById('agentBranch').value = 'Main';
+                document.getElementById('agentNrcFrontUrl').value = '';
+                document.getElementById('agentNrcBackUrl').value = '';
+                document.getElementById('agentProfileUrl').value = '';
+                document.querySelectorAll('#createAgentModal .upload-preview').forEach(el => el.remove());
             } catch (e) {
                 Utils.showToast('Error', e.message, 'error');
             }
@@ -2314,6 +2485,10 @@
             const address = document.getElementById('custAddress').value.trim();
             const password = document.getElementById('custPassword').value.trim();
             const agentId = document.getElementById('custAgent').value;
+
+            const nrcFront = document.getElementById('custNrcFrontUrl').value;
+            const nrcBack = document.getElementById('custNrcBackUrl').value;
+            const profile = document.getElementById('custProfileUrl').value;
 
             if (!name || !email || !phone || !nrc || !address || !password) {
                 Utils.showToast('Error', 'All fields required', 'error');
@@ -2339,7 +2514,9 @@
                     assignedAgentId: agentId || null,
                     agentName: agentName || null,
                     createdAt: Date.now(),
-                    totalLoans: 0
+                    nrcFront,
+                    nrcBack,
+                    profilePhoto: profile
                 });
                 if (agentId) {
                     const agentRef = db.ref('users/' + agentId);
@@ -2356,6 +2533,10 @@
                 document.getElementById('custNrc').value = '';
                 document.getElementById('custAddress').value = '';
                 document.getElementById('custPassword').value = '';
+                document.getElementById('custNrcFrontUrl').value = '';
+                document.getElementById('custNrcBackUrl').value = '';
+                document.getElementById('custProfileUrl').value = '';
+                document.querySelectorAll('#createCustomerModal .upload-preview').forEach(el => el.remove());
             } catch (e) {
                 Utils.showToast('Error', e.message, 'error');
             }
@@ -2446,13 +2627,22 @@
         });
 
         // ========== FILTERS & SEARCH ==========
+        document.querySelectorAll('#agentsSection .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('#agentsSection .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                agentFilter = tab.dataset.status;
+                renderAgents(); // will call renderAgentApplications if pending
+            });
+        });
+
         document.getElementById('filterActiveAgents')?.addEventListener('click', () => {
             agentFilter = 'active';
             renderAgents();
         });
         document.getElementById('filterPendingAgents')?.addEventListener('click', () => {
             agentFilter = 'pending';
-            renderAgents();
+            renderAgentApplications();
         });
         document.getElementById('filterBannedAgents')?.addEventListener('click', () => {
             agentFilter = 'banned';
@@ -2536,6 +2726,11 @@
             // Refresh data for specific sections
             if (sectionId === 'audit') renderAuditLogs();
             if (sectionId === 'analytics') renderAnalytics();
+            if (sectionId === 'agents') {
+                // if current filter is pending, show pending apps
+                if (agentFilter === 'pending') renderAgentApplications();
+                else renderAgents();
+            }
         }
         window.showSection = showSection;
 
@@ -2624,6 +2819,7 @@
         });
 
         function exportToCSV(data, filename) {
+            if (!data.length) return;
             const header = Object.keys(data[0]).join(',');
             const rows = data.map(obj => Object.values(obj).map(v => `"${v}"`).join(','));
             const csv = [header, ...rows].join('\n');
@@ -2639,6 +2835,51 @@
         // Modal helpers
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+
+        // ========== CLOUDINARY UPLOAD HANDLERS ==========
+        function initCloudinaryWidget() {
+            if (cloudinaryWidget) return;
+            cloudinaryWidget = cloudinary.createUploadWidget({
+                cloudName: cloudinaryConfig.cloudName,
+                uploadPreset: cloudinaryConfig.uploadPreset,
+                folder: cloudinaryConfig.folder,
+                multiple: false,
+                maxFileSize: 5242880
+            }, (error, result) => {
+                if (result && result.event === 'success') {
+                    const info = result.info;
+                    const activeUpload = document.querySelector('.upload-box.active');
+                    if (activeUpload) {
+                        const preview = document.createElement('img');
+                        preview.className = 'upload-preview';
+                        preview.src = info.secure_url;
+                        activeUpload.appendChild(preview);
+                        activeUpload.classList.add('has-preview');
+                        // store URL in hidden input
+                        const type = activeUpload.dataset.type;
+                        let hiddenId;
+                        if (type === 'agent-nrc-front') hiddenId = 'agentNrcFrontUrl';
+                        else if (type === 'agent-nrc-back') hiddenId = 'agentNrcBackUrl';
+                        else if (type === 'agent-profile') hiddenId = 'agentProfileUrl';
+                        else if (type === 'cust-nrc-front') hiddenId = 'custNrcFrontUrl';
+                        else if (type === 'cust-nrc-back') hiddenId = 'custNrcBackUrl';
+                        else if (type === 'cust-profile') hiddenId = 'custProfileUrl';
+                        if (hiddenId) document.getElementById(hiddenId).value = info.secure_url;
+                    }
+                }
+            });
+        }
+
+        window.openCloudinaryUpload = (type) => {
+            initCloudinaryWidget();
+            // remove active class from all
+            document.querySelectorAll('.upload-box').forEach(b => b.classList.remove('active'));
+            const target = document.querySelector(`.upload-box[data-type="${type}"]`);
+            if (target) {
+                target.classList.add('active');
+                cloudinaryWidget.open();
+            }
+        };
 
         // ========== AUTH ==========
         auth.onAuthStateChanged(async (user) => {
@@ -2677,22 +2918,6 @@
                 }
             });
         });
-
-        // Initialize Cloudinary widget (if needed)
-        function initCloudinary() {
-            cloudinaryWidget = cloudinary.createUploadWidget({
-                cloudName: cloudinaryConfig.cloudName,
-                uploadPreset: cloudinaryConfig.uploadPreset,
-                folder: cloudinaryConfig.folder,
-                multiple: false,
-                maxFileSize: 5242880
-            }, (error, result) => {
-                if (result && result.event === 'success') {
-                    console.log('Uploaded:', result.info.secure_url);
-                }
-            });
-        }
-        initCloudinary();
     </script>
 </body>
 </html>
