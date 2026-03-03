@@ -3,16 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TruCash | Agent</title>
+    <title>TruCash · Enterprise Admin (Enhanced)</title>
+    <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase SDK -->
+    <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <!-- Cloudinary -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* === iOS‑inspired Mobile Theme (extended) === */
+        /* ========== iOS-inspired design system (kept from original) ========== */
         * {
             margin: 0;
             padding: 0;
@@ -20,146 +23,184 @@
             -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-        body {
-            background: #f8f9fc;
-            color: #1c1e24;
-            line-height: 1.4;
-            padding-bottom: 80px;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
+
+        :root {
+            --ios-bg: #f8fafc;
+            --ios-card: #ffffff;
+            --ios-blue: #007AFF;
+            --ios-red: #FF3B30;
+            --ios-green: #34C759;
+            --ios-orange: #FF9500;
+            --ios-gray1: #f2f2f7;
+            --ios-gray2: #e5e5ea;
+            --ios-gray3: #d1d1d6;
+            --ios-gray4: #c7c7cc;
+            --ios-gray5: #8e8e93;
+            --shadow-sm: 0 2px 8px rgba(0,0,0,0.04), 0 1px 2px rgba(0,0,0,0.03);
+            --shadow-md: 0 4px 16px rgba(0,0,0,0.06), 0 2px 4px rgba(0,0,0,0.02);
+            --radius: 18px;
+            --radius-sm: 12px;
         }
-        /* header with profile pic and title */
-        .agent-header {
-            background: white;
-            padding: 12px 20px;
-            border-bottom: 1px solid #e9ecf0;
+
+        body {
+            background: var(--ios-bg);
+            color: #1c1c1e;
+            min-height: 100vh;
+            padding-bottom: 80px;
+        }
+
+        .app-header {
+            position: sticky;
+            top: 0;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-bottom: 1px solid var(--ios-gray2);
+            padding: 12px 16px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            position: sticky;
-            top: 0;
-            z-index: 10;
-            backdrop-filter: blur(10px);
-            background: rgba(255,255,255,0.9);
+            z-index: 100;
         }
-        .header-left {
+        .logo-area {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .logo-icon {
+            width: 32px;
+            height: 32px;
+            background: var(--ios-blue);
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 16px;
+        }
+        .logo-text {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--ios-blue);
+        }
+        .admin-name {
+            font-weight: 500;
+            font-size: 16px;
+            background: var(--ios-gray1);
+            padding: 6px 16px;
+            border-radius: 30px;
+            border: 1px solid var(--ios-gray2);
+        }
+        .menu-toggle {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: var(--ios-gray1);
+            border: 1px solid var(--ios-gray2);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            color: var(--ios-gray5);
+            cursor: pointer;
+        }
+
+        /* Sidebar (right) */
+        .sidebar-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(5px);
+            z-index: 200;
+            opacity: 0;
+            visibility: hidden;
+            transition: 0.3s;
+        }
+        .sidebar-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        .sidebar {
+            position: fixed;
+            top: 0;
+            right: -280px;
+            width: 280px;
+            height: 100%;
+            background: white;
+            box-shadow: var(--shadow-md);
+            z-index: 201;
+            transition: right 0.3s ease;
+            padding: 24px 16px;
+            overflow-y: auto;
+        }
+        .sidebar.active {
+            right: 0;
+        }
+        .sidebar-header {
             display: flex;
             align-items: center;
             gap: 12px;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 1px solid var(--ios-gray2);
         }
-        .agent-avatar {
+        .sidebar-avatar {
             width: 44px;
             height: 44px;
-            border-radius: 22px;
-            background: #e1e8f0;
+            border-radius: 50%;
+            background: var(--ios-blue);
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
-            color: #4a5a6e;
-            object-fit: cover;
-            border: 2px solid #007aff;
-        }
-        .agent-name {
             font-size: 18px;
+            font-weight: 500;
+        }
+        .sidebar-user {
+            flex:1;
+        }
+        .sidebar-user .name {
             font-weight: 600;
-            color: #1c1e24;
         }
-        .agent-name small {
-            font-size: 13px;
-            font-weight: 400;
-            color: #6c7a8a;
-            display: block;
-            margin-top: 2px;
+        .sidebar-user .role {
+            font-size: 12px;
+            color: var(--ios-gray5);
         }
-        .header-right {
-            font-weight: 700;
-            font-size: 16px;
-            color: #007aff;
-            letter-spacing: 0.5px;
-            background: #e8f0fe;
-            padding: 6px 14px;
-            border-radius: 30px;
-        }
-        /* main content */
-        .main-content {
-            flex: 1;
-            padding: 20px 16px;
-        }
-        .section-title {
-            font-size: 18px;
-            font-weight: 600;
-            margin-bottom: 16px;
-            padding-left: 4px;
-            color: #1c1e24;
-        }
-        .customer-grid {
+        .sidebar-menu {
             display: flex;
             flex-direction: column;
-            gap: 16px;
-        }
-        .customer-card {
-            background: white;
-            border-radius: 24px;
-            padding: 18px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05);
-            border: 1px solid #edf2f7;
-            transition: all 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 16px;
-            cursor: pointer;
-        }
-        .customer-card:active {
-            background: #f2f6fc;
-            transform: scale(0.99);
-        }
-        .customer-avatar {
-            width: 56px;
-            height: 56px;
-            border-radius: 28px;
-            background: #e1e8f0;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: #4a5a6e;
-            flex-shrink: 0;
-            object-fit: cover;
-        }
-        .customer-info {
-            flex: 1;
-        }
-        .customer-name {
-            font-weight: 600;
-            font-size: 17px;
-            margin-bottom: 4px;
-            color: #1e293b;
-        }
-        .customer-meta {
-            font-size: 13px;
-            color: #617388;
-            display: flex;
-            flex-wrap: wrap;
             gap: 8px;
         }
-        .customer-meta i {
-            width: 16px;
-            color: #007aff;
-        }
-        .badge {
-            background: #eef3f8;
-            border-radius: 20px;
-            padding: 4px 10px;
-            font-size: 12px;
-            font-weight: 500;
-            color: #2d3a4a;
-            display: inline-flex;
+        .sidebar-item {
+            display: flex;
             align-items: center;
-            gap: 4px;
+            gap: 16px;
+            padding: 12px 16px;
+            border-radius: 12px;
+            color: #1c1c1e;
+            font-size: 15px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        /* bottom navigation */
+        .sidebar-item:hover {
+            background: var(--ios-gray1);
+        }
+        .sidebar-item i {
+            width: 22px;
+            color: var(--ios-blue);
+        }
+        .sidebar-item.logout {
+            margin-top: 32px;
+            color: var(--ios-red);
+        }
+        .sidebar-item.logout i {
+            color: var(--ios-red);
+        }
+
+        /* Bottom Navigation */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -167,109 +208,343 @@
             width: 100%;
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(20px);
-            border-top: 1px solid #e2e8f0;
+            -webkit-backdrop-filter: blur(20px);
+            border-top: 1px solid var(--ios-gray2);
             display: flex;
             justify-content: space-around;
-            padding: 8px 10px 20px;
-            z-index: 100;
-            box-shadow: 0 -4px 12px rgba(0,0,0,0.02);
+            padding: 10px 8px;
+            padding-bottom: max(10px, env(safe-area-inset-bottom));
+            z-index: 150;
         }
-        .nav-item {
+        .nav-item-bottom {
             display: flex;
             flex-direction: column;
             align-items: center;
             gap: 4px;
-            color: #8a9aa8;
-            font-size: 12px;
+            color: var(--ios-gray5);
+            font-size: 10px;
             transition: 0.2s;
             cursor: pointer;
             flex: 1;
             max-width: 70px;
         }
-        .nav-item i {
-            font-size: 22px;
+        .nav-item-bottom i {
+            font-size: 20px;
         }
-        .nav-item.active {
-            color: #007aff;
+        .nav-item-bottom.active {
+            color: var(--ios-blue);
+        }
+
+        /* Main Content Area */
+        .main-content {
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 16px;
+            padding-bottom: 0;
+        }
+        .content-section {
+            display: none;
+        }
+        .content-section.active {
+            display: block;
+        }
+
+        /* iOS Cards & Elements */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 14px;
+            margin-bottom: 24px;
+        }
+        .stat-card {
+            background: var(--ios-card);
+            border-radius: var(--radius);
+            padding: 18px 16px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--ios-gray2);
+            cursor: pointer;
+        }
+        .stat-card .label {
+            font-size: 14px;
+            color: var(--ios-gray5);
+            margin-bottom: 6px;
+        }
+        .stat-card .value {
+            font-size: 26px;
+            font-weight: 700;
+            color: var(--ios-blue);
+        }
+
+        .search-bar {
+            background: var(--ios-card);
+            border: 1px solid var(--ios-gray2);
+            border-radius: 30px;
+            padding: 12px 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 16px;
+        }
+        .search-bar i {
+            color: var(--ios-gray4);
+        }
+        .search-bar input {
+            border: none;
+            background: transparent;
+            flex: 1;
+            font-size: 16px;
+            outline: none;
+        }
+
+        .action-row {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+        }
+        .btn {
+            padding: 10px 18px;
+            border-radius: 30px;
             font-weight: 500;
+            border: 1px solid transparent;
+            cursor: pointer;
+            background: white;
+            transition: 0.2s;
+            font-size: 14px;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
         }
-        /* modals */
+        .btn-primary {
+            background: var(--ios-blue);
+            color: white;
+            border-color: var(--ios-blue);
+        }
+        .btn-outline {
+            background: white;
+            border-color: var(--ios-gray3);
+            color: #1c1c1e;
+        }
+        .btn-small {
+            padding: 6px 14px;
+            font-size: 13px;
+        }
+        .btn-danger {
+            background: var(--ios-red);
+            color: white;
+            border-color: var(--ios-red);
+        }
+        .btn-success {
+            background: var(--ios-green);
+            color: white;
+            border-color: var(--ios-green);
+        }
+
+        .floating-card {
+            background: var(--ios-card);
+            border-radius: var(--radius);
+            padding: 18px;
+            box-shadow: var(--shadow-sm);
+            border: 1px solid var(--ios-gray2);
+            margin-bottom: 14px;
+            transition: 0.2s;
+        }
+
+        .profile-row {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .profile-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            background: var(--ios-gray1);
+            object-fit: cover;
+        }
+        .profile-details {
+            flex:1;
+        }
+        .profile-name {
+            font-weight: 600;
+            font-size: 16px;
+        }
+        .profile-meta {
+            font-size: 13px;
+            color: var(--ios-gray5);
+        }
+        .loan-badge {
+            background: var(--ios-green);
+            color: white;
+            border-radius: 20px;
+            padding: 4px 10px;
+            font-size: 12px;
+        }
+
+        /* Modals */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
+            top:0; left:0; width:100%; height:100%;
             background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(4px);
+            backdrop-filter: blur(6px);
+            z-index: 300;
             display: none;
-            align-items: flex-end;
+            align-items: center;
             justify-content: center;
-            z-index: 200;
+            padding: 16px;
         }
         .modal-overlay.active {
             display: flex;
         }
-        .modal-card {
+        .modal-container {
             background: white;
+            border-radius: 28px;
+            max-width: 700px;
             width: 100%;
-            max-width: 500px;
-            border-radius: 30px 30px 0 0;
-            padding: 24px 20px 30px;
-            box-shadow: 0 -10px 40px rgba(0,0,0,0.1);
-            animation: slideUp 0.3s ease;
-            max-height: 85vh;
+            max-height: 90vh;
             overflow-y: auto;
-        }
-        @keyframes slideUp {
-            from { transform: translateY(100%); }
-            to { transform: translateY(0); }
+            box-shadow: var(--shadow-md);
+            animation: slideUp 0.3s;
         }
         .modal-header {
+            padding: 20px 24px;
+            border-bottom: 1px solid var(--ios-gray2);
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 20px;
-        }
-        .modal-header h3 {
-            font-size: 20px;
             font-weight: 600;
+            font-size: 18px;
         }
         .modal-close {
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: #8e9dab;
+            font-size: 20px;
+            color: var(--ios-gray5);
             cursor: pointer;
+            background: var(--ios-gray1);
+            width: 34px;
+            height: 34px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-body {
+            padding: 24px;
+        }
+
+        @keyframes slideUp {
+            from { transform: translateY(40px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        /* Signature Pad */
+        .signature-pad {
+            border: 1px solid var(--ios-gray3);
+            border-radius: var(--radius-sm);
+            background: white;
+            margin-bottom: 16px;
+        }
+        .signature-canvas {
+            width: 100%;
+            height: 150px;
+            display: block;
+            background: white;
+            touch-action: none;
+            border-radius: var(--radius-sm) var(--radius-sm) 0 0;
+        }
+        .signature-tools {
+            display: flex;
+            gap: 8px;
             padding: 8px;
+            border-top: 1px solid var(--ios-gray2);
         }
-        /* detail rows */
-        .detail-row {
-            display: flex;
-            margin-bottom: 14px;
-            border-bottom: 1px solid #edf2f7;
-            padding-bottom: 10px;
+
+        /* Form elements */
+        .form-group {
+            margin-bottom: 20px;
         }
-        .detail-label {
-            width: 100px;
+        .form-label {
             font-weight: 500;
-            color: #5b6f82;
+            font-size: 14px;
+            margin-bottom: 6px;
+            display: block;
+            color: #1c1c1e;
         }
-        .detail-value {
-            flex: 1;
-            color: #1c1e24;
+        .form-input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1px solid var(--ios-gray3);
+            border-radius: 18px;
+            font-size: 16px;
+            background: white;
+            transition: 0.2s;
+        }
+        .form-input:focus {
+            outline: none;
+            border-color: var(--ios-blue);
+        }
+
+        /* Status badges */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
             font-weight: 500;
+            background: var(--ios-gray1);
+            color: #1c1c1e;
         }
-        .photo-strip {
-            display: flex;
+        .status-badge.approved, .status-badge.active, .status-badge.confirmed { background: #d4edda; color: #155724; }
+        .status-badge.pending { background: #fff3cd; color: #856404; }
+        .status-badge.rejected, .status-badge.banned { background: #f8d7da; color: #721c24; }
+
+        /* Document grid */
+        .doc-grid {
+            display: grid;
+            grid-template-columns: repeat(2,1fr);
             gap: 12px;
-            overflow-x: auto;
-            padding: 10px 0;
         }
-        .photo-thumb {
-            width: 80px;
-            height: 80px;
-            border-radius: 16px;
+        .doc-thumb {
+            border-radius: var(--radius-sm);
+            border: 1px solid var(--ios-gray2);
+            overflow: hidden;
+            aspect-ratio: 1;
+            cursor: pointer;
+        }
+        .doc-thumb img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
-            border: 1px solid #dde3e9;
         }
+
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 8px 16px;
+            background: white;
+            border: 1px solid var(--ios-gray2);
+            border-radius: 30px;
+            font-size: 14px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: var(--ios-blue);
+            color: white;
+            border-color: var(--ios-blue);
+        }
+
+        /* Charts */
+        .chart-container {
+            background: white;
+            border-radius: var(--radius);
+            padding: 16px;
+            margin-bottom: 20px;
+        }
+
+        /* Additional styles for enhanced views */
         .collateral-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
@@ -282,142 +557,21 @@
             border-radius: 16px;
             object-fit: cover;
             border: 1px solid #dee6ed;
+            cursor: pointer;
         }
-        .btn {
-            background: #007aff;
-            color: white;
-            border: none;
-            padding: 14px 20px;
-            border-radius: 30px;
-            font-weight: 600;
-            font-size: 16px;
+        .repayment-schedule {
+            font-size: 13px;
+            border-collapse: collapse;
             width: 100%;
-            cursor: pointer;
-            margin: 8px 0;
-            box-shadow: 0 8px 18px rgba(0,122,255,0.25);
-            transition: 0.2s;
         }
-        .btn-outline {
-            background: white;
-            border: 1.5px solid #007aff;
-            color: #007aff;
-            box-shadow: none;
+        .repayment-schedule th {
+            background: var(--ios-gray1);
+            padding: 8px;
+            text-align: left;
         }
-        .btn-small {
-            padding: 10px 16px;
-            font-size: 14px;
-        }
-        .agent-code {
-            background: #eaf2ff;
-            border-radius: 20px;
-            padding: 14px;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin: 16px 0;
-        }
-        .code {
-            font-family: monospace;
-            font-size: 18px;
-            font-weight: 600;
-            color: #0055aa;
-            letter-spacing: 1px;
-        }
-        .copy-btn {
-            background: #007aff;
-            color: white;
-            border: none;
-            border-radius: 30px;
-            padding: 8px 18px;
-            font-size: 14px;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            cursor: pointer;
-        }
-        .section-card {
-            background: white;
-            border-radius: 28px;
-            padding: 20px;
-            margin-bottom: 20px;
-            box-shadow: 0 6px 18px rgba(0,0,0,0.02);
-            border: 1px solid #edf2f7;
-        }
-        .commission-item {
-            display: flex;
-            justify-content: space-between;
-            padding: 12px 0;
-            border-bottom: 1px solid #f0f4f9;
-        }
-        .text-muted { color: #7e8c9c; }
-        .text-success { color: #28a745; }
-        .fw-600 { font-weight: 600; }
-        .d-none { display: none; }
-
-        /* New styles for payment list & about page */
-        .payment-list {
-            margin-top: 16px;
-            border-top: 1px solid #edf2f7;
-        }
-        .payment-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 12px 0;
-            border-bottom: 1px dashed #e2e8f0;
-        }
-        .payment-due {
-            font-weight: 500;
-            color: #1e293b;
-        }
-        .payment-amount {
-            font-weight: 600;
-        }
-        .payment-status {
-            padding: 4px 10px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-        .status-paid {
-            background: #d4edda;
-            color: #155724;
-        }
-        .status-pending {
-            background: #fff3cd;
-            color: #856404;
-        }
-        .loan-summary-card {
-            background: #f8fafd;
-            border-radius: 20px;
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid #e9ecf0;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .loan-summary-card:active {
-            background: #e6edf6;
-        }
-        .about-page {
-            padding: 8px 0;
-        }
-        .about-page h4 {
-            font-size: 20px;
-            margin: 20px 0 10px;
-            color: #007aff;
-        }
-        .about-page p {
-            margin-bottom: 16px;
-            color: #2d3a4a;
-        }
-        .about-page ul {
-            padding-left: 24px;
-            margin-bottom: 20px;
-        }
-        .about-page li {
-            margin-bottom: 8px;
-            color: #3e4e5e;
+        .repayment-schedule td {
+            padding: 8px;
+            border-bottom: 1px solid var(--ios-gray2);
         }
         .commission-breakdown {
             background: #f2f7ff;
@@ -430,184 +584,390 @@
             justify-content: space-between;
             padding: 8px 0;
         }
+        .text-success { color: var(--ios-green); }
+        .text-muted { color: var(--ios-gray5); }
+        .d-none { display: none; }
+        .d-flex { display: flex; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .mt-4 { margin-top: 20px; }
+        .mb-2 { margin-bottom: 8px; }
+        .justify-between { justify-content: space-between; }
+        .align-center { align-items: center; }
+        .w-100 { width: 100%; }
     </style>
 </head>
 <body>
-
-    <!-- Header with agent profile picture and TRUCASH AGENT -->
-    <div class="agent-header">
-        <div class="header-left">
-            <img src="" alt="avatar" class="agent-avatar" id="headerAvatar">
-            <div class="agent-name" id="agentFullName">Loading... <small>Agent</small></div>
+    <!-- Header -->
+    <div class="app-header">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+            <span class="logo-text">TruCash</span>
         </div>
-        <div class="header-right">TRUCASH AGENT</div>
+        <div class="admin-name" id="adminNameDisplay">Admin</div>
+        <div class="menu-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></div>
     </div>
 
-    <!-- Main content area (sections) -->
-    <div class="main-content" id="mainContent">
-        <!-- Home section (customers) -->
-        <div id="homeSection" class="section">
-            <div class="section-title"><i class="fas fa-users" style="margin-right: 8px; color: #007aff;"></i> My Customers</div>
-            <div class="customer-grid" id="customersList"></div>
-        </div>
-
-        <!-- Loans section (customers with loans) -->
-        <div id="loansSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-file-invoice" style="margin-right: 8px; color: #007aff;"></i> Customers with Loans</div>
-            <div class="customer-grid" id="customersWithLoansList"></div>
-        </div>
-
-        <!-- Commission section -->
-        <div id="commissionSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-coins" style="margin-right: 8px; color: #007aff;"></i> Commission Overview</div>
-            <div class="section-card">
-                <div class="commission-item"><span>Total earned</span> <span class="fw-600" id="totalCommissionEarned">K0.00</span></div>
-                <div class="commission-item"><span>Pending (15% of interest)</span> <span class="fw-600" id="pendingCommission">K0.00</span></div>
-                <div class="commission-item"><span>To be earned (active loans)</span> <span class="fw-600" id="futureCommission">K0.00</span></div>
+    <!-- Sidebar -->
+    <div class="sidebar-overlay" id="sidebarOverlay"></div>
+    <div class="sidebar" id="sidebar">
+        <div class="sidebar-header">
+            <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+            <div class="sidebar-user">
+                <div class="name" id="sidebarName">Admin User</div>
+                <div class="role">Administrator</div>
             </div>
-            <div class="section-title" style="margin-top: 24px;">Customers</div>
-            <div class="customer-grid" id="customersCommissionList"></div>
         </div>
+        <div class="sidebar-menu">
+            <div class="sidebar-item" data-section="analytics"><i class="fas fa-chart-line"></i> Analytics</div>
+            <div class="sidebar-item" data-section="commission"><i class="fas fa-percent"></i> Commission</div>
+            <div class="sidebar-item" data-section="profit"><i class="fas fa-coins"></i> Profit</div>
+            <div class="sidebar-item" data-section="report"><i class="fas fa-file-pdf"></i> Report</div>
+            <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
+            <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> System Audit</div>
+            <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> System Settings</div>
+            <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
+        </div>
+    </div>
 
-        <!-- Settings section -->
-        <div id="settingsSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-cog" style="margin-right: 8px; color: #007aff;"></i> Settings</div>
-            <div class="section-card">
-                <div style="display: flex; align-items: center; gap: 16px; margin-bottom: 24px;">
-                    <img src="" alt="avatar" class="customer-avatar" id="settingsAvatar" style="width: 70px; height: 70px; border-radius: 35px;">
-                    <div>
-                        <div style="font-weight: 600; font-size: 18px;" id="settingsName"></div>
-                        <div style="color: #617388;" id="settingsEmail"></div>
+    <!-- Bottom Navigation (5 items) -->
+    <div class="bottom-nav">
+        <div class="nav-item-bottom active" data-section="home"><i class="fas fa-home"></i><span>Home</span></div>
+        <div class="nav-item-bottom" data-section="agents"><i class="fas fa-user-tie"></i><span>Agents</span></div>
+        <div class="nav-item-bottom" data-section="customers"><i class="fas fa-users"></i><span>Customers</span></div>
+        <div class="nav-item-bottom" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
+        <div class="nav-item-bottom" data-section="payments"><i class="fas fa-credit-card"></i><span>Payments</span></div>
+    </div>
+
+    <!-- Main Content -->
+    <div class="main-content" id="mainContent">
+        <!-- HOME SECTION -->
+        <section class="content-section active" id="homeSection">
+            <div class="stats-grid">
+                <div class="stat-card" onclick="showSection('customers')">
+                    <div class="label">Customers</div>
+                    <div class="value" id="statCustomers">0</div>
+                </div>
+                <div class="stat-card" onclick="showSection('agents')">
+                    <div class="label">Agents</div>
+                    <div class="value" id="statAgents">0</div>
+                </div>
+                <div class="stat-card" onclick="showSection('loans')">
+                    <div class="label">Loans</div>
+                    <div class="value" id="statLoans">0</div>
+                </div>
+                <div class="stat-card" onclick="showSection('payments')">
+                    <div class="label">Payments</div>
+                    <div class="value" id="statPayments">0</div>
+                </div>
+            </div>
+            <div class="floating-card">
+                <h4 style="margin-bottom: 12px;">Pending Approvals</h4>
+                <div id="pendingSummary">Loading...</div>
+            </div>
+        </section>
+
+        <!-- AGENTS SECTION (enhanced) -->
+        <section class="content-section" id="agentsSection">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="agentSearch" placeholder="Search agents...">
+            </div>
+            <div class="action-row">
+                <button class="btn btn-outline btn-small" id="filterActiveAgents">Active</button>
+                <button class="btn btn-outline btn-small" id="filterPendingAgents">Pending</button>
+                <button class="btn btn-primary btn-small" id="createAgentBtn"><i class="fas fa-plus"></i> Create Agent</button>
+            </div>
+            <div id="agentsList"></div>
+        </section>
+
+        <!-- CUSTOMERS SECTION (enhanced) -->
+        <section class="content-section" id="customersSection">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="customerSearch" placeholder="Search customers...">
+            </div>
+            <div class="action-row">
+                <button class="btn btn-outline btn-small" id="filterActiveCustomers">Active</button>
+                <button class="btn btn-outline btn-small" id="filterBannedCustomers">Banned</button>
+                <button class="btn btn-primary btn-small" id="createCustomerBtn"><i class="fas fa-plus"></i> Create Customer</button>
+            </div>
+            <div id="customersList"></div>
+        </section>
+
+        <!-- LOANS SECTION (enhanced) -->
+        <section class="content-section" id="loansSection">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="loanSearch" placeholder="Search loans...">
+            </div>
+            <div class="tab-bar">
+                <span class="tab active" data-status="all">All</span>
+                <span class="tab" data-status="approved">Approved</span>
+                <span class="tab" data-status="pending">Pending</span>
+                <span class="tab" data-status="rejected">Rejected</span>
+            </div>
+            <div id="loansList"></div>
+        </section>
+
+        <!-- PAYMENTS SECTION (enhanced) -->
+        <section class="content-section" id="paymentsSection">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="paymentSearch" placeholder="Search payments...">
+            </div>
+            <div class="tab-bar">
+                <span class="tab active" data-status="pending">Pending</span>
+                <span class="tab" data-status="confirmed">Confirmed</span>
+                <span class="tab" data-status="rejected">Rejected</span>
+            </div>
+            <div id="paymentsList"></div>
+        </section>
+
+        <!-- ANALYTICS SECTION -->
+        <section class="content-section" id="analyticsSection">
+            <div class="chart-container">
+                <canvas id="topBorrowersChart" style="height:200px; width:100%;"></canvas>
+            </div>
+            <div class="chart-container">
+                <canvas id="topAgentsChart" style="height:200px; width:100%;"></canvas>
+            </div>
+            <div class="floating-card">
+                <h4>Capital Overview</h4>
+                <div>Total lent: <span id="totalLent">K0</span></div>
+                <div>Total repaid: <span id="totalRepaid">K0</span></div>
+                <div>Outstanding: <span id="outstanding">K0</span></div>
+                <div>Total interest earned: <span id="totalInterestEarned">K0</span></div>
+            </div>
+        </section>
+
+        <!-- COMMISSION SECTION (enhanced) -->
+        <section class="content-section" id="commissionSection">
+            <div id="agentsCommissionList"></div>
+            <div class="floating-card mt-4">
+                <h4>Commission History</h4>
+                <div id="commissionHistory"></div>
+            </div>
+        </section>
+
+        <!-- PROFIT SECTION -->
+        <section class="content-section" id="profitSection">
+            <div class="stats-grid">
+                <div class="stat-card"><div class="label">Total Lent</div><div class="value" id="profitLent">0</div></div>
+                <div class="stat-card"><div class="label">Principal Repaid</div><div class="value" id="profitPrincipal">0</div></div>
+                <div class="stat-card"><div class="label">Interest Paid</div><div class="value" id="profitInterest">0</div></div>
+                <div class="stat-card"><div class="label">Commission Paid</div><div class="value" id="profitCommission">0</div></div>
+            </div>
+            <div class="floating-card">
+                <h3>Net Profit: <span id="netProfit">K0</span></h3>
+                <button class="btn btn-primary w-100 mt-4" id="printProfitReport">Detailed Report</button>
+            </div>
+        </section>
+
+        <!-- REPORT SECTION -->
+        <section class="content-section" id="reportSection">
+            <div class="action-row">
+                <button class="btn btn-outline" id="reportAgents">Agents Report</button>
+                <button class="btn btn-outline" id="reportLoans">Loans Report</button>
+                <button class="btn btn-outline" id="reportCustomers">Customers Report</button>
+            </div>
+            <div id="reportOutput" class="floating-card">Select a report to generate</div>
+        </section>
+
+        <!-- ASSIGNMENT SECTION -->
+        <section class="content-section" id="assignmentSection">
+            <div class="floating-card">
+                <h4>Assign Agent to Customer</h4>
+                <div class="form-group">
+                    <label>Customer</label>
+                    <select id="assignCustomer" class="form-input"></select>
+                </div>
+                <div class="form-group">
+                    <label>Agent</label>
+                    <select id="assignAgent" class="form-input"></select>
+                </div>
+                <button class="btn btn-primary" id="assignBtn">Assign</button>
+            </div>
+            <div id="assignmentsList" class="floating-card mt-4"></div>
+        </section>
+
+        <!-- SYSTEM AUDIT SECTION (new) -->
+        <section class="content-section" id="auditSection">
+            <div class="floating-card">
+                <h4>System Audit Log</h4>
+                <div id="auditLog">No audit entries yet.</div>
+            </div>
+        </section>
+
+        <!-- SETTINGS SECTION -->
+        <section class="content-section" id="settingsSection">
+            <div class="floating-card">
+                <h4>System Settings</h4>
+                <div class="form-group">
+                    <label>Commission Rate (%)</label>
+                    <input type="number" id="commissionRate" class="form-input" value="15" step="0.1">
+                </div>
+                <div class="form-group">
+                    <label>Monthly Interest Rate (%)</label>
+                    <input type="number" id="monthlyInterest" class="form-input" value="35">
+                </div>
+                <div class="form-group">
+                    <label>Weekly Interest Rate (%)</label>
+                    <input type="number" id="weeklyInterest" class="form-input" value="10">
+                </div>
+                <button class="btn btn-primary" id="saveSettings">Save</button>
+            </div>
+            <div class="floating-card">
+                <h4>Danger Zone</h4>
+                <button class="btn btn-outline text-red" id="sudoResetBtn">Sudo Reset Database</button>
+            </div>
+        </section>
+    </div>
+
+    <!-- ==================== MODALS (enhanced) ==================== -->
+
+    <!-- Create Agent Modal (unchanged) -->
+    <div class="modal-overlay" id="createAgentModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Create Agent</span>
+                <span class="modal-close" onclick="closeModal('createAgentModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="agentName" class="form-input" required></div>
+                <div class="form-group"><label>Phone *</label><input type="text" id="agentPhone" class="form-input" required></div>
+                <div class="form-group"><label>NRC *</label><input type="text" id="agentNrc" class="form-input" placeholder="123456/78/9" required></div>
+                <div class="form-group"><label>Email *</label><input type="email" id="agentEmail" class="form-input" required></div>
+                <div class="form-group"><label>Agent ID (manual) *</label><input type="text" id="agentCustomId" class="form-input" required></div>
+                <div class="form-group"><label>Password *</label><input type="password" id="agentPassword" class="form-input" required></div>
+                <button class="btn btn-primary" id="submitAgent">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Customer Modal (unchanged) -->
+    <div class="modal-overlay" id="createCustomerModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Create Customer</span>
+                <span class="modal-close" onclick="closeModal('createCustomerModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="custName" class="form-input" required></div>
+                <div class="form-group"><label>Email *</label><input type="email" id="custEmail" class="form-input" required></div>
+                <div class="form-group"><label>Phone *</label><input type="text" id="custPhone" class="form-input" required></div>
+                <div class="form-group"><label>NRC *</label><input type="text" id="custNrc" class="form-input" required></div>
+                <div class="form-group"><label>Address *</label><input type="text" id="custAddress" class="form-input" required></div>
+                <div class="form-group"><label>Password *</label><input type="password" id="custPassword" class="form-input" required></div>
+                <div class="form-group"><label>Agent (optional)</label><select id="custAgent" class="form-input"></select></div>
+                <button class="btn btn-primary" id="submitCustomer">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Enhanced Customer Details Modal -->
+    <div class="modal-overlay" id="customerDetailsModal">
+        <div class="modal-container" style="max-width: 800px;">
+            <div class="modal-header">
+                <span>Customer Details</span>
+                <span class="modal-close" onclick="closeModal('customerDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="customerDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Enhanced Agent Details Modal -->
+    <div class="modal-overlay" id="agentDetailsModal">
+        <div class="modal-container" style="max-width: 800px;">
+            <div class="modal-header">
+                <span>Agent Details</span>
+                <span class="modal-close" onclick="closeModal('agentDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="agentDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Enhanced Loan Details Modal -->
+    <div class="modal-overlay" id="loanDetailsModal">
+        <div class="modal-container" style="max-width: 800px;">
+            <div class="modal-header">
+                <span>Loan Details</span>
+                <span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="loanDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal (with proof) -->
+    <div class="modal-overlay" id="paymentDetailsModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Payment Details</span>
+                <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="paymentDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Commission Math Modal (new) -->
+    <div class="modal-overlay" id="commissionMathModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Commission Breakdown</span>
+                <span class="modal-close" onclick="closeModal('commissionMathModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="commissionMathContent"></div>
+        </div>
+    </div>
+
+    <!-- Document Viewer Modal (new) -->
+    <div class="modal-overlay" id="documentViewModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Document Preview</span>
+                <span class="modal-close" onclick="closeModal('documentViewModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" style="text-align: center;">
+                <img id="documentViewImage" src="" style="max-width:100%; max-height:70vh; border-radius:12px;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Signature Modal for Lender (unchanged) -->
+    <div class="modal-overlay" id="signAgreementModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Sign Loan Agreement (Lender)</span>
+                <span class="modal-close" onclick="closeModal('signAgreementModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <div id="agreementPreview" style="max-height:300px; overflow:auto; border:1px solid #ddd; padding:12px; margin-bottom:16px;"></div>
+                <div class="signature-pad">
+                    <canvas id="lenderSignatureCanvas" class="signature-canvas"></canvas>
+                    <div class="signature-tools">
+                        <button class="btn btn-outline btn-small" id="clearLenderSig">Clear</button>
                     </div>
                 </div>
-                <div class="agent-code">
-                    <span class="code" id="agentCodeDisplay">AGENT123</span>
-                    <button class="copy-btn" id="copyAgentCode"><i class="fas fa-copy"></i> Copy</button>
-                </div>
-                <div style="margin: 16px 0;">
-                    <div><span class="text-muted">Branch:</span> <span id="settingsBranch"></span></div>
-                    <div><span class="text-muted">Registered:</span> <span id="settingsRegDate"></span></div>
-                </div>
-                <button class="btn btn-outline btn-small" id="changePasswordBtn"><i class="fas fa-key"></i> Change Password</button>
-                <button class="btn btn-outline btn-small" id="deleteAccountBtn" style="margin-top: 10px; border-color: #ff3b30; color: #ff3b30;"><i class="fas fa-trash"></i> Delete Account</button>
-                <button class="btn btn-outline btn-small" id="logoutBtn" style="margin-top: 10px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
-            </div>
-        </div>
-
-        <!-- About section (new separate page) -->
-        <div id="aboutSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
-            <div class="section-card about-page">
-                <h4>📌 What is TruCash?</h4>
-                <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
-                
-                <h4>🤝 Benefits of Being an Agent</h4>
-                <ul>
-                    <li><strong>Earn 15% commission</strong> on every interest payment from customers you refer.</li>
-                    <li><strong>Recurring income</strong> – as long as your customers repay, you earn.</li>
-                    <li><strong>No capital required</strong> – you simply connect borrowers with TruCash.</li>
-                    <li><strong>Full support</strong> – marketing materials, training, and a dedicated agent dashboard.</li>
-                    <li><strong>Transparent tracking</strong> – see exactly how much you’ve earned and what’s pending.</li>
-                </ul>
-                
-                <h4>📞 Contact Us</h4>
-                <p><i class="fas fa-phone"></i> +260 123 456 789<br>
-                <i class="fas fa-envelope"></i> agents@trucash.zm<br>
-                <i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
-
-                <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
+                <button class="btn btn-primary" id="submitLenderSignature">Sign & Save</button>
             </div>
         </div>
     </div>
 
-    <!-- Bottom navigation (About now points to its own section) -->
-    <div class="bottom-nav">
-        <div class="nav-item active" data-section="home"><i class="fas fa-home"></i><span>Home</span></div>
-        <div class="nav-item" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
-        <div class="nav-item" data-section="commission"><i class="fas fa-coins"></i><span>Commission</span></div>
-        <div class="nav-item" data-section="settings"><i class="fas fa-cog"></i><span>Settings</span></div>
-        <div class="nav-item" data-section="about"><i class="fas fa-info-circle"></i><span>About</span></div>
-    </div>
-
-    <!-- Modals (existing + new ones) -->
-    <!-- Customer details modal -->
-    <div class="modal-overlay" id="customerModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Customer Details</h3>
-                <button class="modal-close" id="closeCustomerModal">&times;</button>
-            </div>
-            <div id="customerModalContent"></div>
-        </div>
-    </div>
-
-    <!-- Loan details modal (enhanced payment styling) -->
-    <div class="modal-overlay" id="loanModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Loan Application</h3>
-                <button class="modal-close" id="closeLoanModal">&times;</button>
-            </div>
-            <div id="loanModalContent"></div>
-        </div>
-    </div>
-
-    <!-- Modal for listing multiple loans of a customer -->
-    <div class="modal-overlay" id="customerLoansModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Customer Loans</h3>
-                <button class="modal-close" id="closeCustomerLoansModal">&times;</button>
-            </div>
-            <div id="customerLoansList"></div>
-        </div>
-    </div>
-
-    <!-- Modal for commission math -->
-    <div class="modal-overlay" id="commissionMathModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Commission Breakdown</h3>
-                <button class="modal-close" id="closeCommissionMathModal">&times;</button>
-            </div>
-            <div id="commissionMathContent"></div>
-        </div>
-    </div>
-
-    <!-- Password change modal -->
-    <div class="modal-overlay" id="passwordModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Change Password</h3>
-                <button class="modal-close" id="closePasswordModal">&times;</button>
-            </div>
-            <div>
-                <input type="password" id="currentPass" class="detail-value" style="width:100%; padding:14px; border-radius:30px; border:1px solid #dee6ed; margin-bottom:12px;" placeholder="Current password">
-                <input type="password" id="newPass" class="detail-value" style="width:100%; padding:14px; border-radius:30px; border:1px solid #dee6ed; margin-bottom:12px;" placeholder="New password">
-                <input type="password" id="confirmPass" class="detail-value" style="width:100%; padding:14px; border-radius:30px; border:1px solid #dee6ed; margin-bottom:12px;" placeholder="Confirm new">
-                <button class="btn" id="submitPasswordChange">Update Password</button>
+    <!-- Sudo Reset Modal (unchanged) -->
+    <div class="modal-overlay" id="sudoModal">
+        <div class="modal-container">
+            <div class="modal-header"><span>⚠️ Sudo Reset</span><span class="modal-close" onclick="closeModal('sudoModal')"><i class="fas fa-times"></i></span></div>
+            <div class="modal-body">
+                <p>Enter sudo password to delete ALL data:</p>
+                <input type="password" id="sudoPassword" class="form-input" placeholder="Password">
+                <button class="btn btn-danger mt-4" id="confirmSudoReset">Wipe Database</button>
             </div>
         </div>
     </div>
 
-    <!-- Certificate modal -->
-    <div class="modal-overlay" id="certificateModal">
-        <div class="modal-card">
-            <div class="modal-header">
-                <h3>Tax Certificate</h3>
-                <button class="modal-close" id="closeCertificateModal">&times;</button>
-            </div>
-            <div style="max-height: 70vh; overflow-y: auto;" id="certificateContent">
-                <!-- certificate content injected -->
-            </div>
-        </div>
-    </div>
-
-    <!-- Toast container -->
-    <div id="toastContainer" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
-
+    <!-- ==================== FIREBASE CONFIG ==================== -->
     <script>
-        // ==================== FIREBASE CONFIG (same as original) ====================
+        // Firebase Configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
             authDomain: "trucash-9fee8.firebaseapp.com",
@@ -617,406 +977,1117 @@
             messagingSenderId: "622416212225",
             appId: "1:622416212225:web:07418a9b16f955c330ab00"
         };
-
-        const cloudinaryConfig = {
-            cloudName: 'dd3lcymrk',
-            uploadPreset: 'h3eyhc2o',
-            folder: 'trucash/agents'
-        };
-
-        // ==================== INIT FIREBASE ====================
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // ==================== APP STATE ====================
-        const AppState = {
-            currentUser: null,
-            agentData: null,
-            agentId: null,
-            customers: [],
-            loans: [],
-            commissions: [],
-            notifications: []
+        // Cloudinary Configuration
+        const cloudinaryConfig = {
+            cloudName: 'dd3lcymrk',
+            uploadPreset: 'h3eyhc2o',
+            folder: 'trucash/admin'
         };
+        let cloudinaryWidget = null;
 
-        // ==================== UTILS ====================
+        // ========== GLOBAL STATE ==========
+        let currentUser = null;
+        let adminData = null;
+        let allAgents = [];
+        let allCustomers = [];
+        let allLoans = [];
+        let allPayments = [];
+        let allCommissionHistory = [];
+        let auditLog = []; // for system audit
+
+        // Filters
+        let currentLoanFilter = 'all';
+        let currentPaymentFilter = 'pending';
+        let agentFilter = 'all';
+        let customerFilter = 'all';
+
+        // ========== UTILITIES (enhanced) ==========
         const Utils = {
-            showLoading(msg) {},
-            hideLoading() {},
-            formatCurrency(amount) { return 'K' + (amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); },
-            formatDate(ts) { return ts ? new Date(ts).toLocaleDateString() : 'N/A'; },
-            showToast(title, msg, type='info') {
-                const toast = document.createElement('div');
-                toast.style.background = type==='error'?'#ff3b30':'#007aff';
-                toast.style.color='white'; toast.style.padding='12px 20px'; toast.style.borderRadius='30px';
-                toast.style.marginBottom='10px'; toast.style.boxShadow='0 8px 20px rgba(0,0,0,0.2)';
-                toast.innerHTML = `<strong>${title}</strong> ${msg}`;
-                document.getElementById('toastContainer').appendChild(toast);
-                setTimeout(()=>toast.remove(), 4000);
+            formatCurrency: (amt) => 'K' + parseFloat(amt || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'),
+            formatDate: (ts) => ts ? new Date(ts).toLocaleDateString('en-US', { year:'numeric', month:'short', day:'numeric' }) : 'N/A',
+            formatDateTime: (ts) => ts ? new Date(ts).toLocaleString() : 'N/A',
+            showToast: (title, msg, type = 'info') => {
+                // Simple alert for now; can be replaced with custom toast
+                alert(`${title}: ${msg}`);
+            },
+            validateEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+            validateNRC: (nrc) => /^\d{6}\/\d{2}\/\d{1}$/.test(nrc),
+            generateId: (prefix) => prefix + Date.now() + Math.random().toString(36).substr(2,9).toUpperCase(),
+            calculateCommission: (interestAmount) => interestAmount * 0.15,
+            calculateTotalInterest: (principal, rate, periods, isWeekly = false) => {
+                return principal * Math.pow(1 + rate, periods) - principal;
             }
         };
 
-        // ==================== FIREBASE SERVICE ====================
-        const FirebaseService = {
-            async checkAuth() {
-                return new Promise((resolve) => {
-                    auth.onAuthStateChanged(async (user) => {
-                        if (!user) { window.location.href = 'login.html'; return; }
-                        try {
-                            const snap = await db.ref('users/'+user.uid).once('value');
-                            if (!snap.exists() || snap.val().userType !== 'agent') {
-                                Utils.showToast('Access Denied','Not an agent account','error');
-                                auth.signOut(); return;
-                            }
-                            AppState.currentUser = user;
-                            AppState.agentData = snap.val();
-                            AppState.agentId = user.uid;
-                            await this.loadCustomers();
-                            await this.loadLoans();
-                            await this.loadCommissions();
-                            resolve(AppState.agentData);
-                        } catch(e) { console.error(e); resolve(null); }
-                    });
-                });
-            },
-            async loadCustomers() {
-                const snap = await db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).once('value');
-                AppState.customers = [];
-                snap.forEach(child => {
-                    const c = child.val();
-                    if (c.userType === 'customer') {
-                        c.id = child.key;
-                        AppState.customers.push(c);
+        // ========== LOAD ALL DATA ==========
+        async function loadAllData() {
+            const usersSnap = await db.ref('users').once('value');
+            const users = usersSnap.val() || {};
+            allAgents = Object.entries(users)
+                .filter(([_,u]) => u.userType === 'agent')
+                .map(([id,u]) => ({...u, id}));
+            allCustomers = Object.entries(users)
+                .filter(([_,u]) => u.userType === 'customer')
+                .map(([id,u]) => ({...u, id}));
+
+            const loansSnap = await db.ref('loans').once('value');
+            allLoans = Object.entries(loansSnap.val() || {}).map(([id,l]) => ({...l, id}));
+
+            const paymentsSnap = await db.ref('payments').once('value');
+            allPayments = Object.entries(paymentsSnap.val() || {}).map(([id,p]) => ({...p, id}));
+
+            const commSnap = await db.ref('commissionHistory').once('value');
+            allCommissionHistory = Object.entries(commSnap.val() || {}).map(([id,c]) => ({...c, id}));
+
+            // Load audit log from a separate node (optional)
+            const auditSnap = await db.ref('auditLog').once('value');
+            auditLog = Object.entries(auditSnap.val() || {}).map(([id,a]) => ({...a, id})).sort((a,b) => b.timestamp - a.timestamp);
+
+            updateUI();
+        }
+
+        function setupRealtimeListeners() {
+            db.ref('users').on('value', (snap) => {
+                const users = snap.val() || {};
+                allAgents = Object.entries(users).filter(([_,u]) => u.userType === 'agent').map(([id,u]) => ({...u, id}));
+                allCustomers = Object.entries(users).filter(([_,u]) => u.userType === 'customer').map(([id,u]) => ({...u, id}));
+                updateUI();
+            });
+            db.ref('loans').on('value', (snap) => {
+                allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
+                updateUI();
+            });
+            db.ref('payments').on('value', (snap) => {
+                allPayments = Object.entries(snap.val() || {}).map(([id,p]) => ({...p, id}));
+                updateUI();
+            });
+            db.ref('commissionHistory').on('value', (snap) => {
+                allCommissionHistory = Object.entries(snap.val() || {}).map(([id,c]) => ({...c, id}));
+                updateUI();
+            });
+            db.ref('auditLog').on('value', (snap) => {
+                auditLog = Object.entries(snap.val() || {}).map(([id,a]) => ({...a, id})).sort((a,b) => b.timestamp - a.timestamp);
+                renderAuditLog();
+            });
+        }
+
+        // ========== UI UPDATE FUNCTIONS (enhanced) ==========
+        function updateUI() {
+            updateHomeStats();
+            renderAgents();
+            renderCustomers();
+            renderLoans();
+            renderPayments();
+            renderAnalytics();
+            renderCommission();
+            renderProfit();
+            renderAssignments();
+            renderAuditLog();
+        }
+
+        function updateHomeStats() {
+            document.getElementById('statCustomers').innerText = allCustomers.length;
+            document.getElementById('statAgents').innerText = allAgents.length;
+            document.getElementById('statLoans').innerText = allLoans.length;
+            document.getElementById('statPayments').innerText = allPayments.length;
+
+            const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
+            const pendingAgents = allAgents.filter(a => a.status === 'pending').length;
+            const pendingPayments = allPayments.filter(p => p.status === 'pending').length;
+            document.getElementById('pendingSummary').innerHTML = `
+                <div>Pending Loans: ${pendingLoans}</div>
+                <div>Pending Agents: ${pendingAgents}</div>
+                <div>Pending Payments: ${pendingPayments}</div>
+            `;
+        }
+
+        function renderAgents() {
+            const searchTerm = document.getElementById('agentSearch')?.value.toLowerCase() || '';
+            let filtered = allAgents;
+            if (agentFilter !== 'all') filtered = filtered.filter(a => a.status === agentFilter);
+            if (searchTerm) filtered = filtered.filter(a => (a.fullName?.toLowerCase().includes(searchTerm) || a.phone?.includes(searchTerm)));
+
+            const container = document.getElementById('agentsList');
+            container.innerHTML = filtered.map(a => {
+                const customers = allCustomers.filter(c => c.assignedAgentId === a.id);
+                const loans = allLoans.filter(l => l.agentId === a.id);
+                const pendingCommission = allCommissionHistory
+                    .filter(ch => ch.agentId === a.id && ch.status === 'pending')
+                    .reduce((s,ch) => s + ch.amount, 0);
+                return `
+                <div class="floating-card" onclick="showAgentDetails('${a.id}')">
+                    <div class="profile-row">
+                        <img src="${a.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(a.fullName||'Agent')}" class="profile-img">
+                        <div class="profile-details">
+                            <div class="profile-name">${a.fullName}</div>
+                            <div class="profile-meta">${a.phone} · Customers: ${customers.length} · Loans: ${loans.length}</div>
+                            <div class="profile-meta">Pending Comm: ${Utils.formatCurrency(pendingCommission)}</div>
+                        </div>
+                        <span class="status-badge ${a.status}">${a.status}</span>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function renderCustomers() {
+            const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase() || '';
+            let filtered = allCustomers;
+            if (customerFilter === 'active') filtered = filtered.filter(c => c.status === 'active');
+            if (customerFilter === 'banned') filtered = filtered.filter(c => c.status === 'banned');
+            if (searchTerm) filtered = filtered.filter(c => (c.fullName?.toLowerCase().includes(searchTerm) || c.phone?.includes(searchTerm)));
+
+            const container = document.getElementById('customersList');
+            container.innerHTML = filtered.map(c => {
+                const agent = allAgents.find(a => a.id === c.assignedAgentId);
+                const loans = allLoans.filter(l => l.customerId === c.id);
+                const totalBorrowed = loans.reduce((s,l)=> s + (l.amount || 0),0);
+                return `
+                <div class="floating-card" onclick="showCustomerDetails('${c.id}')">
+                    <div class="profile-row">
+                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'Customer')}" class="profile-img">
+                        <div class="profile-details">
+                            <div class="profile-name">${c.fullName}</div>
+                            <div class="profile-meta">${c.phone} · Agent: ${agent?.fullName || 'N/A'}</div>
+                            <div class="profile-meta">Borrowed: ${Utils.formatCurrency(totalBorrowed)} · Loans: ${loans.length}</div>
+                        </div>
+                        <span class="loan-badge">${loans.length} loans</span>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function renderLoans() {
+            const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
+            let filtered = allLoans;
+            if (currentLoanFilter !== 'all') filtered = filtered.filter(l => l.status === currentLoanFilter);
+            if (searchTerm) filtered = filtered.filter(l => (l.customerName?.toLowerCase().includes(searchTerm) || l.id?.toLowerCase().includes(searchTerm)));
+
+            const container = document.getElementById('loansList');
+            container.innerHTML = filtered.map(l => {
+                const paid = l.totalPaid || 0;
+                const remaining = (l.totalPayable || l.amount) - paid;
+                return `
+                <div class="floating-card" onclick="showLoanDetails('${l.id}')">
+                    <div class="profile-row">
+                        <img src="${l.customerPhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'')}" class="profile-img">
+                        <div>
+                            <div><strong>${l.customerName}</strong></div>
+                            <div class="profile-meta">Agent: ${l.agentName}</div>
+                            <div>Amount: ${Utils.formatCurrency(l.amount)} | Paid: ${Utils.formatCurrency(paid)}</div>
+                            <div>Remaining: ${Utils.formatCurrency(remaining)}</div>
+                        </div>
+                        <span class="status-badge ${l.status}">${l.status}</span>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function renderPayments() {
+            const searchTerm = document.getElementById('paymentSearch')?.value.toLowerCase() || '';
+            let filtered = allPayments;
+            if (currentPaymentFilter !== 'all') filtered = filtered.filter(p => p.status === currentPaymentFilter);
+            if (searchTerm) filtered = filtered.filter(p => (p.customerName?.toLowerCase().includes(searchTerm) || p.loanId?.toLowerCase().includes(searchTerm)));
+
+            const container = document.getElementById('paymentsList');
+            container.innerHTML = filtered.map(p => `
+                <div class="floating-card" onclick="showPaymentDetails('${p.id}')">
+                    <div class="profile-row">
+                        <div>
+                            <div><strong>${p.customerName}</strong> - ${Utils.formatCurrency(p.amount)}</div>
+                            <div class="profile-meta">Loan: ${p.loanId} · ${p.method}</div>
+                        </div>
+                        <span class="status-badge ${p.status}">${p.status}</span>
+                    </div>
+                </div>
+            `).join('');
+        }
+
+        function renderAnalytics() {
+            const totalLent = allLoans.filter(l => l.status === 'approved').reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
+            const totalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s,p)=> s + p.amount, 0);
+            const outstanding = allLoans.filter(l => l.status === 'approved').reduce((s,l) => {
+                const paid = (l.totalPaid || 0);
+                const total = (l.totalPayable || l.amount);
+                return s + (total - paid);
+            }, 0);
+            const totalInterest = allLoans.reduce((s,l) => s + (l.totalInterest || 0), 0);
+            document.getElementById('totalLent').innerText = Utils.formatCurrency(totalLent);
+            document.getElementById('totalRepaid').innerText = Utils.formatCurrency(totalRepaid);
+            document.getElementById('outstanding').innerText = Utils.formatCurrency(outstanding);
+            document.getElementById('totalInterestEarned').innerText = Utils.formatCurrency(totalInterest);
+
+            // Charts (simplified)
+            const ctxBorrowers = document.getElementById('topBorrowersChart')?.getContext('2d');
+            if (ctxBorrowers) {
+                new Chart(ctxBorrowers, {
+                    type: 'bar',
+                    data: {
+                        labels: allCustomers.slice(0,5).map(c => c.fullName),
+                        datasets: [{
+                            label: 'Total Borrowed',
+                            data: allCustomers.slice(0,5).map(c => {
+                                const loans = allLoans.filter(l => l.customerId === c.id && l.status === 'approved');
+                                return loans.reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
+                            }),
+                            backgroundColor: 'rgba(0,122,255,0.6)'
+                        }]
                     }
                 });
-            },
-            async loadLoans() {
-                const snap = await db.ref('loans').orderByChild('agentId').equalTo(AppState.agentId).once('value');
-                AppState.loans = [];
-                snap.forEach(child => {
-                    const l = child.val();
-                    l.id = child.key;
-                    AppState.loans.push(l);
-                });
-            },
-            async loadCommissions() {
-                const snap = await db.ref('commissions').orderByChild('agentId').equalTo(AppState.agentId).once('value');
-                AppState.commissions = [];
-                snap.forEach(child => {
-                    const c = child.val();
-                    c.id = child.key;
-                    AppState.commissions.push(c);
-                });
-            },
-            async updateProfile(data) {
-                await db.ref('users/'+AppState.agentId).update(data);
-                Object.assign(AppState.agentData, data);
-            },
-            async changePassword(current, newPass) {
-                const credential = firebase.auth.EmailAuthProvider.credential(AppState.currentUser.email, current);
-                await AppState.currentUser.reauthenticateWithCredential(credential);
-                await AppState.currentUser.updatePassword(newPass);
-            },
-            async signOut() { await auth.signOut(); window.location.href='login.html'; }
-        };
-
-        // ==================== UI MANAGER (extended) ====================
-        const UIManager = {
-            init() {
-                this.cacheElements();
-                this.bindEvents();
-                this.loadAgentData();
-            },
-            cacheElements() {
-                this.sections = {
-                    home: document.getElementById('homeSection'),
-                    loans: document.getElementById('loansSection'),
-                    commission: document.getElementById('commissionSection'),
-                    settings: document.getElementById('settingsSection'),
-                    about: document.getElementById('aboutSection')
-                };
-                this.navItems = document.querySelectorAll('.nav-item');
-                this.customersList = document.getElementById('customersList');
-                this.customersWithLoansList = document.getElementById('customersWithLoansList');
-                this.customersCommissionList = document.getElementById('customersCommissionList');
-                this.agentFullName = document.getElementById('agentFullName');
-                this.headerAvatar = document.getElementById('headerAvatar');
-                this.settingsName = document.getElementById('settingsName');
-                this.settingsEmail = document.getElementById('settingsEmail');
-                this.settingsAvatar = document.getElementById('settingsAvatar');
-                this.agentCodeDisplay = document.getElementById('agentCodeDisplay');
-                this.settingsBranch = document.getElementById('settingsBranch');
-                this.settingsRegDate = document.getElementById('settingsRegDate');
-                this.totalCommissionEarned = document.getElementById('totalCommissionEarned');
-                this.pendingCommission = document.getElementById('pendingCommission');
-                this.futureCommission = document.getElementById('futureCommission');
-                // modals
-                this.customerModal = document.getElementById('customerModal');
-                this.loanModal = document.getElementById('loanModal');
-                this.customerLoansModal = document.getElementById('customerLoansModal');
-                this.commissionMathModal = document.getElementById('commissionMathModal');
-                this.passwordModal = document.getElementById('passwordModal');
-                this.certificateModal = document.getElementById('certificateModal');
-                // close buttons
-                document.getElementById('closeCustomerModal').onclick = ()=> this.customerModal.classList.remove('active');
-                document.getElementById('closeLoanModal').onclick = ()=> this.loanModal.classList.remove('active');
-                document.getElementById('closeCustomerLoansModal').onclick = ()=> this.customerLoansModal.classList.remove('active');
-                document.getElementById('closeCommissionMathModal').onclick = ()=> this.commissionMathModal.classList.remove('active');
-                document.getElementById('closePasswordModal').onclick = ()=> this.passwordModal.classList.remove('active');
-                document.getElementById('closeCertificateModal').onclick = ()=> this.certificateModal.classList.remove('active');
-                // settings buttons
-                document.getElementById('copyAgentCode').onclick = ()=> this.copyAgentCode();
-                document.getElementById('changePasswordBtn').onclick = ()=> this.passwordModal.classList.add('active');
-                document.getElementById('submitPasswordChange').onclick = ()=> this.changePassword();
-                document.getElementById('logoutBtn').onclick = ()=> FirebaseService.signOut();
-                document.getElementById('deleteAccountBtn').onclick = ()=> this.deleteAccount();
-                document.getElementById('showCertificateBtn').onclick = ()=> this.showCertificate();
-            },
-            bindEvents() {
-                this.navItems.forEach(item => {
-                    item.addEventListener('click', (e) => {
-                        const section = item.dataset.section;
-                        this.showSection(section);
-                        this.navItems.forEach(n => n.classList.remove('active'));
-                        item.classList.add('active');
-                    });
-                });
-            },
-            showSection(section) {
-                Object.values(this.sections).forEach(s => s.classList.add('d-none'));
-                this.sections[section]?.classList.remove('d-none');
-                if (section === 'home') this.renderCustomers();
-                if (section === 'loans') this.renderCustomersWithLoans();
-                if (section === 'commission') this.renderCommission();
-            },
-            async loadAgentData() {
-                await FirebaseService.checkAuth();
-                const agent = AppState.agentData;
-                this.agentFullName.innerHTML = `${agent.fullName || 'Agent'} <small>ID: ${agent.agentId || AppState.agentId.substring(0,8)}</small>`;
-                this.headerAvatar.src = agent.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent.fullName||'A')+'&background=007AFF&color=fff';
-                this.settingsName.textContent = agent.fullName || '';
-                this.settingsEmail.textContent = AppState.currentUser?.email || '';
-                this.settingsAvatar.src = agent.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent.fullName||'A')+'&background=007AFF&color=fff';
-                this.agentCodeDisplay.textContent = agent.agentId || AppState.agentId;
-                this.settingsBranch.textContent = agent.branch || 'Main';
-                this.settingsRegDate.textContent = agent.createdAt ? Utils.formatDate(agent.createdAt) : 'N/A';
-                this.renderCustomers();
-                this.renderCustomersWithLoans();
-                this.renderCommission();
-            },
-            renderCustomers() {
-                if (!AppState.customers.length) {
-                    this.customersList.innerHTML = '<div class="customer-card"><div class="customer-info">No customers assigned.</div></div>';
-                    return;
-                }
-                this.customersList.innerHTML = AppState.customers.map(c => {
-                    const loanCount = AppState.loans.filter(l => l.customerId === c.id).length;
-                    return `
-                    <div class="customer-card" data-id="${c.id}" onclick="UIManager.showCustomerModal('${c.id}')">
-                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar" onerror="this.src='https://ui-avatars.com/api/?name=C&background=007AFF&color=fff'">
-                        <div class="customer-info">
-                            <div class="customer-name">${c.fullName || 'Unknown'}</div>
-                            <div class="customer-meta"><i class="fas fa-phone"></i> ${c.phone || 'N/A'}</div>
-                            <span class="badge"><i class="fas fa-file-invoice"></i> ${loanCount} loans</span>
-                        </div>
-                    </div>
-                `}).join('');
-            },
-            renderCustomersWithLoans() {
-                const customersWithLoans = AppState.customers.filter(c => 
-                    AppState.loans.some(l => l.customerId === c.id)
-                );
-                if (!customersWithLoans.length) {
-                    this.customersWithLoansList.innerHTML = '<div class="customer-card">No customers with loans.</div>';
-                    return;
-                }
-                this.customersWithLoansList.innerHTML = customersWithLoans.map(c => `
-                    <div class="customer-card" data-id="${c.id}" onclick="UIManager.showCustomerLoansList('${c.id}')">
-                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
-                        <div class="customer-info">
-                            <div class="customer-name">${c.fullName}</div>
-                            <div class="customer-meta"><i class="fas fa-file-invoice"></i> ${AppState.loans.filter(l=>l.customerId===c.id).length} loans</div>
-                        </div>
-                    </div>
-                `).join('');
-            },
-            showCustomerLoansList(customerId) {
-                const customer = AppState.customers.find(c => c.id === customerId);
-                const loans = AppState.loans.filter(l => l.customerId === customerId);
-                if (!loans.length) return Utils.showToast('Info','No loans for this customer','info');
-                const listHtml = loans.map(loan => `
-                    <div class="loan-summary-card" onclick="UIManager.showLoanModal('${loan.id}')">
-                        <div style="display:flex; justify-content:space-between; align-items:center;">
-                            <span><strong>${Utils.formatCurrency(loan.amount)}</strong> (${loan.status})</span>
-                            <span class="badge">Due: ${loan.repaymentSchedule?.find(p=>p.status==='pending')?.dueDate ? Utils.formatDate(loan.repaymentSchedule.find(p=>p.status==='pending').dueDate) : 'None'}</span>
-                        </div>
-                        <div style="margin-top:8px; color:#617388;">Purpose: ${loan.purpose || 'N/A'}</div>
-                    </div>
-                `).join('');
-                document.getElementById('customerLoansList').innerHTML = listHtml;
-                this.customerLoansModal.classList.add('active');
-            },
-            showCustomerModal(customerId) {
-                const customer = AppState.customers.find(c => c.id === customerId);
-                if (!customer) return;
-                document.getElementById('customerModalContent').innerHTML = `
-                    <div class="detail-row"><span class="detail-label">Name</span><span class="detail-value">${customer.fullName}</span></div>
-                    <div class="detail-row"><span class="detail-label">Email</span><span class="detail-value">${customer.email}</span></div>
-                    <div class="detail-row"><span class="detail-label">Phone</span><span class="detail-value">${customer.phone}</span></div>
-                    <div class="detail-row"><span class="detail-label">NRC</span><span class="detail-value">${customer.nrc}</span></div>
-                    <div class="detail-row"><span class="detail-label">Address</span><span class="detail-value">${customer.residence}, ${customer.houseNumber||''}</span></div>
-                    <div class="photo-strip">
-                        ${customer.profilePhoto ? `<img src="${customer.profilePhoto}" class="photo-thumb">` : ''}
-                        ${customer.nrcFront ? `<img src="${customer.nrcFront}" class="photo-thumb">` : ''}
-                        ${customer.nrcBack ? `<img src="${customer.nrcBack}" class="photo-thumb">` : ''}
-                    </div>
-                `;
-                this.customerModal.classList.add('active');
-            },
-            showLoanModal(loanId) {
-                const loan = AppState.loans.find(l => l.id === loanId);
-                if (!loan) return;
-                const customer = AppState.customers.find(c => c.id === loan.customerId);
-                const payments = loan.repaymentSchedule || [];
-                const paidPayments = payments.filter(p => p.status === 'paid');
-                const pendingPayments = payments.filter(p => p.status === 'pending');
-                const content = `
-                    <div style="margin-bottom:20px;">
-                        <span class="badge" style="background:#007aff; color:white;">${loan.status}</span>
-                    </div>
-                    <div class="detail-row"><span class="detail-label">Amount</span><span class="detail-value">${Utils.formatCurrency(loan.amount)}</span></div>
-                    <div class="detail-row"><span class="detail-label">Purpose</span><span class="detail-value">${loan.purpose}</span></div>
-                    <div class="detail-row"><span class="detail-label">Duration</span><span class="detail-value">${loan.duration} ${loan.durationUnit||'months'}</span></div>
-                    <div class="detail-row"><span class="detail-label">Interest</span><span class="detail-value">${Utils.formatCurrency(loan.totalInterest)}</span></div>
-                    <div class="detail-row"><span class="detail-label">Total payable</span><span class="detail-value">${Utils.formatCurrency(loan.totalPayable)}</span></div>
-                    
-                    <h4 style="margin:16px 0 8px;">Collateral</h4>
-                    <div><strong>${loan.collateral?.category}</strong> - ${Utils.formatCurrency(loan.collateral?.value)}</div>
-                    <div>${loan.collateral?.description}</div>
-                    <div class="collateral-grid">
-                        ${loan.collateral?.images?.map(img => `<img src="${img}">`).join('') || '<p>No images</p>'}
-                    </div>
-
-                    <h4 style="margin:16px 0 8px;">Agreement</h4>
-                    ${loan.signedAgreementUrl ? `<a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-small">View Signed Agreement</a>` : '<p>Not available</p>'}
-
-                    <h4 style="margin:16px 0 8px;">Payment Schedule</h4>
-                    <div class="payment-list">
-                        ${payments.length ? payments.map(p => `
-                            <div class="payment-item">
-                                <div>
-                                    <div class="payment-due">Due: ${Utils.formatDate(p.dueDate)}</div>
-                                    <div class="payment-amount">${Utils.formatCurrency(p.totalDue)}</div>
-                                </div>
-                                <span class="payment-status ${p.status === 'paid' ? 'status-paid' : 'status-pending'}">${p.status}</span>
-                            </div>
-                        `).join('') : '<p>No schedule available</p>'}
-                    </div>
-                    <div style="margin-top:12px;">
-                        <div>Total Paid: ${Utils.formatCurrency(loan.totalPaid || 0)}</div>
-                        <div>Remaining: ${Utils.formatCurrency((loan.totalPayable||0) - (loan.totalPaid||0))}</div>
-                    </div>
-                `;
-                document.getElementById('loanModalContent').innerHTML = content;
-                this.loanModal.classList.add('active');
-            },
-            renderCommission() {
-                const commissions = AppState.commissions;
-                const totalEarned = commissions.filter(c => c.status === 'paid').reduce((s,c)=> s + (c.amount||0),0);
-                const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=> s + (c.amount||0),0);
-                const activeLoans = AppState.loans.filter(l => l.status === 'active');
-                const future = activeLoans.reduce((s,loan)=> s + (loan.totalInterest * 0.15 || 0), 0);
-                this.totalCommissionEarned.textContent = Utils.formatCurrency(totalEarned);
-                this.pendingCommission.textContent = Utils.formatCurrency(pending);
-                this.futureCommission.textContent = Utils.formatCurrency(future);
-
-                this.customersCommissionList.innerHTML = AppState.customers.map(c => {
-                    const custCom = commissions.filter(com => com.customerId === c.id);
-                    const custPending = custCom.filter(com => com.status === 'pending').reduce((s,com)=>s+com.amount,0);
-                    return `
-                        <div class="customer-card" onclick="UIManager.showCommissionMath('${c.id}')">
-                            <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
-                            <div class="customer-info">
-                                <div class="customer-name">${c.fullName}</div>
-                                <div class="customer-meta">Pending: ${Utils.formatCurrency(custPending)}</div>
-                            </div>
-                        </div>
-                    `;
-                }).join('');
-            },
-            showCommissionMath(customerId) {
-                const customer = AppState.customers.find(c => c.id === customerId);
-                const loans = AppState.loans.filter(l => l.customerId === customerId);
-                const commissions = AppState.commissions.filter(c => c.customerId === customerId);
-                
-                let totalInterest = 0;
-                loans.forEach(loan => { totalInterest += loan.totalInterest || 0; });
-                const totalCommissionPossible = totalInterest * 0.15;
-                const earned = commissions.filter(c => c.status === 'paid').reduce((s,c)=>s+c.amount,0);
-                const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=>s+c.amount,0);
-                const future = totalCommissionPossible - earned - pending;
-
-                const breakdownHtml = loans.map(loan => {
-                    const interest = loan.totalInterest || 0;
-                    const commission = interest * 0.15;
-                    return `
-                        <div class="commission-row">
-                            <span>Loan ${loan.id.substring(0,6)} (${Utils.formatCurrency(loan.amount)})</span>
-                            <span>Interest: ${Utils.formatCurrency(interest)} → 15% = ${Utils.formatCurrency(commission)}</span>
-                        </div>
-                    `;
-                }).join('');
-
-                const content = `
-                    <h4>${customer.fullName}</h4>
-                    <div class="commission-breakdown">
-                        ${breakdownHtml || '<p>No loans</p>'}
-                    </div>
-                    <div class="commission-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
-                    <div class="commission-row"><span>Total possible commission (15%)</span> <span>${Utils.formatCurrency(totalCommissionPossible)}</span></div>
-                    <div class="commission-row"><span>Already earned</span> <span class="text-success">${Utils.formatCurrency(earned)}</span></div>
-                    <div class="commission-row"><span>Pending (awaiting payment)</span> <span>${Utils.formatCurrency(pending)}</span></div>
-                    <div class="commission-row"><span>Future (active loans)</span> <span>${Utils.formatCurrency(future)}</span></div>
-                    <p style="margin-top:16px; font-size:14px; color:#617388;">Commission is credited when the customer pays interest. 15% of each interest payment.</p>
-                `;
-                document.getElementById('commissionMathContent').innerHTML = content;
-                this.commissionMathModal.classList.add('active');
-            },
-            copyAgentCode() {
-                navigator.clipboard.writeText(this.agentCodeDisplay.textContent);
-                Utils.showToast('Copied','Agent code copied','info');
-            },
-            async changePassword() {
-                const current = document.getElementById('currentPass').value;
-                const newPass = document.getElementById('newPass').value;
-                const confirm = document.getElementById('confirmPass').value;
-                if (!current || !newPass || newPass!==confirm) return Utils.showToast('Error','Passwords do not match','error');
-                try {
-                    await FirebaseService.changePassword(current, newPass);
-                    Utils.showToast('Success','Password changed','success');
-                    this.passwordModal.classList.remove('active');
-                } catch(e) {
-                    Utils.showToast('Error',e.message,'error');
-                }
-            },
-            deleteAccount() {
-                if (confirm('Are you sure? This action cannot be undone.')) {
-                    Utils.showToast('Info','Delete not implemented in demo','info');
-                }
-            },
-            showCertificate() {
-                document.getElementById('certificateContent').innerHTML = `
-                    <h4>Tax Registration Certificate</h4>
-                    <p>Taxpayer: Moses Ilunga<br>TIN: 1016635011<br>Issue: 17/07/2018</p>
-                    <iframe src="Scan.pdf" style="width:100%; height:400px; border:none;"></iframe>
-                `;
-                this.certificateModal.classList.add('active');
             }
+            const ctxAgents = document.getElementById('topAgentsChart')?.getContext('2d');
+            if (ctxAgents) {
+                new Chart(ctxAgents, {
+                    type: 'bar',
+                    data: {
+                        labels: allAgents.slice(0,5).map(a => a.fullName),
+                        datasets: [{
+                            label: 'Loans Facilitated',
+                            data: allAgents.slice(0,5).map(a => a.totalLoans || 0),
+                            backgroundColor: 'rgba(52,199,89,0.6)'
+                        }]
+                    }
+                });
+            }
+        }
+
+        function renderCommission() {
+            const container = document.getElementById('agentsCommissionList');
+            let html = '';
+            allAgents.forEach(agent => {
+                const agentLoans = allLoans.filter(l => l.agentId === agent.id && l.status === 'approved');
+                const totalInterest = agentLoans.reduce((s,l) => s + (l.totalInterest || 0), 0);
+                const commission = totalInterest * 0.15;
+                const paidCommission = allCommissionHistory
+                    .filter(ch => ch.agentId === agent.id && ch.status === 'paid')
+                    .reduce((s,ch) => s + ch.amount, 0);
+                const pending = commission - paidCommission;
+                html += `
+                    <div class="floating-card">
+                        <div class="profile-row">
+                            <div class="profile-details">
+                                <div class="profile-name">${agent.fullName}</div>
+                                <div>Commission: ${Utils.formatCurrency(commission)} (Paid: ${Utils.formatCurrency(paidCommission)} | Pending: ${Utils.formatCurrency(pending)})</div>
+                                <div>
+                                    <button class="btn btn-small btn-primary" onclick="showCommissionMath('${agent.id}')">Breakdown</button>
+                                    ${pending > 0 ? `<button class="btn btn-small btn-success" onclick="payCommission('${agent.id}', ${pending})">Pay ${Utils.formatCurrency(pending)}</button>` : ''}
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
+
+            const historyEl = document.getElementById('commissionHistory');
+            historyEl.innerHTML = allCommissionHistory.map(ch => {
+                const agent = allAgents.find(a => a.id === ch.agentId);
+                return `<div>${Utils.formatDate(ch.paidAt)} - ${agent?.fullName} - ${Utils.formatCurrency(ch.amount)} - ${ch.status}</div>`;
+            }).join('');
+        }
+
+        function renderProfit() {
+            const totalLent = allLoans.filter(l => l.status === 'approved').reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
+            const principalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s,p)=> s + p.amount, 0);
+            const interestPaid = allLoans.reduce((s,l) => s + (l.interestPaid || 0), 0);
+            const commissionPaid = allCommissionHistory.filter(ch => ch.status === 'paid').reduce((s,ch) => s + ch.amount, 0);
+            document.getElementById('profitLent').innerText = Utils.formatCurrency(totalLent);
+            document.getElementById('profitPrincipal').innerText = Utils.formatCurrency(principalRepaid);
+            document.getElementById('profitInterest').innerText = Utils.formatCurrency(interestPaid);
+            document.getElementById('profitCommission').innerText = Utils.formatCurrency(commissionPaid);
+            const net = interestPaid - commissionPaid;
+            document.getElementById('netProfit').innerText = Utils.formatCurrency(net);
+        }
+
+        function renderAssignments() {
+            const custSelect = document.getElementById('assignCustomer');
+            const agentSelect = document.getElementById('assignAgent');
+            custSelect.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName}</option>`).join('');
+            agentSelect.innerHTML = allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+
+            const list = document.getElementById('assignmentsList');
+            list.innerHTML = allCustomers.map(c => {
+                const agent = allAgents.find(a => a.id === c.assignedAgentId);
+                return `<div>${c.fullName} → ${agent?.fullName || 'none'}</div>`;
+            }).join('');
+        }
+
+        function renderAuditLog() {
+            const container = document.getElementById('auditLog');
+            if (!container) return;
+            if (auditLog.length === 0) {
+                container.innerHTML = 'No audit entries yet.';
+                return;
+            }
+            container.innerHTML = auditLog.slice(0, 20).map(entry => `
+                <div class="audit-entry" style="border-bottom:1px solid #eee; padding:8px 0;">
+                    <div><strong>${Utils.formatDateTime(entry.timestamp)}</strong> - ${entry.action}</div>
+                    <div style="font-size:12px; color:var(--ios-gray5);">${entry.details || ''}</div>
+                </div>
+            `).join('');
+        }
+
+        // ========== DETAIL VIEWS (enhanced) ==========
+        window.showAgentDetails = async (id) => {
+            const agent = allAgents.find(a => a.id === id);
+            if (!agent) return;
+            const loans = allLoans.filter(l => l.agentId === id);
+            const customers = allCustomers.filter(c => c.assignedAgentId === id);
+            const commissions = allCommissionHistory.filter(ch => ch.agentId === id);
+            const totalCommissionPaid = commissions.filter(c => c.status === 'paid').reduce((s,c)=>s+c.amount,0);
+            const totalCommissionPending = commissions.filter(c => c.status === 'pending').reduce((s,c)=>s+c.amount,0);
+            const totalInterest = loans.reduce((s,l)=> s + (l.totalInterest || 0), 0);
+            const possibleCommission = totalInterest * 0.15;
+
+            let customersHtml = customers.map(c => `
+                <div style="padding:4px 0;">${c.fullName} (${c.phone})</div>
+            `).join('') || 'None';
+
+            const content = `
+                <div class="profile-row">
+                    <img src="${agent.profilePhoto || 'https://ui-avatars.com/api/?name='+agent.fullName}" class="profile-img" style="width:80px;height:80px;">
+                    <div>
+                        <h3>${agent.fullName}</h3>
+                        <p>${agent.email} · ${agent.phone}</p>
+                        <p>Agent ID: ${agent.agentId}</p>
+                        <p>Status: <span class="status-badge ${agent.status}">${agent.status}</span></p>
+                    </div>
+                </div>
+                <hr>
+                <p><strong>Customers:</strong> ${customers.length}</p>
+                <div style="max-height:150px; overflow-y:auto; border:1px solid #eee; padding:8px; border-radius:8px; margin-bottom:12px;">
+                    ${customersHtml}
+                </div>
+                <p><strong>Loans facilitated:</strong> ${loans.length}</p>
+                <p><strong>Total interest from loans:</strong> ${Utils.formatCurrency(totalInterest)}</p>
+                <p><strong>Possible commission (15%):</strong> ${Utils.formatCurrency(possibleCommission)}</p>
+                <p><strong>Commission paid:</strong> ${Utils.formatCurrency(totalCommissionPaid)}</p>
+                <p><strong>Commission pending:</strong> ${Utils.formatCurrency(totalCommissionPending)}</p>
+                <div class="action-row mt-4">
+                    <button class="btn btn-outline btn-small" onclick="toggleAgentStatus('${id}', '${agent.status === 'active' ? 'banned' : 'active'}')">${agent.status === 'active' ? 'Ban' : 'Activate'}</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteAgent('${id}')">Delete</button>
+                    <button class="btn btn-primary btn-small" onclick="showCommissionMath('${id}')">Commission Breakdown</button>
+                    <button class="btn btn-outline btn-small" onclick="closeModal('agentDetailsModal')">Close</button>
+                </div>
+            `;
+            document.getElementById('agentDetailsContent').innerHTML = content;
+            openModal('agentDetailsModal');
         };
 
-        // Start app
-        document.addEventListener('DOMContentLoaded', () => UIManager.init());
+        window.showCustomerDetails = async (id) => {
+            const customer = allCustomers.find(c => c.id === id);
+            if (!customer) return;
+            const loans = allLoans.filter(l => l.customerId === id);
+            const agent = allAgents.find(a => a.id === customer.assignedAgentId);
+            const totalBorrowed = loans.reduce((s,l)=> s + (l.amount || 0),0);
+            const totalPaid = loans.reduce((s,l)=> s + (l.totalPaid || 0),0);
+            const outstanding = totalBorrowed - totalPaid;
+
+            // Group loans by status
+            const activeLoans = loans.filter(l => l.status === 'active');
+            const pendingLoans = loans.filter(l => l.status === 'pending');
+            const completedLoans = loans.filter(l => l.status === 'completed' || l.status === 'rejected');
+
+            let loansHtml = loans.map(l => `
+                <div style="border-bottom:1px solid #eee; padding:8px 0; cursor:pointer;" onclick="showLoanDetails('${l.id}')">
+                    <div><strong>${Utils.formatCurrency(l.amount)}</strong> (${l.status})</div>
+                    <div style="font-size:12px;">Created: ${Utils.formatDate(l.createdAt)}</div>
+                </div>
+            `).join('');
+
+            const content = `
+                <div class="profile-row">
+                    <img src="${customer.profilePhoto || 'https://ui-avatars.com/api/?name='+customer.fullName}" class="profile-img" style="width:80px;height:80px;">
+                    <div>
+                        <h3>${customer.fullName}</h3>
+                        <p>${customer.email} · ${customer.phone}</p>
+                        <p>NRC: ${customer.nrc}</p>
+                        <p>Address: ${customer.residence || ''} ${customer.houseNumber || ''}</p>
+                        <p>Status: <span class="status-badge ${customer.status}">${customer.status}</span></p>
+                        <p>Agent: ${agent?.fullName || 'None'}</p>
+                    </div>
+                </div>
+                <hr>
+                <div class="stats-grid" style="grid-template-columns:repeat(3,1fr);">
+                    <div class="stat-card" style="padding:10px;"><span class="label">Loans</span><span class="value" style="font-size:20px;">${loans.length}</span></div>
+                    <div class="stat-card" style="padding:10px;"><span class="label">Borrowed</span><span class="value" style="font-size:20px;">${Utils.formatCurrency(totalBorrowed)}</span></div>
+                    <div class="stat-card" style="padding:10px;"><span class="label">Outstanding</span><span class="value" style="font-size:20px;">${Utils.formatCurrency(outstanding)}</span></div>
+                </div>
+                <div style="margin:16px 0;">
+                    <h4>Loan History</h4>
+                    <div style="max-height:250px; overflow-y:auto; border:1px solid #eee; border-radius:12px; padding:8px;">
+                        ${loansHtml || '<p>No loans</p>'}
+                    </div>
+                </div>
+                <div class="photo-strip" style="display:flex; gap:8px; overflow-x:auto;">
+                    ${customer.nrcFront ? `<img src="${customer.nrcFront}" class="photo-thumb" style="width:80px;height:80px;border-radius:8px;cursor:pointer;" onclick="viewDocument('${customer.nrcFront}')">` : ''}
+                    ${customer.nrcBack ? `<img src="${customer.nrcBack}" class="photo-thumb" style="width:80px;height:80px;border-radius:8px;cursor:pointer;" onclick="viewDocument('${customer.nrcBack}')">` : ''}
+                    ${customer.profilePhoto ? `<img src="${customer.profilePhoto}" class="photo-thumb" style="width:80px;height:80px;border-radius:8px;cursor:pointer;" onclick="viewDocument('${customer.profilePhoto}')">` : ''}
+                </div>
+                <div class="action-row mt-4">
+                    <button class="btn btn-outline btn-small" onclick="toggleCustomerStatus('${id}', '${customer.status === 'active' ? 'banned' : 'active'}')">${customer.status === 'active' ? 'Ban' : 'Activate'}</button>
+                    <button class="btn btn-danger btn-small" onclick="deleteCustomer('${id}')">Delete</button>
+                    <button class="btn btn-primary btn-small" onclick="closeModal('customerDetailsModal')">Close</button>
+                </div>
+            `;
+            document.getElementById('customerDetailsContent').innerHTML = content;
+            openModal('customerDetailsModal');
+        };
+
+        window.showLoanDetails = async (id) => {
+            const loan = allLoans.find(l => l.id === id);
+            if (!loan) return;
+            const customer = allCustomers.find(c => c.id === loan.customerId);
+            const agent = allAgents.find(a => a.id === loan.agentId);
+            const payments = allPayments.filter(p => p.loanId === id);
+
+            // Build repayment schedule table
+            let scheduleHtml = '';
+            if (loan.repaymentSchedule && loan.repaymentSchedule.length) {
+                scheduleHtml = '<table class="repayment-schedule"><tr><th>#</th><th>Due</th><th>Principal</th><th>Interest</th><th>Total</th><th>Status</th></tr>';
+                loan.repaymentSchedule.forEach((inst, idx) => {
+                    scheduleHtml += `<tr>
+                        <td>${idx+1}</td>
+                        <td>${Utils.formatDate(inst.dueDate)}</td>
+                        <td>${Utils.formatCurrency(inst.principal)}</td>
+                        <td>${Utils.formatCurrency(inst.interest)}</td>
+                        <td>${Utils.formatCurrency(inst.totalDue)}</td>
+                        <td><span class="status-badge ${inst.status === 'paid' ? 'approved' : 'pending'}">${inst.status}</span></td>
+                    </tr>`;
+                });
+                scheduleHtml += '</table>';
+            }
+
+            // Collateral images grid
+            let collateralHtml = '';
+            if (loan.collateral && loan.collateral.images && loan.collateral.images.length) {
+                collateralHtml = '<div class="collateral-grid">';
+                loan.collateral.images.forEach(img => {
+                    collateralHtml += `<img src="${img}" onclick="viewDocument('${img}')">`;
+                });
+                collateralHtml += '</div>';
+            }
+
+            // Payment history
+            let paymentHtml = '';
+            if (payments.length) {
+                paymentHtml = '<h4>Payments</h4><div style="max-height:200px; overflow-y:auto;">';
+                payments.forEach(p => {
+                    paymentHtml += `<div style="border-bottom:1px solid #eee; padding:8px;">
+                        <strong>${Utils.formatDate(p.timestamp)}</strong> - ${Utils.formatCurrency(p.amount)} (${p.status})
+                        ${p.proofUrl ? ` <a href="${p.proofUrl}" target="_blank">Proof</a>` : ''}
+                    </div>`;
+                });
+                paymentHtml += '</div>';
+            }
+
+            const content = `
+                <div style="display:flex; gap:20px; flex-wrap:wrap;">
+                    <div style="flex:1;">
+                        <h4>Customer</h4>
+                        <p>${customer?.fullName}<br>${customer?.phone}</p>
+                    </div>
+                    <div style="flex:1;">
+                        <h4>Agent</h4>
+                        <p>${agent?.fullName}<br>${agent?.phone}</p>
+                    </div>
+                </div>
+                <hr>
+                <p><strong>Amount:</strong> ${Utils.formatCurrency(loan.amount)} | <strong>Approved:</strong> ${Utils.formatCurrency(loan.approvedAmount || loan.amount)}</p>
+                <p><strong>Interest:</strong> ${loan.interestRate}% ${loan.durationUnit} | <strong>Total interest:</strong> ${Utils.formatCurrency(loan.totalInterest || 0)}</p>
+                <p><strong>Total payable:</strong> ${Utils.formatCurrency(loan.totalPayable || loan.amount)} | <strong>Paid:</strong> ${Utils.formatCurrency(loan.totalPaid || 0)}</p>
+                <p><strong>Remaining:</strong> ${Utils.formatCurrency((loan.totalPayable || loan.amount) - (loan.totalPaid || 0))}</p>
+                <p><strong>Status:</strong> <span class="status-badge ${loan.status}">${loan.status}</span></p>
+                <p><strong>Agreement:</strong> ${loan.signedAgreementUrl ? `<a href="${loan.signedAgreementUrl}" target="_blank">View Signed</a>` : 'Not signed'}</p>
+                <p><strong>Witness:</strong> ${loan.witness?.name} (${loan.witness?.nrc})</p>
+
+                <h4>Collateral</h4>
+                <p><strong>Type:</strong> ${loan.collateral?.category}</p>
+                <p><strong>Description:</strong> ${loan.collateral?.description}</p>
+                <p><strong>Value:</strong> ${Utils.formatCurrency(loan.collateral?.value)}</p>
+                <p><strong>Location:</strong> ${loan.collateral?.location}</p>
+                ${collateralHtml}
+
+                <h4>Repayment Schedule</h4>
+                ${scheduleHtml || '<p>No schedule available</p>'}
+
+                ${paymentHtml}
+
+                <div class="action-row mt-4">
+                    ${loan.status === 'pending' ? `<button class="btn btn-success" onclick="approveLoan('${id}')">Approve</button>` : ''}
+                    ${loan.status === 'approved' && !loan.lenderSigned ? `<button class="btn btn-primary" onclick="signLoanAsLender('${id}')">Sign as Lender</button>` : ''}
+                    <button class="btn btn-danger" onclick="rejectLoan('${id}')">Reject</button>
+                    <button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button>
+                </div>
+            `;
+            document.getElementById('loanDetailsContent').innerHTML = content;
+            openModal('loanDetailsModal');
+        };
+
+        window.showPaymentDetails = (id) => {
+            const payment = allPayments.find(p => p.id === id);
+            if (!payment) return;
+            const loan = allLoans.find(l => l.id === payment.loanId);
+            const html = `
+                <p><strong>Customer:</strong> ${payment.customerName}</p>
+                <p><strong>Loan:</strong> ${payment.loanId} (${Utils.formatCurrency(loan?.amount)})</p>
+                <p><strong>Amount:</strong> ${Utils.formatCurrency(payment.amount)}</p>
+                <p><strong>Method:</strong> ${payment.method}</p>
+                <p><strong>Reference:</strong> ${payment.reference || 'N/A'}</p>
+                <p><strong>Proof:</strong> <a href="${payment.proofUrl}" target="_blank">View</a></p>
+                <p><strong>Status:</strong> <span class="status-badge ${payment.status}">${payment.status}</span></p>
+                <div class="action-row">
+                    ${payment.status === 'pending' ? `
+                        <button class="btn btn-success" onclick="confirmPayment('${id}')">Confirm</button>
+                        <button class="btn btn-danger" onclick="rejectPayment('${id}')">Reject</button>
+                    ` : ''}
+                    <button class="btn btn-outline" onclick="closeModal('paymentDetailsModal')">Close</button>
+                </div>
+            `;
+            document.getElementById('paymentDetailsContent').innerHTML = html;
+            openModal('paymentDetailsModal');
+        };
+
+        // Commission breakdown modal
+        window.showCommissionMath = (agentId) => {
+            const agent = allAgents.find(a => a.id === agentId);
+            if (!agent) return;
+            const loans = allLoans.filter(l => l.agentId === agentId && l.status === 'approved');
+            const commissions = allCommissionHistory.filter(ch => ch.agentId === agentId);
+            let breakdownHtml = '';
+            loans.forEach(loan => {
+                const interest = loan.totalInterest || 0;
+                const commission = interest * 0.15;
+                const paid = commissions.filter(c => c.loanId === loan.id && c.status === 'paid').reduce((s,c)=>s+c.amount,0);
+                const pending = commissions.filter(c => c.loanId === loan.id && c.status === 'pending').reduce((s,c)=>s+c.amount,0);
+                breakdownHtml += `
+                    <div class="commission-row">
+                        <span>Loan ${loan.id.substring(0,6)} (${Utils.formatCurrency(loan.amount)})</span>
+                        <span>Interest: ${Utils.formatCurrency(interest)} → 15% = ${Utils.formatCurrency(commission)}</span>
+                        <span>Paid: ${Utils.formatCurrency(paid)} | Pending: ${Utils.formatCurrency(pending)}</span>
+                    </div>
+                `;
+            });
+            const totalInterest = loans.reduce((s,l) => s + (l.totalInterest || 0), 0);
+            const totalCommission = totalInterest * 0.15;
+            const totalPaid = commissions.filter(c => c.status === 'paid').reduce((s,c)=>s+c.amount,0);
+            const totalPending = commissions.filter(c => c.status === 'pending').reduce((s,c)=>s+c.amount,0);
+            const future = totalCommission - totalPaid - totalPending;
+
+            const content = `
+                <h4>${agent.fullName}</h4>
+                <div class="commission-breakdown">
+                    ${breakdownHtml || '<p>No approved loans</p>'}
+                </div>
+                <div class="commission-row"><strong>Total interest from all loans:</strong> ${Utils.formatCurrency(totalInterest)}</div>
+                <div class="commission-row"><strong>Total possible commission (15%):</strong> ${Utils.formatCurrency(totalCommission)}</div>
+                <div class="commission-row"><strong>Already earned:</strong> <span class="text-success">${Utils.formatCurrency(totalPaid)}</span></div>
+                <div class="commission-row"><strong>Pending (awaiting payment):</strong> ${Utils.formatCurrency(totalPending)}</div>
+                <div class="commission-row"><strong>Future (active loans):</strong> ${Utils.formatCurrency(future)}</div>
+                <p style="margin-top:16px; font-size:14px; color:var(--ios-gray5);">Commission is credited when the customer pays interest. 15% of each interest payment.</p>
+            `;
+            document.getElementById('commissionMathContent').innerHTML = content;
+            openModal('commissionMathModal');
+        };
+
+        // Document viewer
+        window.viewDocument = (url) => {
+            document.getElementById('documentViewImage').src = url;
+            openModal('documentViewModal');
+        };
+
+        // ========== ACTIONS ==========
+        window.approveLoan = async (loanId) => {
+            if (!confirm('Approve this loan?')) return;
+            await db.ref('loans/' + loanId).update({
+                status: 'approved',
+                approvedAt: Date.now(),
+                approvedBy: currentUser?.uid
+            });
+            await logAudit('Loan approved', `Loan ID: ${loanId}`);
+            closeModal('loanDetailsModal');
+        };
+
+        window.rejectLoan = async (loanId) => {
+            const reason = prompt('Reason for rejection:');
+            if (reason === null) return;
+            await db.ref('loans/' + loanId).update({
+                status: 'rejected',
+                rejectedAt: Date.now(),
+                rejectedBy: currentUser?.uid,
+                rejectionReason: reason
+            });
+            await logAudit('Loan rejected', `Loan ID: ${loanId}, reason: ${reason}`);
+            closeModal('loanDetailsModal');
+        };
+
+        window.signLoanAsLender = (loanId) => {
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan) return;
+            document.getElementById('agreementPreview').innerHTML = `<iframe src="${loan.signedAgreementUrl}" style="width:100%; height:250px;"></iframe>`;
+            window.currentLoanForSign = loanId;
+            openModal('signAgreementModal');
+        };
+
+        // Signature pad for lender (unchanged)
+        const lenderSigPad = (() => {
+            const canvas = document.getElementById('lenderSignatureCanvas');
+            if (!canvas) return null;
+            const ctx = canvas.getContext('2d');
+            let drawing = false;
+            canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
+            canvas.addEventListener('mousemove', (e) => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
+            canvas.addEventListener('mouseup', () => drawing = false);
+            canvas.addEventListener('mouseleave', () => drawing = false);
+            document.getElementById('clearLenderSig').addEventListener('click', () => ctx.clearRect(0,0,canvas.width,canvas.height));
+            return { clear: () => ctx.clearRect(0,0,canvas.width,canvas.height), getData: () => canvas.toDataURL() };
+        })();
+
+        document.getElementById('submitLenderSignature').addEventListener('click', async () => {
+            if (!lenderSigPad) return;
+            const sigData = lenderSigPad.getData();
+            const loanId = window.currentLoanForSign;
+            if (!loanId) return;
+            await db.ref('loans/' + loanId).update({
+                lenderSignature: sigData,
+                lenderSignedAt: Date.now(),
+                lenderSignedBy: currentUser?.uid
+            });
+            await logAudit('Lender signed loan', `Loan ID: ${loanId}`);
+            alert('Loan signed by lender.');
+            closeModal('signAgreementModal');
+        });
+
+        window.confirmPayment = async (id) => {
+            if (!confirm('Confirm this payment?')) return;
+            const payment = allPayments.find(p => p.id === id);
+            if (!payment) return;
+            await db.ref('payments/' + id).update({
+                status: 'confirmed',
+                verifiedAt: Date.now(),
+                verifiedBy: currentUser?.uid
+            });
+            // Update loan totalPaid
+            const loanRef = db.ref('loans/' + payment.loanId);
+            const loanSnap = await loanRef.once('value');
+            const loan = loanSnap.val();
+            const newPaid = (loan.totalPaid || 0) + payment.amount;
+            await loanRef.update({ totalPaid: newPaid });
+            // Update repayment schedule if needed (simplified)
+            if (loan.repaymentSchedule) {
+                const updatedSchedule = loan.repaymentSchedule.map(inst => {
+                    if (inst.status === 'pending' && inst.totalDue <= payment.amount) {
+                        // simplistic: mark first pending as paid
+                        return { ...inst, status: 'paid', paidAmount: inst.totalDue, paidAt: Date.now() };
+                    }
+                    return inst;
+                });
+                await loanRef.update({ repaymentSchedule: updatedSchedule });
+            }
+            await logAudit('Payment confirmed', `Payment ID: ${id}, Loan: ${payment.loanId}`);
+            closeModal('paymentDetailsModal');
+        };
+
+        window.rejectPayment = async (id) => {
+            await db.ref('payments/' + id).update({ status: 'rejected' });
+            await logAudit('Payment rejected', `Payment ID: ${id}`);
+            closeModal('paymentDetailsModal');
+        };
+
+        window.toggleAgentStatus = async (id, newStatus) => {
+            await db.ref('users/' + id).update({ status: newStatus });
+            await logAudit('Agent status changed', `Agent ID: ${id}, new status: ${newStatus}`);
+            closeModal('agentDetailsModal');
+        };
+
+        window.deleteAgent = async (id) => {
+            if (!confirm('Permanently delete this agent? This action cannot be undone.')) return;
+            await db.ref('users/' + id).remove();
+            await logAudit('Agent deleted', `Agent ID: ${id}`);
+            closeModal('agentDetailsModal');
+        };
+
+        window.toggleCustomerStatus = async (id, newStatus) => {
+            await db.ref('users/' + id).update({ status: newStatus });
+            await logAudit('Customer status changed', `Customer ID: ${id}, new status: ${newStatus}`);
+            closeModal('customerDetailsModal');
+        };
+
+        window.deleteCustomer = async (id) => {
+            if (!confirm('Permanently delete this customer? This action cannot be undone.')) return;
+            await db.ref('users/' + id).remove();
+            await logAudit('Customer deleted', `Customer ID: ${id}`);
+            closeModal('customerDetailsModal');
+        };
+
+        window.payCommission = async (agentId, amount) => {
+            if (!confirm(`Pay ${Utils.formatCurrency(amount)} commission to this agent?`)) return;
+            const commId = Utils.generateId('COMM');
+            await db.ref('commissionHistory/' + commId).set({
+                agentId,
+                amount,
+                paidAt: Date.now(),
+                paidBy: currentUser?.uid,
+                status: 'paid'
+            });
+            // Update agent's totalCommission
+            const agentRef = db.ref('users/' + agentId);
+            const agentSnap = await agentRef.once('value');
+            const agent = agentSnap.val();
+            await agentRef.update({ totalCommission: (agent.totalCommission || 0) + amount });
+            await logAudit('Commission paid', `Agent: ${agentId}, amount: ${amount}`);
+        };
+
+        // Audit logging
+        async function logAudit(action, details) {
+            const auditId = Utils.generateId('AUD');
+            await db.ref('auditLog/' + auditId).set({
+                action,
+                details,
+                timestamp: Date.now(),
+                userId: currentUser?.uid,
+                userEmail: currentUser?.email
+            });
+        }
+
+        // ========== ASSIGNMENT ==========
+        document.getElementById('assignBtn').addEventListener('click', async () => {
+            const customerId = document.getElementById('assignCustomer').value;
+            const agentId = document.getElementById('assignAgent').value;
+            if (!customerId || !agentId) return;
+            const agent = allAgents.find(a => a.id === agentId);
+            await db.ref('users/' + customerId).update({
+                assignedAgentId: agentId,
+                agentName: agent?.fullName
+            });
+            // Update agent's customer count
+            const agentRef = db.ref('users/' + agentId);
+            const agentSnap = await agentRef.once('value');
+            const agentData = agentSnap.val();
+            await agentRef.update({ totalCustomers: (agentData.totalCustomers || 0) + 1 });
+            await logAudit('Agent assigned to customer', `Customer: ${customerId}, Agent: ${agentId}`);
+        });
+
+        // ========== REPORTS ==========
+        document.getElementById('reportAgents').addEventListener('click', () => {
+            let report = '<h4>Agents Report</h4>';
+            allAgents.forEach(a => {
+                const loans = allLoans.filter(l => l.agentId === a.id);
+                const commissions = allCommissionHistory.filter(ch => ch.agentId === a.id && ch.status === 'paid');
+                report += `
+                    <div><strong>${a.fullName}</strong> (${a.agentId})<br>
+                    Customers: ${a.totalCustomers || 0}, Loans: ${loans.length}, Commission paid: ${Utils.formatCurrency(commissions.reduce((s,c)=> s + c.amount,0))}</div><hr>
+                `;
+            });
+            document.getElementById('reportOutput').innerHTML = report;
+        });
+
+        document.getElementById('reportLoans').addEventListener('click', () => {
+            let report = '<h4>Loans Report</h4>';
+            allLoans.forEach(l => {
+                report += `
+                    <div><strong>${l.id}</strong> | Customer: ${l.customerName} | Amount: ${Utils.formatCurrency(l.amount)} | Status: ${l.status} | Paid: ${Utils.formatCurrency(l.totalPaid || 0)}</div><hr>
+                `;
+            });
+            document.getElementById('reportOutput').innerHTML = report;
+        });
+
+        document.getElementById('reportCustomers').addEventListener('click', () => {
+            let report = '<h4>Customers Report</h4>';
+            allCustomers.forEach(c => {
+                const loans = allLoans.filter(l => l.customerId === c.id);
+                const totalBorrowed = loans.reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
+                const totalPaid = loans.reduce((s,l)=> s + (l.totalPaid || 0), 0);
+                report += `
+                    <div><strong>${c.fullName}</strong> (${c.phone})<br>
+                    Loans: ${loans.length}, Borrowed: ${Utils.formatCurrency(totalBorrowed)}, Repaid: ${Utils.formatCurrency(totalPaid)}</div><hr>
+                `;
+            });
+            document.getElementById('reportOutput').innerHTML = report;
+        });
+
+        // ========== PROFIT DETAILED REPORT ==========
+        document.getElementById('printProfitReport').addEventListener('click', () => {
+            const totalLent = allLoans.filter(l => l.status === 'approved').reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
+            const principalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s,p)=> s + p.amount, 0);
+            const interestPaid = allLoans.reduce((s,l) => s + (l.interestPaid || 0), 0);
+            const commissionPaid = allCommissionHistory.filter(ch => ch.status === 'paid').reduce((s,ch) => s + ch.amount, 0);
+            const net = interestPaid - commissionPaid;
+            const report = `
+                <h4>Profit & Loss Statement</h4>
+                <p>Total Capital Lent: ${Utils.formatCurrency(totalLent)}</p>
+                <p>Principal Repaid: ${Utils.formatCurrency(principalRepaid)}</p>
+                <p>Outstanding Principal: ${Utils.formatCurrency(totalLent - principalRepaid)}</p>
+                <p>Total Interest Paid: ${Utils.formatCurrency(interestPaid)}</p>
+                <p>Total Commission Paid: ${Utils.formatCurrency(commissionPaid)}</p>
+                <p><strong>Net Profit (Interest - Commission): ${Utils.formatCurrency(net)}</strong></p>
+            `;
+            document.getElementById('reportOutput').innerHTML = report;
+        });
+
+        // ========== CREATE AGENT (unchanged) ==========
+        document.getElementById('submitAgent').addEventListener('click', async () => {
+            const name = document.getElementById('agentName').value.trim();
+            const phone = document.getElementById('agentPhone').value.trim();
+            const nrc = document.getElementById('agentNrc').value.trim();
+            const email = document.getElementById('agentEmail').value.trim();
+            const agentId = document.getElementById('agentCustomId').value.trim();
+            const password = document.getElementById('agentPassword').value.trim();
+
+            if (!name || !phone || !nrc || !email || !agentId || !password) {
+                alert('All fields required');
+                return;
+            }
+            if (!Utils.validateEmail(email)) { alert('Invalid email'); return; }
+            if (!Utils.validateNRC(nrc)) { alert('Invalid NRC'); return; }
+            if (password.length < 6) { alert('Password too short'); return; }
+
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = cred.user.uid;
+                await db.ref('users/' + uid).set({
+                    fullName: name,
+                    phone,
+                    nrc,
+                    email,
+                    agentId,
+                    userType: 'agent',
+                    status: 'active',
+                    createdAt: Date.now(),
+                    totalCustomers: 0,
+                    totalLoans: 0,
+                    totalCommission: 0
+                });
+                await logAudit('Agent created', `Agent ID: ${agentId}, UID: ${uid}`);
+                alert('Agent created');
+                closeModal('createAgentModal');
+                // Clear form
+                document.getElementById('agentName').value = '';
+                document.getElementById('agentPhone').value = '';
+                document.getElementById('agentNrc').value = '';
+                document.getElementById('agentEmail').value = '';
+                document.getElementById('agentCustomId').value = '';
+                document.getElementById('agentPassword').value = '';
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        });
+
+        // ========== CREATE CUSTOMER (unchanged) ==========
+        document.getElementById('submitCustomer').addEventListener('click', async () => {
+            const name = document.getElementById('custName').value.trim();
+            const email = document.getElementById('custEmail').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const nrc = document.getElementById('custNrc').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+            const password = document.getElementById('custPassword').value.trim();
+            const agentId = document.getElementById('custAgent').value;
+
+            if (!name || !email || !phone || !nrc || !address || !password) {
+                alert('All fields required');
+                return;
+            }
+            if (!Utils.validateEmail(email)) { alert('Invalid email'); return; }
+            if (!Utils.validateNRC(nrc)) { alert('Invalid NRC'); return; }
+            if (password.length < 6) { alert('Password too short'); return; }
+
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = cred.user.uid;
+                const agentName = allAgents.find(a => a.id === agentId)?.fullName;
+                await db.ref('users/' + uid).set({
+                    fullName: name,
+                    email,
+                    phone,
+                    nrc,
+                    residence: address,
+                    userType: 'customer',
+                    status: 'active',
+                    assignedAgentId: agentId || null,
+                    agentName: agentName || null,
+                    createdAt: Date.now(),
+                    totalLoans: 0
+                });
+                if (agentId) {
+                    const agentRef = db.ref('users/' + agentId);
+                    const agentSnap = await agentRef.once('value');
+                    const agent = agentSnap.val();
+                    await agentRef.update({ totalCustomers: (agent.totalCustomers || 0) + 1 });
+                }
+                await logAudit('Customer created', `Customer: ${name}, UID: ${uid}`);
+                alert('Customer created');
+                closeModal('createCustomerModal');
+                // Clear form
+                document.getElementById('custName').value = '';
+                document.getElementById('custEmail').value = '';
+                document.getElementById('custPhone').value = '';
+                document.getElementById('custNrc').value = '';
+                document.getElementById('custAddress').value = '';
+                document.getElementById('custPassword').value = '';
+            } catch (e) {
+                alert('Error: ' + e.message);
+            }
+        });
+
+        // Populate customer modal agent dropdown
+        document.getElementById('createCustomerBtn').addEventListener('click', () => {
+            const select = document.getElementById('custAgent');
+            select.innerHTML = '<option value="">None</option>' + allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+            openModal('createCustomerModal');
+        });
+
+        // ========== SETTINGS ==========
+        document.getElementById('saveSettings').addEventListener('click', async () => {
+            const commRate = parseFloat(document.getElementById('commissionRate').value);
+            const monthly = parseFloat(document.getElementById('monthlyInterest').value);
+            const weekly = parseFloat(document.getElementById('weeklyInterest').value);
+            await db.ref('systemSettings').set({
+                commissionRate: commRate,
+                monthlyInterestRate: monthly,
+                weeklyInterestRate: weekly,
+                updatedAt: Date.now(),
+                updatedBy: currentUser?.uid
+            });
+            await logAudit('System settings updated', `Commission: ${commRate}%, Monthly: ${monthly}%, Weekly: ${weekly}%`);
+            alert('Settings saved');
+        });
+
+        // ========== SUDO RESET ==========
+        document.getElementById('sudoResetBtn').addEventListener('click', () => openModal('sudoModal'));
+        document.getElementById('confirmSudoReset').addEventListener('click', async () => {
+            const pwd = document.getElementById('sudoPassword').value;
+            if (pwd === '1551530066TRUCASHDATARESET') {
+                if (confirm('ARE YOU ABSOLUTELY SURE? This will delete EVERYTHING.')) {
+                    await db.ref().set(null);
+                    await logAudit('Database wiped', 'All data deleted');
+                    alert('Database wiped. Page will reload.');
+                    location.reload();
+                }
+            } else {
+                alert('Incorrect password');
+            }
+            closeModal('sudoModal');
+        });
+
+        // ========== FILTERS & SEARCH ==========
+        document.getElementById('filterActiveAgents').addEventListener('click', () => {
+            agentFilter = 'active';
+            renderAgents();
+        });
+        document.getElementById('filterPendingAgents').addEventListener('click', () => {
+            agentFilter = 'pending';
+            renderAgents();
+        });
+        document.getElementById('agentSearch').addEventListener('input', renderAgents);
+
+        document.getElementById('filterActiveCustomers').addEventListener('click', () => {
+            customerFilter = 'active';
+            renderCustomers();
+        });
+        document.getElementById('filterBannedCustomers').addEventListener('click', () => {
+            customerFilter = 'banned';
+            renderCustomers();
+        });
+        document.getElementById('customerSearch').addEventListener('input', renderCustomers);
+
+        document.querySelectorAll('#loansSection .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentLoanFilter = tab.dataset.status;
+                renderLoans();
+            });
+        });
+        document.getElementById('loanSearch').addEventListener('input', renderLoans);
+
+        document.querySelectorAll('#paymentsSection .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                currentPaymentFilter = tab.dataset.status;
+                renderPayments();
+            });
+        });
+        document.getElementById('paymentSearch').addEventListener('input', renderPayments);
+
+        // ========== NAVIGATION ==========
+        function showSection(sectionId) {
+            document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
+            const section = document.getElementById(sectionId + 'Section');
+            if (section) section.classList.add('active');
+            document.querySelectorAll('.nav-item-bottom').forEach(i => i.classList.remove('active'));
+            const bottomNav = document.querySelector(`.nav-item-bottom[data-section="${sectionId}"]`);
+            if (bottomNav) bottomNav.classList.add('active');
+        }
+        window.showSection = showSection;
+
+        document.querySelectorAll('.nav-item-bottom').forEach(item => {
+            item.addEventListener('click', () => showSection(item.dataset.section));
+        });
+        document.querySelectorAll('.sidebar-item').forEach(item => {
+            item.addEventListener('click', () => {
+                const section = item.dataset.section;
+                if (section) showSection(section);
+                if (item.classList.contains('logout')) auth.signOut();
+                document.getElementById('sidebar').classList.remove('active');
+                document.getElementById('sidebarOverlay').classList.remove('active');
+            });
+        });
+
+        // Sidebar toggle
+        document.getElementById('sidebarToggle').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.toggle('active');
+            document.getElementById('sidebarOverlay').classList.toggle('active');
+        });
+        document.getElementById('sidebarOverlay').addEventListener('click', () => {
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
+        });
+
+        // Modal helpers
+        window.openModal = (id) => document.getElementById(id).classList.add('active');
+        window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+
+        // ========== AUTH ==========
+        auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location = 'login.html'; return; }
+            currentUser = user;
+            const snap = await db.ref('users/' + user.uid).once('value');
+            adminData = snap.val();
+            if (adminData?.userType !== 'admin' && adminData?.userType !== 'sudo') {
+                alert('Access denied');
+                auth.signOut();
+                return;
+            }
+            document.getElementById('adminNameDisplay').innerText = adminData?.fullName || 'Admin';
+            document.getElementById('sidebarName').innerText = adminData?.fullName || 'Admin User';
+            document.getElementById('sidebarAvatar').innerText = (adminData?.fullName || 'A')[0];
+
+            await loadAllData();
+            setupRealtimeListeners();
+        });
+
+        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+        // ========== CREATE BUTTONS ==========
+        document.getElementById('createAgentBtn').addEventListener('click', () => openModal('createAgentModal'));
+        document.getElementById('createCustomerBtn').addEventListener('click', () => {
+            const select = document.getElementById('custAgent');
+            select.innerHTML = '<option value="">None</option>' + allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+            openModal('createCustomerModal');
+        });
+
+        // Close modals when clicking on overlay background
+        document.querySelectorAll('.modal-overlay').forEach(overlay => {
+            overlay.addEventListener('click', (e) => {
+                if (e.target === overlay) {
+                    overlay.classList.remove('active');
+                }
+            });
+        });
     </script>
 </body>
 </html>
