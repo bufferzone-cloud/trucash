@@ -3245,86 +3245,81 @@
                     return { success: false, error: 'Failed to submit loan application' };
                 }
             },
-            async makePayment(paymentData) {
-                try {
-                    Utils.showLoading('Processing Payment...');
-                    const paymentId = 'PAY' + Date.now() + Math.random().toString(36).substr(2, 6).toUpperCase();
-                    const paymentRef = db.ref('payments/' + paymentId);
-                    
-                    // Upload proof screenshot if provided
-                    let proofUrl = '';
-                    if (paymentData.proofFile) {
-                        const fileName = `payment_proofs/${paymentId}_${Date.now()}.jpg`;
-                        const storageRef = storage.ref().child(fileName);
-                        const snapshot = await storageRef.put(paymentData.proofFile);
-                        proofUrl = await snapshot.ref.getDownloadURL();
-                    }
+           async makePayment(paymentData) {
+    try {
+        Utils.showLoading('Processing Payment...');
+        const paymentId = 'PAY' + Date.now() + Math.random().toString(36).substr(2, 6).toUpperCase();
+        const paymentRef = db.ref('payments/' + paymentId);
 
-                    const payment = {
-                        id: paymentId,
-                        loanId: paymentData.loanId,
-                        customerId: AppState.currentUser.uid,
-                        customerName: AppState.userData.fullName,
-                        amount: paymentData.amount,
-                        method: paymentData.method,
-                        reference: paymentData.reference,
-                        proofUrl: proofUrl,
-                        timestamp: Date.now(),
-                        status: 'pending',
-                        verifiedBy: null,
-                        verifiedAt: null,
-                        notes: paymentData.notes || ''
-                    };
-                    await paymentRef.set(payment);
+        // Use the Cloudinary URL directly
+        const proofUrl = paymentData.proofUrl || '';
 
-                    // Update loan totalPaid and check for completion
-                    const loanRef = db.ref('loans/' + paymentData.loanId);
-                    const loanSnap = await loanRef.once('value');
-                    const loan = loanSnap.val();
-                    const newTotalPaid = (loan.totalPaid || 0) + paymentData.amount;
-                    
-                    let updatedStatus = loan.status;
-                    if (newTotalPaid >= loan.totalPayable) {
-                        updatedStatus = 'completed';
-                        // Mark all schedule installments as paid (simplified)
-                        const updatedSchedule = loan.repaymentSchedule.map(inst => ({
-                            ...inst,
-                            status: 'paid',
-                            paidAmount: inst.totalDue,
-                            paidAt: Date.now()
-                        }));
-                        await loanRef.update({
-                            totalPaid: newTotalPaid,
-                            status: updatedStatus,
-                            repaymentSchedule: updatedSchedule,
-                            updatedAt: Date.now(),
-                            lastPaymentDate: Date.now()
-                        });
-                    } else {
-                        await loanRef.update({
-                            totalPaid: newTotalPaid,
-                            updatedAt: Date.now(),
-                            lastPaymentDate: Date.now()
-                        });
-                    }
+        const payment = {
+            id: paymentId,
+            loanId: paymentData.loanId,
+            customerId: AppState.currentUser.uid,
+            customerName: AppState.userData.fullName,
+            amount: paymentData.amount,
+            method: paymentData.method,
+            reference: paymentData.reference || '',
+            proofUrl: proofUrl,
+            timestamp: Date.now(),
+            status: 'pending', // Will be verified by admin later
+            verifiedBy: null,
+            verifiedAt: null,
+            notes: paymentData.notes || ''
+        };
+        await paymentRef.set(payment);
 
-                    await this.createNotification(
-                        AppState.currentUser.uid,
-                        'payment_submitted',
-                        {
-                            paymentId: paymentId,
-                            amount: paymentData.amount,
-                            timestamp: Date.now()
-                        }
-                    );
-                    Utils.hideLoading();
-                    return { success: true, paymentId: paymentId, message: 'Payment submitted for verification' };
-                } catch (error) {
-                    console.error('Error making payment:', error);
-                    Utils.hideLoading();
-                    return { success: false, error: 'Failed to process payment' };
-                }
-            },
+        // Update loan totalPaid and check for completion
+        const loanRef = db.ref('loans/' + paymentData.loanId);
+        const loanSnap = await loanRef.once('value');
+        const loan = loanSnap.val();
+        const newTotalPaid = (loan.totalPaid || 0) + paymentData.amount;
+
+        let updatedStatus = loan.status;
+        if (newTotalPaid >= loan.totalPayable) {
+            updatedStatus = 'completed';
+            // Mark all schedule installments as paid (simplified – you may want to mark only current ones)
+            const updatedSchedule = loan.repaymentSchedule.map(inst => ({
+                ...inst,
+                status: 'paid',
+                paidAmount: inst.totalDue,
+                paidAt: Date.now()
+            }));
+            await loanRef.update({
+                totalPaid: newTotalPaid,
+                status: updatedStatus,
+                repaymentSchedule: updatedSchedule,
+                updatedAt: Date.now(),
+                lastPaymentDate: Date.now()
+            });
+        } else {
+            await loanRef.update({
+                totalPaid: newTotalPaid,
+                updatedAt: Date.now(),
+                lastPaymentDate: Date.now()
+            });
+        }
+
+        await FirebaseService.createNotification(
+            AppState.currentUser.uid,
+            'payment_submitted',
+            {
+                paymentId: paymentId,
+                amount: paymentData.amount,
+                timestamp: Date.now()
+            }
+        );
+
+        Utils.hideLoading();
+        return { success: true, paymentId: paymentId, message: 'Payment submitted for verification' };
+    } catch (error) {
+        console.error('Error making payment:', error);
+        Utils.hideLoading();
+        return { success: false, error: 'Failed to process payment' };
+    }
+}
             async updateProfile(profileData) {
                 try {
                     Utils.showLoading('Updating Profile...');
@@ -4495,31 +4490,40 @@
                 }
             },
             async submitPayment() {
-                const loanId = document.getElementById('paymentLoanSelect')?.value;
-                const amount = parseFloat(document.getElementById('paymentAmount')?.value);
-                const method = document.getElementById('paymentMethod')?.value;
-                const reference = document.getElementById('paymentReference')?.value;
-                if (!loanId || !amount || amount <= 0) {
-                    Utils.showToast('Error', 'Please select a loan and enter a valid amount', 'error');
-                    return;
-                }
-                const proofFile = window.paymentProofFile; // set by upload widget
-                const result = await FirebaseService.makePayment({
-                    loanId,
-                    amount,
-                    method,
-                    reference,
-                    proofFile
-                });
-                if (result.success) {
-                    Utils.showToast('Success', result.message, 'info');
-                    document.getElementById('paymentAmount').value = '';
-                    document.getElementById('paymentReference').value = '';
-                    this.paymentModal.classList.remove('active');
-                } else {
-                    Utils.showToast('Error', result.error, 'error');
-                }
-            },
+    const loanId = document.getElementById('paymentLoanSelect')?.value;
+    const amount = parseFloat(document.getElementById('paymentAmount')?.value);
+    const method = document.getElementById('paymentMethod')?.value;
+    const reference = document.getElementById('paymentReference')?.value;
+    const proofUrl = window.paymentProofUrl; // Get stored Cloudinary URL
+
+    if (!loanId || !amount || amount <= 0) {
+        Utils.showToast('Error', 'Please select a loan and enter a valid amount', 'error');
+        return;
+    }
+    if (!proofUrl) {
+        Utils.showToast('Error', 'Please upload a payment screenshot', 'error');
+        return;
+    }
+
+    const result = await FirebaseService.makePayment({
+        loanId,
+        amount,
+        method,
+        reference,
+        proofUrl // Pass URL, not file
+    });
+
+    if (result.success) {
+        Utils.showToast('Success', result.message, 'info');
+        document.getElementById('paymentAmount').value = '';
+        document.getElementById('paymentReference').value = '';
+        window.paymentProofUrl = null; // Clear for next payment
+        this.paymentModal.classList.remove('active');
+        // Refresh loans display (realtime listeners will handle it)
+    } else {
+        Utils.showToast('Error', result.error, 'error');
+    }
+}
             showStatementModal() {
                 this.statementModal.classList.add('active');
                 // Build statement content from loans and payments
@@ -4647,14 +4651,18 @@
         function openCloudinaryWidget(element) {
             CloudinaryService.openWidget(element);
         }
-        function openPaymentProofUpload() {
-            CloudinaryService.openPaymentProofWidget((url) => {
-                document.getElementById('paymentProofUrl').textContent = url;
-                Utils.showToast('Proof Uploaded', 'Screenshot uploaded successfully', 'info');
-                // In a real scenario, you'd store the file object; here we set a global var
-                window.paymentProofFile = new File([url], 'proof.jpg'); // dummy, but in real we'd have file from widget
-            });
+       function openPaymentProofUpload() {
+    CloudinaryService.openPaymentProofWidget((url) => {
+        // Store the URL globally for later use
+        window.paymentProofUrl = url;
+        // Optionally show a success indicator
+        const uploadBox = document.querySelector('.upload-box[onclick="openPaymentProofUpload()"]');
+        if (uploadBox) {
+            uploadBox.innerHTML = '<i class="fas fa-check-circle" style="color: green;"></i><span>Proof Uploaded</span>';
         }
+        Utils.showToast('Proof Uploaded', 'Screenshot uploaded successfully', 'info');
+    });
+}
         function viewDocument(type) {
             const documentImage = document.getElementById('documentImage');
             const documentModal = document.getElementById('documentModal');
