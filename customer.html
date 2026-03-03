@@ -2666,7 +2666,7 @@
                 Utils.showToast('Error', 'Failed to update profile photo', 'error');
             }
         },
-        // Payment proof upload – stores URL globally
+        // Payment proof upload – stores URL globally and updates UI
         openPaymentProofWidget(callback) {
             if (!this.widget) this.initUploadWidget();
             const proofWidget = cloudinary.createUploadWidget({
@@ -2692,7 +2692,7 @@
                     return;
                 }
                 if (result && result.event === "success") {
-                    // Store URL globally and update UI
+                    // Store URL globally and update the upload box appearance
                     window.paymentProofUrl = result.info.secure_url;
                     const uploadBox = document.querySelector('.upload-box[onclick="openPaymentProofUpload()"]');
                     if (uploadBox) {
@@ -4402,6 +4402,7 @@
             this.paymentModal.classList.add('active');
             this.updatePaymentsUI();
         },
+        // UPDATED: Payment history now uses mobile-friendly cards instead of a table
         updatePaymentsUI() {
             const container = document.getElementById('paymentModalContent');
             const activeLoans = AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved');
@@ -4446,27 +4447,36 @@
                 if (AppState.selectedLoanForPayment) {
                     document.getElementById('paymentLoanSelect').value = AppState.selectedLoanForPayment;
                 }
-                // Clear any previous proof URL
                 window.paymentProofUrl = null;
             }
 
-            // Payment history
+            // Payment history – now displayed as cards for better mobile experience
             const historyEl = document.getElementById('paymentHistory');
             if (AppState.payments.length === 0) {
                 historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-history" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No payment history found</p></div>';
             } else {
-                let historyHtml = '<table class="data-table"><tr><th>Date</th><th>Loan</th><th>Amount</th><th>Method</th><th>Status</th><th>Proof</th></tr>';
+                let historyHtml = '<div class="payment-cards">';
                 AppState.payments.slice(0, 10).forEach(p => {
-                    historyHtml += `<tr>
-                        <td>${Utils.formatDate(p.timestamp)}</td>
-                        <td>${p.loanId}</td>
-                        <td>${Utils.formatCurrency(p.amount)}</td>
-                        <td>${p.method}</td>
-                        <td><span class="status-badge-tag ${p.status === 'verified' ? 'status-active' : 'status-pending'}">${p.status}</span></td>
-                        <td>${p.proofUrl ? `<a href="${p.proofUrl}" target="_blank">View</a>` : '-'}</td>
-                    </tr>`;
+                    historyHtml += `
+                        <div class="loan-card" style="margin-bottom: 12px;">
+                            <div class="loan-card-header">
+                                <span class="loan-id">${p.id}</span>
+                                <span class="status-badge-tag ${p.status === 'verified' ? 'status-active' : 'status-pending'}">${p.status}</span>
+                            </div>
+                            <div class="loan-amount">${Utils.formatCurrency(p.amount)}</div>
+                            <div class="loan-dates">
+                                <span>Date: ${Utils.formatDate(p.timestamp)}</span>
+                            </div>
+                            <div style="margin-top: 8px; font-size: 13px;">
+                                <div><strong>Loan:</strong> ${p.loanId}</div>
+                                <div><strong>Method:</strong> ${p.method}</div>
+                                ${p.reference ? `<div><strong>Ref:</strong> ${p.reference}</div>` : ''}
+                                ${p.proofUrl ? `<div><strong>Proof:</strong> <a href="${p.proofUrl}" target="_blank">View</a></div>` : ''}
+                            </div>
+                        </div>
+                    `;
                 });
-                historyHtml += '</table>';
+                historyHtml += '</div>';
                 historyEl.innerHTML = historyHtml;
             }
         },
