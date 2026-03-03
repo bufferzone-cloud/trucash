@@ -1,936 +1,709 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes, viewport-fit=cover">
-    <title>TruCash | Agent Portal v3.0 (Complete Edition)</title>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/intl-tel-input/17.0.8/css/intlTelInput.css">
-    <!-- Firebase SDK -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- Cloudinary -->
-    <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
-    <style>
-        /* ===== Unified iOS‑inspired CSS (blue agent theme) ===== */
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-            -webkit-font-smoothing: antialiased;
-            -moz-osx-font-smoothing: grayscale;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+  <title>TruCash · Agent</title>
+  <!-- Font Awesome & iOS style reset -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Firebase SDK (compat) -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- Cloudinary widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  <style>
+    /* ----- iOS white theme • floating cards • perfect mobile ----- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      -webkit-tap-highlight-color: transparent;
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
 
-        :root {
-            --agent-blue: #007aff;
-            --agent-blue-dark: #0056cc;
-            --agent-blue-light: #409cff;
-            --agent-bg: #f5f7fa;
-            --agent-sidebar: #ffffff;
-            --agent-card: #ffffff;
-            --agent-text: #1d1d1f;
-            --agent-text-secondary: #6c6c70;
-            --agent-border: #d9d9de;
-            --agent-gray-1: #f2f2f7;
-            --agent-gray-2: #e5e5ea;
-            --agent-gray-3: #d1d1d6;
-            --agent-gray-4: #c7c7cc;
-            --agent-gray-5: #8e8e93;
-            --agent-green: #30d158;
-            --agent-red: #ff3b30;
-            --agent-orange: #ff9500;
-            --agent-purple: #af52de;
-            --agent-shadow: 0 4px 16px rgba(0,0,0,0.04);
-            --agent-shadow-lg: 0 8px 32px rgba(0,0,0,0.08);
-            --agent-radius: 14px;
-            --agent-radius-sm: 10px;
-            --agent-radius-lg: 20px;
-            --agent-transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
-            --ios-safe-area-bottom: env(safe-area-inset-bottom,20px);
-            --ios-safe-area-top: env(safe-area-inset-top,20px);
-        }
+    body {
+      background: #f8fafc;  /* soft off-white */
+      color: #1e293b;
+      line-height: 1.4;
+      padding-bottom: 80px;  /* space for bottom nav */
+      min-height: 100vh;
+    }
 
-        body {
-            background: var(--agent-bg);
-            color: var(--agent-text);
-            font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Helvetica Neue', sans-serif;
-            line-height: 1.5;
-            min-height: 100vh;
-            overscroll-behavior-y: none;
-        }
+    /* floating cards */
+    .card {
+      background: #ffffff;
+      border-radius: 24px;
+      padding: 1.2rem;
+      box-shadow: 0 8px 20px rgba(0,0,0,0.02), 0 2px 6px rgba(0,0,0,0.03);
+      border: 1px solid rgba(226, 232, 240, 0.6);
+      transition: 0.2s ease;
+      margin-bottom: 1rem;
+    }
+    .card:active { transform: scale(0.99); background: #fafafa; }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background-image: 
-                radial-gradient(circle at 10% 20%, rgba(0,122,255,0.02) 0px, transparent 50%),
-                radial-gradient(circle at 90% 10%, rgba(0,122,255,0.02) 0px, transparent 50%),
-                radial-gradient(circle at 50% 90%, rgba(0,122,255,0.02) 0px, transparent 50%);
-            pointer-events: none;
-            z-index: -1;
-        }
+    /* header */
+    .agent-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 1.2rem 1.2rem 0.5rem 1.2rem;
+    }
+    .logo-area {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .logo-icon {
+      width: 40px; height: 40px;
+      background: linear-gradient(145deg, #0066CC, #0055AA);
+      border-radius: 14px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      color: white;
+      font-size: 1.4rem;
+      box-shadow: 0 6px 12px rgba(0,102,204,0.2);
+    }
+    .agent-name {
+      font-weight: 650;
+      font-size: 1.3rem;
+      letter-spacing: -0.3px;
+      color: #0f172a;
+    }
+    .conn-badge {
+      background: #e6f7e6;
+      padding: 0.3rem 0.8rem;
+      border-radius: 40px;
+      font-size: 0.75rem;
+      color: #2e7d32;
+      font-weight: 500;
+      border: 1px solid #a5d6a7;
+    }
 
-        .dashboard-container {
-            display: flex;
-            min-height: 100vh;
-            max-width: 1800px;
-            margin: 0 auto;
-        }
+    /* bottom navigation */
+    .bottom-nav {
+      position: fixed;
+      bottom: 0; left: 0; right: 0;
+      background: rgba(255,255,255,0.85);
+      backdrop-filter: blur(16px);
+      -webkit-backdrop-filter: blur(16px);
+      border-top: 1px solid #e9eef2;
+      display: flex;
+      justify-content: space-around;
+      padding: 0.6rem 0.5rem 1.2rem 0.5rem;
+      border-radius: 30px 30px 0 0;
+      box-shadow: 0 -4px 20px rgba(0,0,0,0.02);
+      z-index: 100;
+    }
+    .nav-item {
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      color: #94a3b8;
+      font-size: 0.7rem;
+      transition: 0.2s;
+      padding: 0.4rem 1rem;
+      border-radius: 40px;
+    }
+    .nav-item i { font-size: 1.5rem; margin-bottom: 3px; }
+    .nav-item.active {
+      color: #0066CC;
+      background: rgba(0,102,204,0.08);
+      font-weight: 500;
+    }
 
-        /* mobile header (customer style) */
-        .mobile-header {
-            display: none;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-            background: rgba(255,255,255,0.92);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 16px;
-            border-bottom: 1px solid var(--agent-border);
-            align-items: center;
-            justify-content: space-between;
-        }
-        @media (max-width: 992px) {
-            .mobile-header { display: flex; }
-        }
+    /* main content area */
+    .content {
+      padding: 0.8rem 1rem 1rem 1rem;
+    }
+    .section-title {
+      font-weight: 650;
+      font-size: 1.2rem;
+      margin: 1rem 0 0.8rem 0;
+      color: #0f172a;
+      padding-left: 0.2rem;
+    }
 
-        .hamburger-menu {
-            width: 40px; height: 40px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 10px;
-            background: var(--agent-gray-1);
-            border: none;
-            font-size: 18px;
-            color: var(--agent-text);
-            cursor: pointer;
-        }
+    /* customer cards (home / loans) */
+    .customer-row {
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+    }
+    .avatar {
+      width: 56px; height: 56px;
+      border-radius: 28px;
+      background: #e2e8f0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.6rem;
+      color: #475569;
+      object-fit: cover;
+      border: 2px solid white;
+      box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    }
+    .customer-info {
+      flex: 1;
+    }
+    .customer-name {
+      font-weight: 650;
+      font-size: 1.1rem;
+    }
+    .customer-meta {
+      color: #64748b;
+      font-size: 0.85rem;
+      display: flex;
+      gap: 0.8rem;
+      margin-top: 4px;
+    }
+    .badge-light {
+      background: #f1f5f9;
+      border-radius: 40px;
+      padding: 0.2rem 0.8rem;
+      font-size: 0.7rem;
+      font-weight: 600;
+      color: #334155;
+    }
 
-        .mobile-logo {
-            font-size: 18px; font-weight: 700;
-            color: var(--agent-blue);
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        .mobile-logo i { font-size: 16px; }
+    /* buttons glowing / curved */
+    .btn {
+      background: white;
+      border: 1px solid #dde3e9;
+      padding: 0.6rem 1.2rem;
+      border-radius: 40px;
+      font-weight: 500;
+      font-size: 0.9rem;
+      color: #1e293b;
+      box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+      transition: 0.15s;
+      cursor: pointer;
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+    }
+    .btn-primary {
+      background: #0066CC;
+      border: none;
+      color: white;
+      box-shadow: 0 6px 14px rgba(0,102,204,0.25);
+    }
+    .btn-primary:active { background: #004999; transform: scale(0.97); }
+    .btn-outline { background: transparent; border: 1px solid #b9c7d9; }
 
-        .sidebar {
-            width: 280px;
-            background: var(--agent-sidebar);
-            border-right: 1px solid var(--agent-border);
-            padding: 20px 0;
-            position: fixed;
-            height: 100vh;
-            overflow-y: auto;
-            z-index: 1000;
-            transition: transform 0.3s ease;
-            left: -280px;
-        }
-        @media (min-width: 993px) {
-            .sidebar { left: 0; position: sticky; }
-        }
-        .sidebar.active { left: 0; }
+    /* modals – iOS style */
+    .modal {
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.3);
+      backdrop-filter: blur(6px);
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 1rem;
+    }
+    .modal.active { display: flex; }
+    .modal-card {
+      background: white;
+      border-radius: 32px;
+      width: 100%;
+      max-width: 420px;
+      max-height: 85vh;
+      overflow-y: auto;
+      padding: 1.8rem 1.5rem;
+      box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1.2rem;
+    }
+    .modal-close {
+      background: #f1f5f9;
+      border: none;
+      width: 36px; height: 36px;
+      border-radius: 50%;
+      font-size: 1.2rem;
+      color: #475569;
+    }
 
-        .logo-container {
-            display: flex;
-            align-items: center;
-            padding: 0 24px 30px;
-            border-bottom: 1px solid var(--agent-border);
-            margin-bottom: 30px;
-        }
-        .logo-icon {
-            width: 36px; height: 36px;
-            background: linear-gradient(135deg, var(--agent-blue), var(--agent-purple));
-            border-radius: 9px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 12px;
-            color: white;
-            font-size: 18px;
-        }
-        .logo-text { font-size: 20px; font-weight: 700; color: var(--agent-text); }
-        .agent-badge { background: var(--agent-blue); color: white; font-size: 11px; padding: 2px 8px; border-radius: 12px; margin-left: 8px; }
+    /* agent code copy */
+    .code-block {
+      background: #eef2ff;
+      padding: 1rem;
+      border-radius: 24px;
+      border: 1px dashed #0066CC;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin: 1rem 0;
+    }
+    .agent-code {
+      font-family: monospace;
+      font-size: 1.3rem;
+      font-weight: 600;
+      letter-spacing: 1px;
+      color: #0066CC;
+    }
+    .copy-btn {
+      background: #0066CC; color: white; border: none;
+      padding: 0.4rem 1.2rem; border-radius: 40px;
+      font-size: 0.9rem;
+    }
 
-        .nav-menu { padding: 0 16px; }
-        .nav-item {
-            display: flex;
-            align-items: center;
-            padding: 12px 16px;
-            color: var(--agent-text-secondary);
-            border-radius: var(--agent-radius-sm);
-            margin-bottom: 4px;
-            transition: var(--agent-transition);
-            cursor: pointer;
-            text-decoration: none;
-            position: relative;
-        }
-        .nav-item:hover { background: var(--agent-gray-1); color: var(--agent-text); }
-        .nav-item.active { background: var(--agent-blue); color: white; }
-        .nav-item i { width: 24px; margin-right: 12px; font-size: 16px; }
-        .nav-item span { font-size: 14px; font-weight: 500; }
-        .nav-badge {
-            position: absolute; right: 16px;
-            background: var(--agent-red); color: white;
-            font-size: 11px; font-weight: 600; padding: 2px 6px; border-radius: 10px;
-            min-width: 20px; text-align: center;
-        }
+    /* commission grid */
+    .stat-row {
+      display: flex;
+      justify-content: space-between;
+      background: #f8fafc;
+      border-radius: 20px;
+      padding: 0.8rem 1.2rem;
+      margin: 0.5rem 0;
+    }
+    hr { opacity: 0.2; margin: 1rem 0; }
 
-        .user-profile {
-            padding: 20px 24px;
-            border-top: 1px solid var(--agent-border);
-            margin-top: auto;
-        }
-        .profile-card {
-            display: flex;
-            align-items: center;
-            background: var(--agent-gray-1);
-            border-radius: var(--agent-radius-sm);
-            padding: 10px;
-            border: 1px solid var(--agent-border);
-        }
-        .profile-avatar {
-            width: 44px; height: 44px; border-radius: 50%; object-fit: cover;
-            border: 2px solid var(--agent-border); margin-right: 12px;
-        }
-        .profile-info { flex: 1; min-width: 0; }
-        .profile-name { font-size: 14px; font-weight: 600; color: var(--agent-text); margin-bottom: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-        .profile-role { font-size: 12px; color: var(--agent-text-secondary); }
+    /* loan agreement preview */
+    .agreement-preview {
+      background: #f1f5f9;
+      border-radius: 16px;
+      padding: 1rem;
+      font-size: 0.8rem;
+      font-family: 'Times New Roman', serif;
+      white-space: pre-wrap;
+      max-height: 200px;
+      overflow-y: auto;
+      border: 1px solid #cbd5e1;
+    }
 
-        .main-content {
-            flex: 1;
-            margin-left: 0;
-            width: 100%;
-            min-height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-        @media (min-width: 993px) {
-            .main-content { margin-left: 280px; }
-        }
+    /* hidden sections */
+    .section { display: none; }
+    .section.active { display: block; }
 
-        .header {
-            padding: 24px 32px;
-            background: rgba(255,255,255,0.8);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--agent-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            position: sticky;
-            top: 0;
-            z-index: 100;
-        }
-        .header-title { font-size: 24px; font-weight: 700; color: var(--agent-text); }
-        .header-subtitle { font-size: 14px; color: var(--agent-text-secondary); }
-        .header-actions { display: flex; align-items: center; gap: 16px; }
-        .status-badge {
-            padding: 6px 12px; background: var(--agent-gray-1); border-radius: 20px;
-            font-size: 13px; font-weight: 500; display: flex; align-items: center; gap: 6px;
-        }
-        .status-badge i { color: var(--agent-green); font-size: 8px; }
-        .logout-btn {
-            padding: 10px 20px; background: var(--agent-red); color: white; border: none;
-            border-radius: var(--agent-radius-sm); font-size: 14px; font-weight: 500;
-            cursor: pointer; transition: var(--agent-transition); display: flex; align-items: center; gap: 8px;
-        }
-        .logout-btn:hover { background: #d70015; }
-
-        #contentArea {
-            flex: 1;
-            padding: 32px;
-            overflow-y: auto;
-        }
-        @media (max-width: 768px) { #contentArea { padding: 16px; } }
-
-        .dashboard-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px,1fr));
-            gap: 20px;
-            margin-bottom: 32px;
-        }
-        .dashboard-card {
-            background: var(--agent-card);
-            border-radius: var(--agent-radius);
-            padding: 24px;
-            box-shadow: var(--agent-shadow);
-            border: 1px solid var(--agent-border);
-            transition: var(--agent-transition);
-            cursor: pointer;
-        }
-        .dashboard-card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--agent-shadow-lg);
-        }
-        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; }
-        .card-title { font-size: 14px; color: var(--agent-text-secondary); font-weight: 500; }
-        .card-icon {
-            width: 44px; height: 44px; border-radius: 12px;
-            background: linear-gradient(135deg, var(--agent-blue-light), var(--agent-blue));
-            display: flex; align-items: center; justify-content: center; color: white;
-        }
-        .card-value { font-size: 32px; font-weight: 700; color: var(--agent-text); margin-bottom: 8px; }
-        .card-subtitle { font-size: 14px; color: var(--agent-text-secondary); margin-bottom: 12px; }
-        .card-footer { display: flex; justify-content: space-between; font-size: 13px; }
-        .trend-up { color: var(--agent-green); }
-        .trend-down { color: var(--agent-red); }
-
-        .section {
-            background: var(--agent-card);
-            border-radius: var(--agent-radius);
-            padding: 24px;
-            box-shadow: var(--agent-shadow);
-            margin-bottom: 24px;
-            border: 1px solid var(--agent-border);
-        }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; }
-        .section-title { font-size: 18px; font-weight: 700; color: var(--agent-text); }
-
-        /* loan tabs (customer style) */
-        .loan-tabs {
-            display: flex; gap: 8px; margin-bottom: 20px; flex-wrap: wrap;
-        }
-        .loan-tab {
-            padding: 8px 16px; background: var(--agent-gray-1); border-radius: 20px;
-            font-size: 13px; cursor: pointer; transition: var(--agent-transition);
-        }
-        .loan-tab.active { background: var(--agent-blue); color: white; }
-
-        .table-responsive { overflow-x: auto; }
-        .data-table { width: 100%; border-collapse: collapse; }
-        .data-table th {
-            background: var(--agent-gray-1); padding: 16px; text-align: left;
-            font-size: 13px; font-weight: 600; color: var(--agent-text-secondary);
-            border-bottom: 1px solid var(--agent-border);
-        }
-        .data-table td { padding: 16px; font-size: 14px; border-bottom: 1px solid var(--agent-border); }
-        .data-table tr:hover { background: var(--agent-gray-1); }
-
-        .status-badge-table {
-            display: inline-block; padding: 4px 12px; border-radius: 20px;
-            font-size: 12px; font-weight: 600;
-        }
-        .status-active { background: rgba(48,209,88,0.1); color: #248a3d; }
-        .status-pending { background: rgba(255,149,0,0.1); color: var(--agent-orange); }
-        .status-approved { background: rgba(0,122,255,0.1); color: var(--agent-blue); }
-        .status-rejected { background: rgba(255,59,48,0.1); color: var(--agent-red); }
-        .status-completed { background: rgba(48,209,88,0.1); color: var(--agent-green); }
-
-        .loan-card {
-            background: var(--agent-card);
-            border-radius: var(--agent-radius);
-            padding: 16px;
-            margin-bottom: 12px;
-            border: 1px solid var(--agent-border);
-            transition: var(--agent-transition);
-            cursor: pointer;
-            position: relative;
-        }
-        .loan-card:hover { box-shadow: var(--agent-shadow-lg); transform: translateY(-2px); }
-        .loan-card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 10px; }
-        .loan-id { font-weight: 600; color: var(--agent-text); }
-        .loan-amount { font-size: 18px; font-weight: 700; color: var(--agent-blue); }
-        .loan-dates { display: flex; justify-content: space-between; font-size: 12px; color: var(--agent-text-secondary); }
-        .loan-agreement-btn {
-            background: var(--agent-blue); color: white; border: none;
-            border-radius: var(--agent-radius-sm); padding: 6px 12px; font-size: 12px;
-            cursor: pointer; margin-top: 10px;
-        }
-
-        .loan-detail-grid {
-            display: grid; grid-template-columns: repeat(auto-fit, minmax(150px,1fr)); gap: 16px; margin: 16px 0;
-        }
-        .loan-detail-item { background: var(--agent-gray-1); padding: 12px; border-radius: var(--agent-radius-sm); }
-        .loan-detail-label { font-size: 11px; color: var(--agent-text-secondary); text-transform: uppercase; }
-        .loan-detail-value { font-size: 16px; font-weight: 600; color: var(--agent-text); }
-
-        .form-group { margin-bottom: 20px; }
-        .form-label { display: block; font-size: 14px; font-weight: 500; margin-bottom: 8px; color: var(--agent-text); }
-        .form-input {
-            width: 100%; padding: 12px 16px; border: 1px solid var(--agent-border);
-            border-radius: var(--agent-radius-sm); font-size: 14px; background: white;
-            transition: var(--agent-transition);
-        }
-        .form-input:focus { outline: none; border-color: var(--agent-blue); box-shadow: 0 0 0 3px rgba(0,122,255,0.1); }
-        .form-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px,1fr)); gap: 20px; }
-        .btn {
-            padding: 10px 20px; border: none; border-radius: var(--agent-radius-sm);
-            font-size: 14px; font-weight: 500; cursor: pointer; transition: var(--agent-transition);
-            display: inline-flex; align-items: center; gap: 8px; justify-content: center;
-        }
-        .btn-primary { background: var(--agent-blue); color: white; }
-        .btn-primary:hover { background: var(--agent-blue-dark); }
-        .btn-outline { background: transparent; border: 1px solid var(--agent-blue); color: var(--agent-blue); }
-        .btn-outline:hover { background: var(--agent-blue); color: white; }
-        .btn-danger { background: var(--agent-red); color: white; }
-        .btn-success { background: var(--agent-green); color: white; }
-        .btn-small { padding: 6px 12px; font-size: 12px; }
-
-        .modal {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.4); backdrop-filter: blur(8px);
-            display: none; align-items: center; justify-content: center;
-            z-index: 2000; padding: 16px;
-        }
-        .modal.active { display: flex; }
-        .modal-content {
-            background: white; border-radius: var(--agent-radius-lg);
-            max-width: 800px; width: 100%; max-height: 90vh; overflow-y: auto;
-            box-shadow: var(--agent-shadow-lg);
-        }
-        .modal-content.large { max-width: 1000px; }
-        .modal-header {
-            padding: 20px; border-bottom: 1px solid var(--agent-border);
-            display: flex; justify-content: space-between; align-items: center;
-            position: sticky; top: 0; background: white; z-index: 10;
-        }
-        .modal-title { font-size: 20px; font-weight: 700; color: var(--agent-text); }
-        .modal-close {
-            width: 32px; height: 32px; border-radius: 50%; background: var(--agent-gray-1);
-            border: none; cursor: pointer; display: flex; align-items: center; justify-content: center;
-        }
-        .modal-body { padding: 24px; }
-        .modal-footer { padding: 20px; border-top: 1px solid var(--agent-border); display: flex; gap: 12px; justify-content: flex-end; }
-
-        .mobile-bottom-nav {
-            display: none;
-            position: fixed; bottom: 0; left: 0; width: 100%;
-            background: rgba(255,255,255,0.98); backdrop-filter: blur(20px);
-            border-top: 1px solid var(--agent-border);
-            padding: 10px 16px calc(10px + var(--ios-safe-area-bottom));
-            z-index: 100;
-            justify-content: space-around;
-        }
-        @media (max-width: 992px) { .mobile-bottom-nav { display: flex; } }
-        .mobile-nav-item {
-            display: flex; flex-direction: column; align-items: center; gap: 4px;
-            color: var(--agent-text-secondary); text-decoration: none; font-size: 10px;
-            padding: 6px; border-radius: 8px; min-width: 60px;
-        }
-        .mobile-nav-item.active { color: var(--agent-blue); background: rgba(0,122,255,0.1); }
-        .mobile-nav-item i { font-size: 18px; }
-
-        .toast-container { position: fixed; top: 20px; right: 20px; z-index: 3000; }
-        .toast {
-            background: white; border-radius: var(--agent-radius); padding: 14px 16px;
-            margin-bottom: 10px; box-shadow: var(--agent-shadow-lg);
-            border-left: 4px solid var(--agent-blue); display: flex; gap: 12px;
-            animation: slideInRight 0.3s;
-        }
-        @keyframes slideInRight { from { opacity:0; transform:translateX(100%); } to { opacity:1; transform:translateX(0); } }
-
-        .signature-container { border: 1px solid var(--agent-border); border-radius: var(--agent-radius-sm); background: white; margin-bottom: 16px; }
-        .signature-canvas { width: 100%; height: 150px; display: block; cursor: crosshair; background: white; border-radius: var(--agent-radius-sm) var(--agent-radius-sm) 0 0; }
-        .signature-tools { display: flex; gap: 8px; padding: 8px; border-top: 1px solid var(--agent-border); background: var(--agent-gray-1); }
-
-        .d-none { display: none; }
-        .d-flex { display: flex; }
-        .gap-2 { gap: 8px; }
-        .mt-3 { margin-top: 16px; }
-        .mb-2 { margin-bottom: 8px; }
-        .text-center { text-align: center; }
-        .text-success { color: var(--agent-green) !important; }
-        .text-danger { color: var(--agent-red) !important; }
-        .w-100 { width: 100%; }
-
-        .agreement-iframe { width: 100%; height: 500px; border: 1px solid var(--agent-border); border-radius: 6px; }
-    </style>
+    /* small utilities */
+    .flex { display: flex; align-items: center; gap: 8px; }
+    .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+    .text-success { color: #2e7d32; }
+    .text-danger { color: #b91c1c; }
+    .mt-1 { margin-top: 0.5rem; } .mt-2 { margin-top: 1rem; } .mb-1 { margin-bottom: 0.5rem; }
+  </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">Initializing Agent Portal...</div>
+  <!-- loading overlay (kept from original) -->
+  <div class="loading-overlay" id="loadingOverlay" style="display: none; position:fixed; inset:0; background:rgba(255,255,255,0.9); backdrop-filter:blur(10px); z-index:9999; align-items:center; justify-content:center; flex-direction:column;">
+    <div class="loading-spinner" style="width:50px; height:50px; border:4px solid #eee; border-top-color:#0066CC; border-radius:50%; animation:spin 1s infinite;"></div>
+    <div class="loading-text" style="margin-top:1rem; color:#334155;">Loading...</div>
+  </div>
+  <style> @keyframes spin { to { transform: rotate(360deg); } } </style>
+
+  <!-- toast container (minimal) -->
+  <div id="toastContainer" style="position:fixed; top:16px; right:16px; z-index:10000;"></div>
+
+  <!-- agent header -->
+  <div class="agent-header">
+    <div class="logo-area">
+      <div class="logo-icon"><i class="fas fa-user-tie"></i></div>
+      <span class="agent-name" id="agentFullName">Agent</span>
+    </div>
+    <div class="conn-badge" id="connectionStatus"><i class="fas fa-circle" style="font-size:0.6rem; margin-right:4px;"></i> Online</div>
+  </div>
+
+  <!-- main content pages -->
+  <div class="content" id="contentArea">
+    <!-- HOME (customers) -->
+    <div class="section active" id="homeSection">
+      <div class="section-title"><i class="fas fa-users" style="margin-right:8px;"></i>My customers</div>
+      <div id="customersListHome"></div>
+      <div class="flex" style="justify-content: center; margin: 1rem 0;">
+        <span class="badge-light" id="customerCount">0 customers</span>
+      </div>
     </div>
 
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-
-    <!-- Mobile Header -->
-    <div class="mobile-header">
-        <button class="hamburger-menu" id="menuToggle"><i class="fas fa-bars"></i></button>
-        <div class="mobile-logo"><i class="fas fa-user-tie"></i><span>TruCash Agent</span></div>
-        <div class="status-badge"><i class="fas fa-circle"></i><span id="connectionStatus">Online</span></div>
+    <!-- LOANS (customers -> loan details) -->
+    <div class="section" id="loansSection">
+      <div class="section-title"><i class="fas fa-file-invoice" style="margin-right:8px;"></i>Customer loans</div>
+      <div id="customersListLoans"></div>
     </div>
 
-    <div class="dashboard-container">
-        <!-- Sidebar -->
-        <aside class="sidebar" id="sidebar">
-            <div class="logo-container">
-                <div class="logo-icon"><i class="fas fa-user-tie"></i></div>
-                <div class="logo-text">TruCash <span class="agent-badge">AGENT</span></div>
-            </div>
-            <nav class="nav-menu">
-                <a href="#" class="nav-item active" data-section="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a>
-                <a href="#" class="nav-item" data-section="customers"><i class="fas fa-users"></i><span>My Customers</span><span class="nav-badge" id="customersBadge">0</span></a>
-                <a href="#" class="nav-item" data-section="onboard"><i class="fas fa-user-plus"></i><span>Onboard Customer</span></a>
-                <a href="#" class="nav-item" data-section="loans"><i class="fas fa-file-invoice-dollar"></i><span>Loan Applications</span><span class="nav-badge" id="loansBadge">0</span></a>
-                <a href="#" class="nav-item" data-section="repayments"><i class="fas fa-calendar-check"></i><span>Repayments</span><span class="nav-badge" id="repaymentsBadge">0</span></a>
-                <a href="#" class="nav-item" data-section="transactions"><i class="fas fa-exchange-alt"></i><span>Transactions</span><span class="nav-badge" id="transactionsBadge">0</span></a>
-                <a href="#" class="nav-item" data-section="commission"><i class="fas fa-money-check-alt"></i><span>Commission</span></a>
-                <a href="#" class="nav-item" data-section="documents"><i class="fas fa-file-contract"></i><span>Documents</span></a>
-                <a href="#" class="nav-item" data-section="notifications"><i class="fas fa-bell"></i><span>Notifications</span><span class="nav-badge" id="notificationsBadge">0</span></a>
-                <a href="#" class="nav-item" data-section="analytics"><i class="fas fa-chart-line"></i><span>Analytics</span></a>
-                <a href="#" class="nav-item" data-section="audit"><i class="fas fa-history"></i><span>Audit Log</span></a>
-                <a href="#" class="nav-item" data-section="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
-            </nav>
-            <div class="user-profile">
-                <div class="profile-card">
-                    <img src="" alt="Profile" class="profile-avatar" id="profileAvatar" onerror="this.src='https://ui-avatars.com/api/?name=Agent&background=007AFF&color=fff'">
-                    <div class="profile-info">
-                        <div class="profile-name" id="profileName">Loading...</div>
-                        <div class="profile-role">Agent ID: <span id="agentIdDisplay">---</span></div>
-                    </div>
-                </div>
-            </div>
-        </aside>
-
-        <!-- Main Content -->
-        <main class="main-content">
-            <header class="header">
-                <div>
-                    <div class="header-title" id="pageTitle">Agent Dashboard</div>
-                    <div class="header-subtitle" id="agentBranch">Loading branch...</div>
-                </div>
-                <div class="header-actions">
-                    <div class="status-badge"><i class="fas fa-circle"></i><span id="desktopConnectionStatus">Online</span></div>
-                    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i>Logout</button>
-                </div>
-            </header>
-
-            <div id="contentArea">
-                <!-- ========== DASHBOARD SECTION ========== -->
-                <section id="dashboardSection" class="content-section">
-                    <div class="commission-display" style="background: linear-gradient(135deg, var(--agent-purple), var(--agent-blue)); color: white; padding: 24px; border-radius: var(--agent-radius); margin-bottom: 24px;">
-                        <div class="commission-value" id="totalCommission">K0.00</div>
-                        <div class="commission-label">Total Commission (15% of interest)</div>
-                        <div class="card-footer" style="color: rgba(255,255,255,0.8);"><span id="thisMonthCommission">K0.00 this month</span><span class="trend-up" id="commissionTrend">+0%</span></div>
-                    </div>
-                    <div class="dashboard-grid">
-                        <div class="dashboard-card" onclick="UIManager.showSection('customers')">
-                            <div class="card-header"><div class="card-title">Total Customers</div><div class="card-icon"><i class="fas fa-users"></i></div></div>
-                            <div class="card-value" id="totalCustomers">0</div>
-                            <div class="card-subtitle">Active customers assigned</div>
-                            <div class="card-footer"><span id="activeCustomers">0 active</span><span class="trend-up" id="customersTrend">+0</span></div>
-                        </div>
-                        <div class="dashboard-card" onclick="UIManager.showSection('loans')">
-                            <div class="card-header"><div class="card-title">Active Loans</div><div class="card-icon"><i class="fas fa-file-invoice-dollar"></i></div></div>
-                            <div class="card-value" id="activeLoans">0</div>
-                            <div class="card-subtitle">Total portfolio value</div>
-                            <div class="card-footer"><span id="loanPortfolioValue">K0.00</span><span class="trend-up" id="loansTrend">+0%</span></div>
-                        </div>
-                        <div class="dashboard-card" onclick="UIManager.showSection('repayments')">
-                            <div class="card-header"><div class="card-title">Repayments Due</div><div class="card-icon"><i class="fas fa-calendar-alt"></i></div></div>
-                            <div class="card-value" id="dueRepayments">0</div>
-                            <div class="card-subtitle">Installments due this week</div>
-                            <div class="card-footer"><span id="overdueCount">0 overdue</span><span class="trend-down" id="repaymentsTrend">-0%</span></div>
-                        </div>
-                        <div class="dashboard-card" onclick="UIManager.showSection('notifications')">
-                            <div class="card-header"><div class="card-title">Pending Actions</div><div class="card-icon"><i class="fas fa-tasks"></i></div></div>
-                            <div class="card-value" id="pendingActions">0</div>
-                            <div class="card-subtitle">Require your attention</div>
-                            <div class="card-footer"><span id="highPriority">0 high</span><span class="trend-up" id="actionsTrend">+0</span></div>
-                        </div>
-                    </div>
-                    <div class="section">
-                        <div class="section-header"><div class="section-title">Recent Activity</div><button class="btn btn-outline btn-small" onclick="UIManager.showSection('audit')">View All</button></div>
-                        <div class="audit-log" id="recentActivity">
-                            <div class="audit-entry pulse"><div class="audit-icon"><i class="fas fa-spinner fa-spin"></i></div><div class="audit-content"><div class="audit-action">Loading activities...</div><div class="audit-time">Just now</div></div></div>
-                        </div>
-                    </div>
-                    <div class="section">
-                        <div class="section-header"><div class="section-title">Performance Metrics</div></div>
-                        <div class="form-row">
-                            <div class="dashboard-card"><div class="card-header"><div class="card-title">Recovery Rate</div><div class="card-icon"><i class="fas fa-percentage"></i></div></div><div class="card-value" id="recoveryRate">0%</div><div class="card-footer"><span id="recoveryChange">+0%</span><span class="trend-up">This month</span></div></div>
-                            <div class="dashboard-card"><div class="card-header"><div class="card-title">Avg Processing Time</div><div class="card-icon"><i class="fas fa-clock"></i></div></div><div class="card-value" id="avgProcessingTime">0h</div><div class="card-footer"><span id="processingChange">+0%</span><span class="trend-down">Faster</span></div></div>
-                            <div class="dashboard-card"><div class="card-header"><div class="card-title">Customer Satisfaction</div><div class="card-icon"><i class="fas fa-smile"></i></div></div><div class="card-value" id="customerSatisfaction">0%</div><div class="card-footer"><span id="satisfactionChange">+0%</span><span class="trend-up">Improving</span></div></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ========== CUSTOMERS SECTION (original) ========== -->
-                <section id="customersSection" class="content-section" style="display: none;">
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">My Customers</div>
-                            <button class="btn btn-primary" onclick="UIManager.showSection('onboard')"><i class="fas fa-user-plus"></i> Onboard Customer</button>
-                        </div>
-                        <div class="section-subtitle">Customers assigned to your Agent ID: <strong id="currentAgentId">---</strong></div>
-                        <div class="search-filter-container" style="display: flex; gap: 12px; margin-bottom: 20px;">
-                            <div class="search-box" style="flex:1; position:relative;"><i class="fas fa-search" style="position:absolute; left:16px; top:50%; transform:translateY(-50%); color:var(--agent-text-secondary);"></i><input type="text" id="customerSearch" class="form-input" placeholder="Search..." style="padding-left:44px;"></div>
-                            <div class="filter-select"><select id="customerFilter" class="form-input"><option value="all">All</option><option value="active">Active</option><option value="with_loans">With Loans</option><option value="overdue">Overdue</option><option value="inactive">Inactive</option></select></div>
-                        </div>
-                        <div class="customers-grid" id="customersGrid">
-                            <!-- populated by JS -->
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ========== ONBOARD SECTION (original) ========== -->
-                <section id="onboardSection" class="content-section" style="display: none;">
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">Onboard New Customer</div>
-                            <button class="btn btn-outline btn-small" onclick="UIManager.showSection('customers')"><i class="fas fa-arrow-left"></i> Back</button>
-                        </div>
-                        <form id="onboardingForm">
-                            <!-- full original form with all fields, upload areas, etc. -->
-                            <div class="form-group"><label class="form-label">Personal Information</label>
-                                <div class="form-row"><div class="form-group"><input type="text" id="customerFullName" class="form-input" placeholder="Full Name *" required></div><div class="form-group"><input type="email" id="customerEmail" class="form-input" placeholder="Email *" required></div></div>
-                                <div class="form-row"><div class="form-group"><input type="tel" id="customerPhone" class="form-input" placeholder="Phone *" required></div><div class="form-group"><input type="text" id="customerNRC" class="form-input" placeholder="NRC (123456/78/9) *" required></div></div>
-                                <div class="form-row"><div class="form-group"><input type="text" id="customerAddress" class="form-input" placeholder="Address *" required></div><div class="form-group"><input type="text" id="customerHouseNumber" class="form-input" placeholder="House/Plot"></div></div>
-                                <div class="form-row"><div class="form-group"><input type="text" id="customerOccupation" class="form-input" placeholder="Occupation"></div><div class="form-group"><input type="number" id="customerMonthlyIncome" class="form-input" placeholder="Monthly Income (ZMW)"></div></div>
-                            </div>
-                            <div class="form-group"><label class="form-label">Account Setup</label>
-                                <div class="form-row"><div class="form-group"><input type="password" id="customerPassword" class="form-input" placeholder="Temporary Password *" required minlength="6"></div><div class="form-group"><input type="password" id="customerConfirmPassword" class="form-input" placeholder="Confirm Password *" required></div></div>
-                                <div class="form-row"><div class="form-group"><select id="serviceLevel" class="form-input"><option value="standard">Standard</option><option value="premium">Premium</option><option value="basic">Basic</option></select></div><div class="form-group"><input type="text" id="customerReferral" class="form-input" placeholder="Referral Code"></div></div>
-                            </div>
-                            <div class="form-group"><label class="form-label">Document Upload</label>
-                                <div class="form-row">
-                                    <div class="form-group"><div class="upload-area" onclick="DocumentManager.openUploadWidget('nrcFront')" data-type="nrcFront"><i class="fas fa-id-card"></i><span>NRC Front</span><div class="upload-status" id="nrcFrontStatus"></div></div></div>
-                                    <div class="form-group"><div class="upload-area" onclick="DocumentManager.openUploadWidget('nrcBack')" data-type="nrcBack"><i class="fas fa-id-card"></i><span>NRC Back</span><div class="upload-status" id="nrcBackStatus"></div></div></div>
-                                </div>
-                                <div class="form-row">
-                                    <div class="form-group"><div class="upload-area" onclick="DocumentManager.openUploadWidget('profilePhoto')" data-type="profilePhoto"><i class="fas fa-user-circle"></i><span>Profile Photo</span><div class="upload-status" id="profilePhotoStatus"></div></div></div>
-                                    <div class="form-group"><div class="upload-area" onclick="DocumentManager.openUploadWidget('proofOfIncome')" data-type="proofOfIncome"><i class="fas fa-file-invoice"></i><span>Proof of Income</span><div class="upload-status" id="proofOfIncomeStatus"></div></div></div>
-                                </div>
-                            </div>
-                            <div class="form-group"><textarea id="customerNotes" class="form-input form-textarea" placeholder="Verification notes..." rows="3"></textarea></div>
-                            <div class="form-group"><label class="checkbox-container"><input type="checkbox" id="termsAgreement" required> I confirm verification</label><label class="checkbox-container"><input type="checkbox" id="consentAgreement" required> Customer consented</label></div>
-                            <div class="form-row"><button type="button" class="btn btn-outline" onclick="UIManager.showSection('customers')">Cancel</button><button type="submit" class="btn btn-primary" id="submitOnboarding"><i class="fas fa-user-plus"></i> Create Account</button></div>
-                        </form>
-                    </div>
-                </section>
-
-                <!-- ========== LOANS SECTION (enhanced) ========== -->
-                <section id="loansSection" class="content-section" style="display: none;">
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">Loan Applications</div>
-                            <button class="btn btn-primary" onclick="LoanManager.initiateNewLoan()"><i class="fas fa-plus"></i> Initiate Loan</button>
-                        </div>
-                        <!-- loan tabs (new) -->
-                        <div class="loan-tabs">
-                            <span class="loan-tab active" data-status="all">All</span>
-                            <span class="loan-tab" data-status="pending">Pending</span>
-                            <span class="loan-tab" data-status="approved">Approved</span>
-                            <span class="loan-tab" data-status="active">Active</span>
-                            <span class="loan-tab" data-status="completed">Paid</span>
-                            <span class="loan-tab" data-status="rejected">Rejected</span>
-                            <span class="loan-tab" data-status="defaulted">Defaulted</span>
-                        </div>
-                        <div class="search-filter-container" style="display: flex; gap:12px; margin-bottom:20px;">
-                            <div class="search-box" style="flex:1;"><i class="fas fa-search"></i><input type="text" id="loanSearch" class="form-input" placeholder="Search loans..."></div>
-                            <div class="filter-select"><select id="loanStatusFilter" class="form-input"><option value="all">All</option><option value="pending">Pending</option><option value="under_review">Under Review</option><option value="approved">Approved</option><option value="rejected">Rejected</option><option value="active">Active</option><option value="completed">Completed</option><option value="defaulted">Defaulted</option></select></div>
-                        </div>
-                        <div class="table-responsive">
-                            <table class="data-table">
-                                <thead><tr><th>Customer</th><th>Loan ID</th><th>Amount</th><th>Purpose</th><th>Applied</th><th>Status</th><th>Agreement</th><th>Actions</th></tr></thead>
-                                <tbody id="loansTableBody">
-                                    <!-- populated by JS -->
-                                </tbody>
-                            </table>
-                        </div>
-                        <!-- mobile card alternative (hidden on desktop) -->
-                        <div id="loansMobileList" style="display:none;"></div>
-                    </div>
-                    <div class="section">
-                        <div class="section-header"><div class="section-title">Loan Portfolio Summary</div></div>
-                        <div class="form-row">
-                            <div class="dashboard-card"><div class="card-header"><div class="card-title">Total Applications</div><div class="card-icon"><i class="fas fa-file-alt"></i></div></div><div class="card-value" id="totalApplications">0</div><div class="card-footer"><span id="approvedApplications">0 approved</span><span class="trend-up" id="approvalRate">0% rate</span></div></div>
-                            <div class="dashboard-card"><div class="card-header"><div class="card-title">Active Loans</div><div class="card-icon"><i class="fas fa-chart-line"></i></div></div><div class="card-value" id="totalActiveLoans">0</div><div class="card-footer"><span id="activeLoanValue">K0.00</span><span class="trend-up" id="loanGrowth">+0%</span></div></div>
-                            <div class="dashboard-card"><div class="card-header"><div class="card-title">Default Rate</div><div class="card-icon"><i class="fas fa-exclamation-triangle"></i></div></div><div class="card-value" id="defaultRate">0%</div><div class="card-footer"><span id="defaultCount">0 loans</span><span class="trend-down" id="defaultTrend">-0%</span></div></div>
-                        </div>
-                    </div>
-                </section>
-
-                <!-- ========== REPAYMENTS SECTION (original) ========== -->
-                <section id="repaymentsSection" class="content-section" style="display: none;">
-                    <div class="section">
-                        <div class="section-header"><div class="section-title">Repayment Management</div><button class="btn btn-success" onclick="RepaymentManager.recordPayment()"><i class="fas fa-money-check-alt"></i> Record Payment</button></div>
-                        <div class="search-filter-container" style="display:flex; gap:12px;"><div class="search-box"><i class="fas fa-search"></i><input type="text" id="repaymentSearch" class="form-input" placeholder="Search..."></div><div class="filter-select"><select id="repaymentStatusFilter" class="form-input"><option value="all">All</option><option value="due">Due</option><option value="overdue">Overdue</option><option value="paid">Paid</option><option value="partial">Partial</option><option value="missed">Missed</option></select></div></div>
-                        <div class="table-responsive"><table class="data-table"><thead><tr><th>Customer</th><th>Loan ID</th><th>Due Date</th><th>Amount Due</th><th>Paid Amount</th><th>Status</th><th>Days Overdue</th><th>Actions</th></tr></thead><tbody id="repaymentsTable"></tbody></table></div>
-                    </div>
-                </section>
-
-                <!-- ========== TRANSACTIONS SECTION (original) ========== -->
-                <section id="transactionsSection" class="content-section" style="display: none;">
-                    <div class="section"><div class="section-header"><div class="section-title">Transaction Processing</div><button class="btn btn-primary" onclick="TransactionManager.openNewTransactionModal()"><i class="fas fa-plus"></i> New Transaction</button></div><div class="search-filter-container">...</div><div class="table-responsive"><table class="data-table"><thead>...</thead><tbody id="transactionsTable"></tbody></table></div></div>
-                </section>
-
-                <!-- ========== COMMISSION SECTION (original with 15% update) ========== -->
-                <section id="commissionSection" class="content-section" style="display: none;">
-                    <div class="section"><div class="section-header"><div class="section-title">Commission Dashboard</div><button class="btn btn-outline btn-small" onclick="CommissionManager.requestPayout()"><i class="fas fa-money-check"></i> Request Payout</button></div>
-                    <div class="commission-display" style="background: linear-gradient(135deg, var(--agent-purple), var(--agent-blue)); color: white; padding: 24px; border-radius: var(--agent-radius); margin-bottom: 24px;">
-                        <div class="commission-value" id="availableCommission">K0.00</div><div class="commission-label">Available Commission (15% of interest)</div><div class="card-footer"><span id="pendingCommission">K0.00 pending</span><span id="totalEarned">K0.00 total</span></div>
-                    </div>
-                    <div class="form-row"><div class="dashboard-card"><div class="card-header"><div class="card-title">This Month</div><div class="card-icon"><i class="fas fa-calendar"></i></div></div><div class="card-value" id="monthCommission">K0.00</div><div class="card-footer"><span id="monthCommissionLoans">0 loans</span><span class="trend-up" id="monthCommissionChange">+0%</span></div></div>
-                    <div class="dashboard-card"><div class="card-header"><div class="card-title">Last Month</div><div class="card-icon"><i class="fas fa-chart-bar"></i></div></div><div class="card-value" id="lastMonthCommission">K0.00</div><div class="card-footer"><span id="lastMonthLoans">0 loans</span><span class="trend-up">Performance</span></div></div>
-                    <div class="dashboard-card"><div class="card-header"><div class="card-title">Commission Rate</div><div class="card-icon"><i class="fas fa-percent"></i></div></div><div class="card-value" id="commissionRate">15%</div><div class="card-footer"><span id="commissionTier">Tier 1</span><span class="trend-up">Active</span></div></div></div>
-                    <div class="section"><div class="section-header"><div class="section-title">Commission History</div></div><div class="table-responsive"><table class="data-table"><thead><tr><th>Date</th><th>Loan ID</th><th>Customer</th><th>Loan Amount</th><th>Interest</th><th>Commission</th><th>Status</th><th>Payout Date</th></tr></thead><tbody id="commissionHistory"></tbody></table></div></div></div>
-                </section>
-
-                <!-- ========== DOCUMENTS SECTION (original) ========== -->
-                <section id="documentsSection" class="content-section" style="display: none;"><div class="section"><div class="section-header"><div class="section-title">Document Management</div><button class="btn btn-primary" onclick="DocumentManager.openBulkUpload()"><i class="fas fa-cloud-upload-alt"></i> Bulk Upload</button></div><div class="customers-grid" id="documentsGrid"></div></div></section>
-
-                <!-- ========== NOTIFICATIONS SECTION (original) ========== -->
-                <section id="notificationsSection" class="content-section" style="display: none;"><div class="section"><div class="section-header"><div class="section-title">Notifications & Tasks</div><button class="btn btn-outline btn-small" onclick="NotificationManager.markAllAsRead()"><i class="fas fa-check-double"></i> Mark All Read</button></div><div class="audit-log" id="notificationsList"></div></div></section>
-
-                <!-- ========== ANALYTICS SECTION (original) ========== -->
-                <section id="analyticsSection" class="content-section" style="display: none;"><div class="section"><div class="section-header"><div class="section-title">Performance Analytics</div></div><div class="form-row">...</div><div class="form-row"><div class="section"><canvas id="performanceChart"></canvas></div><div class="section"><canvas id="loanDistributionChart"></canvas></div></div></div></section>
-
-                <!-- ========== AUDIT SECTION (original) ========== -->
-                <section id="auditSection" class="content-section" style="display: none;"><div class="section"><div class="section-header"><div class="section-title">Audit Log</div><button class="btn btn-outline btn-small" onclick="AuditManager.exportAuditLog()"><i class="fas fa-download"></i> Export Log</button></div><div class="audit-log" id="fullAuditLog"></div></div></section>
-
-                <!-- ========== SETTINGS SECTION (original) ========== -->
-                <section id="settingsSection" class="content-section" style="display: none;"><div class="section"><div class="section-header"><div class="section-title">Agent Settings</div></div><div class="form-group"><label class="form-label">Profile Information</label><div class="form-row"><input type="text" id="agentFullName" class="form-input" placeholder="Full Name"><input type="email" id="agentEmail" class="form-input" placeholder="Email" readonly></div><div class="form-row"><input type="tel" id="agentPhone" class="form-input" placeholder="Phone"><input type="text" id="agentBranch" class="form-input" placeholder="Branch" readonly></div><button class="btn btn-primary" onclick="SettingsManager.updateProfile()"><i class="fas fa-save"></i> Update</button></div><div class="form-group"><label class="form-label">Notification Preferences</label>... </div></div></section>
-            </div>
-        </main>
+    <!-- COMMISSION -->
+    <div class="section" id="commissionSection">
+      <div class="section-title"><i class="fas fa-coins"></i> Commissions</div>
+      <div class="card">
+        <div class="stat-row"><span>Total earned</span> <strong id="totalEarned">K0.00</strong></div>
+        <div class="stat-row"><span>Pending (unpaid loans)</span> <strong id="pendingCommission">K0.00</strong></div>
+        <div class="stat-row"><span>Projected (active loans)</span> <strong id="projectedCommission">K0.00</strong></div>
+      </div>
+      <div class="section-title" style="margin-top:1.5rem;">Per customer</div>
+      <div id="commissionCustomersList"></div>
     </div>
 
-    <!-- Mobile Bottom Navigation -->
-    <nav class="mobile-bottom-nav">
-        <a href="#" class="mobile-nav-item active" data-section="dashboard"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="#" class="mobile-nav-item" data-section="customers"><i class="fas fa-users"></i><span>Customers</span></a>
-        <a href="#" class="mobile-nav-item" data-section="loans"><i class="fas fa-file-invoice-dollar"></i><span>Loans</span></a>
-        <a href="#" class="mobile-nav-item" data-section="repayments"><i class="fas fa-calendar-check"></i><span>Payments</span></a>
-        <a href="#" class="mobile-nav-item" data-section="commission"><i class="fas fa-money-check-alt"></i><span>Comm</span></a>
-    </nav>
+    <!-- SETTINGS (with about) -->
+    <div class="section" id="settingsSection">
+      <div class="card">
+        <div class="flex" style="margin-bottom:1rem;">
+          <img src="" id="settingsAvatar" class="avatar" style="width:70px; height:70px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23cccccc%22 width=%22100%22 height=%22100%22 /><text fill=%22%23333%22 x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22>👤</text></svg>'">
+          <div>
+            <div style="font-weight:700; font-size:1.2rem;" id="settingsName">Agent Name</div>
+            <div style="color:#64748b;" id="settingsEmail">email@example.com</div>
+          </div>
+        </div>
+        <!-- big blue agent code with copy -->
+        <div class="code-block">
+          <span class="agent-code" id="agentCodeDisplay">AGENT123</span>
+          <button class="copy-btn" id="copyAgentCode"><i class="far fa-copy"></i> Copy</button>
+        </div>
+        <div class="stat-row"><span>Agent ID</span> <span id="agentUid">---</span></div>
+        <div class="stat-row"><span>Registered</span> <span id="agentRegistered">---</span></div>
+        <div class="stat-row"><span>Branch</span> <span id="agentBranch">---</span></div>
 
-    <!-- Modals (all original + new agreement modal) -->
-    <div class="modal" id="customerDetailModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Customer Details</h3><button class="modal-close" onclick="ModalManager.closeCustomerModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" id="customerDetailContent"></div></div></div>
-    <div class="modal" id="loanDetailModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Loan Details</h3><button class="modal-close" onclick="ModalManager.closeLoanModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" id="loanDetailContent"></div></div></div>
-    <div class="modal" id="transactionModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">New Transaction</h3><button class="modal-close" onclick="ModalManager.closeTransactionModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" id="transactionModalContent"></div></div></div>
-    <div class="modal" id="repaymentModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Record Payment</h3><button class="modal-close" onclick="ModalManager.closeRepaymentModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" id="repaymentModalContent"></div></div></div>
-    <div class="modal" id="documentViewModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Document Preview</h3><button class="modal-close" onclick="ModalManager.closeDocumentModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" id="documentViewContent"></div></div></div>
-    <div class="modal" id="changePasswordModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Change Password</h3><button class="modal-close" onclick="ModalManager.closePasswordModal()"><i class="fas fa-times"></i></button></div><div class="modal-body"><div class="form-group"><label for="currentPassword">Current</label><input type="password" id="currentPassword" class="form-input"></div><div class="form-group"><label for="newPassword">New</label><input type="password" id="newPassword" class="form-input"></div><div class="form-group"><label for="confirmNewPassword">Confirm</label><input type="password" id="confirmNewPassword" class="form-input"></div></div><div class="modal-footer"><button class="btn btn-outline" onclick="ModalManager.closePasswordModal()">Cancel</button><button class="btn btn-primary" onclick="SettingsManager.submitPasswordChange()">Change</button></div></div></div>
-    <div class="modal" id="newLoanModal"><div class="modal-content"><div class="modal-header"><h3 class="modal-title">Initiate Loan</h3><button class="modal-close" onclick="ModalManager.closeNewLoanModal()"><i class="fas fa-times"></i></button></div><div class="modal-body" id="newLoanModalContent"></div></div></div>
-    <!-- new agreement modal -->
-    <div class="modal" id="loanAgreementModal"><div class="modal-content large"><div class="modal-header"><h3 class="modal-title">Loan Agreement</h3><button class="modal-close" onclick="ModalManager.closeModal('loanAgreementModal')"><i class="fas fa-times"></i></button></div><div class="modal-body"><iframe class="agreement-iframe" id="agreementIframe" src="about:blank"></iframe></div></div></div>
+        <hr>
+        <button class="btn btn-outline" style="width:100%; margin-bottom:0.8rem;" id="resetPasswordBtn"><i class="fas fa-key"></i> Reset password</button>
+        <button class="btn btn-outline" style="width:100%; margin-bottom:0.8rem; color:#b91c1c;" id="deleteAccountBtn"><i class="fas fa-trash-alt"></i> Delete account</button>
+        <button class="btn btn-outline" style="width:100%;" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
 
-    <!-- Toast Notification -->
-    <div class="notification-toast" id="notificationToast"><div class="toast-icon"><i class="fas fa-info-circle"></i></div><div class="toast-content"><div class="toast-title" id="toastTitle">Notification</div><div class="toast-message" id="toastMessage">Message</div></div><button class="toast-close" onclick="ToastManager.hide()"><i class="fas fa-times"></i></button></div>
+        <hr>
+        <div class="section-title" style="margin-top:1rem;">About TruCash</div>
+        <p style="font-size:0.9rem; color:#334155;">Zambian registered microfinance, agent-driven.<br>📍 Ndola, Copperbelt<br>📞 +260 123 456 789<br>✉️ support@trucash.zm</p>
+      </div>
+    </div>
+  </div>
 
-    <script>
-        // ========== FIREBASE CONFIG ==========
-        const firebaseConfig = {
-            apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
-            authDomain: "trucash-9fee8.firebaseapp.com",
-            databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
-            projectId: "trucash-9fee8",
-            storageBucket: "trucash-9fee8.firebasestorage.app",
-            messagingSenderId: "622416212225",
-            appId: "1:622416212225:web:07418a9b16f955c330ab00",
-            measurementId: "G-6TEZFNFDBK"
-        };
+  <!-- bottom navigation (4 buttons) -->
+  <div class="bottom-nav">
+    <div class="nav-item active" data-page="home"><i class="fas fa-home"></i><span>Home</span></div>
+    <div class="nav-item" data-page="loans"><i class="fas fa-hand-holding-usd"></i><span>Loans</span></div>
+    <div class="nav-item" data-page="commission"><i class="fas fa-chart-pie"></i><span>Commission</span></div>
+    <div class="nav-item" data-page="settings"><i class="fas fa-cog"></i><span>Settings</span></div>
+  </div>
 
-        // ========== CLOUDINARY CONFIG ==========
-        const cloudinaryConfig = {
-            cloudName: 'dd3lcymrk',
-            uploadPreset: 'h3eyhc2o',
-            folder: 'trucash/agents',
-            maxFileSize: 10485760,
-            allowedFormats: ['jpg','jpeg','png','pdf','doc','docx'],
-            multiple: false
-        };
+  <!-- MODALS -->
+  <!-- Customer detail modal (home) -->
+  <div class="modal" id="customerModal">
+    <div class="modal-card">
+      <div class="modal-header">
+        <h3>Customer details</h3>
+        <button class="modal-close" id="closeCustomerModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="customerModalContent"></div>
+    </div>
+  </div>
 
-        // ========== APP STATE ==========
-        const AppState = {
-            currentUser: null,
-            agentData: null,
-            agentId: null,
-            customers: [],
-            loans: [],
-            transactions: [],
-            repayments: [],
-            commissions: [],
-            notifications: [],
-            auditLogs: [],
-            systemSettings: null,
-            uploadedDocuments: {},
-            realtimeListeners: [],
-            cloudinaryWidget: null,
-            currentSection: 'dashboard',
-            charts: {},
-            pagination: { customers: { page:1, limit:10, total:0 }, loans: { page:1, limit:10, total:0 }, transactions: { page:1, limit:10, total:0 } },
-            loanStatusFilter: 'all'
-        };
+  <!-- Loan detail modal (loans) -->
+  <div class="modal" id="loanDetailModal">
+    <div class="modal-card" style="max-width:500px;">
+      <div class="modal-header">
+        <h3>Loan application</h3>
+        <button class="modal-close" id="closeLoanModal"><i class="fas fa-times"></i></button>
+      </div>
+      <div id="loanModalContent"></div>
+    </div>
+  </div>
 
-        // ===== INIT FIREBASE =====
-        let firebaseApp, auth, db, storage;
-        try {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.database();
-            storage = firebase.storage();
-            console.log("Firebase initialized");
-        } catch(e){ console.error(e); }
+  <!-- payment history modal (simple) -->
+  <div class="modal" id="paymentHistoryModal">
+    <div class="modal-card">
+      <div class="modal-header"><h3>Payments</h3><button class="modal-close" id="closePayModal"><i class="fas fa-times"></i></button></div>
+      <div id="paymentHistoryContent"></div>
+    </div>
+  </div>
 
-        // ===== UTILITY FUNCTIONS =====
-        const Utils = {
-            showLoading(message = 'Loading...') {
-                document.getElementById('loadingOverlay').classList.add('active');
-                document.querySelector('#loadingOverlay .loading-text').textContent = message;
-            },
-            hideLoading() {
-                document.getElementById('loadingOverlay').classList.remove('active');
-            },
-            formatCurrency(amount) {
-                return 'K' + (parseFloat(amount) || 0).toFixed(2);
-            },
-            formatDate(timestamp) {
-                if (!timestamp) return 'N/A';
-                return new Date(Number(timestamp)).toLocaleDateString();
-            },
-            calculateCommissionFromInterest(interest) {
-                return interest * 0.15; // 15% of interest
-            }
-        };
+  <!-- FIREBASE + CLOUDINARY CONFIG (unchanged) -->
+  <script>
+    // ========== CONFIG (same as original) ==========
+    const firebaseConfig = {
+      apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
+      authDomain: "trucash-9fee8.firebaseapp.com",
+      databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
+      projectId: "trucash-9fee8",
+      storageBucket: "trucash-9fee8.firebasestorage.app",
+      messagingSenderId: "622416212225",
+      appId: "1:622416212225:web:07418a9b16f955c330ab00"
+    };
+    const cloudinaryConfig = {
+      cloudName: 'dd3lcymrk',
+      uploadPreset: 'h3eyhc2o',
+      folder: 'trucash/agents'
+    };
 
-        // ===== TOAST MANAGER =====
-        const ToastManager = {
-            show(title, message, type = 'info', duration = 5000) {
-                const toast = document.getElementById('notificationToast');
-                document.getElementById('toastTitle').textContent = title;
-                document.getElementById('toastMessage').textContent = message;
-                toast.style.borderLeftColor = type === 'error' ? 'var(--agent-red)' : (type === 'warning' ? 'var(--agent-orange)' : 'var(--agent-blue)');
-                toast.classList.add('active');
-                setTimeout(() => this.hide(), duration);
-            },
-            hide() {
-                document.getElementById('notificationToast').classList.remove('active');
-            }
-        };
+    // Initialize Firebase
+    firebase.initializeApp(firebaseConfig);
+    const auth = firebase.auth();
+    const db = firebase.database();
 
-        // ===== FIREBASE SERVICE (with 15% commission) =====
-        const FirebaseService = {
-            async checkAuth() { /* full original implementation */ return true; },
-            async loadAssignedCustomers() { /* original */ return []; },
-            async loadAgentLoans() { /* original */ return []; },
-            async loadCommissionData() { /* original */ return []; },
-            async onboardCustomer(data) { /* original */ return {success:true}; },
-            async createLoanApplication(loanData) {
-                try {
-                    // Calculate interest and commission
-                    const interest = loanData.totalInterest || (loanData.amount * 0.35 * loanData.duration / 12); // example
-                    const commissionAmount = Utils.calculateCommissionFromInterest(interest);
-                    const loan = {
-                        ...loanData,
-                        interestAmount: interest,
-                        commissionAmount: commissionAmount,
-                        commissionStatus: 'pending',
-                        createdAt: Date.now()
-                    };
-                    // Save to Firebase (original logic)
-                    const loanId = Utils.generateId('LN');
-                    await db.ref('loans/' + loanId).set(loan);
-                    return { success: true, loanId, message: 'Loan created' };
-                } catch(e){ return { success: false, error: e.message }; }
-            },
-            // ... all other original methods
-        };
+    // ========== APP STATE ==========
+    const AppState = {
+      currentUser: null,
+      agentData: null,
+      agentId: null,
+      customers: [],
+      loans: [],
+      commissions: [],
+      notifications: []
+    };
 
-        // ===== LOAN MANAGER (enhanced) =====
-        const LoanManager = {
-            async viewLoanDetails(loanId) { /* original */ },
-            async showAgreement(loanId) {
-                const loan = AppState.loans.find(l => l.id === loanId);
-                if (loan && loan.signedAgreementUrl) {
-                    document.getElementById('agreementIframe').src = loan.signedAgreementUrl;
-                    document.getElementById('loanAgreementModal').classList.add('active');
-                } else {
-                    ToastManager.show('No Agreement', 'No signed agreement available', 'warning');
-                }
-            },
-            filterByStatus(status) {
-                AppState.loanStatusFilter = status;
-                this.updateLoansTable();
-            },
-            updateLoansTable() {
-                const filtered = AppState.loans.filter(l => AppState.loanStatusFilter === 'all' || l.status === AppState.loanStatusFilter);
-                let html = '';
-                filtered.forEach(loan => {
-                    html += `<tr>
-                        <td>${loan.customerName || ''}</td>
-                        <td>${loan.id || ''}</td>
-                        <td>${Utils.formatCurrency(loan.amount)}</td>
-                        <td>${loan.purpose || ''}</td>
-                        <td>${Utils.formatDate(loan.createdAt)}</td>
-                        <td><span class="status-badge-table status-${loan.status}">${loan.status}</span></td>
-                        <td><button class="btn btn-outline btn-small" onclick="LoanManager.showAgreement('${loan.id}')"><i class="fas fa-file-signature"></i> View</button></td>
-                        <td><button class="btn btn-small" onclick="LoanManager.viewLoanDetails('${loan.id}')">Details</button></td>
-                    </tr>`;
-                });
-                document.getElementById('loansTableBody').innerHTML = html || '<tr><td colspan="8" class="text-center">No loans</td></tr>';
-            },
-            initiateNewLoan() { /* original */ }
-        };
+    // ========== UTILS ==========
+    const Utils = {
+      showLoading(msg) { 
+        const el = document.getElementById('loadingOverlay');
+        el.style.display = 'flex'; 
+        if(msg) el.querySelector('.loading-text').innerText = msg;
+      },
+      hideLoading() { document.getElementById('loadingOverlay').style.display = 'none'; },
+      formatCurrency(amt) { return 'K' + (amt || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); },
+      formatDate(ts) { return ts ? new Date(ts).toLocaleDateString('en-ZM',{year:'numeric',month:'short',day:'numeric'}) : 'N/A'; },
+      showToast(title, msg, type='info') {
+        const toast = document.createElement('div'); toast.style.background='white'; toast.style.borderRadius='30px'; toast.style.padding='0.8rem 1.2rem'; toast.style.marginBottom='0.5rem'; toast.style.boxShadow='0 10px 30px rgba(0,0,0,0.1)'; toast.style.borderLeft='5px solid '+ (type=='error'?'#b91c1c':'#0066CC');
+        toast.innerHTML = `<strong>${title}</strong><br><small>${msg}</small>`;
+        document.getElementById('toastContainer').appendChild(toast);
+        setTimeout(()=>toast.remove(), 4000);
+      },
+      calculateCommission(loanAmount, totalInterest) { return totalInterest * 0.15; } // 15% of total interest
+    };
 
-        // ===== UI MANAGER =====
-        const UIManager = {
-            init() {
-                this.cacheElements();
-                this.bindEvents();
-                this.initAuth();
-                this.setupRealtimeListeners();
-                // loan tabs listeners
-                document.querySelectorAll('.loan-tab').forEach(tab => {
-                    tab.addEventListener('click', (e) => {
-                        document.querySelectorAll('.loan-tab').forEach(t => t.classList.remove('active'));
-                        tab.classList.add('active');
-                        LoanManager.filterByStatus(tab.dataset.status);
-                    });
-                });
-            },
-            cacheElements() { /* original */ },
-            bindEvents() { /* original */ },
-            async initAuth() { /* original */ },
-            setupRealtimeListeners() { /* original with loan refresh */ },
-            showSection(sectionId) { /* original */ },
-            updateDashboardUI() { /* original */ },
-            // ... rest
-        };
-
-        // ===== MODAL MANAGER =====
-        const ModalManager = {
-            closeModal(id) { document.getElementById(id).classList.remove('active'); },
-            closeCustomerModal() { this.closeModal('customerDetailModal'); },
-            closeLoanModal() { this.closeModal('loanDetailModal'); },
-            closeTransactionModal() { this.closeModal('transactionModal'); },
-            closeRepaymentModal() { this.closeModal('repaymentModal'); },
-            closeDocumentModal() { this.closeModal('documentViewModal'); },
-            closePasswordModal() { this.closeModal('changePasswordModal'); },
-            closeNewLoanModal() { this.closeModal('newLoanModal'); }
-        };
-
-        // ===== OTHER MANAGERS (original stubs) =====
-        const CustomerManager = {};
-        const RepaymentManager = {};
-        const TransactionManager = {};
-        const CommissionManager = { requestPayout() {} };
-        const DocumentManager = { openUploadWidget() {} };
-        const NotificationManager = { markAllAsRead() {} };
-        const AuditManager = { exportAuditLog() {} };
-        const SettingsManager = { updateProfile() {}, submitPasswordChange() {} };
-        const CloudinaryService = {};
-
-        // ===== INITIALIZE =====
-        document.addEventListener('DOMContentLoaded', () => {
-            UIManager.init();
-            window.LoanManager = LoanManager;
-            window.ModalManager = ModalManager;
+    // ========== FIREBASE SERVICE (keep core) ==========
+    const FirebaseService = {
+      async checkAuth() {
+        return new Promise((resolve) => {
+          auth.onAuthStateChanged(async (user) => {
+            if (!user) { window.location.href = 'login.html'; return; }
+            try {
+              const snap = await db.ref('users/'+user.uid).once('value');
+              if (!snap.exists() || snap.val().userType !== 'agent') {
+                Utils.showToast('Access denied', 'Not an agent', 'error');
+                auth.signOut(); return;
+              }
+              AppState.currentUser = user;
+              AppState.agentData = snap.val();
+              AppState.agentId = user.uid;
+              document.getElementById('agentFullName').innerText = AppState.agentData.fullName || 'Agent';
+              await this.loadCustomers();
+              await this.loadLoans();
+              await this.loadCommissions();
+              this.setupListeners();
+              resolve(true);
+            } catch (e) { console.error(e); }
+          });
         });
-    </script>
-    <!-- The full original agent JavaScript (over 5000 lines) is included above; due to answer length limitations, only the key additions are shown. In the actual delivered file, all original functions and event handlers are present. -->
+      },
+      async loadCustomers() {
+        const snap = await db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).once('value');
+        const cust = [];
+        snap.forEach(c=>{ if(c.val().userType==='customer') cust.push({id:c.key, ...c.val()}); });
+        AppState.customers = cust;
+      },
+      async loadLoans() {
+        const snap = await db.ref('loans').orderByChild('agentId').equalTo(AppState.agentId).once('value');
+        const loans = [];
+        snap.forEach(l=> loans.push({id:l.key, ...l.val()}));
+        AppState.loans = loans;
+      },
+      async loadCommissions() {
+        const snap = await db.ref('commissions').orderByChild('agentId').equalTo(AppState.agentId).once('value');
+        const coms = [];
+        snap.forEach(c=> coms.push({id:c.key, ...c.val()}));
+        AppState.commissions = coms;
+      },
+      setupListeners() {
+        // real-time customers
+        db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).on('value', snap => {
+          const cust = []; snap.forEach(c=>{ if(c.val().userType==='customer') cust.push({id:c.key, ...c.val()}); });
+          AppState.customers = cust; UIManager.refreshHome(); UIManager.refreshLoansList(); UIManager.refreshCommission();
+        });
+        db.ref('loans').orderByChild('agentId').equalTo(AppState.agentId).on('value', snap => {
+          const loans = []; snap.forEach(l=> loans.push({id:l.key, ...l.val()})); AppState.loans = loans;
+          UIManager.refreshLoansList(); UIManager.refreshCommission();
+        });
+      },
+      async signOut() { await auth.signOut(); window.location.href='login.html'; },
+      async sendPasswordReset() { 
+        if(AppState.currentUser?.email) await auth.sendPasswordResetEmail(AppState.currentUser.email);
+      },
+      async deleteAccount() {
+        await AppState.currentUser.delete();
+        window.location.href='login.html';
+      }
+    };
+
+    // ========== UI MANAGER ==========
+    const UIManager = {
+      init() {
+        this.bindNav();
+        this.loadData();
+        document.getElementById('copyAgentCode').addEventListener('click', ()=> {
+          navigator.clipboard.writeText(AppState.agentData?.agentId || AppState.agentId);
+          Utils.showToast('Copied', 'Agent code copied', 'info');
+        });
+        document.getElementById('resetPasswordBtn').addEventListener('click', ()=> FirebaseService.sendPasswordReset());
+        document.getElementById('deleteAccountBtn').addEventListener('click', ()=> { if(confirm('Permanently delete account?')) FirebaseService.deleteAccount(); });
+        document.getElementById('logoutBtn').addEventListener('click', ()=> FirebaseService.signOut());
+        document.getElementById('closeCustomerModal').addEventListener('click', ()=> document.getElementById('customerModal').classList.remove('active'));
+        document.getElementById('closeLoanModal').addEventListener('click', ()=> document.getElementById('loanDetailModal').classList.remove('active'));
+        document.getElementById('closePayModal').addEventListener('click', ()=> document.getElementById('paymentHistoryModal').classList.remove('active'));
+      },
+      bindNav() {
+        document.querySelectorAll('.nav-item').forEach(btn => {
+          btn.addEventListener('click', (e) => {
+            document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
+            btn.classList.add('active');
+            document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+            const page = btn.dataset.page;
+            if(page==='home') document.getElementById('homeSection').classList.add('active');
+            else if(page==='loans') { document.getElementById('loansSection').classList.add('active'); this.refreshLoansList(); }
+            else if(page==='commission') { document.getElementById('commissionSection').classList.add('active'); this.refreshCommission(); }
+            else if(page==='settings') { document.getElementById('settingsSection').classList.add('active'); this.refreshSettings(); }
+          });
+        });
+      },
+      async loadData() {
+        Utils.showLoading('Loading agent...');
+        await FirebaseService.checkAuth();
+        this.refreshHome();
+        this.refreshLoansList();
+        this.refreshCommission();
+        this.refreshSettings();
+        Utils.hideLoading();
+      },
+      refreshHome() {
+        const container = document.getElementById('customersListHome');
+        if (!AppState.customers.length) { container.innerHTML = '<div class="card"><p class="text-muted">No customers assigned.</p></div>'; }
+        else {
+          container.innerHTML = AppState.customers.map(c => `
+            <div class="card" style="cursor:pointer;" data-cid="${c.id}" onclick="UIManager.showCustomerModal('${c.id}')">
+              <div class="customer-row">
+                <img class="avatar" src="${c.profilePhoto || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ccc%22 width=%22100%22 height=%22100%22 /><text fill=%22%23333%22 x=%2250%22 y=%2250%22 font-size=%2250%22>👤</text></svg>'}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ccc%22 width=%22100%22 height=%22100%22 /><text fill=%22%23333%22 x=%2250%22 y=%2250%22 font-size=%2250%22>👤</text></svg>'">
+                <div class="customer-info">
+                  <div class="customer-name">${c.fullName || 'Unnamed'}</div>
+                  <div class="customer-meta"><span>📞 ${c.phone || '--'}</span> <span>🏦 ${c.nrc || 'no NRC'}</span></div>
+                </div>
+              </div>
+            </div>`).join('');
+        }
+        document.getElementById('customerCount').innerText = AppState.customers.length+' customers';
+      },
+      showCustomerModal(cid) {
+        const cust = AppState.customers.find(c=>c.id===cid);
+        if(!cust) return;
+        const modal = document.getElementById('customerModalContent');
+        modal.innerHTML = `
+          <div style="text-align:center;"><img src="${cust.profilePhoto||''}" class="avatar" style="width:80px;height:80px; margin-bottom:0.5rem;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ccc%22 width=%22100%22 height=%22100%22 /><text fill=%22%23333%22 x=%2250%22 y=%2250%22 font-size=%2250%22>👤</text></svg>'"></div>
+          <div class="stat-row"><span>Full name</span> <strong>${cust.fullName||''}</strong></div>
+          <div class="stat-row"><span>Email</span> ${cust.email||''}</div>
+          <div class="stat-row"><span>Phone</span> ${cust.phone||''}</div>
+          <div class="stat-row"><span>Address</span> ${cust.residence||''} ${cust.houseNumber||''}</div>
+          <div class="stat-row"><span>NRC</span> ${cust.nrc||''}</div>
+          <div class="grid-2 mt-1">
+            <div><strong>NRC front</strong><br><img src="${cust.nrcFront||''}" style="width:100%; border-radius:16px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23eee%22 width=%22100%22 height=%22100%22 /><text fill=%22%23999%22 x=%2250%22 y=%2250%22>N/A</text></svg>'"></div>
+            <div><strong>NRC back</strong><br><img src="${cust.nrcBack||''}" style="width:100%; border-radius:16px;" onerror="..."></div>
+          </div>
+        `;
+        document.getElementById('customerModal').classList.add('active');
+      },
+      refreshLoansList() {
+        const container = document.getElementById('customersListLoans');
+        if (!AppState.customers.length) { container.innerHTML = '<div class="card">No customers</div>'; return; }
+        container.innerHTML = AppState.customers.map(c => {
+          const customerLoans = AppState.loans.filter(l => l.customerId === c.id);
+          return `
+            <div class="card" style="cursor:pointer;" onclick="UIManager.showCustomerLoans('${c.id}')">
+              <div class="customer-row">
+                <img class="avatar" src="${c.profilePhoto||''}" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect fill=%22%23ccc%22 width=%22100%22 height=%22100%22 /><text fill=%22%23333%22 x=%2250%22 y=%2250%22>👤</text></svg>'">
+                <div class="customer-info">
+                  <div class="customer-name">${c.fullName}</div>
+                  <div class="customer-meta"><span class="badge-light">${customerLoans.length} loan(s)</span></div>
+                </div>
+              </div>
+            </div>`;
+        }).join('');
+      },
+      showCustomerLoans(customerId) {
+        const cust = AppState.customers.find(c=>c.id===customerId);
+        const loans = AppState.loans.filter(l=>l.customerId===customerId);
+        if(loans.length===0) { Utils.showToast('Info','No loans for this customer','info'); return; }
+        // simplify: pick first loan (or you could show a list, but spec: tap -> loan full details)
+        // we'll just open the first loan details modal
+        this.showLoanDetails(loans[0]);
+      },
+      showLoanDetails(loan) {
+        const cust = AppState.customers.find(c=>c.id===loan.customerId) || {};
+        const content = document.getElementById('loanModalContent');
+        const nextPayment = loan.repaymentSchedule?.find(p=>p.status==='pending') || {};
+        const paidAmount = loan.totalPaid || 0;
+        content.innerHTML = `
+          <div class="stat-row"><span>Loan ID</span> <strong>${loan.id}</strong></div>
+          <div class="stat-row"><span>Customer</span> ${cust.fullName||''}</div>
+          <div class="stat-row"><span>Amount</span> ${Utils.formatCurrency(loan.amount)}</div>
+          <div class="stat-row"><span>Status</span> <span class="badge-light">${loan.status}</span></div>
+          <div class="stat-row"><span>Total interest</span> ${Utils.formatCurrency(loan.totalInterest||0)}</div>
+          <div class="stat-row"><span>Paid</span> ${Utils.formatCurrency(paidAmount)}</div>
+          <div class="stat-row"><span>Next due</span> ${nextPayment.dueDate?Utils.formatDate(nextPayment.dueDate):'N/A'} • ${Utils.formatCurrency(nextPayment.totalDue||0)}</div>
+          <hr>
+          <strong>Collateral</strong>
+          <div>${loan.collateral?.description||''} (${loan.collateral?.category})</div>
+          <div>📍 ${loan.collateral?.location||''}</div>
+          <div class="grid-2 mt-1">
+            ${(loan.collateral?.images||[]).map(img=>`<img src="${img}" style="width:100%; border-radius:12px;">`).join('')}
+          </div>
+          <hr>
+          <strong>Signed agreement preview</strong>
+          <div class="agreement-preview">${loan.signedAgreementUrl ? '<a href="'+loan.signedAgreementUrl+'" target="_blank">📄 View full agreement</a>' : 'Not signed yet'}</div>
+          <hr>
+          <div class="flex" style="justify-content:space-between;">
+            <button class="btn btn-outline" onclick="UIManager.viewPayments('${loan.id}')"><i class="fas fa-credit-card"></i> Payments</button>
+          </div>
+        `;
+        document.getElementById('loanDetailModal').classList.add('active');
+      },
+      async viewPayments(loanId) {
+        const loan = AppState.loans.find(l=>l.id===loanId);
+        if(!loan) return;
+        const payments = (await db.ref('payments').orderByChild('loanId').equalTo(loanId).once('val')).val() || {};
+        const list = Object.values(payments).sort((a,b)=>b.timestamp - a.timestamp);
+        const html = list.length ? list.map(p=>`
+          <div class="stat-row"><span>${Utils.formatDate(p.timestamp)}</span><span>${Utils.formatCurrency(p.amount)}</span><span class="badge-light">${p.status}</span></div>
+        `).join('') : '<p>No payments yet</p>';
+        document.getElementById('paymentHistoryContent').innerHTML = html;
+        document.getElementById('paymentHistoryModal').classList.add('active');
+      },
+      refreshCommission() {
+        // calculate commissions 15% of total interest per loan (only when loan completed?)
+        // we'll compute: total earned = from commissions node + manually sum
+        let totalEarned = 0, pending = 0, projected = 0;
+        AppState.loans.forEach(loan => {
+          const interest = loan.totalInterest || 0;
+          const comm = interest * 0.15;
+          if(loan.status === 'completed' || loan.status === 'paid') totalEarned += comm;
+          else if(loan.status === 'active') projected += comm;
+          else if(loan.status === 'pending' || loan.status === 'approved') pending += comm;
+        });
+        document.getElementById('totalEarned').innerText = Utils.formatCurrency(totalEarned);
+        document.getElementById('pendingCommission').innerText = Utils.formatCurrency(pending);
+        document.getElementById('projectedCommission').innerText = Utils.formatCurrency(projected);
+
+        const perCust = document.getElementById('commissionCustomersList');
+        perCust.innerHTML = AppState.customers.map(c=>{
+          const custLoans = AppState.loans.filter(l=>l.customerId===c.id);
+          const custComm = custLoans.reduce((acc,l)=> acc + ( (l.totalInterest||0)*0.15 ), 0);
+          return `<div class="card flex" style="justify-content:space-between;">
+            <span>${c.fullName}</span> <strong>${Utils.formatCurrency(custComm)}</strong>
+          </div>`;
+        }).join('');
+      },
+      refreshSettings() {
+        document.getElementById('settingsName').innerText = AppState.agentData?.fullName || 'Agent';
+        document.getElementById('settingsEmail').innerText = AppState.currentUser?.email || '';
+        document.getElementById('agentCodeDisplay').innerText = AppState.agentData?.agentId || AppState.agentId;
+        document.getElementById('agentUid').innerText = AppState.agentId;
+        document.getElementById('agentRegistered').innerText = AppState.agentData?.createdAt ? Utils.formatDate(AppState.agentData.createdAt) : '---';
+        document.getElementById('agentBranch').innerText = AppState.agentData?.branch || 'Head office';
+        if(AppState.agentData?.profilePhoto) document.getElementById('settingsAvatar').src = AppState.agentData.profilePhoto;
+      }
+    };
+    window.UIManager = UIManager; // for onclick
+
+    // start
+    document.addEventListener('DOMContentLoaded', ()=> UIManager.init());
+    window.addEventListener('online', ()=> document.getElementById('connectionStatus').innerHTML='<i class="fas fa-circle" style="color:#2e7d32;"></i> Online');
+    window.addEventListener('offline', ()=> document.getElementById('connectionStatus').innerHTML='<i class="fas fa-circle" style="color:#b91c1c;"></i> Offline');
+  </script>
 </body>
 </html>
