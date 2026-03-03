@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TruCash · Admin</title>
+    <title>TruCash · Admin Console</title>
     <!-- Font Awesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase -->
@@ -15,6 +15,7 @@
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
+        /* === iOS‑inspired CSS (unchanged from original, only minor additions) === */
         * {
             margin: 0;
             padding: 0;
@@ -44,7 +45,7 @@
             background: var(--ios-bg);
             color: #1c1c1e;
             min-height: 100vh;
-            padding-bottom: 80px; /* space for bottom nav */
+            padding-bottom: 80px;
         }
 
         /* Header */
@@ -125,7 +126,7 @@
         .sidebar {
             position: fixed;
             top: 0;
-            right: -280px; /* from right */
+            right: -280px;
             width: 280px;
             height: 100%;
             background: white;
@@ -231,7 +232,7 @@
             color: var(--ios-blue);
         }
 
-        /* Main Content Area */
+        /* Main Content */
         .main-content {
             max-width: 800px;
             margin: 0 auto;
@@ -245,7 +246,7 @@
             display: block;
         }
 
-        /* iOS Cards & Elements */
+        /* Cards & Elements */
         .stats-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
@@ -258,6 +259,12 @@
             padding: 18px 16px;
             box-shadow: var(--shadow-sm);
             border: 1px solid var(--ios-gray2);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .stat-card:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow-md);
         }
         .stat-card .label {
             font-size: 14px;
@@ -315,6 +322,14 @@
             color: white;
             border-color: var(--ios-blue);
         }
+        .btn-success {
+            background: var(--ios-green);
+            color: white;
+        }
+        .btn-danger {
+            background: var(--ios-red);
+            color: white;
+        }
         .btn-outline {
             background: white;
             border-color: var(--ios-gray3);
@@ -333,6 +348,10 @@
             border: 1px solid var(--ios-gray2);
             margin-bottom: 14px;
             transition: 0.2s;
+            cursor: pointer;
+        }
+        .floating-card:hover {
+            box-shadow: var(--shadow-md);
         }
 
         .profile-row {
@@ -365,6 +384,22 @@
             padding: 4px 10px;
             font-size: 12px;
         }
+
+        /* Status badges */
+        .status-badge {
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+            background: var(--ios-gray1);
+            color: #1c1c1e;
+        }
+        .status-badge.approved { background: #d4edda; color: #155724; }
+        .status-badge.pending { background: #fff3cd; color: #856404; }
+        .status-badge.rejected { background: #f8d7da; color: #721c24; }
+        .status-badge.active { background: #cce5ff; color: #004085; }
+        .status-badge.banned { background: #e2e3e5; color: #383d41; }
+        .status-badge.confirmed { background: #d4edda; color: #155724; }
 
         /* Modals */
         .modal-overlay {
@@ -415,6 +450,13 @@
         .modal-body {
             padding: 24px;
         }
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid var(--ios-gray2);
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+        }
 
         @keyframes slideUp {
             from { transform: translateY(40px); opacity: 0; }
@@ -454,7 +496,7 @@
             display: block;
             color: #1c1c1e;
         }
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
             padding: 14px 16px;
             border: 1px solid var(--ios-gray3);
@@ -463,31 +505,21 @@
             background: white;
             transition: 0.2s;
         }
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
             border-color: var(--ios-blue);
         }
-
-        /* Status badges */
-        .status-badge {
-            padding: 4px 12px;
-            border-radius: 30px;
-            font-size: 12px;
-            font-weight: 500;
-            background: var(--ios-gray1);
-            color: #1c1c1e;
+        textarea.form-input {
+            min-height: 80px;
+            resize: vertical;
         }
-        .status-badge.approved { background: #d4edda; color: #155724; }
-        .status-badge.pending { background: #fff3cd; color: #856404; }
-        .status-badge.rejected { background: #f8d7da; color: #721c24; }
-        .status-badge.active { background: #cce5ff; color: #004085; }
-        .status-badge.banned { background: #e2e3e5; color: #383d41; }
 
-        /* 2x2 document grid */
+        /* Document grid */
         .doc-grid {
             display: grid;
             grid-template-columns: repeat(2,1fr);
             gap: 12px;
+            margin-top: 12px;
         }
         .doc-thumb {
             border-radius: var(--radius-sm);
@@ -507,6 +539,7 @@
             display: flex;
             gap: 8px;
             margin-bottom: 20px;
+            flex-wrap: wrap;
         }
         .tab {
             padding: 8px 16px;
@@ -515,6 +548,7 @@
             border-radius: 30px;
             font-size: 14px;
             cursor: pointer;
+            transition: 0.2s;
         }
         .tab.active {
             background: var(--ios-blue);
@@ -522,7 +556,7 @@
             border-color: var(--ios-blue);
         }
 
-        /* charts */
+        /* Charts */
         .chart-container {
             background: white;
             border-radius: var(--radius);
@@ -530,21 +564,81 @@
             margin-bottom: 20px;
         }
 
+        /* Loading overlay (reuse from original) */
+        .loading-overlay {
+            position: fixed;
+            top:0; left:0; width:100%; height:100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 1000;
+            flex-direction: column;
+            gap: 16px;
+        }
+        .loading-overlay.active {
+            display: flex;
+        }
+        .loading-spinner {
+            width: 40px;
+            height: 40px;
+            border: 3px solid var(--ios-gray2);
+            border-top-color: var(--ios-blue);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+
+        /* Toast */
+        .toast-container {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 4000;
+        }
+        .toast {
+            background: white;
+            border-radius: var(--radius);
+            padding: 14px 16px;
+            margin-bottom: 10px;
+            box-shadow: var(--shadow-md);
+            border-left: 4px solid var(--ios-green);
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            animation: slideInRight 0.3s;
+        }
+        .toast.error { border-left-color: var(--ios-red); }
+        .toast.warning { border-left-color: #ff9500; }
+        .toast-icon { font-size: 18px; }
+        .toast-content { flex:1; }
+        .toast-title { font-weight: 600; }
+        .toast-message { font-size: 13px; color: var(--ios-gray5); }
+
         /* Utility */
-        .text-blue { color: var(--ios-blue); }
-        .text-green { color: var(--ios-green); }
-        .text-red { color: var(--ios-red); }
-        .d-none { display: none; }
-        .d-flex { display: flex; }
-        .gap-2 { gap: 8px; }
-        .gap-4 { gap: 16px; }
+        .text-center { text-align: center; }
+        .w-100 { width: 100%; }
         .mt-4 { margin-top: 20px; }
         .mb-2 { margin-bottom: 8px; }
+        .d-flex { display: flex; }
+        .gap-2 { gap: 8px; }
         .justify-between { justify-content: space-between; }
         .align-center { align-items: center; }
+        .text-red { color: var(--ios-red); }
+        .text-green { color: var(--ios-green); }
     </style>
 </head>
 <body>
+    <!-- Loading Overlay -->
+    <div class="loading-overlay" id="loadingOverlay">
+        <div class="loading-spinner"></div>
+        <div class="loading-text">Loading...</div>
+    </div>
+
+    <!-- Toast Container -->
+    <div class="toast-container" id="toastContainer"></div>
+
     <!-- Header -->
     <div class="app-header">
         <div class="logo-area">
@@ -576,7 +670,7 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation (5 items) -->
+    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item-bottom active" data-section="home"><i class="fas fa-home"></i><span>Home</span></div>
         <div class="nav-item-bottom" data-section="agents"><i class="fas fa-user-tie"></i><span>Agents</span></div>
@@ -590,24 +684,23 @@
         <!-- HOME SECTION -->
         <section class="content-section active" id="homeSection">
             <div class="stats-grid">
-                <div class="stat-card">
+                <div class="stat-card" onclick="showSection('customers')">
                     <div class="label">Customers</div>
                     <div class="value" id="statCustomers">0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showSection('agents')">
                     <div class="label">Agents</div>
                     <div class="value" id="statAgents">0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showSection('loans')">
                     <div class="label">Loans</div>
                     <div class="value" id="statLoans">0</div>
                 </div>
-                <div class="stat-card">
+                <div class="stat-card" onclick="showSection('payments')">
                     <div class="label">Payments</div>
                     <div class="value" id="statPayments">0</div>
                 </div>
             </div>
-            <!-- Recent activity / pending approvals could be placed here -->
             <div class="floating-card">
                 <h4 style="margin-bottom: 12px;">Pending Approvals</h4>
                 <div id="pendingSummary">Loading...</div>
@@ -738,7 +831,7 @@
             <div id="assignmentsList" class="floating-card mt-4"></div>
         </section>
 
-        <!-- SETTINGS SECTION (already exists, we can reuse original but simplified) -->
+        <!-- SETTINGS SECTION -->
         <section class="content-section" id="settingsSection">
             <div class="floating-card">
                 <h4>System Settings</h4>
@@ -747,18 +840,22 @@
                     <input type="number" id="commissionRate" class="form-input" value="15" step="0.1">
                 </div>
                 <div class="form-group">
-                    <label>Interest Rate (Monthly %)</label>
+                    <label>Monthly Interest Rate (%)</label>
                     <input type="number" id="monthlyInterest" class="form-input" value="35">
                 </div>
                 <div class="form-group">
-                    <label>Interest Rate (Weekly %)</label>
+                    <label>Weekly Interest Rate (%)</label>
                     <input type="number" id="weeklyInterest" class="form-input" value="10">
                 </div>
-                <button class="btn btn-primary" id="saveSettings">Save</button>
+                <div class="form-group">
+                    <label>Max Loan Amount (K)</label>
+                    <input type="number" id="maxLoanAmount" class="form-input" value="50000">
+                </div>
+                <button class="btn btn-primary" id="saveSettings">Save Settings</button>
             </div>
             <div class="floating-card">
                 <h4>Danger Zone</h4>
-                <button class="btn btn-outline text-red" id="sudoResetBtn">Sudo Reset Database</button>
+                <button class="btn btn-outline text-red" id="sudoResetBtn">⚠️ Sudo Reset Database</button>
             </div>
         </section>
     </div>
@@ -779,7 +876,8 @@
                 <div class="form-group"><label>Email</label><input type="email" id="agentEmail" class="form-input"></div>
                 <div class="form-group"><label>Agent ID (manual)</label><input type="text" id="agentCustomId" class="form-input"></div>
                 <div class="form-group"><label>Password</label><input type="password" id="agentPassword" class="form-input"></div>
-                <button class="btn btn-primary" id="submitAgent">Create</button>
+                <div class="form-group"><label>Branch</label><input type="text" id="agentBranch" class="form-input"></div>
+                <button class="btn btn-primary" id="submitAgent">Create Agent</button>
             </div>
         </div>
     </div>
@@ -798,13 +896,81 @@
                 <div class="form-group"><label>NRC</label><input type="text" id="custNrc" class="form-input"></div>
                 <div class="form-group"><label>Address</label><input type="text" id="custAddress" class="form-input"></div>
                 <div class="form-group"><label>Password</label><input type="password" id="custPassword" class="form-input"></div>
-                <div class="form-group"><label>Agent (optional)</label><select id="custAgent" class="form-input"></select></div>
-                <button class="btn btn-primary" id="submitCustomer">Create</button>
+                <div class="form-group"><label>Assign Agent (optional)</label><select id="custAgent" class="form-input"></select></div>
+                <div class="form-group"><label>Profile Photo</label>
+                    <button class="btn btn-outline btn-small" id="uploadCustPhoto">Upload Photo</button>
+                    <input type="hidden" id="custPhotoUrl">
+                </div>
+                <button class="btn btn-primary" id="submitCustomer">Create Customer</button>
             </div>
         </div>
     </div>
 
-    <!-- Loan Agreement Signature Modal (for admin to sign as lender) -->
+    <!-- Customer Details Modal -->
+    <div class="modal-overlay" id="customerDetailsModal">
+        <div class="modal-container" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>Customer Details</span>
+                <span class="modal-close" onclick="closeModal('customerDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="customerDetailsContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('customerDetailsModal')">Close</button>
+                <button class="btn btn-danger" id="banCustomerBtn">Ban</button>
+                <button class="btn btn-primary" id="editCustomerBtn">Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Details Modal -->
+    <div class="modal-overlay" id="agentDetailsModal">
+        <div class="modal-container" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>Agent Details</span>
+                <span class="modal-close" onclick="closeModal('agentDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="agentDetailsContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('agentDetailsModal')">Close</button>
+                <button class="btn btn-danger" id="banAgentBtn">Ban</button>
+                <button class="btn btn-primary" id="editAgentBtn">Edit</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Loan Details Modal -->
+    <div class="modal-overlay" id="loanDetailsModal">
+        <div class="modal-container" style="max-width: 700px;">
+            <div class="modal-header">
+                <span>Loan Details</span>
+                <span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="loanDetailsContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button>
+                <button class="btn btn-success" id="approveLoanBtn">Approve</button>
+                <button class="btn btn-danger" id="rejectLoanBtn">Reject</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Payment Details Modal -->
+    <div class="modal-overlay" id="paymentDetailsModal">
+        <div class="modal-container" style="max-width: 600px;">
+            <div class="modal-header">
+                <span>Payment Details</span>
+                <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="paymentDetailsContent"></div>
+            <div class="modal-footer">
+                <button class="btn btn-success" id="confirmPaymentBtn">Confirm</button>
+                <button class="btn btn-danger" id="rejectPaymentBtn">Reject</button>
+                <button class="btn btn-outline" onclick="closeModal('paymentDetailsModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Lender Signature Modal (for loan agreement) -->
     <div class="modal-overlay" id="signAgreementModal">
         <div class="modal-container">
             <div class="modal-header">
@@ -824,32 +990,48 @@
         </div>
     </div>
 
-    <!-- Payment Details Modal (with proof) -->
-    <div class="modal-overlay" id="paymentDetailsModal">
+    <!-- Commission Pay Modal -->
+    <div class="modal-overlay" id="payCommissionModal">
         <div class="modal-container">
             <div class="modal-header">
-                <span>Payment Details</span>
-                <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
+                <span>Pay Commission</span>
+                <span class="modal-close" onclick="closeModal('payCommissionModal')"><i class="fas fa-times"></i></span>
             </div>
-            <div class="modal-body" id="paymentDetailsContent"></div>
+            <div class="modal-body">
+                <p>Agent: <span id="payAgentName"></span></p>
+                <p>Amount: <span id="payAmount"></span></p>
+                <p>Loan: <span id="payLoanId"></span></p>
+                <div class="form-group">
+                    <label>Payment Method</label>
+                    <input type="text" id="payMethod" class="form-input" placeholder="e.g., Bank Transfer">
+                </div>
+                <div class="form-group">
+                    <label>Reference</label>
+                    <input type="text" id="payReference" class="form-input">
+                </div>
+                <button class="btn btn-primary" id="confirmPayCommission">Pay Now</button>
+            </div>
         </div>
     </div>
 
     <!-- Sudo Reset Modal -->
     <div class="modal-overlay" id="sudoModal">
         <div class="modal-container">
-            <div class="modal-header"><span>⚠️ Sudo Reset</span><span class="modal-close" onclick="closeModal('sudoModal')"><i class="fas fa-times"></i></span></div>
+            <div class="modal-header">
+                <span>⚠️ Sudo Reset Database</span>
+                <span class="modal-close" onclick="closeModal('sudoModal')"><i class="fas fa-times"></i></span>
+            </div>
             <div class="modal-body">
-                <p>Enter sudo password to delete ALL data:</p>
-                <input type="password" id="sudoPassword" class="form-input" placeholder="Password">
-                <button class="btn btn-danger mt-4" id="confirmSudoReset">Wipe Database</button>
+                <p>Enter the sudo password to delete ALL data. This action is irreversible.</p>
+                <input type="password" id="sudoPassword" class="form-input" placeholder="Sudo password">
+                <button class="btn btn-danger w-100 mt-4" id="confirmSudoReset">Wipe Database</button>
             </div>
         </div>
     </div>
 
-    <!-- Firebase config -->
+    <!-- ==================== JAVASCRIPT ==================== -->
     <script>
-        // Firebase Config (unchanged from original)
+        // ---------- Firebase Configuration (unchanged) ----------
         const firebaseConfig = {
             apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
             authDomain: "trucash-9fee8.firebaseapp.com",
@@ -863,7 +1045,7 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // Cloudinary
+        // ---------- Cloudinary Config ----------
         const cloudinaryConfig = {
             cloudName: 'dd3lcymrk',
             uploadPreset: 'h3eyhc2o',
@@ -871,78 +1053,160 @@
         };
         let cloudinaryWidget = null;
 
-        // Global state
+        // ---------- Global State ----------
         let currentUser = null;
         let adminData = null;
-        let allAgents = [], allCustomers = [], allLoans = [], allPayments = [];
+        let allUsers = {};          // key: uid, value: user object
+        let allAgents = [];
+        let allCustomers = [];
+        let allLoans = [];
+        let allPayments = [];
+        let allCommissionRecords = [];   // separate collection for commission payments
+
+        // UI filters
         let currentLoanFilter = 'all';
         let currentPaymentFilter = 'pending';
+        let currentAgentFilter = 'all';   // 'active', 'pending', 'all'
+        let currentCustomerFilter = 'all'; // 'active', 'banned', 'all'
 
-        // Utility functions (reused from original)
+        // Toast & Loading
+        function showLoading(msg = 'Loading...') {
+            document.getElementById('loadingOverlay').classList.add('active');
+            document.querySelector('#loadingOverlay .loading-text').innerText = msg;
+        }
+        function hideLoading() {
+            document.getElementById('loadingOverlay').classList.remove('active');
+        }
+        function showToast(title, message, type = 'info', duration = 5000) {
+            const container = document.getElementById('toastContainer');
+            const toast = document.createElement('div');
+            toast.className = `toast ${type}`;
+            toast.innerHTML = `
+                <div class="toast-icon"><i class="fas fa-${type==='error'?'exclamation-circle':type==='warning'?'exclamation-triangle':'info-circle'}"></i></div>
+                <div class="toast-content"><div class="toast-title">${title}</div><div class="toast-message">${message}</div></div>
+            `;
+            container.appendChild(toast);
+            setTimeout(() => { if (toast.parentNode) toast.remove(); }, duration);
+        }
+
+        // ---------- Utility Functions ----------
         const Utils = {
             formatCurrency: (amt) => 'K' + parseFloat(amt || 0).toFixed(2),
             formatDate: (ts) => new Date(ts).toLocaleDateString(),
-            showLoading: (msg) => { /* we can add a simple loader */ },
-            hideLoading: () => {},
-            showToast: (title, msg, type) => alert(`${title}: ${msg}`) // simplified
+            formatDateTime: (ts) => new Date(ts).toLocaleString(),
+            validateEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
+            validatePhone: (phone) => /^\+?[\d\s\-\(\)]{10,}$/.test(phone),
+            validateNRC: (nrc) => /^\d{6}\/\d{2}\/\d{1}$/.test(nrc),
+            generateId: (prefix) => prefix + Date.now() + Math.random().toString(36).substr(2,9).toUpperCase(),
+            calculateTotalInterest: (principal, rate, periods, isWeekly = false) => {
+                // simple compound interest (as per customer logic)
+                return principal * Math.pow(1 + rate, periods) - principal;
+            },
+            calculatePeriodicPayment: (principal, rate, periods, isWeekly = false) => {
+                // payment = principal * rate * (1+rate)^periods / ((1+rate)^periods -1)
+                if (rate === 0) return principal / periods;
+                const factor = Math.pow(1 + rate, periods);
+                return principal * rate * factor / (factor - 1);
+            }
         };
 
-        // Load data
-        async function loadAllData() {
-            const snap = await db.ref('users').once('value');
-            const users = snap.val() || {};
-            allAgents = Object.entries(users).filter(([_,u]) => u.userType === 'agent').map(([id,u]) => ({...u, id}));
-            allCustomers = Object.entries(users).filter(([_,u]) => u.userType === 'customer').map(([id,u]) => ({...u, id}));
-            const loansSnap = await db.ref('loans').once('value');
-            allLoans = Object.entries(loansSnap.val() || {}).map(([id,l]) => ({...l, id}));
-            const paymentsSnap = await db.ref('payments').once('value');
-            allPayments = Object.entries(paymentsSnap.val() || {}).map(([id,p]) => ({...p, id}));
-            updateUI();
+        // ---------- Data Loading & Real-time Listeners ----------
+        function loadAllData() {
+            showLoading('Loading system data...');
+            // Users
+            db.ref('users').on('value', (snap) => {
+                allUsers = snap.val() || {};
+                allAgents = Object.entries(allUsers)
+                    .filter(([_,u]) => u.userType === 'agent')
+                    .map(([id,u]) => ({...u, id}));
+                allCustomers = Object.entries(allUsers)
+                    .filter(([_,u]) => u.userType === 'customer')
+                    .map(([id,u]) => ({...u, id}));
+                updateStats();
+                renderAgents();
+                renderCustomers();
+                renderAssignmentsDropdowns();
+            });
+            // Loans
+            db.ref('loans').on('value', (snap) => {
+                allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
+                updateStats();
+                renderLoans();
+                renderAnalytics();
+                renderCommissionList();
+                renderProfit();
+            });
+            // Payments
+            db.ref('payments').on('value', (snap) => {
+                allPayments = Object.entries(snap.val() || {}).map(([id,p]) => ({...p, id}));
+                updateStats();
+                renderPayments();
+                renderAnalytics();
+                renderProfit();
+            });
+            // Commission records (if stored separately)
+            db.ref('commissions').on('value', (snap) => {
+                allCommissionRecords = Object.entries(snap.val() || {}).map(([id,c]) => ({...c, id}));
+                renderCommissionHistory();
+                renderProfit();
+            });
+            hideLoading();
         }
 
-        // Update all sections
-        function updateUI() {
+        function updateStats() {
             document.getElementById('statCustomers').innerText = allCustomers.length;
             document.getElementById('statAgents').innerText = allAgents.length;
             document.getElementById('statLoans').innerText = allLoans.length;
             document.getElementById('statPayments').innerText = allPayments.length;
-
-            renderAgents();
-            renderCustomers();
-            renderLoans();
-            renderPayments();
-            renderAnalytics();
-            renderCommission();
-            renderProfit();
-            renderAssignments();
+            // Pending summary
+            const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
+            const pendingPayments = allPayments.filter(p => p.status === 'pending').length;
+            const pendingAgents = allAgents.filter(a => a.status === 'pending').length;
+            document.getElementById('pendingSummary').innerHTML = `
+                <div>Pending Loans: ${pendingLoans}</div>
+                <div>Pending Payments: ${pendingPayments}</div>
+                <div>Pending Agents: ${pendingAgents}</div>
+            `;
         }
 
-        // Render functions (simplified – would be expanded in real implementation)
+        // ---------- Rendering Functions ----------
         function renderAgents() {
+            let filtered = allAgents;
+            if (currentAgentFilter === 'active') filtered = allAgents.filter(a => a.status === 'active');
+            else if (currentAgentFilter === 'pending') filtered = allAgents.filter(a => a.status === 'pending');
+            const search = document.getElementById('agentSearch')?.value.toLowerCase() || '';
+            if (search) filtered = filtered.filter(a => (a.fullName?.toLowerCase() || '').includes(search) || (a.phone || '').includes(search));
+
             const container = document.getElementById('agentsList');
-            container.innerHTML = allAgents.map(a => `
+            container.innerHTML = filtered.map(a => `
                 <div class="floating-card" onclick="showAgentDetails('${a.id}')">
                     <div class="profile-row">
-                        <img src="${a.profilePhoto || 'https://ui-avatars.com/api/?name='+a.fullName}" class="profile-img">
+                        <img src="${a.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(a.fullName||'A')}" class="profile-img">
                         <div class="profile-details">
-                            <div class="profile-name">${a.fullName}</div>
-                            <div class="profile-meta">${a.phone} · Loans: ${a.totalLoans || 0}</div>
+                            <div class="profile-name">${a.fullName || 'Unnamed'}</div>
+                            <div class="profile-meta">${a.phone || 'No phone'} · Loans: ${a.totalLoans || 0}</div>
                         </div>
-                        <span class="status-badge ${a.status}">${a.status}</span>
+                        <span class="status-badge ${a.status || 'pending'}">${a.status || 'pending'}</span>
                     </div>
                 </div>
             `).join('');
         }
 
         function renderCustomers() {
+            let filtered = allCustomers;
+            if (currentCustomerFilter === 'active') filtered = allCustomers.filter(c => c.status === 'active');
+            else if (currentCustomerFilter === 'banned') filtered = allCustomers.filter(c => c.status === 'banned');
+            const search = document.getElementById('customerSearch')?.value.toLowerCase() || '';
+            if (search) filtered = filtered.filter(c => (c.fullName?.toLowerCase() || '').includes(search) || (c.phone || '').includes(search));
+
             const container = document.getElementById('customersList');
-            container.innerHTML = allCustomers.map(c => `
+            container.innerHTML = filtered.map(c => `
                 <div class="floating-card" onclick="showCustomerDetails('${c.id}')">
                     <div class="profile-row">
-                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+c.fullName}" class="profile-img">
+                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')}" class="profile-img">
                         <div class="profile-details">
-                            <div class="profile-name">${c.fullName}</div>
-                            <div class="profile-meta">${c.phone} · Agent: ${c.agentName || 'N/A'}</div>
+                            <div class="profile-name">${c.fullName || 'Unnamed'}</div>
+                            <div class="profile-meta">${c.phone || 'No phone'} · Agent: ${c.agentName || 'N/A'}</div>
                         </div>
                         <span class="loan-badge">${c.totalLoans || 0} loans</span>
                     </div>
@@ -951,210 +1215,225 @@
         }
 
         function renderLoans() {
-            const filtered = allLoans.filter(l => currentLoanFilter === 'all' || l.status === currentLoanFilter);
+            let filtered = allLoans;
+            if (currentLoanFilter !== 'all') filtered = filtered.filter(l => l.status === currentLoanFilter);
+            const search = document.getElementById('loanSearch')?.value.toLowerCase() || '';
+            if (search) filtered = filtered.filter(l => (l.customerName?.toLowerCase() || '').includes(search) || (l.id || '').includes(search));
+
             const container = document.getElementById('loansList');
             container.innerHTML = filtered.map(l => `
                 <div class="floating-card" onclick="showLoanDetails('${l.id}')">
                     <div class="profile-row">
-                        <img src="${l.customerPhoto || 'https://ui-avatars.com/api/?name='+l.customerName}" class="profile-img">
+                        <img src="${l.customerPhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'L')}" class="profile-img">
                         <div>
-                            <div><strong>${l.customerName}</strong></div>
-                            <div class="profile-meta">${l.customerPhone} · Agent: ${l.agentName}</div>
+                            <div><strong>${l.customerName || 'Unknown'}</strong></div>
+                            <div class="profile-meta">${l.customerPhone || ''} · Agent: ${l.agentName || 'N/A'}</div>
                             <div>Amount: ${Utils.formatCurrency(l.amount)}</div>
                         </div>
-                        <span class="status-badge ${l.status}">${l.status}</span>
+                        <span class="status-badge ${l.status || 'pending'}">${l.status || 'pending'}</span>
                     </div>
                 </div>
             `).join('');
         }
 
         function renderPayments() {
-            const filtered = allPayments.filter(p => p.status === currentPaymentFilter);
+            let filtered = allPayments;
+            if (currentPaymentFilter !== 'all') filtered = filtered.filter(p => p.status === currentPaymentFilter);
+            const search = document.getElementById('paymentSearch')?.value.toLowerCase() || '';
+            if (search) filtered = filtered.filter(p => (p.customerName?.toLowerCase() || '').includes(search) || (p.loanId || '').includes(search));
+
             const container = document.getElementById('paymentsList');
             container.innerHTML = filtered.map(p => `
                 <div class="floating-card" onclick="showPaymentDetails('${p.id}')">
                     <div class="profile-row">
                         <div>
-                            <div><strong>${p.customerName}</strong> - ${Utils.formatCurrency(p.amount)}</div>
-                            <div class="profile-meta">Loan: ${p.loanId} · ${p.method}</div>
+                            <div><strong>${p.customerName || 'Unknown'}</strong> - ${Utils.formatCurrency(p.amount)}</div>
+                            <div class="profile-meta">Loan: ${p.loanId} · ${p.method || ''}</div>
                         </div>
-                        <span class="status-badge ${p.status}">${p.status}</span>
+                        <span class="status-badge ${p.status || 'pending'}">${p.status || 'pending'}</span>
                     </div>
                 </div>
             `).join('');
         }
 
         function renderAnalytics() {
-            // Simplified charts – in real would use Chart.js
-            document.getElementById('totalLent').innerText = Utils.formatCurrency(allLoans.reduce((s,l)=>s+(l.approvedAmount||l.amount),0));
-            document.getElementById('totalRepaid').innerText = Utils.formatCurrency(allPayments.filter(p=>p.status==='confirmed').reduce((s,p)=>s+p.amount,0));
-            const outstanding = allLoans.reduce((s,l)=>s+(l.totalPayable - (l.totalPaid||0)),0);
+            // Capital overview
+            const totalLent = allLoans.reduce((s, l) => s + (l.approvedAmount || l.amount || 0), 0);
+            const totalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s, p) => s + (p.amount || 0), 0);
+            const outstanding = totalLent - totalRepaid;
+            const totalInterest = allLoans.reduce((s, l) => s + (l.totalInterest || 0), 0);
+            document.getElementById('totalLent').innerText = Utils.formatCurrency(totalLent);
+            document.getElementById('totalRepaid').innerText = Utils.formatCurrency(totalRepaid);
             document.getElementById('outstanding').innerText = Utils.formatCurrency(outstanding);
-            const interest = allLoans.reduce((s,l)=>s+(l.totalInterest||0),0);
-            document.getElementById('totalInterestEarned').innerText = Utils.formatCurrency(interest);
+            document.getElementById('totalInterestEarned').innerText = Utils.formatCurrency(totalInterest);
+
+            // Charts (simplified – would require proper data aggregation)
+            // Top borrowers: sum of loan amounts per customer
+            const borrowerMap = new Map();
+            allLoans.forEach(l => {
+                if (l.customerId) {
+                    const curr = borrowerMap.get(l.customerId) || { name: l.customerName || 'Unknown', total: 0 };
+                    curr.total += (l.approvedAmount || l.amount || 0);
+                    borrowerMap.set(l.customerId, curr);
+                }
+            });
+            const topBorrowers = Array.from(borrowerMap.values()).sort((a,b) => b.total - a.total).slice(0,5);
+            // Top agents by number of loans
+            const agentLoanCount = {};
+            allLoans.forEach(l => {
+                if (l.agentId) agentLoanCount[l.agentId] = (agentLoanCount[l.agentId] || 0) + 1;
+            });
+            const topAgents = Object.entries(agentLoanCount).map(([id, count]) => {
+                const agent = allAgents.find(a => a.id === id);
+                return { name: agent?.fullName || id, count };
+            }).sort((a,b) => b.count - a.count).slice(0,5);
+
+            // Render charts (using Chart.js) – we need canvas contexts
+            if (topBorrowers.length) {
+                new Chart(document.getElementById('topBorrowersChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: topBorrowers.map(b => b.name),
+                        datasets: [{
+                            label: 'Total Borrowed (K)',
+                            data: topBorrowers.map(b => b.total),
+                            backgroundColor: '#007AFF'
+                        }]
+                    }
+                });
+            }
+            if (topAgents.length) {
+                new Chart(document.getElementById('topAgentsChart'), {
+                    type: 'bar',
+                    data: {
+                        labels: topAgents.map(a => a.name),
+                        datasets: [{
+                            label: 'Loans Managed',
+                            data: topAgents.map(a => a.count),
+                            backgroundColor: '#34C759'
+                        }]
+                    }
+                });
+            }
         }
 
-        function renderCommission() {
-            const list = document.getElementById('agentsCommissionList');
-            const history = document.getElementById('commissionHistory');
-            // Group by agent, calculate 15% of total interest from their loans
+        function renderCommissionList() {
+            const container = document.getElementById('agentsCommissionList');
+            // For each agent, calculate total interest from their approved loans, then commission = 15%
             let html = '';
             allAgents.forEach(agent => {
                 const agentLoans = allLoans.filter(l => l.agentId === agent.id && l.status === 'approved');
-                const totalInterest = agentLoans.reduce((s,l) => s + (l.totalInterest || 0), 0);
-                const commission = totalInterest * 0.15;
-                html += `<div class="floating-card"><strong>${agent.fullName}</strong> - Commission: ${Utils.formatCurrency(commission)} <button class="btn btn-small btn-primary" onclick="payCommission('${agent.id}', ${commission})">Pay</button></div>`;
+                const totalInterest = agentLoans.reduce((sum, l) => sum + (l.totalInterest || 0), 0);
+                const commission = totalInterest * 0.15; // 15%
+                // Check if already paid? We'll use commissionRecords to show paid amount
+                const paidCommission = allCommissionRecords
+                    .filter(c => c.agentId === agent.id && c.status === 'paid')
+                    .reduce((sum, c) => sum + (c.amount || 0), 0);
+                const pendingCommission = commission - paidCommission;
+                html += `
+                    <div class="floating-card">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <strong>${agent.fullName || agent.id}</strong><br>
+                                Total Interest: ${Utils.formatCurrency(totalInterest)}<br>
+                                Commission (15%): ${Utils.formatCurrency(commission)}
+                            </div>
+                            <div>
+                                <span class="status-badge">Paid: ${Utils.formatCurrency(paidCommission)}</span>
+                                ${pendingCommission > 0 ? `<button class="btn btn-primary btn-small" onclick="openPayCommissionModal('${agent.id}', ${pendingCommission})">Pay ${Utils.formatCurrency(pendingCommission)}</button>` : ''}
+                            </div>
+                        </div>
+                    </div>
+                `;
             });
-            list.innerHTML = html;
-            // history (simplified)
-            history.innerHTML = '<p>Commission payments tracked here.</p>';
+            container.innerHTML = html;
+        }
+
+        function renderCommissionHistory() {
+            const container = document.getElementById('commissionHistory');
+            if (allCommissionRecords.length === 0) {
+                container.innerHTML = '<p class="text-muted">No commission payments yet.</p>';
+                return;
+            }
+            let html = '<table class="data-table"><tr><th>Date</th><th>Agent</th><th>Amount</th><th>Loan</th><th>Method</th></tr>';
+            allCommissionRecords.slice(0, 20).forEach(c => {
+                html += `<tr>
+                    <td>${Utils.formatDate(c.paidAt)}</td>
+                    <td>${c.agentName || c.agentId}</td>
+                    <td>${Utils.formatCurrency(c.amount)}</td>
+                    <td>${c.loanId || '-'}</td>
+                    <td>${c.method || '-'}</td>
+                </tr>`;
+            });
+            html += '</table>';
+            container.innerHTML = html;
         }
 
         function renderProfit() {
-            const totalLent = allLoans.reduce((s,l)=>s+(l.approvedAmount||l.amount),0);
-            const principalRepaid = allPayments.filter(p=>p.status==='confirmed').reduce((s,p)=>s+p.amount,0);
-            const interestPaid = allLoans.reduce((s,l)=>s+(l.totalInterest||0),0); // simplified
-            const commissionPaid = 0; // would need a commission paid flag
+            const totalLent = allLoans.reduce((s, l) => s + (l.approvedAmount || l.amount || 0), 0);
+            const principalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s, p) => s + (p.amount || 0), 0);
+            // Interest paid is sum of interest portions from payments (simplified: we assume payments first go to interest? For accurate, need breakdown. We'll approximate: interest paid = totalInterestEarned from loans that are fully paid? Better to use loan totalInterest for now)
+            const totalInterestEarned = allLoans.reduce((s, l) => s + (l.totalInterest || 0), 0);
+            const commissionPaid = allCommissionRecords.reduce((s, c) => s + (c.amount || 0), 0);
+            const netProfit = totalInterestEarned - commissionPaid;
+
             document.getElementById('profitLent').innerText = Utils.formatCurrency(totalLent);
             document.getElementById('profitPrincipal').innerText = Utils.formatCurrency(principalRepaid);
-            document.getElementById('profitInterest').innerText = Utils.formatCurrency(interestPaid);
+            document.getElementById('profitInterest').innerText = Utils.formatCurrency(totalInterestEarned);
             document.getElementById('profitCommission').innerText = Utils.formatCurrency(commissionPaid);
-            const net = interestPaid - commissionPaid;
-            document.getElementById('netProfit').innerText = Utils.formatCurrency(net);
+            document.getElementById('netProfit').innerText = Utils.formatCurrency(netProfit);
         }
 
-        function renderAssignments() {
+        function renderAssignmentsDropdowns() {
             const custSelect = document.getElementById('assignCustomer');
             const agentSelect = document.getElementById('assignAgent');
-            custSelect.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName}</option>`).join('');
-            agentSelect.innerHTML = allAgents.map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
-            // assignment list
-            const list = document.getElementById('assignmentsList');
-            list.innerHTML = allCustomers.map(c => `<div>${c.fullName} → ${c.agentName || 'none'}</div>`).join('');
+            if (custSelect) custSelect.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName} (${c.phone})</option>`).join('');
+            if (agentSelect) agentSelect.innerHTML = allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName} (${a.agentId})</option>`).join('');
+
+            const assignmentsList = document.getElementById('assignmentsList');
+            if (assignmentsList) {
+                assignmentsList.innerHTML = allCustomers.map(c => {
+                    const agent = allAgents.find(a => a.id === c.assignedAgentId);
+                    return `<div class="d-flex justify-between"><span>${c.fullName}</span><span>→ ${agent ? agent.fullName : 'none'}</span></div>`;
+                }).join('');
+            }
         }
 
-        // Show details (stubs)
-        window.showAgentDetails = (id) => { alert('Agent details: ' + id); };
-        window.showCustomerDetails = (id) => { alert('Customer details: ' + id); };
-        window.showLoanDetails = (id) => { 
-            // show loan details modal with agreement view and sign button
-            const loan = allLoans.find(l=>l.id===id);
-            if (!loan) return;
-            let msg = `Loan ${id}\nCustomer: ${loan.customerName}\nAmount: ${loan.amount}\nAgreement: ${loan.signedAgreementUrl || 'None'}`;
-            if (loan.signedAgreementUrl && !loan.lenderSigned) {
-                if (confirm('View agreement and sign as lender?')) {
-                    // open signature modal with iframe preview
-                    document.getElementById('agreementPreview').innerHTML = `<iframe src="${loan.signedAgreementUrl}" style="width:100%; height:250px;"></iframe>`;
-                    openModal('signAgreementModal');
-                    window.currentLoanForSign = id;
-                }
-            } else {
-                alert(msg);
-            }
-        };
-        window.showPaymentDetails = (id) => {
-            const payment = allPayments.find(p=>p.id===id);
-            if (!payment) return;
-            document.getElementById('paymentDetailsContent').innerHTML = `
-                <p>Customer: ${payment.customerName}</p>
-                <p>Amount: ${Utils.formatCurrency(payment.amount)}</p>
-                <p>Method: ${payment.method}</p>
-                <p>Reference: ${payment.reference || 'N/A'}</p>
-                <p>Proof: <a href="${payment.proofUrl}" target="_blank">View</a></p>
-                <button class="btn btn-success" onclick="confirmPayment('${id}')">Confirm</button>
-                <button class="btn btn-danger" onclick="rejectPayment('${id}')">Reject</button>
-            `;
-            openModal('paymentDetailsModal');
-        };
-        window.confirmPayment = async (id) => {
-            await db.ref('payments/'+id).update({status:'confirmed', verifiedAt:Date.now(), verifiedBy:currentUser?.uid});
-            loadAllData();
-            closeModal('paymentDetailsModal');
-        };
-        window.rejectPayment = async (id) => {
-            await db.ref('payments/'+id).update({status:'rejected'});
-            loadAllData();
-            closeModal('paymentDetailsModal');
-        };
-        window.payCommission = (agentId, amount) => {
-            if (prompt(`Pay ${Utils.formatCurrency(amount)} to agent? Enter 'yes' to confirm`) === 'yes') {
-                alert('Commission paid (demo)');
-            }
-        };
-
-        // Lender signature
-        const lenderSigPad = (() => {
-            const canvas = document.getElementById('lenderSignatureCanvas');
-            if (!canvas) return;
-            const ctx = canvas.getContext('2d');
-            let drawing = false;
-            canvas.addEventListener('mousedown', (e) => { drawing = true; ctx.beginPath(); ctx.moveTo(e.offsetX, e.offsetY); });
-            canvas.addEventListener('mousemove', (e) => { if(drawing) { ctx.lineTo(e.offsetX, e.offsetY); ctx.stroke(); } });
-            canvas.addEventListener('mouseup', () => drawing = false);
-            canvas.addEventListener('mouseleave', () => drawing = false);
-            document.getElementById('clearLenderSig').addEventListener('click', () => ctx.clearRect(0,0,canvas.width,canvas.height));
-            return { clear: () => ctx.clearRect(0,0,canvas.width,canvas.height), getData: () => canvas.toDataURL() };
-        })();
-
-        document.getElementById('submitLenderSignature').addEventListener('click', async () => {
-            if (!lenderSigPad) return;
-            const sigData = lenderSigPad.getData();
-            const loanId = window.currentLoanForSign;
-            if (!loanId) return;
-            // Here you would upload the signature to Cloudinary and attach to loan record
-            alert('Signature saved (demo).');
-            closeModal('signAgreementModal');
-        });
-
-        // Sudo reset
-        document.getElementById('sudoResetBtn').addEventListener('click', () => openModal('sudoModal'));
-        document.getElementById('confirmSudoReset').addEventListener('click', async () => {
-            const pwd = document.getElementById('sudoPassword').value;
-            if (pwd === '1551530066TRUCASHDATARESET') {
-                await db.ref().set(null); // DANGEROUS: wipes entire DB
-                alert('Database wiped.');
-                location.reload();
-            } else {
-                alert('Incorrect password');
-            }
-            closeModal('sudoModal');
-        });
-
-        // Navigation
-        function showSection(sectionId) {
+        // ---------- Section Navigation ----------
+        window.showSection = function(sectionId) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
             document.getElementById(sectionId + 'Section').classList.add('active');
             document.querySelectorAll('.nav-item-bottom').forEach(i => i.classList.remove('active'));
             document.querySelector(`.nav-item-bottom[data-section="${sectionId}"]`)?.classList.add('active');
-        }
+            // Special render for analytics, commission, profit when switched
+            if (sectionId === 'analytics') renderAnalytics();
+            if (sectionId === 'commission') { renderCommissionList(); renderCommissionHistory(); }
+            if (sectionId === 'profit') renderProfit();
+            if (sectionId === 'assignment') renderAssignmentsDropdowns();
+        };
 
-        document.querySelectorAll('.nav-item-bottom').forEach(item => {
-            item.addEventListener('click', () => showSection(item.dataset.section));
-        });
-        document.querySelectorAll('.sidebar-item').forEach(item => {
-            item.addEventListener('click', () => {
-                const section = item.dataset.section;
-                if (section) showSection(section);
-                if (item.classList.contains('logout')) auth.signOut();
-            });
-        });
-
-        // Modals
+        // ---------- Modals ----------
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
 
-        // Header admin name
+        // ---------- Authentication ----------
         auth.onAuthStateChanged(async (user) => {
             if (!user) { window.location = 'login.html'; return; }
             currentUser = user;
-            const snap = await db.ref('users/'+user.uid).once('value');
+            const snap = await db.ref('users/' + user.uid).once('value');
             adminData = snap.val();
-            document.getElementById('adminNameDisplay').innerText = adminData?.fullName || 'Admin';
-            document.getElementById('sidebarName').innerText = adminData?.fullName || 'Admin User';
+            if (!adminData || adminData.userType !== 'admin') {
+                alert('Access denied.');
+                auth.signOut();
+                return;
+            }
+            document.getElementById('adminNameDisplay').innerText = adminData.fullName || 'Admin';
+            document.getElementById('sidebarName').innerText = adminData.fullName || 'Admin User';
+            document.getElementById('sidebarAvatar').innerText = (adminData.fullName?.[0] || 'A').toUpperCase();
             loadAllData();
         });
 
-        // Sidebar toggle
+        // ---------- Sidebar toggle ----------
         document.getElementById('sidebarToggle').addEventListener('click', () => {
             document.getElementById('sidebar').classList.toggle('active');
             document.getElementById('sidebarOverlay').classList.toggle('active');
@@ -1164,7 +1443,19 @@
             document.getElementById('sidebarOverlay').classList.remove('active');
         });
 
-        // Tabs
+        // ---------- Logout ----------
+        document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+        // ---------- Search and Filter Event Listeners ----------
+        document.getElementById('agentSearch').addEventListener('input', renderAgents);
+        document.getElementById('filterActiveAgents').addEventListener('click', () => { currentAgentFilter = 'active'; renderAgents(); });
+        document.getElementById('filterPendingAgents').addEventListener('click', () => { currentAgentFilter = 'pending'; renderAgents(); });
+
+        document.getElementById('customerSearch').addEventListener('input', renderCustomers);
+        document.getElementById('filterActiveCustomers').addEventListener('click', () => { currentCustomerFilter = 'active'; renderCustomers(); });
+        document.getElementById('filterBannedCustomers').addEventListener('click', () => { currentCustomerFilter = 'banned'; renderCustomers(); });
+
+        document.getElementById('loanSearch').addEventListener('input', renderLoans);
         document.querySelectorAll('#loansSection .tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
@@ -1173,6 +1464,8 @@
                 renderLoans();
             });
         });
+
+        document.getElementById('paymentSearch').addEventListener('input', renderPayments);
         document.querySelectorAll('#paymentsSection .tab').forEach(tab => {
             tab.addEventListener('click', () => {
                 document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
@@ -1182,17 +1475,494 @@
             });
         });
 
-        // Create agent/customer (simplified)
+        // ---------- Create Agent ----------
         document.getElementById('createAgentBtn').addEventListener('click', () => openModal('createAgentModal'));
         document.getElementById('submitAgent').addEventListener('click', async () => {
-            // Basic creation – would need full validation and Firebase Auth creation
-            alert('Agent creation would be implemented similarly to original');
-            closeModal('createAgentModal');
+            const name = document.getElementById('agentName').value.trim();
+            const phone = document.getElementById('agentPhone').value.trim();
+            const nrc = document.getElementById('agentNrc').value.trim();
+            const email = document.getElementById('agentEmail').value.trim();
+            const agentId = document.getElementById('agentCustomId').value.trim();
+            const password = document.getElementById('agentPassword').value;
+            const branch = document.getElementById('agentBranch').value.trim();
+
+            if (!name || !phone || !nrc || !email || !agentId || !password) {
+                showToast('Validation', 'All fields are required', 'error'); return;
+            }
+            if (!Utils.validateEmail(email)) { showToast('Error', 'Invalid email', 'error'); return; }
+            if (password.length < 6) { showToast('Error', 'Password must be at least 6 characters', 'error'); return; }
+
+            try {
+                showLoading('Creating agent...');
+                // Create auth user
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = cred.user.uid;
+                const agentData = {
+                    fullName: name,
+                    phone,
+                    nrc,
+                    email,
+                    agentId,
+                    branch,
+                    userType: 'agent',
+                    status: 'active',   // directly active (or could be pending)
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    totalCustomers: 0,
+                    totalLoans: 0,
+                    totalCommission: 0,
+                    approvedBy: currentUser.uid
+                };
+                await db.ref('users/' + uid).set(agentData);
+                showToast('Success', 'Agent created successfully', 'success');
+                closeModal('createAgentModal');
+                // Clear form
+                document.getElementById('agentName').value = '';
+                document.getElementById('agentPhone').value = '';
+                document.getElementById('agentNrc').value = '';
+                document.getElementById('agentEmail').value = '';
+                document.getElementById('agentCustomId').value = '';
+                document.getElementById('agentPassword').value = '';
+                document.getElementById('agentBranch').value = '';
+            } catch (err) {
+                showToast('Error', err.message, 'error');
+            } finally {
+                hideLoading();
+            }
         });
-        document.getElementById('createCustomerBtn').addEventListener('click', () => openModal('createCustomerModal'));
+
+        // ---------- Create Customer ----------
+        document.getElementById('createCustomerBtn').addEventListener('click', () => {
+            // Populate agent dropdown
+            const select = document.getElementById('custAgent');
+            select.innerHTML = '<option value="">None</option>' + allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+            openModal('createCustomerModal');
+        });
+
+        // Cloudinary upload for customer photo (simplified)
+        document.getElementById('uploadCustPhoto').addEventListener('click', () => {
+            if (!cloudinaryWidget) {
+                cloudinaryWidget = cloudinary.createUploadWidget(cloudinaryConfig, (error, result) => {
+                    if (result && result.event === 'success') {
+                        document.getElementById('custPhotoUrl').value = result.info.secure_url;
+                        showToast('Photo uploaded', 'Customer photo ready', 'success');
+                    }
+                });
+            }
+            cloudinaryWidget.open();
+        });
+
         document.getElementById('submitCustomer').addEventListener('click', async () => {
-            alert('Customer creation');
-            closeModal('createCustomerModal');
+            const name = document.getElementById('custName').value.trim();
+            const email = document.getElementById('custEmail').value.trim();
+            const phone = document.getElementById('custPhone').value.trim();
+            const nrc = document.getElementById('custNrc').value.trim();
+            const address = document.getElementById('custAddress').value.trim();
+            const password = document.getElementById('custPassword').value;
+            const agentId = document.getElementById('custAgent').value;
+            const photo = document.getElementById('custPhotoUrl').value;
+
+            if (!name || !email || !phone || !nrc || !address || !password) {
+                showToast('Validation', 'All fields required', 'error'); return;
+            }
+            if (!Utils.validateEmail(email)) { showToast('Error', 'Invalid email', 'error'); return; }
+            if (password.length < 6) { showToast('Error', 'Password must be at least 6 characters', 'error'); return; }
+
+            try {
+                showLoading('Creating customer...');
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = cred.user.uid;
+                const agent = allAgents.find(a => a.id === agentId);
+                const customerData = {
+                    fullName: name,
+                    email,
+                    phone,
+                    nrc,
+                    residence: address,
+                    profilePhoto: photo || '',
+                    userType: 'customer',
+                    status: 'active',
+                    assignedAgentId: agentId || null,
+                    agentName: agent ? agent.fullName : null,
+                    createdAt: Date.now(),
+                    updatedAt: Date.now(),
+                    totalLoans: 0,
+                    activeLoans: 0
+                };
+                await db.ref('users/' + uid).set(customerData);
+                if (agentId) {
+                    // increment agent's customer count
+                    await db.ref('users/' + agentId + '/totalCustomers').transaction(val => (val || 0) + 1);
+                }
+                showToast('Success', 'Customer created', 'success');
+                closeModal('createCustomerModal');
+                // Clear form
+                document.getElementById('custName').value = '';
+                document.getElementById('custEmail').value = '';
+                document.getElementById('custPhone').value = '';
+                document.getElementById('custNrc').value = '';
+                document.getElementById('custAddress').value = '';
+                document.getElementById('custPassword').value = '';
+                document.getElementById('custPhotoUrl').value = '';
+            } catch (err) {
+                showToast('Error', err.message, 'error');
+            } finally {
+                hideLoading();
+            }
+        });
+
+        // ---------- Show Details ----------
+        window.showAgentDetails = async (id) => {
+            const agent = allAgents.find(a => a.id === id);
+            if (!agent) return;
+            const agentLoans = allLoans.filter(l => l.agentId === id);
+            const totalInterest = agentLoans.reduce((s,l) => s + (l.totalInterest || 0), 0);
+            const commissionEarned = totalInterest * 0.15;
+            const paidCommission = allCommissionRecords.filter(c => c.agentId === id && c.status === 'paid').reduce((s,c) => s + (c.amount || 0), 0);
+            const customers = allCustomers.filter(c => c.assignedAgentId === id);
+            document.getElementById('agentDetailsContent').innerHTML = `
+                <div class="text-center mb-4">
+                    <img src="${agent.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent.fullName||'A')}" class="profile-img" style="width:80px; height:80px;">
+                    <h3>${agent.fullName}</h3>
+                    <p>${agent.agentId} · ${agent.email}</p>
+                </div>
+                <div><strong>Phone:</strong> ${agent.phone}</div>
+                <div><strong>NRC:</strong> ${agent.nrc}</div>
+                <div><strong>Branch:</strong> ${agent.branch || 'N/A'}</div>
+                <div><strong>Status:</strong> <span class="status-badge ${agent.status}">${agent.status}</span></div>
+                <div><strong>Customers:</strong> ${customers.length}</div>
+                <div><strong>Loans facilitated:</strong> ${agentLoans.length}</div>
+                <div><strong>Total Interest from loans:</strong> ${Utils.formatCurrency(totalInterest)}</div>
+                <div><strong>Commission earned (15%):</strong> ${Utils.formatCurrency(commissionEarned)}</div>
+                <div><strong>Commission paid:</strong> ${Utils.formatCurrency(paidCommission)}</div>
+                <div><strong>Joined:</strong> ${Utils.formatDate(agent.createdAt)}</div>
+            `;
+            window.currentAgentId = id;
+            openModal('agentDetailsModal');
+        };
+
+        window.showCustomerDetails = async (id) => {
+            const customer = allCustomers.find(c => c.id === id);
+            if (!customer) return;
+            const customerLoans = allLoans.filter(l => l.customerId === id);
+            const totalBorrowed = customerLoans.reduce((s,l) => s + (l.approvedAmount || l.amount || 0), 0);
+            const totalPaid = allPayments.filter(p => p.customerId === id && p.status === 'confirmed').reduce((s,p) => s + (p.amount || 0), 0);
+            document.getElementById('customerDetailsContent').innerHTML = `
+                <div class="text-center mb-4">
+                    <img src="${customer.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(customer.fullName||'C')}" class="profile-img" style="width:80px; height:80px;">
+                    <h3>${customer.fullName}</h3>
+                    <p>${customer.email}</p>
+                </div>
+                <div><strong>Phone:</strong> ${customer.phone}</div>
+                <div><strong>NRC:</strong> ${customer.nrc}</div>
+                <div><strong>Address:</strong> ${customer.residence}</div>
+                <div><strong>Agent:</strong> ${customer.agentName || 'None'}</div>
+                <div><strong>Status:</strong> <span class="status-badge ${customer.status}">${customer.status}</span></div>
+                <div><strong>Total Loans:</strong> ${customerLoans.length}</div>
+                <div><strong>Total Borrowed:</strong> ${Utils.formatCurrency(totalBorrowed)}</div>
+                <div><strong>Total Repaid:</strong> ${Utils.formatCurrency(totalPaid)}</div>
+                <div><strong>Balance:</strong> ${Utils.formatCurrency(totalBorrowed - totalPaid)}</div>
+                <div><strong>Joined:</strong> ${Utils.formatDate(customer.createdAt)}</div>
+                ${customer.nrcFront || customer.nrcBack ? `
+                    <h4 class="mt-4">Documents</h4>
+                    <div class="doc-grid">
+                        ${customer.nrcFront ? `<div class="doc-thumb"><img src="${customer.nrcFront}" onclick="window.open('${customer.nrcFront}')"></div>` : ''}
+                        ${customer.nrcBack ? `<div class="doc-thumb"><img src="${customer.nrcBack}" onclick="window.open('${customer.nrcBack}')"></div>` : ''}
+                    </div>
+                ` : ''}
+            `;
+            window.currentCustomerId = id;
+            openModal('customerDetailsModal');
+        };
+
+        window.showLoanDetails = async (id) => {
+            const loan = allLoans.find(l => l.id === id);
+            if (!loan) return;
+            const customer = allCustomers.find(c => c.id === loan.customerId);
+            const agent = allAgents.find(a => a.id === loan.agentId);
+            const payments = allPayments.filter(p => p.loanId === id && p.status === 'confirmed');
+            const totalPaid = payments.reduce((s,p) => s + (p.amount || 0), 0);
+            const remaining = (loan.totalPayable || 0) - totalPaid;
+
+            document.getElementById('loanDetailsContent').innerHTML = `
+                <h3>Loan ${loan.id}</h3>
+                <div class="d-flex justify-between">
+                    <div>
+                        <strong>Customer:</strong> ${customer?.fullName || loan.customerName}<br>
+                        <strong>Phone:</strong> ${customer?.phone || loan.customerPhone}<br>
+                        <strong>Agent:</strong> ${agent?.fullName || loan.agentName}<br>
+                    </div>
+                    <div>
+                        <span class="status-badge ${loan.status}">${loan.status}</span>
+                    </div>
+                </div>
+                <hr>
+                <div><strong>Amount:</strong> ${Utils.formatCurrency(loan.amount)}</div>
+                <div><strong>Approved Amount:</strong> ${Utils.formatCurrency(loan.approvedAmount || loan.amount)}</div>
+                <div><strong>Interest Rate:</strong> ${loan.interestRate}% (${loan.durationUnit})</div>
+                <div><strong>Duration:</strong> ${loan.duration} ${loan.durationUnit}</div>
+                <div><strong>Total Interest:</strong> ${Utils.formatCurrency(loan.totalInterest || 0)}</div>
+                <div><strong>Total Payable:</strong> ${Utils.formatCurrency(loan.totalPayable || 0)}</div>
+                <div><strong>Total Paid:</strong> ${Utils.formatCurrency(totalPaid)}</div>
+                <div><strong>Remaining:</strong> ${Utils.formatCurrency(remaining)}</div>
+                <div><strong>Purpose:</strong> ${loan.purpose} - ${loan.purposeDescription}</div>
+                ${loan.collateral ? `
+                    <h4>Collateral</h4>
+                    <p>${loan.collateral.category}: ${loan.collateral.description} (Value: ${Utils.formatCurrency(loan.collateral.value)})</p>
+                    <p>Location: ${loan.collateral.location}</p>
+                    ${loan.collateral.images ? `<div class="doc-grid">${loan.collateral.images.map(img => `<div class="doc-thumb"><img src="${img}"></div>`).join('')}</div>` : ''}
+                ` : ''}
+                ${loan.signedAgreementUrl ? `<p><a href="${loan.signedAgreementUrl}" target="_blank">View Signed Agreement</a></p>` : ''}
+                <hr>
+                <h4>Payment History</h4>
+                ${payments.length ? payments.map(p => `<div>${Utils.formatDate(p.timestamp)}: ${Utils.formatCurrency(p.amount)} (${p.method})</div>`).join('') : '<p>No payments yet.</p>'}
+            `;
+            window.currentLoanId = id;
+            openModal('loanDetailsModal');
+
+            // Show/hide approve/reject buttons based on status
+            document.getElementById('approveLoanBtn').style.display = loan.status === 'pending' ? 'inline-block' : 'none';
+            document.getElementById('rejectLoanBtn').style.display = loan.status === 'pending' ? 'inline-block' : 'none';
+        };
+
+        // Approve Loan
+        document.getElementById('approveLoanBtn').addEventListener('click', async () => {
+            const loanId = window.currentLoanId;
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan) return;
+            // Optionally open signature modal for lender to sign
+            if (loan.signedAgreementUrl && !loan.lenderSigned) {
+                // Show agreement preview
+                document.getElementById('agreementPreview').innerHTML = `<iframe src="${loan.signedAgreementUrl}" style="width:100%; height:250px;"></iframe>`;
+                window.currentLoanForSign = loanId;
+                openModal('signAgreementModal');
+            } else {
+                // Directly approve
+                await db.ref('loans/' + loanId).update({ status: 'approved', approvedAt: Date.now(), approvedBy: currentUser.uid });
+                showToast('Loan approved', 'Loan has been approved', 'success');
+                closeModal('loanDetailsModal');
+            }
+        });
+
+        // Lender signature submission
+        document.getElementById('submitLenderSignature').addEventListener('click', async () => {
+            const canvas = document.getElementById('lenderSignatureCanvas');
+            if (!canvas) return;
+            const sigData = canvas.toDataURL();
+            // Upload signature to Cloudinary or store as base64? For simplicity, store as string in Firebase.
+            const loanId = window.currentLoanForSign;
+            if (!loanId) return;
+            await db.ref('loans/' + loanId).update({ lenderSignature: sigData, lenderSigned: true, lenderSignedAt: Date.now(), status: 'approved', approvedAt: Date.now(), approvedBy: currentUser.uid });
+            showToast('Loan approved', 'Lender signature saved and loan approved', 'success');
+            closeModal('signAgreementModal');
+            closeModal('loanDetailsModal');
+        });
+
+        document.getElementById('clearLenderSig').addEventListener('click', () => {
+            const canvas = document.getElementById('lenderSignatureCanvas');
+            if (canvas) canvas.getContext('2d').clearRect(0,0,canvas.width,canvas.height);
+        });
+
+        // Reject Loan
+        document.getElementById('rejectLoanBtn').addEventListener('click', async () => {
+            const reason = prompt('Reason for rejection:');
+            if (reason === null) return;
+            const loanId = window.currentLoanId;
+            await db.ref('loans/' + loanId).update({ status: 'rejected', rejectedAt: Date.now(), rejectedBy: currentUser.uid, rejectionReason: reason });
+            showToast('Loan rejected', 'Loan has been rejected', 'warning');
+            closeModal('loanDetailsModal');
+        });
+
+        // ---------- Payment Details ----------
+        window.showPaymentDetails = (id) => {
+            const payment = allPayments.find(p => p.id === id);
+            if (!payment) return;
+            const loan = allLoans.find(l => l.id === payment.loanId);
+            document.getElementById('paymentDetailsContent').innerHTML = `
+                <p><strong>Payment ID:</strong> ${payment.id}</p>
+                <p><strong>Customer:</strong> ${payment.customerName}</p>
+                <p><strong>Loan:</strong> ${payment.loanId}</p>
+                <p><strong>Amount:</strong> ${Utils.formatCurrency(payment.amount)}</p>
+                <p><strong>Method:</strong> ${payment.method}</p>
+                <p><strong>Reference:</strong> ${payment.reference || 'N/A'}</p>
+                <p><strong>Submitted:</strong> ${Utils.formatDateTime(payment.timestamp)}</p>
+                ${payment.proofUrl ? `<p><strong>Proof:</strong> <a href="${payment.proofUrl}" target="_blank">View</a></p>` : ''}
+                <p><strong>Status:</strong> <span class="status-badge ${payment.status}">${payment.status}</span></p>
+                ${payment.status === 'pending' ? `
+                    <p><strong>Actions:</strong> Confirm or reject below.</p>
+                ` : ''}
+            `;
+            window.currentPaymentId = id;
+            openModal('paymentDetailsModal');
+        };
+
+        document.getElementById('confirmPaymentBtn').addEventListener('click', async () => {
+            const paymentId = window.currentPaymentId;
+            const payment = allPayments.find(p => p.id === paymentId);
+            if (!payment) return;
+            await db.ref('payments/' + paymentId).update({ status: 'confirmed', verifiedAt: Date.now(), verifiedBy: currentUser.uid });
+            // Update loan totalPaid
+            const loanRef = db.ref('loans/' + payment.loanId);
+            const loanSnap = await loanRef.once('value');
+            const loan = loanSnap.val();
+            const newTotalPaid = (loan.totalPaid || 0) + payment.amount;
+            const updates = { totalPaid: newTotalPaid, updatedAt: Date.now() };
+            if (newTotalPaid >= (loan.totalPayable || 0)) {
+                updates.status = 'completed';
+                updates.completedAt = Date.now();
+            }
+            await loanRef.update(updates);
+            showToast('Payment confirmed', 'Payment has been verified', 'success');
+            closeModal('paymentDetailsModal');
+        });
+
+        document.getElementById('rejectPaymentBtn').addEventListener('click', async () => {
+            const paymentId = window.currentPaymentId;
+            const reason = prompt('Reason for rejection:');
+            if (reason === null) return;
+            await db.ref('payments/' + paymentId).update({ status: 'rejected', rejectedAt: Date.now(), rejectedBy: currentUser.uid, rejectionReason: reason });
+            showToast('Payment rejected', 'Payment has been rejected', 'warning');
+            closeModal('paymentDetailsModal');
+        });
+
+        // ---------- Commission Payment ----------
+        window.openPayCommissionModal = (agentId, amount) => {
+            const agent = allAgents.find(a => a.id === agentId);
+            document.getElementById('payAgentName').innerText = agent?.fullName || agentId;
+            document.getElementById('payAmount').innerText = Utils.formatCurrency(amount);
+            // For simplicity, we'll just store agentId and amount
+            window.payCommissionData = { agentId, amount };
+            openModal('payCommissionModal');
+        };
+
+        document.getElementById('confirmPayCommission').addEventListener('click', async () => {
+            const { agentId, amount } = window.payCommissionData;
+            const method = document.getElementById('payMethod').value;
+            const reference = document.getElementById('payReference').value;
+            if (!method || !reference) {
+                showToast('Error', 'Method and reference required', 'error'); return;
+            }
+            const commissionRecord = {
+                agentId,
+                agentName: allAgents.find(a => a.id === agentId)?.fullName,
+                amount,
+                method,
+                reference,
+                status: 'paid',
+                paidAt: Date.now(),
+                paidBy: currentUser.uid
+            };
+            await db.ref('commissions').push(commissionRecord);
+            // Optionally update agent's totalCommission
+            await db.ref('users/' + agentId + '/totalCommission').transaction(val => (val || 0) + amount);
+            showToast('Commission paid', `Paid ${Utils.formatCurrency(amount)} to agent`, 'success');
+            closeModal('payCommissionModal');
+            document.getElementById('payMethod').value = '';
+            document.getElementById('payReference').value = '';
+        });
+
+        // ---------- Assignment ----------
+        document.getElementById('assignBtn').addEventListener('click', async () => {
+            const customerId = document.getElementById('assignCustomer').value;
+            const agentId = document.getElementById('assignAgent').value;
+            if (!customerId || !agentId) { showToast('Error', 'Select both customer and agent', 'error'); return; }
+            const agent = allAgents.find(a => a.id === agentId);
+            await db.ref('users/' + customerId).update({ assignedAgentId: agentId, agentName: agent?.fullName, updatedAt: Date.now() });
+            // Increment agent's customer count
+            await db.ref('users/' + agentId + '/totalCustomers').transaction(val => (val || 0) + 1);
+            showToast('Assigned', 'Agent assigned to customer', 'success');
+        });
+
+        // ---------- System Settings ----------
+        document.getElementById('saveSettings').addEventListener('click', async () => {
+            const commissionRate = parseFloat(document.getElementById('commissionRate').value);
+            const monthlyInterest = parseFloat(document.getElementById('monthlyInterest').value);
+            const weeklyInterest = parseFloat(document.getElementById('weeklyInterest').value);
+            const maxLoan = parseFloat(document.getElementById('maxLoanAmount').value);
+            await db.ref('systemSettings').set({
+                commissionRate,
+                monthlyInterestRate: monthlyInterest / 100,
+                weeklyInterestRate: weeklyInterest / 100,
+                maxLoanAmount: maxLoan,
+                updatedAt: Date.now(),
+                updatedBy: currentUser.uid
+            });
+            showToast('Settings saved', 'System settings updated', 'success');
+        });
+
+        // ---------- Sudo Reset ----------
+        document.getElementById('sudoResetBtn').addEventListener('click', () => openModal('sudoModal'));
+        document.getElementById('confirmSudoReset').addEventListener('click', async () => {
+            const pwd = document.getElementById('sudoPassword').value;
+            if (pwd === '1551530066TRUCASHDATARESET') {
+                showLoading('Wiping database...');
+                await db.ref().set(null);
+                showToast('Database wiped', 'All data has been deleted', 'warning');
+                location.reload();
+            } else {
+                showToast('Error', 'Incorrect sudo password', 'error');
+            }
+            closeModal('sudoModal');
+        });
+
+        // ---------- Reports (simplified printable) ----------
+        document.getElementById('reportAgents').addEventListener('click', () => {
+            let html = '<h2>Agents Report</h2><table border="1"><tr><th>Name</th><th>ID</th><th>Phone</th><th>Status</th><th>Customers</th><th>Loans</th><th>Commission Earned</th></tr>';
+            allAgents.forEach(a => {
+                const agentLoans = allLoans.filter(l => l.agentId === a.id);
+                const totalInterest = agentLoans.reduce((s,l) => s + (l.totalInterest || 0), 0);
+                const commission = totalInterest * 0.15;
+                html += `<tr><td>${a.fullName}</td><td>${a.agentId}</td><td>${a.phone}</td><td>${a.status}</td><td>${a.totalCustomers || 0}</td><td>${agentLoans.length}</td><td>${Utils.formatCurrency(commission)}</td></tr>`;
+            });
+            html += '</table>';
+            const win = window.open();
+            win.document.write(html);
+        });
+
+        document.getElementById('reportLoans').addEventListener('click', () => {
+            let html = '<h2>Loans Report</h2><table border="1"><tr><th>ID</th><th>Customer</th><th>Amount</th><th>Status</th><th>Interest</th><th>Paid</th><th>Agent</th></tr>';
+            allLoans.forEach(l => {
+                const paid = allPayments.filter(p => p.loanId === l.id && p.status === 'confirmed').reduce((s,p) => s + (p.amount || 0), 0);
+                html += `<tr><td>${l.id}</td><td>${l.customerName}</td><td>${Utils.formatCurrency(l.amount)}</td><td>${l.status}</td><td>${Utils.formatCurrency(l.totalInterest || 0)}</td><td>${Utils.formatCurrency(paid)}</td><td>${l.agentName}</td></tr>`;
+            });
+            html += '</table>';
+            const win = window.open();
+            win.document.write(html);
+        });
+
+        document.getElementById('reportCustomers').addEventListener('click', () => {
+            let html = '<h2>Customers Report</h2><table border="1"><tr><th>Name</th><th>Phone</th><th>Status</th><th>Agent</th><th>Loans</th><th>Total Borrowed</th></tr>';
+            allCustomers.forEach(c => {
+                const customerLoans = allLoans.filter(l => l.customerId === c.id);
+                const totalBorrowed = customerLoans.reduce((s,l) => s + (l.approvedAmount || l.amount || 0), 0);
+                html += `<tr><td>${c.fullName}</td><td>${c.phone}</td><td>${c.status}</td><td>${c.agentName}</td><td>${customerLoans.length}</td><td>${Utils.formatCurrency(totalBorrowed)}</td></tr>`;
+            });
+            html += '</table>';
+            const win = window.open();
+            win.document.write(html);
+        });
+
+        // ---------- Profit Detailed Report ----------
+        document.getElementById('printProfitReport').addEventListener('click', () => {
+            const totalLent = allLoans.reduce((s, l) => s + (l.approvedAmount || l.amount || 0), 0);
+            const principalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s, p) => s + (p.amount || 0), 0);
+            const totalInterestEarned = allLoans.reduce((s, l) => s + (l.totalInterest || 0), 0);
+            const commissionPaid = allCommissionRecords.reduce((s, c) => s + (c.amount || 0), 0);
+            const netProfit = totalInterestEarned - commissionPaid;
+            const html = `
+                <h2>Profit & Loss Statement</h2>
+                <p>Total Lent: ${Utils.formatCurrency(totalLent)}</p>
+                <p>Principal Repaid: ${Utils.formatCurrency(principalRepaid)}</p>
+                <p>Outstanding Principal: ${Utils.formatCurrency(totalLent - principalRepaid)}</p>
+                <p>Total Interest Earned: ${Utils.formatCurrency(totalInterestEarned)}</p>
+                <p>Total Commission Paid: ${Utils.formatCurrency(commissionPaid)}</p>
+                <h3>Net Profit: ${Utils.formatCurrency(netProfit)}</h3>
+                <hr>
+                <h4>Breakdown</h4>
+                <p>Interest from loans minus commissions.</p>
+            `;
+            const win = window.open();
+            win.document.write(html);
         });
     </script>
 </body>
