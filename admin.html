@@ -3,19 +3,23 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TruCash · Enterprise Admin Console</title>
-    <!-- Font Awesome -->
+    <title>TruCash · Enterprise Admin Console (Production)</title>
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase -->
+    <!-- Firebase SDK (compat) -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <!-- Cloudinary -->
+    <!-- Cloudinary Upload Widget -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js for analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- html2pdf for reports -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
+    <!-- Moment.js for date handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <style>
-        /* ========== iOS‑inspired Design System (refined) ========== */
+        /* ========== ENHANCED iOS DESIGN SYSTEM ========== */
         * {
             margin: 0;
             padding: 0;
@@ -31,6 +35,7 @@
             --ios-red: #FF3B30;
             --ios-green: #34C759;
             --ios-orange: #FF9500;
+            --ios-purple: #5856d6;
             --ios-gray1: #f2f2f7;
             --ios-gray2: #e5e5ea;
             --ios-gray3: #d1d1d6;
@@ -74,7 +79,7 @@
         .logo-icon {
             width: 32px;
             height: 32px;
-            background: linear-gradient(135deg, var(--ios-blue), #5856d6);
+            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
             border-radius: 8px;
             display: flex;
             align-items: center;
@@ -85,7 +90,7 @@
         .logo-text {
             font-weight: 700;
             font-size: 16px;
-            background: linear-gradient(135deg, var(--ios-blue), #5856d6);
+            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
@@ -96,6 +101,11 @@
             padding: 6px 16px;
             border-radius: 30px;
             border: 1px solid var(--ios-gray2);
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .admin-name:hover {
+            background: var(--ios-gray2);
         }
         .menu-toggle {
             width: 40px;
@@ -109,6 +119,10 @@
             font-size: 18px;
             color: var(--ios-gray5);
             cursor: pointer;
+            transition: 0.2s;
+        }
+        .menu-toggle:hover {
+            background: var(--ios-gray2);
         }
 
         /* ----- Sidebar (right) ----- */
@@ -132,8 +146,8 @@
         .sidebar {
             position: fixed;
             top: 0;
-            right: -300px;
-            width: 300px;
+            right: -320px;
+            width: 320px;
             height: 100%;
             background: white;
             box-shadow: var(--shadow-lg);
@@ -243,7 +257,7 @@
 
         /* ----- Main Content Area ----- */
         .main-content {
-            max-width: 1200px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 16px;
             padding-bottom: 0;
@@ -261,6 +275,11 @@
             grid-template-columns: repeat(2, 1fr);
             gap: 14px;
             margin-bottom: 24px;
+        }
+        @media (min-width: 640px) {
+            .stats-grid {
+                grid-template-columns: repeat(4, 1fr);
+            }
         }
         .stat-card {
             background: var(--ios-card);
@@ -350,6 +369,15 @@
             color: white;
             border-color: var(--ios-green);
         }
+        .btn-warning {
+            background: var(--ios-orange);
+            color: white;
+            border-color: var(--ios-orange);
+        }
+        .btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
 
         .floating-card {
             background: var(--ios-card);
@@ -406,7 +434,8 @@
         }
         .status-badge.approved, .status-badge.active, .status-badge.confirmed { background: #d4edda; color: #155724; }
         .status-badge.pending { background: #fff3cd; color: #856404; }
-        .status-badge.rejected, .status-badge.banned { background: #f8d7da; color: #721c24; }
+        .status-badge.rejected, .status-badge.banned, .status-badge.defaulted { background: #f8d7da; color: #721c24; }
+        .status-badge.completed { background: #d1ecf1; color: #0c5460; }
 
         /* ----- Document grid (2x2) ----- */
         .doc-grid {
@@ -454,6 +483,10 @@
             border-radius: 30px;
             font-size: 14px;
             cursor: pointer;
+            transition: 0.2s;
+        }
+        .tab:hover {
+            background: var(--ios-gray1);
         }
         .tab.active {
             background: var(--ios-blue);
@@ -488,7 +521,7 @@
         .modal-container {
             background: white;
             border-radius: 28px;
-            max-width: 700px;
+            max-width: 800px;
             width: 100%;
             max-height: 90vh;
             overflow-y: auto;
@@ -519,6 +552,10 @@
             display: flex;
             align-items: center;
             justify-content: center;
+            transition: 0.2s;
+        }
+        .modal-close:hover {
+            background: var(--ios-gray2);
         }
         .modal-body {
             padding: 24px;
@@ -562,6 +599,7 @@
             border-radius: 12px;
             object-fit: cover;
             border: 1px solid var(--ios-gray3);
+            cursor: pointer;
         }
 
         .repayment-table {
@@ -612,7 +650,7 @@
             display: block;
             color: #1c1c1e;
         }
-        .form-input {
+        .form-input, .form-select {
             width: 100%;
             padding: 14px 16px;
             border: 1px solid var(--ios-gray3);
@@ -621,7 +659,7 @@
             background: white;
             transition: 0.2s;
         }
-        .form-input:focus {
+        .form-input:focus, .form-select:focus {
             outline: none;
             border-color: var(--ios-blue);
         }
@@ -644,10 +682,12 @@
             align-items: center;
             gap: 12px;
             animation: slideInRight 0.3s ease;
+            max-width: 300px;
         }
         .toast.error { border-left-color: var(--ios-red); }
         .toast.success { border-left-color: var(--ios-green); }
         .toast.warning { border-left-color: var(--ios-orange); }
+        .toast.info { border-left-color: var(--ios-blue); }
         @keyframes slideInRight {
             from { transform: translateX(100%); opacity: 0; }
             to { transform: translateX(0); opacity: 1; }
@@ -690,6 +730,24 @@
         .justify-between { justify-content: space-between; }
         .align-center { align-items: center; }
         .w-100 { width: 100%; }
+        .text-center { text-align: center; }
+        .small { font-size: 12px; color: var(--ios-gray5); }
+
+        /* Progress bar */
+        .progress-bar {
+            width: 100%;
+            height: 4px;
+            background: var(--ios-gray2);
+            border-radius: 2px;
+            overflow: hidden;
+            margin: 8px 0;
+        }
+        .progress-fill {
+            height: 100%;
+            background: var(--ios-blue);
+            width: 0%;
+            transition: width 0.3s;
+        }
     </style>
 </head>
 <body>
@@ -706,7 +764,7 @@
     <div class="app-header">
         <div class="logo-area">
             <div class="logo-icon"><i class="fas fa-wallet"></i></div>
-            <span class="logo-text">TruCash</span>
+            <span class="logo-text">TruCash Enterprise</span>
         </div>
         <div class="admin-name" id="adminNameDisplay">Admin</div>
         <div class="menu-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></div>
@@ -723,19 +781,25 @@
             </div>
         </div>
         <div class="sidebar-menu">
+            <div class="sidebar-item" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</div>
+            <div class="sidebar-item" data-section="customers"><i class="fas fa-users"></i> Customers</div>
+            <div class="sidebar-item" data-section="agents"><i class="fas fa-user-tie"></i> Agents</div>
+            <div class="sidebar-item" data-section="loans"><i class="fas fa-file-invoice"></i> Loans</div>
+            <div class="sidebar-item" data-section="payments"><i class="fas fa-credit-card"></i> Payments</div>
             <div class="sidebar-item" data-section="analytics"><i class="fas fa-chart-line"></i> Analytics</div>
             <div class="sidebar-item" data-section="commission"><i class="fas fa-percent"></i> Commission</div>
-            <div class="sidebar-item" data-section="profit"><i class="fas fa-coins"></i> Profit</div>
-            <div class="sidebar-item" data-section="report"><i class="fas fa-file-pdf"></i> Report</div>
+            <div class="sidebar-item" data-section="profit"><i class="fas fa-coins"></i> Profit & Loss</div>
+            <div class="sidebar-item" data-section="reports"><i class="fas fa-file-pdf"></i> Reports</div>
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
-            <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> System Settings</div>
+            <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
+            <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
             <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
         </div>
     </div>
 
-    <!-- Bottom Navigation (5 items) -->
+    <!-- Bottom Navigation -->
     <div class="bottom-nav">
-        <div class="nav-item-bottom active" data-section="home"><i class="fas fa-home"></i><span>Home</span></div>
+        <div class="nav-item-bottom active" data-section="dashboard"><i class="fas fa-home"></i><span>Home</span></div>
         <div class="nav-item-bottom" data-section="agents"><i class="fas fa-user-tie"></i><span>Agents</span></div>
         <div class="nav-item-bottom" data-section="customers"><i class="fas fa-users"></i><span>Customers</span></div>
         <div class="nav-item-bottom" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
@@ -744,26 +808,27 @@
 
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
-        <!-- HOME SECTION -->
-        <section class="content-section active" id="homeSection">
+        <!-- DASHBOARD SECTION -->
+        <section class="content-section active" id="dashboardSection">
             <div class="stats-grid">
                 <div class="stat-card" onclick="showSection('customers')">
-                    <div class="label">Customers</div>
+                    <div class="label">Total Customers</div>
                     <div class="value" id="statCustomers">0</div>
                 </div>
                 <div class="stat-card" onclick="showSection('agents')">
-                    <div class="label">Agents</div>
+                    <div class="label">Total Agents</div>
                     <div class="value" id="statAgents">0</div>
                 </div>
                 <div class="stat-card" onclick="showSection('loans')">
-                    <div class="label">Loans</div>
-                    <div class="value" id="statLoans">0</div>
+                    <div class="label">Active Loans</div>
+                    <div class="value" id="statActiveLoans">0</div>
                 </div>
                 <div class="stat-card" onclick="showSection('payments')">
-                    <div class="label">Payments</div>
-                    <div class="value" id="statPayments">0</div>
+                    <div class="label">Pending Payments</div>
+                    <div class="value" id="statPendingPayments">0</div>
                 </div>
             </div>
+
             <div class="floating-card">
                 <div class="d-flex justify-between align-center mb-2">
                     <h4>Pending Approvals</h4>
@@ -771,6 +836,31 @@
                 </div>
                 <div id="pendingSummary">Loading...</div>
             </div>
+
+            <div class="floating-card">
+                <h4>Quick Actions</h4>
+                <div class="action-row">
+                    <button class="btn btn-primary" id="quickCreateCustomer"><i class="fas fa-user-plus"></i> New Customer</button>
+                    <button class="btn btn-outline" id="quickCreateAgent"><i class="fas fa-user-tie"></i> New Agent</button>
+                    <button class="btn btn-outline" id="quickViewReports"><i class="fas fa-file-alt"></i> Reports</button>
+                </div>
+            </div>
+        </section>
+
+        <!-- CUSTOMERS SECTION -->
+        <section class="content-section" id="customersSection">
+            <div class="search-bar">
+                <i class="fas fa-search"></i>
+                <input type="text" id="customerSearch" placeholder="Search customers by name, phone, email...">
+                <button class="btn btn-small btn-outline" id="clearCustomerSearch"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="action-row">
+                <button class="btn btn-outline btn-small" id="filterActiveCustomers">Active</button>
+                <button class="btn btn-outline btn-small" id="filterBannedCustomers">Banned</button>
+                <button class="btn btn-primary btn-small" id="createCustomerBtn"><i class="fas fa-plus"></i> Create Customer</button>
+                <button class="btn btn-outline btn-small" id="exportCustomers"><i class="fas fa-download"></i> Export</button>
+            </div>
+            <div id="customersList"></div>
         </section>
 
         <!-- AGENTS SECTION -->
@@ -778,35 +868,24 @@
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="agentSearch" placeholder="Search agents...">
+                <button class="btn btn-small btn-outline" id="clearAgentSearch"><i class="fas fa-times"></i></button>
             </div>
             <div class="action-row">
                 <button class="btn btn-outline btn-small" id="filterActiveAgents">Active</button>
                 <button class="btn btn-outline btn-small" id="filterPendingAgents">Pending</button>
                 <button class="btn btn-outline btn-small" id="filterBannedAgents">Banned</button>
                 <button class="btn btn-primary btn-small" id="createAgentBtn"><i class="fas fa-plus"></i> Create Agent</button>
+                <button class="btn btn-outline btn-small" id="exportAgents"><i class="fas fa-download"></i> Export</button>
             </div>
             <div id="agentsList"></div>
-        </section>
-
-        <!-- CUSTOMERS SECTION -->
-        <section class="content-section" id="customersSection">
-            <div class="search-bar">
-                <i class="fas fa-search"></i>
-                <input type="text" id="customerSearch" placeholder="Search customers...">
-            </div>
-            <div class="action-row">
-                <button class="btn btn-outline btn-small" id="filterActiveCustomers">Active</button>
-                <button class="btn btn-outline btn-small" id="filterBannedCustomers">Banned</button>
-                <button class="btn btn-primary btn-small" id="createCustomerBtn"><i class="fas fa-plus"></i> Create Customer</button>
-            </div>
-            <div id="customersList"></div>
         </section>
 
         <!-- LOANS SECTION -->
         <section class="content-section" id="loansSection">
             <div class="search-bar">
                 <i class="fas fa-search"></i>
-                <input type="text" id="loanSearch" placeholder="Search loans...">
+                <input type="text" id="loanSearch" placeholder="Search loans by ID, customer...">
+                <button class="btn btn-small btn-outline" id="clearLoanSearch"><i class="fas fa-times"></i></button>
             </div>
             <div class="tab-bar">
                 <span class="tab active" data-status="all">All</span>
@@ -815,6 +894,10 @@
                 <span class="tab" data-status="active">Active</span>
                 <span class="tab" data-status="rejected">Rejected</span>
                 <span class="tab" data-status="completed">Completed</span>
+                <span class="tab" data-status="defaulted">Defaulted</span>
+            </div>
+            <div class="action-row">
+                <button class="btn btn-outline btn-small" id="exportLoans"><i class="fas fa-download"></i> Export</button>
             </div>
             <div id="loansList"></div>
         </section>
@@ -824,11 +907,15 @@
             <div class="search-bar">
                 <i class="fas fa-search"></i>
                 <input type="text" id="paymentSearch" placeholder="Search payments...">
+                <button class="btn btn-small btn-outline" id="clearPaymentSearch"><i class="fas fa-times"></i></button>
             </div>
             <div class="tab-bar">
                 <span class="tab active" data-status="pending">Pending</span>
                 <span class="tab" data-status="confirmed">Confirmed</span>
                 <span class="tab" data-status="rejected">Rejected</span>
+            </div>
+            <div class="action-row">
+                <button class="btn btn-outline btn-small" id="exportPayments"><i class="fas fa-download"></i> Export</button>
             </div>
             <div id="paymentsList"></div>
         </section>
@@ -836,23 +923,34 @@
         <!-- ANALYTICS SECTION -->
         <section class="content-section" id="analyticsSection">
             <div class="chart-container">
-                <canvas id="topBorrowersChart" style="height:200px; width:100%;"></canvas>
+                <canvas id="loanTrendChart" style="height:250px; width:100%;"></canvas>
             </div>
             <div class="chart-container">
-                <canvas id="topAgentsChart" style="height:200px; width:100%;"></canvas>
+                <canvas id="paymentTrendChart" style="height:250px; width:100%;"></canvas>
             </div>
             <div class="floating-card">
-                <h4>Capital Overview</h4>
-                <div>Total lent: <span id="totalLent">K0</span></div>
-                <div>Total repaid: <span id="totalRepaid">K0</span></div>
-                <div>Outstanding: <span id="outstanding">K0</span></div>
-                <div>Total interest earned: <span id="totalInterestEarned">K0</span></div>
-                <div>Overdue: <span id="overdue">K0</span></div>
+                <h4>Financial Summary</h4>
+                <div class="detail-grid">
+                    <div class="detail-item"><span class="detail-label">Total Lent</span><span class="detail-value" id="totalLent">K0</span></div>
+                    <div class="detail-item"><span class="detail-label">Total Repaid</span><span class="detail-value" id="totalRepaid">K0</span></div>
+                    <div class="detail-item"><span class="detail-label">Outstanding</span><span class="detail-value" id="outstanding">K0</span></div>
+                    <div class="detail-item"><span class="detail-label">Interest Earned</span><span class="detail-value" id="totalInterestEarned">K0</span></div>
+                    <div class="detail-item"><span class="detail-label">Overdue</span><span class="detail-value" id="overdue">K0</span></div>
+                    <div class="detail-item"><span class="detail-label">Defaulted</span><span class="detail-value" id="defaulted">K0</span></div>
+                </div>
             </div>
         </section>
 
         <!-- COMMISSION SECTION -->
         <section class="content-section" id="commissionSection">
+            <div class="floating-card">
+                <h4>Commission Summary</h4>
+                <div class="detail-grid">
+                    <div class="detail-item"><span class="detail-label">Total Commission Earned</span><span class="detail-value" id="totalCommissionEarned">K0</span></div>
+                    <div class="detail-item"><span class="detail-label">Paid Out</span><span class="detail-value" id="commissionPaid">K0</span></div>
+                    <div class="detail-item"><span class="detail-label">Pending</span><span class="detail-value" id="commissionPending">K0</span></div>
+                </div>
+            </div>
             <div id="agentsCommissionList"></div>
             <div class="floating-card mt-4">
                 <h4>Commission History</h4>
@@ -865,21 +963,22 @@
             <div class="stats-grid">
                 <div class="stat-card"><div class="label">Total Lent</div><div class="value" id="profitLent">0</div></div>
                 <div class="stat-card"><div class="label">Principal Repaid</div><div class="value" id="profitPrincipal">0</div></div>
-                <div class="stat-card"><div class="label">Interest Paid</div><div class="value" id="profitInterest">0</div></div>
+                <div class="stat-card"><div class="label">Interest Received</div><div class="value" id="profitInterest">0</div></div>
                 <div class="stat-card"><div class="label">Commission Paid</div><div class="value" id="profitCommission">0</div></div>
             </div>
             <div class="floating-card">
                 <h3>Net Profit: <span id="netProfit">K0</span></h3>
-                <button class="btn btn-primary w-100 mt-4" id="printProfitReport">Detailed Report</button>
+                <button class="btn btn-primary w-100 mt-4" id="generateProfitReport">Generate Detailed Report</button>
             </div>
         </section>
 
-        <!-- REPORT SECTION -->
-        <section class="content-section" id="reportSection">
+        <!-- REPORTS SECTION -->
+        <section class="content-section" id="reportsSection">
             <div class="action-row">
                 <button class="btn btn-outline" id="reportAgents">Agents Report</button>
                 <button class="btn btn-outline" id="reportLoans">Loans Report</button>
                 <button class="btn btn-outline" id="reportCustomers">Customers Report</button>
+                <button class="btn btn-outline" id="reportPayments">Payments Report</button>
             </div>
             <div id="reportOutput" class="floating-card">Select a report to generate</div>
         </section>
@@ -890,15 +989,27 @@
                 <h4>Assign Agent to Customer</h4>
                 <div class="form-group">
                     <label>Customer</label>
-                    <select id="assignCustomer" class="form-input"></select>
+                    <select id="assignCustomer" class="form-select"></select>
                 </div>
                 <div class="form-group">
                     <label>Agent</label>
-                    <select id="assignAgent" class="form-input"></select>
+                    <select id="assignAgent" class="form-select"></select>
                 </div>
                 <button class="btn btn-primary" id="assignBtn">Assign</button>
             </div>
             <div id="assignmentsList" class="floating-card mt-4"></div>
+        </section>
+
+        <!-- AUDIT LOGS SECTION -->
+        <section class="content-section" id="auditSection">
+            <div class="floating-card">
+                <h4>System Audit Logs</h4>
+                <div class="search-bar">
+                    <i class="fas fa-search"></i>
+                    <input type="text" id="auditSearch" placeholder="Search logs...">
+                </div>
+                <div id="auditLogsList"></div>
+            </div>
         </section>
 
         <!-- SETTINGS SECTION -->
@@ -917,7 +1028,24 @@
                     <label>Weekly Interest Rate (%)</label>
                     <input type="number" id="weeklyInterest" class="form-input" value="10">
                 </div>
-                <button class="btn btn-primary" id="saveSettings">Save</button>
+                <div class="form-group">
+                    <label>Max Loan Amount (K)</label>
+                    <input type="number" id="maxLoanAmount" class="form-input" value="50000">
+                </div>
+                <div class="form-group">
+                    <label>Min Loan Amount (K)</label>
+                    <input type="number" id="minLoanAmount" class="form-input" value="100">
+                </div>
+                <div class="form-group">
+                    <label>Default Loan Duration (months)</label>
+                    <input type="number" id="defaultDuration" class="form-input" value="6">
+                </div>
+                <button class="btn btn-primary" id="saveSettings">Save Settings</button>
+            </div>
+            <div class="floating-card">
+                <h4>Admin Management</h4>
+                <div id="adminsList"></div>
+                <button class="btn btn-outline mt-2" id="createAdminBtn"><i class="fas fa-user-shield"></i> Create Admin</button>
             </div>
             <div class="floating-card">
                 <h4>Danger Zone</h4>
@@ -926,7 +1054,7 @@
         </section>
     </div>
 
-    <!-- MODALS -->
+    <!-- ========== MODALS ========== -->
 
     <!-- Create Agent Modal -->
     <div class="modal-overlay" id="createAgentModal">
@@ -936,13 +1064,17 @@
                 <span class="modal-close" onclick="closeModal('createAgentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
-                <div class="form-group"><label>Full Name *</label><input type="text" id="agentName" class="form-input" required></div>
-                <div class="form-group"><label>Phone *</label><input type="text" id="agentPhone" class="form-input" required></div>
-                <div class="form-group"><label>NRC *</label><input type="text" id="agentNrc" class="form-input" placeholder="123456/78/9" required></div>
-                <div class="form-group"><label>Email *</label><input type="email" id="agentEmail" class="form-input" required></div>
-                <div class="form-group"><label>Agent ID (manual) *</label><input type="text" id="agentCustomId" class="form-input" required></div>
-                <div class="form-group"><label>Password *</label><input type="password" id="agentPassword" class="form-input" required></div>
-                <button class="btn btn-primary" id="submitAgent">Create</button>
+                <form id="agentCreateForm">
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="agentName" class="form-input" required></div>
+                    <div class="form-group"><label>Phone *</label><input type="tel" id="agentPhone" class="form-input" required></div>
+                    <div class="form-group"><label>NRC *</label><input type="text" id="agentNrc" class="form-input" placeholder="123456/78/9" required></div>
+                    <div class="form-group"><label>Email *</label><input type="email" id="agentEmail" class="form-input" required></div>
+                    <div class="form-group"><label>Agent ID (manual) *</label><input type="text" id="agentCustomId" class="form-input" required></div>
+                    <div class="form-group"><label>Password *</label><input type="password" id="agentPassword" class="form-input" required></div>
+                    <div class="form-group"><label>Branch</label><input type="text" id="agentBranch" class="form-input" value="Main"></div>
+                    <div class="progress-bar" id="agentCreateProgress"><div class="progress-fill"></div></div>
+                </form>
+                <button class="btn btn-primary" id="submitAgent">Create Agent</button>
             </div>
         </div>
     </div>
@@ -955,21 +1087,23 @@
                 <span class="modal-close" onclick="closeModal('createCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
-                <div class="form-group"><label>Full Name *</label><input type="text" id="custName" class="form-input" required></div>
-                <div class="form-group"><label>Email *</label><input type="email" id="custEmail" class="form-input" required></div>
-                <div class="form-group"><label>Phone *</label><input type="text" id="custPhone" class="form-input" required></div>
-                <div class="form-group"><label>NRC *</label><input type="text" id="custNrc" class="form-input" required></div>
-                <div class="form-group"><label>Address *</label><input type="text" id="custAddress" class="form-input" required></div>
-                <div class="form-group"><label>Password *</label><input type="password" id="custPassword" class="form-input" required></div>
-                <div class="form-group"><label>Agent (optional)</label><select id="custAgent" class="form-input"></select></div>
-                <button class="btn btn-primary" id="submitCustomer">Create</button>
+                <form id="customerCreateForm">
+                    <div class="form-group"><label>Full Name *</label><input type="text" id="custName" class="form-input" required></div>
+                    <div class="form-group"><label>Email *</label><input type="email" id="custEmail" class="form-input" required></div>
+                    <div class="form-group"><label>Phone *</label><input type="tel" id="custPhone" class="form-input" required></div>
+                    <div class="form-group"><label>NRC *</label><input type="text" id="custNrc" class="form-input" required></div>
+                    <div class="form-group"><label>Address *</label><input type="text" id="custAddress" class="form-input" required></div>
+                    <div class="form-group"><label>Password *</label><input type="password" id="custPassword" class="form-input" required></div>
+                    <div class="form-group"><label>Agent (optional)</label><select id="custAgent" class="form-select"></select></div>
+                </form>
+                <button class="btn btn-primary" id="submitCustomer">Create Customer</button>
             </div>
         </div>
     </div>
 
-    <!-- Agent Details Modal (large) -->
+    <!-- Agent Details Modal -->
     <div class="modal-overlay" id="agentDetailsModal">
-        <div class="modal-container" style="max-width: 800px;">
+        <div class="modal-container" style="max-width: 900px;">
             <div class="modal-header">
                 <span>Agent Profile</span>
                 <span class="modal-close" onclick="closeModal('agentDetailsModal')"><i class="fas fa-times"></i></span>
@@ -978,9 +1112,9 @@
         </div>
     </div>
 
-    <!-- Customer Details Modal (large) -->
+    <!-- Customer Details Modal -->
     <div class="modal-overlay" id="customerDetailsModal">
-        <div class="modal-container" style="max-width: 800px;">
+        <div class="modal-container" style="max-width: 900px;">
             <div class="modal-header">
                 <span>Customer Profile</span>
                 <span class="modal-close" onclick="closeModal('customerDetailsModal')"><i class="fas fa-times"></i></span>
@@ -989,9 +1123,9 @@
         </div>
     </div>
 
-    <!-- Loan Details Modal (large, with collateral grid) -->
+    <!-- Loan Details Modal -->
     <div class="modal-overlay" id="loanDetailsModal">
-        <div class="modal-container" style="max-width: 900px;">
+        <div class="modal-container" style="max-width: 1000px;">
             <div class="modal-header">
                 <span>Loan Application Details</span>
                 <span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
@@ -1000,7 +1134,7 @@
         </div>
     </div>
 
-    <!-- Payment Details Modal (with proof) -->
+    <!-- Payment Details Modal -->
     <div class="modal-overlay" id="paymentDetailsModal">
         <div class="modal-container">
             <div class="modal-header">
@@ -1042,6 +1176,22 @@
         </div>
     </div>
 
+    <!-- Create Admin Modal -->
+    <div class="modal-overlay" id="createAdminModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Create Admin</span>
+                <span class="modal-close" onclick="closeModal('createAdminModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group"><label>Full Name *</label><input type="text" id="adminName" class="form-input"></div>
+                <div class="form-group"><label>Email *</label><input type="email" id="adminEmail" class="form-input"></div>
+                <div class="form-group"><label>Password *</label><input type="password" id="adminPassword" class="form-input"></div>
+                <button class="btn btn-primary" id="submitAdmin">Create Admin</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sudo Reset Modal -->
     <div class="modal-overlay" id="sudoModal">
         <div class="modal-container">
@@ -1054,9 +1204,13 @@
         </div>
     </div>
 
-    <!-- Firebase Configuration (same as original) -->
+    <!-- ========== FIREBASE CONFIG ========== -->
     <script>
-        // ========== FIREBASE CONFIG ==========
+        // =========================================================================
+        // PRODUCTION-GRADE ADMIN PANEL - TRUCASH
+        // =========================================================================
+        
+        // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
             authDomain: "trucash-9fee8.firebaseapp.com",
@@ -1066,11 +1220,13 @@
             messagingSenderId: "622416212225",
             appId: "1:622416212225:web:07418a9b16f955c330ab00"
         };
+
+        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const auth = firebase.auth();
         const db = firebase.database();
 
-        // ========== CLOUDINARY CONFIG ==========
+        // Cloudinary config
         const cloudinaryConfig = {
             cloudName: 'dd3lcymrk',
             uploadPreset: 'h3eyhc2o',
@@ -1086,24 +1242,29 @@
         let allLoans = [];
         let allPayments = [];
         let allCommissionHistory = [];
+        let allAuditLogs = [];
+        let systemSettings = {};
 
         // Filters
         let currentLoanFilter = 'all';
         let currentPaymentFilter = 'pending';
-        let agentFilter = 'all'; // 'active', 'pending', 'banned', 'all'
-        let customerFilter = 'all'; // 'active', 'banned', 'all'
+        let agentFilter = 'all';
+        let customerFilter = 'all';
+
+        // Charts instances
+        let loanTrendChart, paymentTrendChart;
 
         // ========== UTILITIES ==========
         const Utils = {
             formatCurrency: (amt) => 'K' + parseFloat(amt || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-            formatDate: (ts) => ts ? new Date(ts).toLocaleDateString() : 'N/A',
-            formatDateTime: (ts) => ts ? new Date(ts).toLocaleString() : 'N/A',
+            formatDate: (ts) => ts ? moment(ts).format('MMM D, YYYY') : 'N/A',
+            formatDateTime: (ts) => ts ? moment(ts).format('MMM D, YYYY h:mm A') : 'N/A',
             showToast: (title, msg, type = 'info') => {
                 const toast = document.createElement('div');
                 toast.className = `toast ${type}`;
-                toast.innerHTML = `<div><strong>${title}</strong> ${msg}</div>`;
+                toast.innerHTML = `<div><strong>${title}</strong><br>${msg}</div>`;
                 document.getElementById('toastContainer').appendChild(toast);
-                setTimeout(() => toast.remove(), 4000);
+                setTimeout(() => toast.remove(), 5000);
             },
             showLoading: (msg = 'Loading...') => {
                 document.querySelector('#loadingOverlay .loading-text').textContent = msg;
@@ -1115,32 +1276,88 @@
             generateId: (prefix) => prefix + Date.now() + Math.random().toString(36).substr(2,9).toUpperCase(),
             calculateInterest: (principal, rate, periods, isWeekly) => {
                 return principal * Math.pow(1 + rate, periods) - principal;
+            },
+            generateRepaymentSchedule: (principal, rate, periods, isWeekly, startDate = Date.now()) => {
+                const schedule = [];
+                const payment = isWeekly 
+                    ? (principal * rate * Math.pow(1 + rate, periods)) / (Math.pow(1 + rate, periods) - 1)
+                    : (principal * rate/12 * Math.pow(1 + rate/12, periods)) / (Math.pow(1 + rate/12, periods) - 1);
+                let balance = principal;
+                for (let i = 1; i <= periods; i++) {
+                    const interest = balance * (isWeekly ? rate : rate/12);
+                    const principalPortion = payment - interest;
+                    balance -= principalPortion;
+                    const dueDate = moment(startDate).add(i, isWeekly ? 'weeks' : 'months').valueOf();
+                    schedule.push({
+                        installment: i,
+                        dueDate,
+                        principal: principalPortion,
+                        interest,
+                        totalDue: payment,
+                        status: 'pending',
+                        paidAmount: 0,
+                        paidDate: null
+                    });
+                }
+                return schedule;
+            },
+            logAudit: async (action, details) => {
+                if (!currentUser) return;
+                const log = {
+                    timestamp: Date.now(),
+                    adminUid: currentUser.uid,
+                    adminEmail: currentUser.email,
+                    action,
+                    details,
+                    ip: 'admin' // would get from server in production
+                };
+                await db.ref('auditLogs/' + Utils.generateId('LOG')).set(log);
             }
         };
 
-        // ========== LOAD ALL DATA ONCE, THEN SETUP LISTENERS ==========
+        // ========== LOAD ALL DATA ==========
         async function loadAllData() {
-            const usersSnap = await db.ref('users').once('value');
-            const users = usersSnap.val() || {};
-            allAgents = Object.entries(users)
-                .filter(([_,u]) => u.userType === 'agent')
-                .map(([id,u]) => ({...u, id}));
-            allCustomers = Object.entries(users)
-                .filter(([_,u]) => u.userType === 'customer')
-                .map(([id,u]) => ({...u, id}));
+            Utils.showLoading('Loading system data...');
+            try {
+                // Load users
+                const usersSnap = await db.ref('users').once('value');
+                const users = usersSnap.val() || {};
+                allAgents = Object.entries(users)
+                    .filter(([_,u]) => u.userType === 'agent')
+                    .map(([id,u]) => ({...u, id}));
+                allCustomers = Object.entries(users)
+                    .filter(([_,u]) => u.userType === 'customer')
+                    .map(([id,u]) => ({...u, id}));
 
-            const loansSnap = await db.ref('loans').once('value');
-            allLoans = Object.entries(loansSnap.val() || {}).map(([id,l]) => ({...l, id}));
+                // Load loans
+                const loansSnap = await db.ref('loans').once('value');
+                allLoans = Object.entries(loansSnap.val() || {}).map(([id,l]) => ({...l, id}));
 
-            const paymentsSnap = await db.ref('payments').once('value');
-            allPayments = Object.entries(paymentsSnap.val() || {}).map(([id,p]) => ({...p, id}));
+                // Load payments
+                const paymentsSnap = await db.ref('payments').once('value');
+                allPayments = Object.entries(paymentsSnap.val() || {}).map(([id,p]) => ({...p, id}));
 
-            const commSnap = await db.ref('commissionHistory').once('value');
-            allCommissionHistory = Object.entries(commSnap.val() || {}).map(([id,c]) => ({...c, id}));
+                // Load commission history
+                const commSnap = await db.ref('commissionHistory').once('value');
+                allCommissionHistory = Object.entries(commSnap.val() || {}).map(([id,c]) => ({...c, id}));
 
-            updateUI();
+                // Load audit logs
+                const auditSnap = await db.ref('auditLogs').once('value');
+                allAuditLogs = Object.entries(auditSnap.val() || {}).map(([id,l]) => ({...l, id})).sort((a,b) => b.timestamp - a.timestamp);
+
+                // Load system settings
+                const settingsSnap = await db.ref('systemSettings').once('value');
+                systemSettings = settingsSnap.val() || {};
+
+                updateUI();
+                Utils.hideLoading();
+            } catch (error) {
+                Utils.showToast('Error', 'Failed to load data: ' + error.message, 'error');
+                Utils.hideLoading();
+            }
         }
 
+        // Setup realtime listeners
         function setupRealtimeListeners() {
             db.ref('users').on('value', (snap) => {
                 const users = snap.val() || {};
@@ -1160,30 +1377,36 @@
                 allCommissionHistory = Object.entries(snap.val() || {}).map(([id,c]) => ({...c, id}));
                 updateUI();
             });
+            db.ref('auditLogs').on('value', (snap) => {
+                allAuditLogs = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id})).sort((a,b) => b.timestamp - a.timestamp);
+                if (document.getElementById('auditSection').classList.contains('active')) renderAuditLogs();
+            });
         }
 
         // ========== UI UPDATE FUNCTIONS ==========
         function updateUI() {
-            updateHomeStats();
-            renderAgents();
+            updateDashboardStats();
             renderCustomers();
+            renderAgents();
             renderLoans();
             renderPayments();
             renderAnalytics();
             renderCommission();
             renderProfit();
             renderAssignments();
+            renderAuditLogs();
         }
 
-        function updateHomeStats() {
+        function updateDashboardStats() {
             document.getElementById('statCustomers').innerText = allCustomers.length;
             document.getElementById('statAgents').innerText = allAgents.length;
-            document.getElementById('statLoans').innerText = allLoans.length;
-            document.getElementById('statPayments').innerText = allPayments.length;
+            const activeLoans = allLoans.filter(l => l.status === 'active').length;
+            document.getElementById('statActiveLoans').innerText = activeLoans;
+            const pendingPayments = allPayments.filter(p => p.status === 'pending').length;
+            document.getElementById('statPendingPayments').innerText = pendingPayments;
 
             const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
             const pendingAgents = allAgents.filter(a => a.status === 'pending').length;
-            const pendingPayments = allPayments.filter(p => p.status === 'pending').length;
             const totalPending = pendingLoans + pendingAgents + pendingPayments;
             document.getElementById('pendingCount').innerText = totalPending;
             document.getElementById('pendingSummary').innerHTML = `
@@ -1193,44 +1416,60 @@
             `;
         }
 
-        function renderAgents() {
-            const searchTerm = document.getElementById('agentSearch')?.value.toLowerCase() || '';
-            let filtered = allAgents;
-            if (agentFilter !== 'all') filtered = filtered.filter(a => a.status === agentFilter);
-            if (searchTerm) filtered = filtered.filter(a => (a.fullName?.toLowerCase().includes(searchTerm) || a.phone?.includes(searchTerm)));
-            const container = document.getElementById('agentsList');
-            container.innerHTML = filtered.map(a => `
-                <div class="floating-card" onclick="showAgentDetails('${a.id}')">
-                    <div class="profile-row">
-                        <img src="${a.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(a.fullName||'Agent')}" class="profile-img">
-                        <div class="profile-details">
-                            <div class="profile-name">${a.fullName}</div>
-                            <div class="profile-meta">${a.phone} · Loans: ${a.totalLoans || 0}</div>
-                        </div>
-                        <span class="status-badge ${a.status}">${a.status}</span>
-                    </div>
-                </div>
-            `).join('');
-        }
-
         function renderCustomers() {
             const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase() || '';
             let filtered = allCustomers;
             if (customerFilter === 'active') filtered = filtered.filter(c => c.status === 'active');
             if (customerFilter === 'banned') filtered = filtered.filter(c => c.status === 'banned');
-            if (searchTerm) filtered = filtered.filter(c => (c.fullName?.toLowerCase().includes(searchTerm) || c.phone?.includes(searchTerm)));
+            if (searchTerm) {
+                filtered = filtered.filter(c => 
+                    (c.fullName?.toLowerCase().includes(searchTerm)) ||
+                    (c.phone?.includes(searchTerm)) ||
+                    (c.email?.toLowerCase().includes(searchTerm))
+                );
+            }
             const container = document.getElementById('customersList');
             container.innerHTML = filtered.map(c => {
                 const agent = allAgents.find(a => a.id === c.assignedAgentId);
+                const loanCount = allLoans.filter(l => l.customerId === c.id).length;
                 return `
                 <div class="floating-card" onclick="showCustomerDetails('${c.id}')">
                     <div class="profile-row">
-                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'Customer')}" class="profile-img">
+                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="profile-img">
                         <div class="profile-details">
                             <div class="profile-name">${c.fullName}</div>
                             <div class="profile-meta">${c.phone} · Agent: ${agent?.fullName || 'N/A'}</div>
                         </div>
-                        <span class="loan-badge">${c.totalLoans || 0} loans</span>
+                        <span class="loan-badge">${loanCount} loans</span>
+                        <span class="status-badge ${c.status}">${c.status}</span>
+                    </div>
+                </div>
+            `}).join('');
+        }
+
+        function renderAgents() {
+            const searchTerm = document.getElementById('agentSearch')?.value.toLowerCase() || '';
+            let filtered = allAgents;
+            if (agentFilter !== 'all') filtered = filtered.filter(a => a.status === agentFilter);
+            if (searchTerm) {
+                filtered = filtered.filter(a => 
+                    (a.fullName?.toLowerCase().includes(searchTerm)) ||
+                    (a.phone?.includes(searchTerm)) ||
+                    (a.email?.toLowerCase().includes(searchTerm))
+                );
+            }
+            const container = document.getElementById('agentsList');
+            container.innerHTML = filtered.map(a => {
+                const loanCount = allLoans.filter(l => l.agentId === a.id).length;
+                return `
+                <div class="floating-card" onclick="showAgentDetails('${a.id}')">
+                    <div class="profile-row">
+                        <img src="${a.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(a.fullName||'A')+'&background=007AFF&color=fff'}" class="profile-img">
+                        <div class="profile-details">
+                            <div class="profile-name">${a.fullName}</div>
+                            <div class="profile-meta">${a.phone} · Loans: ${loanCount}</div>
+                        </div>
+                        <span class="status-badge ${a.status}">${a.status}</span>
                     </div>
                 </div>
             `}).join('');
@@ -1240,16 +1479,20 @@
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
             if (currentLoanFilter !== 'all') filtered = filtered.filter(l => l.status === currentLoanFilter);
-            if (searchTerm) filtered = filtered.filter(l => (l.customerName?.toLowerCase().includes(searchTerm) || l.id?.toLowerCase().includes(searchTerm)));
+            if (searchTerm) {
+                filtered = filtered.filter(l => 
+                    (l.customerName?.toLowerCase().includes(searchTerm)) ||
+                    (l.id?.toLowerCase().includes(searchTerm))
+                );
+            }
             const container = document.getElementById('loansList');
             container.innerHTML = filtered.map(l => `
                 <div class="floating-card" onclick="showLoanDetails('${l.id}')">
                     <div class="profile-row">
                         <img src="${l.customerPhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'')}" class="profile-img">
                         <div>
-                            <div><strong>${l.customerName}</strong></div>
-                            <div class="profile-meta">${l.customerPhone} · Agent: ${l.agentName}</div>
-                            <div>Amount: ${Utils.formatCurrency(l.amount)}</div>
+                            <div><strong>${l.customerName}</strong> - ${Utils.formatCurrency(l.amount)}</div>
+                            <div class="profile-meta">Loan ID: ${l.id} · Agent: ${l.agentName}</div>
                         </div>
                         <span class="status-badge ${l.status}">${l.status}</span>
                     </div>
@@ -1261,7 +1504,12 @@
             const searchTerm = document.getElementById('paymentSearch')?.value.toLowerCase() || '';
             let filtered = allPayments;
             if (currentPaymentFilter !== 'all') filtered = filtered.filter(p => p.status === currentPaymentFilter);
-            if (searchTerm) filtered = filtered.filter(p => (p.customerName?.toLowerCase().includes(searchTerm) || p.loanId?.toLowerCase().includes(searchTerm)));
+            if (searchTerm) {
+                filtered = filtered.filter(p => 
+                    (p.customerName?.toLowerCase().includes(searchTerm)) ||
+                    (p.loanId?.toLowerCase().includes(searchTerm))
+                );
+            }
             const container = document.getElementById('paymentsList');
             container.innerHTML = filtered.map(p => `
                 <div class="floating-card" onclick="showPaymentDetails('${p.id}')">
@@ -1277,6 +1525,7 @@
         }
 
         function renderAnalytics() {
+            // Financials
             const totalLent = allLoans.filter(l => l.status === 'approved' || l.status === 'active').reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
             const totalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s,p)=> s + p.amount, 0);
             const outstanding = allLoans.filter(l => l.status === 'approved' || l.status === 'active').reduce((s,l) => {
@@ -1287,44 +1536,59 @@
             const totalInterest = allLoans.reduce((s,l) => s + (l.totalInterest || 0), 0);
             const overdue = allLoans.filter(l => l.status === 'active').reduce((s,l) => {
                 const next = l.repaymentSchedule?.find(p => p.status === 'pending');
-                if (next && next.dueDate < Date.now()) {
-                    return s + next.totalDue;
-                }
+                if (next && next.dueDate < Date.now()) return s + next.totalDue;
                 return s;
             }, 0);
+            const defaulted = allLoans.filter(l => l.status === 'defaulted').reduce((s,l) => s + (l.totalPayable - (l.totalPaid||0)), 0);
+            
             document.getElementById('totalLent').innerText = Utils.formatCurrency(totalLent);
             document.getElementById('totalRepaid').innerText = Utils.formatCurrency(totalRepaid);
             document.getElementById('outstanding').innerText = Utils.formatCurrency(outstanding);
             document.getElementById('totalInterestEarned').innerText = Utils.formatCurrency(totalInterest);
             document.getElementById('overdue').innerText = Utils.formatCurrency(overdue);
+            document.getElementById('defaulted').innerText = Utils.formatCurrency(defaulted);
 
-            // Charts (simplified)
-            const ctxBorrowers = document.getElementById('topBorrowersChart')?.getContext('2d');
-            if (ctxBorrowers) {
-                new Chart(ctxBorrowers, {
-                    type: 'bar',
+            // Charts
+            const ctxLoan = document.getElementById('loanTrendChart')?.getContext('2d');
+            if (ctxLoan) {
+                if (loanTrendChart) loanTrendChart.destroy();
+                const last6Months = [...Array(6)].map((_,i) => moment().subtract(5-i, 'months').format('MMM'));
+                const loanData = last6Months.map(month => {
+                    const start = moment(month, 'MMM').startOf('month').valueOf();
+                    const end = moment(month, 'MMM').endOf('month').valueOf();
+                    return allLoans.filter(l => l.createdAt >= start && l.createdAt <= end).length;
+                });
+                loanTrendChart = new Chart(ctxLoan, {
+                    type: 'line',
                     data: {
-                        labels: allCustomers.slice(0,5).map(c => c.fullName),
+                        labels: last6Months,
                         datasets: [{
-                            label: 'Total Borrowed',
-                            data: allCustomers.slice(0,5).map(c => {
-                                const loans = allLoans.filter(l => l.customerId === c.id && (l.status === 'approved' || l.status === 'active'));
-                                return loans.reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
-                            }),
-                            backgroundColor: 'rgba(0,122,255,0.6)'
+                            label: 'Loans Created',
+                            data: loanData,
+                            borderColor: 'rgba(0,122,255,0.8)',
+                            backgroundColor: 'rgba(0,122,255,0.1)',
+                            fill: true
                         }]
                     }
                 });
             }
-            const ctxAgents = document.getElementById('topAgentsChart')?.getContext('2d');
-            if (ctxAgents) {
-                new Chart(ctxAgents, {
+
+            const ctxPay = document.getElementById('paymentTrendChart')?.getContext('2d');
+            if (ctxPay) {
+                if (paymentTrendChart) paymentTrendChart.destroy();
+                const last6Months = [...Array(6)].map((_,i) => moment().subtract(5-i, 'months').format('MMM'));
+                const paymentData = last6Months.map(month => {
+                    const start = moment(month, 'MMM').startOf('month').valueOf();
+                    const end = moment(month, 'MMM').endOf('month').valueOf();
+                    return allPayments.filter(p => p.timestamp >= start && p.timestamp <= end && p.status === 'confirmed').reduce((s,p) => s + p.amount, 0);
+                });
+                paymentTrendChart = new Chart(ctxPay, {
                     type: 'bar',
                     data: {
-                        labels: allAgents.slice(0,5).map(a => a.fullName),
+                        labels: last6Months,
                         datasets: [{
-                            label: 'Loans Facilitated',
-                            data: allAgents.slice(0,5).map(a => a.totalLoans || 0),
+                            label: 'Payments Received (K)',
+                            data: paymentData,
                             backgroundColor: 'rgba(52,199,89,0.6)'
                         }]
                     }
@@ -1335,21 +1599,23 @@
         function renderCommission() {
             const container = document.getElementById('agentsCommissionList');
             let html = '';
+            let totalEarned = 0, totalPaid = 0, totalPending = 0;
             allAgents.forEach(agent => {
                 const agentLoans = allLoans.filter(l => l.agentId === agent.id && l.status === 'active');
-                const totalInterestPaid = agentLoans.reduce((s,l) => s + (l.interestPaid || 0), 0);
-                const commission = totalInterestPaid * 0.15;
-                const paidCommission = allCommissionHistory
-                    .filter(ch => ch.agentId === agent.id && ch.status === 'paid')
-                    .reduce((s,ch) => s + ch.amount, 0);
-                const pending = commission - paidCommission;
+                const interestPaid = agentLoans.reduce((s,l) => s + (l.interestPaid || 0), 0);
+                const commission = interestPaid * 0.15;
+                const paid = allCommissionHistory.filter(ch => ch.agentId === agent.id && ch.status === 'paid').reduce((s,c) => s + c.amount, 0);
+                const pending = commission - paid;
+                totalEarned += commission;
+                totalPaid += paid;
+                totalPending += pending;
                 html += `
                     <div class="floating-card">
                         <div class="profile-row">
                             <div class="profile-details">
                                 <div class="profile-name">${agent.fullName}</div>
                                 <div>Commission (15% of interest paid): ${Utils.formatCurrency(commission)}</div>
-                                <div>Paid: ${Utils.formatCurrency(paidCommission)} | Pending: ${Utils.formatCurrency(pending)}</div>
+                                <div>Paid: ${Utils.formatCurrency(paid)} | Pending: ${Utils.formatCurrency(pending)}</div>
                                 ${pending > 0 ? `<button class="btn btn-small btn-primary" onclick="payCommission('${agent.id}', ${pending})">Pay ${Utils.formatCurrency(pending)}</button>` : ''}
                                 <button class="btn btn-small btn-outline" onclick="showCommissionMath('${agent.id}')">Breakdown</button>
                             </div>
@@ -1358,6 +1624,9 @@
                 `;
             });
             container.innerHTML = html;
+            document.getElementById('totalCommissionEarned').innerText = Utils.formatCurrency(totalEarned);
+            document.getElementById('commissionPaid').innerText = Utils.formatCurrency(totalPaid);
+            document.getElementById('commissionPending').innerText = Utils.formatCurrency(totalPending);
 
             const historyEl = document.getElementById('commissionHistory');
             historyEl.innerHTML = allCommissionHistory.map(ch => {
@@ -1382,17 +1651,41 @@
         function renderAssignments() {
             const custSelect = document.getElementById('assignCustomer');
             const agentSelect = document.getElementById('assignAgent');
-            custSelect.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName}</option>`).join('');
-            agentSelect.innerHTML = allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+            if (custSelect) {
+                custSelect.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName}</option>`).join('');
+            }
+            if (agentSelect) {
+                agentSelect.innerHTML = allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+            }
 
             const list = document.getElementById('assignmentsList');
-            list.innerHTML = allCustomers.map(c => {
-                const agent = allAgents.find(a => a.id === c.assignedAgentId);
-                return `<div>${c.fullName} → ${agent?.fullName || 'none'}</div>`;
-            }).join('');
+            if (list) {
+                list.innerHTML = allCustomers.map(c => {
+                    const agent = allAgents.find(a => a.id === c.assignedAgentId);
+                    return `<div>${c.fullName} → ${agent?.fullName || 'none'}</div>`;
+                }).join('');
+            }
         }
 
-        // ========== DETAIL VIEWS (expanded, professional) ==========
+        function renderAuditLogs() {
+            const searchTerm = document.getElementById('auditSearch')?.value.toLowerCase() || '';
+            let filtered = allAuditLogs;
+            if (searchTerm) {
+                filtered = filtered.filter(log => 
+                    log.action?.toLowerCase().includes(searchTerm) ||
+                    log.adminEmail?.toLowerCase().includes(searchTerm)
+                );
+            }
+            const container = document.getElementById('auditLogsList');
+            container.innerHTML = filtered.slice(0, 100).map(log => `
+                <div class="floating-card" style="padding:12px;">
+                    <div><strong>${log.action}</strong> - ${Utils.formatDateTime(log.timestamp)}</div>
+                    <div class="small">Admin: ${log.adminEmail} | Details: ${JSON.stringify(log.details)}</div>
+                </div>
+            `).join('');
+        }
+
+        // ========== DETAIL VIEWS ==========
         window.showAgentDetails = async (id) => {
             const agent = allAgents.find(a => a.id === id);
             if (!agent) return;
@@ -1505,10 +1798,10 @@
             const customer = allCustomers.find(c => c.id === loan.customerId);
             const agent = allAgents.find(a => a.id === loan.agentId);
             const payments = allPayments.filter(p => p.loanId === id && p.status === 'confirmed');
-            const totalPaid = payments.reduce((s,p)=> s + p.amount,0);
+            const totalPaid = payments.reduce((s,p)=> s + p.amount, 0);
             const scheduleHtml = loan.repaymentSchedule ? `
                 <table class="repayment-table">
-                    <tr><th>#</th><th>Due</th><th>Principal</th><th>Interest</th><th>Total</th><th>Status</th></tr>
+                    <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Total</th><th>Status</th></tr>
                     ${loan.repaymentSchedule.map((inst,i) => `
                         <tr>
                             <td>${i+1}</td>
@@ -1562,6 +1855,7 @@
                     ${loan.status === 'pending' ? `<button class="btn btn-success" onclick="approveLoan('${id}')">Approve</button>` : ''}
                     ${loan.status === 'approved' && !loan.lenderSigned ? `<button class="btn btn-primary" onclick="signLoanAsLender('${id}')">Sign as Lender</button>` : ''}
                     ${loan.status === 'pending' || loan.status === 'approved' ? `<button class="btn btn-danger" onclick="rejectLoan('${id}')">Reject</button>` : ''}
+                    ${loan.status === 'active' ? `<button class="btn btn-warning" onclick="markAsDefaulted('${id}')">Mark Defaulted</button>` : ''}
                     <button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button>
                 </div>
             `;
@@ -1580,10 +1874,11 @@
                     <div class="detail-item"><span class="detail-label">Amount</span><span class="detail-value">${Utils.formatCurrency(payment.amount)}</span></div>
                     <div class="detail-item"><span class="detail-label">Method</span><span class="detail-value">${payment.method}</span></div>
                     <div class="detail-item"><span class="detail-label">Reference</span><span class="detail-value">${payment.reference || 'N/A'}</span></div>
+                    <div class="detail-item"><span class="detail-label">Timestamp</span><span class="detail-value">${Utils.formatDateTime(payment.timestamp)}</span></div>
                     <div class="detail-item"><span class="detail-label">Status</span><span class="detail-value"><span class="status-badge ${payment.status}">${payment.status}</span></span></div>
                 </div>
                 <h4>Proof of Payment</h4>
-                ${payment.proofUrl ? `<img src="${payment.proofUrl}" style="max-width:100%; max-height:300px; border-radius:12px;" onclick="window.open('${payment.proofUrl}')">` : 'No proof uploaded'}
+                ${payment.proofUrl ? `<img src="${payment.proofUrl}" style="max-width:100%; max-height:300px; border-radius:12px; cursor:pointer;" onclick="window.open('${payment.proofUrl}')">` : 'No proof uploaded'}
                 <div class="action-row mt-4">
                     ${payment.status === 'pending' ? `
                         <button class="btn btn-success" onclick="confirmPayment('${id}')">Confirm</button>
@@ -1617,7 +1912,7 @@
                 <p><strong>Total commission (15%):</strong> ${Utils.formatCurrency(totalCommission)}</p>
                 <p><strong>Already paid:</strong> ${Utils.formatCurrency(paid)}</p>
                 <p><strong>Pending:</strong> ${Utils.formatCurrency(pending)}</p>
-                <p class="text-muted">Commission is paid only after interest is received.</p>
+                <p class="small">Commission is paid only after interest is received.</p>
             `;
             openModal('commissionMathModal');
         };
@@ -1626,13 +1921,18 @@
         window.approveLoan = async (loanId) => {
             if (!confirm('Approve this loan?')) return;
             Utils.showLoading('Approving loan...');
-            await db.ref('loans/' + loanId).update({
-                status: 'approved',
-                approvedAt: Date.now(),
-                approvedBy: currentUser?.uid
-            });
+            try {
+                await db.ref('loans/' + loanId).update({
+                    status: 'approved',
+                    approvedAt: Date.now(),
+                    approvedBy: currentUser?.uid
+                });
+                await Utils.logAudit('APPROVE_LOAN', { loanId });
+                Utils.showToast('Success', 'Loan approved', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Success', 'Loan approved', 'success');
             closeModal('loanDetailsModal');
         };
 
@@ -1640,14 +1940,37 @@
             const reason = prompt('Reason for rejection:');
             if (reason === null) return;
             Utils.showLoading('Rejecting loan...');
-            await db.ref('loans/' + loanId).update({
-                status: 'rejected',
-                rejectedAt: Date.now(),
-                rejectedBy: currentUser?.uid,
-                rejectionReason: reason
-            });
+            try {
+                await db.ref('loans/' + loanId).update({
+                    status: 'rejected',
+                    rejectedAt: Date.now(),
+                    rejectedBy: currentUser?.uid,
+                    rejectionReason: reason
+                });
+                await Utils.logAudit('REJECT_LOAN', { loanId, reason });
+                Utils.showToast('Rejected', 'Loan rejected', 'info');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Rejected', 'Loan rejected', 'info');
+            closeModal('loanDetailsModal');
+        };
+
+        window.markAsDefaulted = async (loanId) => {
+            if (!confirm('Mark this loan as defaulted? This will stop further payments.')) return;
+            Utils.showLoading('Updating...');
+            try {
+                await db.ref('loans/' + loanId).update({
+                    status: 'defaulted',
+                    defaultedAt: Date.now(),
+                    defaultedBy: currentUser?.uid
+                });
+                await Utils.logAudit('MARK_DEFAULTED', { loanId });
+                Utils.showToast('Success', 'Loan marked as defaulted', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
             closeModal('loanDetailsModal');
         };
 
@@ -1679,13 +2002,18 @@
             const loanId = window.currentLoanForSign;
             if (!loanId) return;
             Utils.showLoading('Saving signature...');
-            await db.ref('loans/' + loanId).update({
-                lenderSignature: sigData,
-                lenderSignedAt: Date.now(),
-                lenderSignedBy: currentUser?.uid
-            });
+            try {
+                await db.ref('loans/' + loanId).update({
+                    lenderSignature: sigData,
+                    lenderSignedAt: Date.now(),
+                    lenderSignedBy: currentUser?.uid
+                });
+                await Utils.logAudit('LENDER_SIGN_LOAN', { loanId });
+                Utils.showToast('Success', 'Loan signed by lender', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Success', 'Loan signed by lender', 'success');
             closeModal('signAgreementModal');
         });
 
@@ -1694,131 +2022,173 @@
             const payment = allPayments.find(p => p.id === id);
             if (!payment) return;
             Utils.showLoading('Verifying payment...');
-            await db.ref('payments/' + id).update({
-                status: 'confirmed',
-                verifiedAt: Date.now(),
-                verifiedBy: currentUser?.uid
-            });
-            // Update loan totalPaid and interestPaid (simplified: assume payment is interest first if schedule exists)
-            const loanRef = db.ref('loans/' + payment.loanId);
-            const loanSnap = await loanRef.once('value');
-            const loan = loanSnap.val();
-            let newTotalPaid = (loan.totalPaid || 0) + payment.amount;
-            let newInterestPaid = (loan.interestPaid || 0);
-            if (loan.repaymentSchedule) {
-                // simplistic: assign to interest first
-                const pendingInterest = loan.repaymentSchedule.reduce((s,inst) => s + (inst.interest - (inst.paidInterest || 0)), 0);
-                const interestPortion = Math.min(payment.amount, pendingInterest);
-                newInterestPaid += interestPortion;
-            } else {
-                newInterestPaid += payment.amount; // fallback
-            }
-            await loanRef.update({ 
-                totalPaid: newTotalPaid,
-                interestPaid: newInterestPaid
-            });
-            // If interest paid, create commission entry (15% of interest portion)
-            if (payment.amount > 0 && loan.agentId) {
-                const interestPortion = payment.amount; // simplified; should use actual split
-                const commissionAmount = interestPortion * 0.15;
-                const commId = Utils.generateId('COMM');
-                await db.ref('commissionHistory/' + commId).set({
-                    agentId: loan.agentId,
-                    amount: commissionAmount,
-                    paidAt: Date.now(),
-                    paidBy: currentUser?.uid,
-                    status: 'pending' // will be paid later via payCommission
+            try {
+                await db.ref('payments/' + id).update({
+                    status: 'confirmed',
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser?.uid
                 });
+                // Update loan totalPaid and interestPaid (simplified: assume payment is interest first)
+                const loanRef = db.ref('loans/' + payment.loanId);
+                const loanSnap = await loanRef.once('value');
+                const loan = loanSnap.val();
+                let newTotalPaid = (loan.totalPaid || 0) + payment.amount;
+                let newInterestPaid = (loan.interestPaid || 0);
+                // simplistic: allocate all to interest until full interest paid
+                const remainingInterest = (loan.totalInterest || 0) - newInterestPaid;
+                if (payment.amount <= remainingInterest) {
+                    newInterestPaid += payment.amount;
+                } else {
+                    newInterestPaid = loan.totalInterest;
+                }
+                await loanRef.update({ 
+                    totalPaid: newTotalPaid,
+                    interestPaid: newInterestPaid
+                });
+                // If interest paid, create commission entry (15% of interest portion)
+                if (payment.amount > 0 && loan.agentId) {
+                    const interestPortion = Math.min(payment.amount, remainingInterest);
+                    const commissionAmount = interestPortion * 0.15;
+                    if (commissionAmount > 0) {
+                        const commId = Utils.generateId('COMM');
+                        await db.ref('commissionHistory/' + commId).set({
+                            agentId: loan.agentId,
+                            customerId: payment.customerId,
+                            loanId: payment.loanId,
+                            amount: commissionAmount,
+                            paidAt: Date.now(),
+                            paidBy: currentUser?.uid,
+                            status: 'pending' // will be paid later via payCommission
+                        });
+                    }
+                }
+                await Utils.logAudit('CONFIRM_PAYMENT', { paymentId: id, loanId: payment.loanId });
+                Utils.showToast('Success', 'Payment confirmed', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
             }
             Utils.hideLoading();
-            Utils.showToast('Success', 'Payment confirmed', 'success');
             closeModal('paymentDetailsModal');
         };
 
         window.rejectPayment = async (id) => {
             Utils.showLoading('Rejecting payment...');
-            await db.ref('payments/' + id).update({ status: 'rejected' });
+            try {
+                await db.ref('payments/' + id).update({ status: 'rejected' });
+                await Utils.logAudit('REJECT_PAYMENT', { paymentId: id });
+                Utils.showToast('Rejected', 'Payment rejected', 'info');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Rejected', 'Payment rejected', 'info');
             closeModal('paymentDetailsModal');
         };
 
         window.toggleAgentStatus = async (id, newStatus) => {
             Utils.showLoading('Updating status...');
-            await db.ref('users/' + id).update({ status: newStatus });
+            try {
+                await db.ref('users/' + id).update({ status: newStatus });
+                await Utils.logAudit('TOGGLE_AGENT_STATUS', { agentId: id, newStatus });
+                Utils.showToast('Success', `Agent ${newStatus}`, 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Success', `Agent ${newStatus}`, 'success');
             closeModal('agentDetailsModal');
         };
 
         window.deleteAgent = async (id) => {
             if (!confirm('Permanently delete this agent? This action cannot be undone.')) return;
             Utils.showLoading('Deleting...');
-            await db.ref('users/' + id).remove();
+            try {
+                await db.ref('users/' + id).remove();
+                await Utils.logAudit('DELETE_AGENT', { agentId: id });
+                Utils.showToast('Deleted', 'Agent removed', 'info');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Deleted', 'Agent removed', 'info');
             closeModal('agentDetailsModal');
         };
 
         window.toggleCustomerStatus = async (id, newStatus) => {
             Utils.showLoading('Updating status...');
-            await db.ref('users/' + id).update({ status: newStatus });
+            try {
+                await db.ref('users/' + id).update({ status: newStatus });
+                await Utils.logAudit('TOGGLE_CUSTOMER_STATUS', { customerId: id, newStatus });
+                Utils.showToast('Success', `Customer ${newStatus}`, 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Success', `Customer ${newStatus}`, 'success');
             closeModal('customerDetailsModal');
         };
 
         window.deleteCustomer = async (id) => {
             if (!confirm('Permanently delete this customer? This action cannot be undone.')) return;
             Utils.showLoading('Deleting...');
-            await db.ref('users/' + id).remove();
+            try {
+                await db.ref('users/' + id).remove();
+                await Utils.logAudit('DELETE_CUSTOMER', { customerId: id });
+                Utils.showToast('Deleted', 'Customer removed', 'info');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Deleted', 'Customer removed', 'info');
             closeModal('customerDetailsModal');
         };
 
         window.payCommission = async (agentId, amount) => {
             if (!confirm(`Pay ${Utils.formatCurrency(amount)} commission to this agent?`)) return;
-            // Check if interest has actually been paid (should be enforced by business logic)
             Utils.showLoading('Paying commission...');
-            const commId = Utils.generateId('COMM');
-            await db.ref('commissionHistory/' + commId).set({
-                agentId,
-                amount,
-                paidAt: Date.now(),
-                paidBy: currentUser?.uid,
-                status: 'paid'
-            });
-            // Update agent's totalCommission
-            const agentRef = db.ref('users/' + agentId);
-            const agentSnap = await agentRef.once('value');
-            const agent = agentSnap.val();
-            await agentRef.update({ totalCommission: (agent.totalCommission || 0) + amount });
+            try {
+                const commId = Utils.generateId('COMM');
+                await db.ref('commissionHistory/' + commId).set({
+                    agentId,
+                    amount,
+                    paidAt: Date.now(),
+                    paidBy: currentUser?.uid,
+                    status: 'paid'
+                });
+                // Update agent's totalCommission
+                const agentRef = db.ref('users/' + agentId);
+                const agentSnap = await agentRef.once('value');
+                const agent = agentSnap.val();
+                await agentRef.update({ totalCommission: (agent.totalCommission || 0) + amount });
+                await Utils.logAudit('PAY_COMMISSION', { agentId, amount });
+                Utils.showToast('Success', 'Commission paid', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Success', 'Commission paid', 'success');
         };
 
         // ========== ASSIGNMENT ==========
-        document.getElementById('assignBtn').addEventListener('click', async () => {
+        document.getElementById('assignBtn')?.addEventListener('click', async () => {
             const customerId = document.getElementById('assignCustomer').value;
             const agentId = document.getElementById('assignAgent').value;
             if (!customerId || !agentId) return;
             const agent = allAgents.find(a => a.id === agentId);
             Utils.showLoading('Assigning...');
-            await db.ref('users/' + customerId).update({
-                assignedAgentId: agentId,
-                agentName: agent?.fullName
-            });
-            const agentRef = db.ref('users/' + agentId);
-            const agentSnap = await agentRef.once('value');
-            const agentData = agentSnap.val();
-            await agentRef.update({ totalCustomers: (agentData.totalCustomers || 0) + 1 });
+            try {
+                await db.ref('users/' + customerId).update({
+                    assignedAgentId: agentId,
+                    agentName: agent?.fullName
+                });
+                const agentRef = db.ref('users/' + agentId);
+                const agentSnap = await agentRef.once('value');
+                const agentData = agentSnap.val();
+                await agentRef.update({ totalCustomers: (agentData.totalCustomers || 0) + 1 });
+                await Utils.logAudit('ASSIGN_AGENT', { customerId, agentId });
+                Utils.showToast('Success', 'Agent assigned', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
             Utils.hideLoading();
-            Utils.showToast('Success', 'Agent assigned', 'success');
         });
 
         // ========== REPORTS ==========
-        document.getElementById('reportAgents').addEventListener('click', () => {
+        document.getElementById('reportAgents')?.addEventListener('click', () => {
             let report = '<h4>Agents Report</h4>';
             allAgents.forEach(a => {
                 const loans = allLoans.filter(l => l.agentId === a.id);
@@ -1831,7 +2201,7 @@
             document.getElementById('reportOutput').innerHTML = report;
         });
 
-        document.getElementById('reportLoans').addEventListener('click', () => {
+        document.getElementById('reportLoans')?.addEventListener('click', () => {
             let report = '<h4>Loans Report</h4>';
             allLoans.forEach(l => {
                 report += `
@@ -1841,7 +2211,7 @@
             document.getElementById('reportOutput').innerHTML = report;
         });
 
-        document.getElementById('reportCustomers').addEventListener('click', () => {
+        document.getElementById('reportCustomers')?.addEventListener('click', () => {
             let report = '<h4>Customers Report</h4>';
             allCustomers.forEach(c => {
                 const loans = allLoans.filter(l => l.customerId === c.id);
@@ -1855,8 +2225,17 @@
             document.getElementById('reportOutput').innerHTML = report;
         });
 
-        // ========== PROFIT DETAILED REPORT ==========
-        document.getElementById('printProfitReport').addEventListener('click', () => {
+        document.getElementById('reportPayments')?.addEventListener('click', () => {
+            let report = '<h4>Payments Report</h4>';
+            allPayments.forEach(p => {
+                report += `
+                    <div><strong>${p.id}</strong> | Loan: ${p.loanId} | Amount: ${Utils.formatCurrency(p.amount)} | Status: ${p.status} | Date: ${Utils.formatDate(p.timestamp)}</div><hr>
+                `;
+            });
+            document.getElementById('reportOutput').innerHTML = report;
+        });
+
+        document.getElementById('generateProfitReport')?.addEventListener('click', () => {
             const totalLent = allLoans.filter(l => l.status === 'approved' || l.status === 'active').reduce((s,l)=> s + (l.approvedAmount || l.amount), 0);
             const principalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s,p)=> s + p.amount, 0);
             const interestPaid = allLoans.reduce((s,l) => s + (l.interestPaid || 0), 0);
@@ -1882,6 +2261,7 @@
             const email = document.getElementById('agentEmail').value.trim();
             const agentId = document.getElementById('agentCustomId').value.trim();
             const password = document.getElementById('agentPassword').value.trim();
+            const branch = document.getElementById('agentBranch').value.trim();
 
             if (!name || !phone || !nrc || !email || !agentId || !password) {
                 Utils.showToast('Error', 'All fields required', 'error');
@@ -1901,6 +2281,7 @@
                     nrc,
                     email,
                     agentId,
+                    branch,
                     userType: 'agent',
                     status: 'active',
                     createdAt: Date.now(),
@@ -1908,7 +2289,7 @@
                     totalLoans: 0,
                     totalCommission: 0
                 });
-                Utils.hideLoading();
+                await Utils.logAudit('CREATE_AGENT', { agentId: uid, email });
                 Utils.showToast('Success', 'Agent created', 'success');
                 closeModal('createAgentModal');
                 document.getElementById('agentName').value = '';
@@ -1917,10 +2298,11 @@
                 document.getElementById('agentEmail').value = '';
                 document.getElementById('agentCustomId').value = '';
                 document.getElementById('agentPassword').value = '';
+                document.getElementById('agentBranch').value = 'Main';
             } catch (e) {
-                Utils.hideLoading();
                 Utils.showToast('Error', e.message, 'error');
             }
+            Utils.hideLoading();
         });
 
         // ========== CREATE CUSTOMER ==========
@@ -1965,7 +2347,7 @@
                     const agent = agentSnap.val();
                     await agentRef.update({ totalCustomers: (agent.totalCustomers || 0) + 1 });
                 }
-                Utils.hideLoading();
+                await Utils.logAudit('CREATE_CUSTOMER', { customerId: uid, email });
                 Utils.showToast('Success', 'Customer created', 'success');
                 closeModal('createCustomerModal');
                 document.getElementById('custName').value = '';
@@ -1975,9 +2357,9 @@
                 document.getElementById('custAddress').value = '';
                 document.getElementById('custPassword').value = '';
             } catch (e) {
-                Utils.hideLoading();
                 Utils.showToast('Error', e.message, 'error');
             }
+            Utils.hideLoading();
         });
 
         // Populate customer modal agent dropdown
@@ -1987,18 +2369,60 @@
             openModal('createCustomerModal');
         });
 
+        // ========== CREATE ADMIN ==========
+        document.getElementById('createAdminBtn')?.addEventListener('click', () => openModal('createAdminModal'));
+        document.getElementById('submitAdmin')?.addEventListener('click', async () => {
+            const name = document.getElementById('adminName').value.trim();
+            const email = document.getElementById('adminEmail').value.trim();
+            const password = document.getElementById('adminPassword').value.trim();
+            if (!name || !email || !password) {
+                Utils.showToast('Error', 'All fields required', 'error');
+                return;
+            }
+            if (!Utils.validateEmail(email)) { Utils.showToast('Error', 'Invalid email', 'error'); return; }
+            if (password.length < 6) { Utils.showToast('Error', 'Password too short', 'error'); return; }
+            Utils.showLoading('Creating admin...');
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const uid = cred.user.uid;
+                await db.ref('users/' + uid).set({
+                    fullName: name,
+                    email,
+                    userType: 'admin',
+                    status: 'active',
+                    createdAt: Date.now()
+                });
+                await Utils.logAudit('CREATE_ADMIN', { adminId: uid, email });
+                Utils.showToast('Success', 'Admin created', 'success');
+                closeModal('createAdminModal');
+                document.getElementById('adminName').value = '';
+                document.getElementById('adminEmail').value = '';
+                document.getElementById('adminPassword').value = '';
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
         // ========== SETTINGS ==========
         document.getElementById('saveSettings').addEventListener('click', async () => {
             const commRate = parseFloat(document.getElementById('commissionRate').value);
             const monthly = parseFloat(document.getElementById('monthlyInterest').value);
             const weekly = parseFloat(document.getElementById('weeklyInterest').value);
+            const maxLoan = parseFloat(document.getElementById('maxLoanAmount').value);
+            const minLoan = parseFloat(document.getElementById('minLoanAmount').value);
+            const defaultDuration = parseInt(document.getElementById('defaultDuration').value);
             await db.ref('systemSettings').set({
                 commissionRate: commRate,
                 monthlyInterestRate: monthly,
                 weeklyInterestRate: weekly,
+                maxLoanAmount: maxLoan,
+                minLoanAmount: minLoan,
+                defaultDuration,
                 updatedAt: Date.now(),
                 updatedBy: currentUser?.uid
             });
+            await Utils.logAudit('UPDATE_SETTINGS', { commRate, monthly, weekly });
             Utils.showToast('Success', 'Settings saved', 'success');
         });
 
@@ -2010,6 +2434,7 @@
                 if (confirm('ARE YOU ABSOLUTELY SURE? This will delete EVERYTHING.')) {
                     Utils.showLoading('Wiping database...');
                     await db.ref().set(null);
+                    await Utils.logAudit('SUDO_RESET', {});
                     Utils.hideLoading();
                     Utils.showToast('Done', 'Database wiped. Page will reload.', 'info');
                     setTimeout(() => location.reload(), 2000);
@@ -2021,29 +2446,37 @@
         });
 
         // ========== FILTERS & SEARCH ==========
-        document.getElementById('filterActiveAgents').addEventListener('click', () => {
+        document.getElementById('filterActiveAgents')?.addEventListener('click', () => {
             agentFilter = 'active';
             renderAgents();
         });
-        document.getElementById('filterPendingAgents').addEventListener('click', () => {
+        document.getElementById('filterPendingAgents')?.addEventListener('click', () => {
             agentFilter = 'pending';
             renderAgents();
         });
-        document.getElementById('filterBannedAgents').addEventListener('click', () => {
+        document.getElementById('filterBannedAgents')?.addEventListener('click', () => {
             agentFilter = 'banned';
             renderAgents();
         });
-        document.getElementById('agentSearch').addEventListener('input', renderAgents);
+        document.getElementById('agentSearch')?.addEventListener('input', renderAgents);
+        document.getElementById('clearAgentSearch')?.addEventListener('click', () => {
+            document.getElementById('agentSearch').value = '';
+            renderAgents();
+        });
 
-        document.getElementById('filterActiveCustomers').addEventListener('click', () => {
+        document.getElementById('filterActiveCustomers')?.addEventListener('click', () => {
             customerFilter = 'active';
             renderCustomers();
         });
-        document.getElementById('filterBannedCustomers').addEventListener('click', () => {
+        document.getElementById('filterBannedCustomers')?.addEventListener('click', () => {
             customerFilter = 'banned';
             renderCustomers();
         });
-        document.getElementById('customerSearch').addEventListener('input', renderCustomers);
+        document.getElementById('customerSearch')?.addEventListener('input', renderCustomers);
+        document.getElementById('clearCustomerSearch')?.addEventListener('click', () => {
+            document.getElementById('customerSearch').value = '';
+            renderCustomers();
+        });
 
         document.querySelectorAll('#loansSection .tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -2053,7 +2486,11 @@
                 renderLoans();
             });
         });
-        document.getElementById('loanSearch').addEventListener('input', renderLoans);
+        document.getElementById('loanSearch')?.addEventListener('input', renderLoans);
+        document.getElementById('clearLoanSearch')?.addEventListener('click', () => {
+            document.getElementById('loanSearch').value = '';
+            renderLoans();
+        });
 
         document.querySelectorAll('#paymentsSection .tab').forEach(tab => {
             tab.addEventListener('click', () => {
@@ -2063,14 +2500,42 @@
                 renderPayments();
             });
         });
-        document.getElementById('paymentSearch').addEventListener('input', renderPayments);
+        document.getElementById('paymentSearch')?.addEventListener('input', renderPayments);
+        document.getElementById('clearPaymentSearch')?.addEventListener('click', () => {
+            document.getElementById('paymentSearch').value = '';
+            renderPayments();
+        });
+
+        document.getElementById('auditSearch')?.addEventListener('input', renderAuditLogs);
 
         // ========== NAVIGATION ==========
         function showSection(sectionId) {
             document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-            document.getElementById(sectionId + 'Section').classList.add('active');
+            const sectionMap = {
+                dashboard: 'dashboardSection',
+                customers: 'customersSection',
+                agents: 'agentsSection',
+                loans: 'loansSection',
+                payments: 'paymentsSection',
+                analytics: 'analyticsSection',
+                commission: 'commissionSection',
+                profit: 'profitSection',
+                reports: 'reportsSection',
+                assignment: 'assignmentSection',
+                audit: 'auditSection',
+                settings: 'settingsSection'
+            };
+            const target = sectionMap[sectionId];
+            if (target) {
+                document.getElementById(target).classList.add('active');
+            }
             document.querySelectorAll('.nav-item-bottom').forEach(i => i.classList.remove('active'));
-            document.querySelector(`.nav-item-bottom[data-section="${sectionId}"]`)?.classList.add('active');
+            const bottomNav = document.querySelector(`.nav-item-bottom[data-section="${sectionId}"]`);
+            if (bottomNav) bottomNav.classList.add('active');
+
+            // Refresh data for specific sections
+            if (sectionId === 'audit') renderAuditLogs();
+            if (sectionId === 'analytics') renderAnalytics();
         }
         window.showSection = showSection;
 
@@ -2096,6 +2561,80 @@
             document.getElementById('sidebar').classList.remove('active');
             document.getElementById('sidebarOverlay').classList.remove('active');
         });
+
+        // Quick actions
+        document.getElementById('quickCreateCustomer')?.addEventListener('click', () => {
+            showSection('customers');
+            setTimeout(() => document.getElementById('createCustomerBtn').click(), 100);
+        });
+        document.getElementById('quickCreateAgent')?.addEventListener('click', () => {
+            showSection('agents');
+            setTimeout(() => document.getElementById('createAgentBtn').click(), 100);
+        });
+        document.getElementById('quickViewReports')?.addEventListener('click', () => showSection('reports'));
+
+        // Export functions
+        document.getElementById('exportCustomers')?.addEventListener('click', () => {
+            const data = allCustomers.map(c => ({
+                Name: c.fullName,
+                Email: c.email,
+                Phone: c.phone,
+                NRC: c.nrc,
+                Status: c.status,
+                Agent: allAgents.find(a => a.id === c.assignedAgentId)?.fullName || ''
+            }));
+            exportToCSV(data, 'customers.csv');
+        });
+
+        document.getElementById('exportAgents')?.addEventListener('click', () => {
+            const data = allAgents.map(a => ({
+                Name: a.fullName,
+                Email: a.email,
+                Phone: a.phone,
+                AgentID: a.agentId,
+                Status: a.status,
+                Customers: a.totalCustomers || 0,
+                Loans: allLoans.filter(l => l.agentId === a.id).length
+            }));
+            exportToCSV(data, 'agents.csv');
+        });
+
+        document.getElementById('exportLoans')?.addEventListener('click', () => {
+            const data = allLoans.map(l => ({
+                ID: l.id,
+                Customer: l.customerName,
+                Amount: l.amount,
+                Status: l.status,
+                Created: Utils.formatDate(l.createdAt),
+                Agent: l.agentName
+            }));
+            exportToCSV(data, 'loans.csv');
+        });
+
+        document.getElementById('exportPayments')?.addEventListener('click', () => {
+            const data = allPayments.map(p => ({
+                ID: p.id,
+                Loan: p.loanId,
+                Customer: p.customerName,
+                Amount: p.amount,
+                Status: p.status,
+                Date: Utils.formatDate(p.timestamp)
+            }));
+            exportToCSV(data, 'payments.csv');
+        });
+
+        function exportToCSV(data, filename) {
+            const header = Object.keys(data[0]).join(',');
+            const rows = data.map(obj => Object.values(obj).map(v => `"${v}"`).join(','));
+            const csv = [header, ...rows].join('\n');
+            const blob = new Blob([csv], { type: 'text/csv' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            a.click();
+            URL.revokeObjectURL(url);
+        }
 
         // Modal helpers
         window.openModal = (id) => document.getElementById(id).classList.add('active');
@@ -2138,6 +2677,22 @@
                 }
             });
         });
+
+        // Initialize Cloudinary widget (if needed)
+        function initCloudinary() {
+            cloudinaryWidget = cloudinary.createUploadWidget({
+                cloudName: cloudinaryConfig.cloudName,
+                uploadPreset: cloudinaryConfig.uploadPreset,
+                folder: cloudinaryConfig.folder,
+                multiple: false,
+                maxFileSize: 5242880
+            }, (error, result) => {
+                if (result && result.event === 'success') {
+                    console.log('Uploaded:', result.info.secure_url);
+                }
+            });
+        }
+        initCloudinary();
     </script>
 </body>
 </html>
