@@ -14,8 +14,6 @@
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <!-- Chart.js for analytics -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <!-- html2pdf for reports -->
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <!-- Moment.js for date handling -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <style>
@@ -47,6 +45,7 @@
             --shadow-lg: 0 12px 32px rgba(0,0,0,0.08), 0 4px 8px rgba(0,0,0,0.02);
             --radius: 18px;
             --radius-sm: 12px;
+            --radius-lg: 24px;
         }
 
         body {
@@ -798,6 +797,111 @@
             cursor: pointer;
             border: 1px solid var(--ios-gray3);
         }
+
+        /* Loan card with split profile */
+        .loan-card {
+            background: var(--ios-card);
+            border-radius: var(--radius);
+            padding: 0;
+            margin-bottom: 16px;
+            border: 1px solid var(--ios-gray2);
+            overflow: hidden;
+            box-shadow: var(--shadow-sm);
+            transition: 0.2s;
+            cursor: pointer;
+            display: flex;
+            flex-direction: column;
+        }
+        .loan-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
+        .loan-card-header {
+            display: flex;
+            height: 90px;
+        }
+        .loan-customer-side, .loan-agent-side {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            padding: 12px;
+            gap: 12px;
+        }
+        .loan-customer-side {
+            background: linear-gradient(135deg, rgba(0,122,255,0.05), rgba(0,122,255,0.02));
+            border-right: 1px dashed var(--ios-gray3);
+        }
+        .loan-agent-side {
+            background: linear-gradient(135deg, rgba(52,199,89,0.05), rgba(52,199,89,0.02));
+        }
+        .loan-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: var(--shadow-sm);
+        }
+        .loan-avatar.small {
+            width: 32px;
+            height: 32px;
+        }
+        .loan-info {
+            flex: 1;
+            min-width: 0;
+        }
+        .loan-name {
+            font-weight: 600;
+            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .loan-detail {
+            font-size: 12px;
+            color: var(--ios-gray5);
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+        .loan-card-body {
+            padding: 16px;
+            border-top: 1px solid var(--ios-gray2);
+        }
+        .loan-amount-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 10px;
+        }
+        .loan-amount {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--ios-blue);
+        }
+        .loan-status {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .loan-footer {
+            display: flex;
+            justify-content: space-between;
+            font-size: 12px;
+            color: var(--ios-gray5);
+            margin-top: 8px;
+        }
+
+        /* CSV download button */
+        .btn-csv {
+            background: var(--ios-purple);
+            color: white;
+            border-color: var(--ios-purple);
+        }
+        .btn-csv:hover {
+            background: #4a48b5;
+        }
     </style>
 </head>
 <body>
@@ -908,7 +1012,7 @@
                 <button class="btn btn-outline btn-small" id="filterActiveCustomers">Active</button>
                 <button class="btn btn-outline btn-small" id="filterBannedCustomers">Banned</button>
                 <button class="btn btn-primary btn-small" id="createCustomerBtn"><i class="fas fa-plus"></i> Create Customer</button>
-                <button class="btn btn-outline btn-small" id="exportCustomers"><i class="fas fa-download"></i> Export</button>
+                <button class="btn btn-outline btn-small" id="exportCustomers"><i class="fas fa-download"></i> Export CSV</button>
             </div>
             <div id="customersList"></div>
         </section>
@@ -927,7 +1031,7 @@
             </div>
             <div class="action-row">
                 <button class="btn btn-primary btn-small" id="createAgentBtn"><i class="fas fa-plus"></i> Create Agent</button>
-                <button class="btn btn-outline btn-small" id="exportAgents"><i class="fas fa-download"></i> Export</button>
+                <button class="btn btn-outline btn-small" id="exportAgents"><i class="fas fa-download"></i> Export CSV</button>
             </div>
             <div id="agentsList"></div>
         </section>
@@ -949,7 +1053,7 @@
                 <span class="tab" data-status="defaulted">Defaulted</span>
             </div>
             <div class="action-row">
-                <button class="btn btn-outline btn-small" id="exportLoans"><i class="fas fa-download"></i> Export</button>
+                <button class="btn btn-outline btn-small" id="exportLoans"><i class="fas fa-download"></i> Export CSV</button>
             </div>
             <div id="loansList"></div>
         </section>
@@ -967,7 +1071,7 @@
                 <span class="tab" data-status="rejected">Rejected</span>
             </div>
             <div class="action-row">
-                <button class="btn btn-outline btn-small" id="exportPayments"><i class="fas fa-download"></i> Export</button>
+                <button class="btn btn-outline btn-small" id="exportPayments"><i class="fas fa-download"></i> Export CSV</button>
             </div>
             <div id="paymentsList"></div>
         </section>
@@ -1121,10 +1225,10 @@
                     <div class="form-group"><label>Phone *</label><input type="tel" id="agentPhone" class="form-input" required></div>
                     <div class="form-group"><label>NRC *</label><input type="text" id="agentNrc" class="form-input" placeholder="123456/78/9" required></div>
                     <div class="form-group"><label>Email *</label><input type="email" id="agentEmail" class="form-input" required></div>
-                    <div class="form-group"><label>Agent ID (manual) *</label><input type="text" id="agentCustomId" class="form-input" required></div>
+                    <div class="form-group"><label>Agent ID *</label><input type="text" id="agentCustomId" class="form-input" required></div>
                     <div class="form-group"><label>Password *</label><input type="password" id="agentPassword" class="form-input" required></div>
                     <div class="form-group"><label>Branch</label><input type="text" id="agentBranch" class="form-input" value="Main"></div>
-                    <!-- Cloudinary uploads for agent documents (optional but recommended) -->
+                    <!-- Document uploads -->
                     <div class="doc-grid">
                         <div class="upload-box" data-type="agent-nrc-front" onclick="openCloudinaryUpload('agent-nrc-front')">
                             <i class="fas fa-id-card"></i><span>NRC Front</span>
@@ -1283,6 +1387,52 @@
         </div>
     </div>
 
+    <!-- Edit Customer Modal -->
+    <div class="modal-overlay" id="editCustomerModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Edit Customer</span>
+                <span class="modal-close" onclick="closeModal('editCustomerModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <form id="editCustomerForm">
+                    <input type="hidden" id="editCustomerId">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="editCustName" class="form-input" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="editCustEmail" class="form-input" required></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" id="editCustPhone" class="form-input" required></div>
+                    <div class="form-group"><label>NRC</label><input type="text" id="editCustNrc" class="form-input" required></div>
+                    <div class="form-group"><label>Address</label><input type="text" id="editCustAddress" class="form-input" required></div>
+                    <div class="form-group"><label>Agent</label><select id="editCustAgent" class="form-select"></select></div>
+                    <div class="form-group"><label>Status</label><select id="editCustStatus" class="form-select"><option value="active">Active</option><option value="banned">Banned</option></select></div>
+                </form>
+                <button class="btn btn-primary" id="saveCustomerEdit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Edit Agent Modal -->
+    <div class="modal-overlay" id="editAgentModal">
+        <div class="modal-container">
+            <div class="modal-header">
+                <span>Edit Agent</span>
+                <span class="modal-close" onclick="closeModal('editAgentModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <form id="editAgentForm">
+                    <input type="hidden" id="editAgentId">
+                    <div class="form-group"><label>Full Name</label><input type="text" id="editAgentName" class="form-input" required></div>
+                    <div class="form-group"><label>Email</label><input type="email" id="editAgentEmail" class="form-input" required></div>
+                    <div class="form-group"><label>Phone</label><input type="tel" id="editAgentPhone" class="form-input" required></div>
+                    <div class="form-group"><label>NRC</label><input type="text" id="editAgentNrc" class="form-input" required></div>
+                    <div class="form-group"><label>Agent ID</label><input type="text" id="editAgentCustomId" class="form-input" required></div>
+                    <div class="form-group"><label>Branch</label><input type="text" id="editAgentBranch" class="form-input"></div>
+                    <div class="form-group"><label>Status</label><select id="editAgentStatus" class="form-select"><option value="active">Active</option><option value="banned">Banned</option></select></div>
+                </form>
+                <button class="btn btn-primary" id="saveAgentEdit">Save Changes</button>
+            </div>
+        </div>
+    </div>
+
     <!-- ========== FIREBASE CONFIG ========== -->
     <script>
         // =========================================================================
@@ -1392,6 +1542,20 @@
                     ip: 'admin'
                 };
                 await db.ref('auditLogs/' + Utils.generateId('LOG')).set(log);
+            },
+            // CSV export function
+            exportToCSV: (data, filename) => {
+                if (!data.length) return;
+                const header = Object.keys(data[0]).join(',');
+                const rows = data.map(obj => Object.values(obj).map(v => `"${v}"`).join(','));
+                const csv = [header, ...rows].join('\n');
+                const blob = new Blob([csv], { type: 'text/csv' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = filename;
+                a.click();
+                URL.revokeObjectURL(url);
             }
         };
 
@@ -1487,7 +1651,7 @@
             renderProfit();
             renderAssignments();
             renderAuditLogs();
-            renderAgentApplications(); // new
+            renderAgentApplications(); // pending applications
         }
 
         function updateDashboardStats() {
@@ -1509,7 +1673,7 @@
             `;
         }
 
-        // New: Render pending agent applications in Agents section
+        // Render pending agent applications in Agents section
         function renderAgentApplications() {
             const container = document.getElementById('agentsList');
             if (!container) return;
@@ -1607,18 +1771,39 @@
                 );
             }
             const container = document.getElementById('loansList');
-            container.innerHTML = filtered.map(l => `
-                <div class="floating-card" onclick="showLoanDetails('${l.id}')">
-                    <div class="profile-row">
-                        <img src="${l.customerPhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'')}" class="profile-img">
-                        <div>
-                            <div><strong>${l.customerName}</strong> - ${Utils.formatCurrency(l.amount)}</div>
-                            <div class="profile-meta">Loan ID: ${l.id} · Agent: ${l.agentName}</div>
+            container.innerHTML = filtered.map(l => {
+                const customer = allCustomers.find(c => c.id === l.customerId);
+                const agent = allAgents.find(a => a.id === l.agentId);
+                return `
+                <div class="loan-card" onclick="showLoanDetails('${l.id}')">
+                    <div class="loan-card-header">
+                        <div class="loan-customer-side">
+                            <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'')}" class="loan-avatar">
+                            <div class="loan-info">
+                                <div class="loan-name">${l.customerName}</div>
+                                <div class="loan-detail">${customer?.phone || ''}</div>
+                            </div>
                         </div>
-                        <span class="status-badge ${l.status}">${l.status}</span>
+                        <div class="loan-agent-side">
+                            <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.agentName||'A')}" class="loan-avatar">
+                            <div class="loan-info">
+                                <div class="loan-name">${l.agentName || 'N/A'}</div>
+                                <div class="loan-detail">Agent</div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="loan-card-body">
+                        <div class="loan-amount-row">
+                            <span class="loan-amount">${Utils.formatCurrency(l.amount)}</span>
+                            <span class="status-badge ${l.status}">${l.status}</span>
+                        </div>
+                        <div class="loan-footer">
+                            <span><i class="fas fa-calendar"></i> ${Utils.formatDate(l.createdAt)}</span>
+                            <span><i class="fas fa-credit-card"></i> Due: ${l.repaymentSchedule?.[0]?.dueDate ? Utils.formatDate(l.repaymentSchedule[0].dueDate) : 'N/A'}</span>
+                        </div>
                     </div>
                 </div>
-            `).join('');
+            `}).join('');
         }
 
         function renderPayments() {
@@ -1852,6 +2037,7 @@
                 ${commissionHistory.length ? commissionHistory.map(ch => `<div>${Utils.formatDate(ch.paidAt)} - ${Utils.formatCurrency(ch.amount)} - ${ch.status}</div>`).join('') : 'None'}
 
                 <div class="action-row mt-4">
+                    <button class="btn btn-outline btn-small" onclick="editAgent('${id}')"><i class="fas fa-edit"></i> Edit</button>
                     <button class="btn btn-outline btn-small" onclick="toggleAgentStatus('${id}', '${agent.status === 'active' ? 'banned' : 'active'}')">${agent.status === 'active' ? 'Ban' : 'Activate'}</button>
                     <button class="btn btn-danger btn-small" onclick="deleteAgent('${id}')">Delete</button>
                     <button class="btn btn-primary btn-small" onclick="closeModal('agentDetailsModal')">Close</button>
@@ -1905,6 +2091,7 @@
                 `).join('') : 'None'}
 
                 <div class="action-row mt-4">
+                    <button class="btn btn-outline btn-small" onclick="editCustomer('${id}')"><i class="fas fa-edit"></i> Edit</button>
                     <button class="btn btn-outline btn-small" onclick="toggleCustomerStatus('${id}', '${customer.status === 'active' ? 'banned' : 'active'}')">${customer.status === 'active' ? 'Ban' : 'Activate'}</button>
                     <button class="btn btn-danger btn-small" onclick="deleteCustomer('${id}')">Delete</button>
                     <button class="btn btn-primary btn-small" onclick="closeModal('customerDetailsModal')">Close</button>
@@ -2047,25 +2234,67 @@
 
         // ========== AGENT APPLICATION ACTIONS ==========
         window.approveAgentApplication = async (appId) => {
-            // Generate credentials (similar to login.html)
+            // Instead of auto-generating, show a modal for manual entry
             const app = allAgentApplications.find(a => a.id === appId);
             if (!app) return;
-            // Generate agent ID and email
-            const agentId = 'AG' + Date.now().toString().slice(-6) + Math.random().toString(36).substr(2,3).toUpperCase();
-            const agentEmail = `agent.${app.fullName.toLowerCase().replace(/ /g,'.')}.${Date.now().toString().slice(-4)}@trucash.com`;
-            const agentPassword = Math.random().toString(36).slice(-8) + 'A1!';
-
-            if (confirm(`Approve ${app.fullName}? Credentials will be generated.\nEmail: ${agentEmail}\nPassword: ${agentPassword}\n\nCopy these details before proceeding.`)) {
+            // Create a simple modal for manual credential entry
+            const modal = document.createElement('div');
+            modal.className = 'modal-overlay active';
+            modal.innerHTML = `
+                <div class="modal-container">
+                    <div class="modal-header">
+                        <span>Approve Agent: ${app.fullName}</span>
+                        <span class="modal-close" onclick="this.closest('.modal-overlay').remove()"><i class="fas fa-times"></i></span>
+                    </div>
+                    <div class="modal-body">
+                        <div class="form-group">
+                            <label>Agent Email</label>
+                            <input type="email" id="approveAgentEmail" class="form-input" placeholder="agent@example.com">
+                        </div>
+                        <div class="form-group">
+                            <label>Agent ID</label>
+                            <input type="text" id="approveAgentId" class="form-input" placeholder="AGENT123">
+                        </div>
+                        <div class="form-group">
+                            <label>Password</label>
+                            <input type="password" id="approveAgentPassword" class="form-input" placeholder="Password">
+                        </div>
+                        <div class="form-group">
+                            <label>Confirm Password</label>
+                            <input type="password" id="approveAgentConfirm" class="form-input" placeholder="Confirm password">
+                        </div>
+                        <button class="btn btn-primary" id="confirmApproveAgent">Create Agent Account</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(modal);
+            document.getElementById('confirmApproveAgent').onclick = async () => {
+                const email = document.getElementById('approveAgentEmail').value.trim();
+                const agentId = document.getElementById('approveAgentId').value.trim();
+                const password = document.getElementById('approveAgentPassword').value;
+                const confirm = document.getElementById('approveAgentConfirm').value;
+                if (!email || !agentId || !password) {
+                    Utils.showToast('Error', 'All fields required', 'error');
+                    return;
+                }
+                if (password !== confirm) {
+                    Utils.showToast('Error', 'Passwords do not match', 'error');
+                    return;
+                }
+                if (password.length < 6) {
+                    Utils.showToast('Error', 'Password must be at least 6 characters', 'error');
+                    return;
+                }
+                modal.remove();
                 Utils.showLoading('Creating agent account...');
                 try {
                     // Create Firebase Auth user
-                    const cred = await auth.createUserWithEmailAndPassword(agentEmail, agentPassword);
+                    const cred = await auth.createUserWithEmailAndPassword(email, password);
                     const uid = cred.user.uid;
-                    // Save to users
                     const agentData = {
                         fullName: app.fullName,
                         phone: app.phone,
-                        email: agentEmail,
+                        email: email,
                         nrc: app.nrc,
                         residence: app.residence,
                         nrcFront: app.nrcFront,
@@ -2082,11 +2311,10 @@
                         status: 'approved',
                         reviewedAt: Date.now(),
                         reviewedBy: currentUser?.email,
-                        assignedCredentials: { email: agentEmail, agentId }
+                        assignedCredentials: { email, agentId }
                     });
-                    // Remove from pending list
                     await db.ref('pendingApplications/' + appId).remove();
-                    Utils.logAudit('APPROVE_AGENT', { appId, agentId });
+                    await Utils.logAudit('APPROVE_AGENT_MANUAL', { appId, agentId, email });
                     Utils.showToast('Success', `Agent ${app.fullName} approved and account created.`, 'success');
                     closeModal('agentApplicationModal');
                 } catch (e) {
@@ -2094,14 +2322,14 @@
                 } finally {
                     Utils.hideLoading();
                 }
-            }
+            };
         };
 
         window.rejectAgentApplication = async (appId) => {
             if (confirm('Reject this application?')) {
                 await db.ref('agentApplications/' + appId).update({ status: 'rejected', reviewedAt: Date.now() });
                 await db.ref('pendingApplications/' + appId).remove();
-                Utils.logAudit('REJECT_AGENT', { appId });
+                await Utils.logAudit('REJECT_AGENT', { appId });
                 Utils.showToast('Rejected', 'Application rejected', 'info');
                 closeModal('agentApplicationModal');
             }
@@ -2329,6 +2557,100 @@
             }
             Utils.hideLoading();
         };
+
+        // ========== EDIT FUNCTIONS ==========
+        window.editCustomer = (customerId) => {
+            const customer = allCustomers.find(c => c.id === customerId);
+            if (!customer) return;
+            document.getElementById('editCustomerId').value = customerId;
+            document.getElementById('editCustName').value = customer.fullName || '';
+            document.getElementById('editCustEmail').value = customer.email || '';
+            document.getElementById('editCustPhone').value = customer.phone || '';
+            document.getElementById('editCustNrc').value = customer.nrc || '';
+            document.getElementById('editCustAddress').value = customer.residence || '';
+            document.getElementById('editCustStatus').value = customer.status || 'active';
+            const agentSelect = document.getElementById('editCustAgent');
+            agentSelect.innerHTML = '<option value="">None</option>' + allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName}</option>`).join('');
+            agentSelect.value = customer.assignedAgentId || '';
+            openModal('editCustomerModal');
+        };
+
+        document.getElementById('saveCustomerEdit').addEventListener('click', async () => {
+            const id = document.getElementById('editCustomerId').value;
+            const fullName = document.getElementById('editCustName').value.trim();
+            const email = document.getElementById('editCustEmail').value.trim();
+            const phone = document.getElementById('editCustPhone').value.trim();
+            const nrc = document.getElementById('editCustNrc').value.trim();
+            const residence = document.getElementById('editCustAddress').value.trim();
+            const assignedAgentId = document.getElementById('editCustAgent').value;
+            const status = document.getElementById('editCustStatus').value;
+            if (!fullName || !email || !phone || !nrc || !residence) {
+                Utils.showToast('Error', 'All fields required', 'error');
+                return;
+            }
+            Utils.showLoading('Saving...');
+            try {
+                const updates = {
+                    fullName, email, phone, nrc, residence, status, assignedAgentId,
+                    updatedAt: Date.now()
+                };
+                if (assignedAgentId) {
+                    const agent = allAgents.find(a => a.id === assignedAgentId);
+                    updates.agentName = agent?.fullName;
+                } else {
+                    updates.agentName = null;
+                }
+                await db.ref('users/' + id).update(updates);
+                await Utils.logAudit('EDIT_CUSTOMER', { customerId: id });
+                Utils.showToast('Success', 'Customer updated', 'success');
+                closeModal('editCustomerModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        window.editAgent = (agentId) => {
+            const agent = allAgents.find(a => a.id === agentId);
+            if (!agent) return;
+            document.getElementById('editAgentId').value = agentId;
+            document.getElementById('editAgentName').value = agent.fullName || '';
+            document.getElementById('editAgentEmail').value = agent.email || '';
+            document.getElementById('editAgentPhone').value = agent.phone || '';
+            document.getElementById('editAgentNrc').value = agent.nrc || '';
+            document.getElementById('editAgentCustomId').value = agent.agentId || '';
+            document.getElementById('editAgentBranch').value = agent.branch || '';
+            document.getElementById('editAgentStatus').value = agent.status || 'active';
+            openModal('editAgentModal');
+        };
+
+        document.getElementById('saveAgentEdit').addEventListener('click', async () => {
+            const id = document.getElementById('editAgentId').value;
+            const fullName = document.getElementById('editAgentName').value.trim();
+            const email = document.getElementById('editAgentEmail').value.trim();
+            const phone = document.getElementById('editAgentPhone').value.trim();
+            const nrc = document.getElementById('editAgentNrc').value.trim();
+            const agentId = document.getElementById('editAgentCustomId').value.trim();
+            const branch = document.getElementById('editAgentBranch').value.trim();
+            const status = document.getElementById('editAgentStatus').value;
+            if (!fullName || !email || !phone || !nrc || !agentId) {
+                Utils.showToast('Error', 'All fields required', 'error');
+                return;
+            }
+            Utils.showLoading('Saving...');
+            try {
+                await db.ref('users/' + id).update({
+                    fullName, email, phone, nrc, agentId, branch, status,
+                    updatedAt: Date.now()
+                });
+                await Utils.logAudit('EDIT_AGENT', { agentId: id });
+                Utils.showToast('Success', 'Agent updated', 'success');
+                closeModal('editAgentModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
 
         // ========== ASSIGNMENT ==========
         document.getElementById('assignBtn')?.addEventListener('click', async () => {
@@ -2636,24 +2958,6 @@
             });
         });
 
-        document.getElementById('filterActiveAgents')?.addEventListener('click', () => {
-            agentFilter = 'active';
-            renderAgents();
-        });
-        document.getElementById('filterPendingAgents')?.addEventListener('click', () => {
-            agentFilter = 'pending';
-            renderAgentApplications();
-        });
-        document.getElementById('filterBannedAgents')?.addEventListener('click', () => {
-            agentFilter = 'banned';
-            renderAgents();
-        });
-        document.getElementById('agentSearch')?.addEventListener('input', renderAgents);
-        document.getElementById('clearAgentSearch')?.addEventListener('click', () => {
-            document.getElementById('agentSearch').value = '';
-            renderAgents();
-        });
-
         document.getElementById('filterActiveCustomers')?.addEventListener('click', () => {
             customerFilter = 'active';
             renderCustomers();
@@ -2768,7 +3072,7 @@
         });
         document.getElementById('quickViewReports')?.addEventListener('click', () => showSection('reports'));
 
-        // Export functions
+        // CSV Export functions
         document.getElementById('exportCustomers')?.addEventListener('click', () => {
             const data = allCustomers.map(c => ({
                 Name: c.fullName,
@@ -2778,7 +3082,7 @@
                 Status: c.status,
                 Agent: allAgents.find(a => a.id === c.assignedAgentId)?.fullName || ''
             }));
-            exportToCSV(data, 'customers.csv');
+            Utils.exportToCSV(data, 'customers.csv');
         });
 
         document.getElementById('exportAgents')?.addEventListener('click', () => {
@@ -2791,7 +3095,7 @@
                 Customers: a.totalCustomers || 0,
                 Loans: allLoans.filter(l => l.agentId === a.id).length
             }));
-            exportToCSV(data, 'agents.csv');
+            Utils.exportToCSV(data, 'agents.csv');
         });
 
         document.getElementById('exportLoans')?.addEventListener('click', () => {
@@ -2803,7 +3107,7 @@
                 Created: Utils.formatDate(l.createdAt),
                 Agent: l.agentName
             }));
-            exportToCSV(data, 'loans.csv');
+            Utils.exportToCSV(data, 'loans.csv');
         });
 
         document.getElementById('exportPayments')?.addEventListener('click', () => {
@@ -2815,22 +3119,8 @@
                 Status: p.status,
                 Date: Utils.formatDate(p.timestamp)
             }));
-            exportToCSV(data, 'payments.csv');
+            Utils.exportToCSV(data, 'payments.csv');
         });
-
-        function exportToCSV(data, filename) {
-            if (!data.length) return;
-            const header = Object.keys(data[0]).join(',');
-            const rows = data.map(obj => Object.values(obj).map(v => `"${v}"`).join(','));
-            const csv = [header, ...rows].join('\n');
-            const blob = new Blob([csv], { type: 'text/csv' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = filename;
-            a.click();
-            URL.revokeObjectURL(url);
-        }
 
         // Modal helpers
         window.openModal = (id) => document.getElementById(id).classList.add('active');
