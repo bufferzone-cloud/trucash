@@ -12,7 +12,7 @@
     <!-- Cloudinary -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* === iOS‑inspired Mobile Theme === */
+        /* === iOS‑inspired Mobile Theme (extended) === */
         * {
             margin: 0;
             padding: 0;
@@ -24,36 +24,42 @@
             background: #f8f9fc;
             color: #1c1e24;
             line-height: 1.4;
-            padding-bottom: 80px; /* space for bottom nav */
+            padding-bottom: 80px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
         }
-        /* header */
+        /* header with profile pic and title */
         .agent-header {
             background: white;
-            padding: 18px 20px 12px;
+            padding: 12px 20px;
             border-bottom: 1px solid #e9ecf0;
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
             position: sticky;
             top: 0;
             z-index: 10;
             backdrop-filter: blur(10px);
             background: rgba(255,255,255,0.9);
         }
-        .logo-icon {
-            width: 40px;
-            height: 40px;
-            background: linear-gradient(145deg, #007aff, #005bb5);
-            border-radius: 12px;
+        .header-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .agent-avatar {
+            width: 44px;
+            height: 44px;
+            border-radius: 22px;
+            background: #e1e8f0;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
             font-size: 20px;
-            box-shadow: 0 6px 12px rgba(0,122,255,0.2);
+            color: #4a5a6e;
+            object-fit: cover;
+            border: 2px solid #007aff;
         }
         .agent-name {
             font-size: 18px;
@@ -67,12 +73,20 @@
             display: block;
             margin-top: 2px;
         }
-        /* main content area */
+        .header-right {
+            font-weight: 700;
+            font-size: 16px;
+            color: #007aff;
+            letter-spacing: 0.5px;
+            background: #e8f0fe;
+            padding: 6px 14px;
+            border-radius: 30px;
+        }
+        /* main content */
         .main-content {
             flex: 1;
             padding: 20px 16px;
         }
-        /* section headings */
         .section-title {
             font-size: 18px;
             font-weight: 600;
@@ -80,7 +94,6 @@
             padding-left: 4px;
             color: #1c1e24;
         }
-        /* customer cards */
         .customer-grid {
             display: flex;
             flex-direction: column;
@@ -340,14 +353,94 @@
         .text-success { color: #28a745; }
         .fw-600 { font-weight: 600; }
         .d-none { display: none; }
+
+        /* New styles for payment list & about page */
+        .payment-list {
+            margin-top: 16px;
+            border-top: 1px solid #edf2f7;
+        }
+        .payment-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 0;
+            border-bottom: 1px dashed #e2e8f0;
+        }
+        .payment-due {
+            font-weight: 500;
+            color: #1e293b;
+        }
+        .payment-amount {
+            font-weight: 600;
+        }
+        .payment-status {
+            padding: 4px 10px;
+            border-radius: 30px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+        .status-paid {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .loan-summary-card {
+            background: #f8fafd;
+            border-radius: 20px;
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid #e9ecf0;
+            cursor: pointer;
+            transition: 0.2s;
+        }
+        .loan-summary-card:active {
+            background: #e6edf6;
+        }
+        .about-page {
+            padding: 8px 0;
+        }
+        .about-page h4 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #007aff;
+        }
+        .about-page p {
+            margin-bottom: 16px;
+            color: #2d3a4a;
+        }
+        .about-page ul {
+            padding-left: 24px;
+            margin-bottom: 20px;
+        }
+        .about-page li {
+            margin-bottom: 8px;
+            color: #3e4e5e;
+        }
+        .commission-breakdown {
+            background: #f2f7ff;
+            border-radius: 20px;
+            padding: 16px;
+            margin: 16px 0;
+        }
+        .commission-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Header with agent name & logo -->
+    <!-- Header with agent profile picture and TRUCASH AGENT -->
     <div class="agent-header">
-        <div class="logo-icon"><i class="fas fa-user-tie"></i></div>
-        <div class="agent-name" id="agentFullName">Loading... <small>Agent</small></div>
+        <div class="header-left">
+            <img src="" alt="avatar" class="agent-avatar" id="headerAvatar">
+            <div class="agent-name" id="agentFullName">Loading... <small>Agent</small></div>
+        </div>
+        <div class="header-right">TRUCASH AGENT</div>
     </div>
 
     <!-- Main content area (sections) -->
@@ -399,16 +492,35 @@
                 <button class="btn btn-outline btn-small" id="deleteAccountBtn" style="margin-top: 10px; border-color: #ff3b30; color: #ff3b30;"><i class="fas fa-trash"></i> Delete Account</button>
                 <button class="btn btn-outline btn-small" id="logoutBtn" style="margin-top: 10px;"><i class="fas fa-sign-out-alt"></i> Logout</button>
             </div>
-            <div class="section-card" id="aboutCard" style="margin-top: 16px;">
-                <div class="section-title">About TruCash</div>
-                <p style="color: #3b4a5a;">Zambian‑registered microfinance institution providing quick, collateral‑based loans.</p>
-                <p><i class="fas fa-phone"></i> +260 123 456 789<br><i class="fas fa-envelope"></i> support@trucash.zm</p>
+        </div>
+
+        <!-- About section (new separate page) -->
+        <div id="aboutSection" class="section d-none">
+            <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
+            <div class="section-card about-page">
+                <h4>📌 What is TruCash?</h4>
+                <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
+                
+                <h4>🤝 Benefits of Being an Agent</h4>
+                <ul>
+                    <li><strong>Earn 15% commission</strong> on every interest payment from customers you refer.</li>
+                    <li><strong>Recurring income</strong> – as long as your customers repay, you earn.</li>
+                    <li><strong>No capital required</strong> – you simply connect borrowers with TruCash.</li>
+                    <li><strong>Full support</strong> – marketing materials, training, and a dedicated agent dashboard.</li>
+                    <li><strong>Transparent tracking</strong> – see exactly how much you’ve earned and what’s pending.</li>
+                </ul>
+                
+                <h4>📞 Contact Us</h4>
+                <p><i class="fas fa-phone"></i> +260 123 456 789<br>
+                <i class="fas fa-envelope"></i> agents@trucash.zm<br>
+                <i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+
                 <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
             </div>
         </div>
     </div>
 
-    <!-- Bottom navigation -->
+    <!-- Bottom navigation (About now points to its own section) -->
     <div class="bottom-nav">
         <div class="nav-item active" data-section="home"><i class="fas fa-home"></i><span>Home</span></div>
         <div class="nav-item" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
@@ -417,7 +529,7 @@
         <div class="nav-item" data-section="about"><i class="fas fa-info-circle"></i><span>About</span></div>
     </div>
 
-    <!-- Modals -->
+    <!-- Modals (existing + new ones) -->
     <!-- Customer details modal -->
     <div class="modal-overlay" id="customerModal">
         <div class="modal-card">
@@ -429,7 +541,7 @@
         </div>
     </div>
 
-    <!-- Loan details modal -->
+    <!-- Loan details modal (enhanced payment styling) -->
     <div class="modal-overlay" id="loanModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -437,6 +549,28 @@
                 <button class="modal-close" id="closeLoanModal">&times;</button>
             </div>
             <div id="loanModalContent"></div>
+        </div>
+    </div>
+
+    <!-- Modal for listing multiple loans of a customer -->
+    <div class="modal-overlay" id="customerLoansModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Customer Loans</h3>
+                <button class="modal-close" id="closeCustomerLoansModal">&times;</button>
+            </div>
+            <div id="customerLoansList"></div>
+        </div>
+    </div>
+
+    <!-- Modal for commission math -->
+    <div class="modal-overlay" id="commissionMathModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Commission Breakdown</h3>
+                <button class="modal-close" id="closeCommissionMathModal">&times;</button>
+            </div>
+            <div id="commissionMathContent"></div>
         </div>
     </div>
 
@@ -456,7 +590,7 @@
         </div>
     </div>
 
-    <!-- Certificate modal (embedded PDF style) -->
+    <!-- Certificate modal -->
     <div class="modal-overlay" id="certificateModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -464,7 +598,7 @@
                 <button class="modal-close" id="closeCertificateModal">&times;</button>
             </div>
             <div style="max-height: 70vh; overflow-y: auto;" id="certificateContent">
-                <!-- same certificate as customer version -->
+                <!-- certificate content injected -->
             </div>
         </div>
     </div>
@@ -508,7 +642,7 @@
 
         // ==================== UTILS ====================
         const Utils = {
-            showLoading(msg) { /* simplified – you can keep original overlay if desired */ },
+            showLoading(msg) {},
             hideLoading() {},
             formatCurrency(amount) { return 'K' + (amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); },
             formatDate(ts) { return ts ? new Date(ts).toLocaleDateString() : 'N/A'; },
@@ -523,7 +657,7 @@
             }
         };
 
-        // ==================== FIREBASE SERVICE (condensed from original) ====================
+        // ==================== FIREBASE SERVICE ====================
         const FirebaseService = {
             async checkAuth() {
                 return new Promise((resolve) => {
@@ -587,7 +721,7 @@
             async signOut() { await auth.signOut(); window.location.href='login.html'; }
         };
 
-        // ==================== UI MANAGER (new) ====================
+        // ==================== UI MANAGER (extended) ====================
         const UIManager = {
             init() {
                 this.cacheElements();
@@ -600,13 +734,14 @@
                     loans: document.getElementById('loansSection'),
                     commission: document.getElementById('commissionSection'),
                     settings: document.getElementById('settingsSection'),
-                    about: document.getElementById('settingsSection') // about inside settings
+                    about: document.getElementById('aboutSection')
                 };
                 this.navItems = document.querySelectorAll('.nav-item');
                 this.customersList = document.getElementById('customersList');
                 this.customersWithLoansList = document.getElementById('customersWithLoansList');
                 this.customersCommissionList = document.getElementById('customersCommissionList');
                 this.agentFullName = document.getElementById('agentFullName');
+                this.headerAvatar = document.getElementById('headerAvatar');
                 this.settingsName = document.getElementById('settingsName');
                 this.settingsEmail = document.getElementById('settingsEmail');
                 this.settingsAvatar = document.getElementById('settingsAvatar');
@@ -619,11 +754,15 @@
                 // modals
                 this.customerModal = document.getElementById('customerModal');
                 this.loanModal = document.getElementById('loanModal');
+                this.customerLoansModal = document.getElementById('customerLoansModal');
+                this.commissionMathModal = document.getElementById('commissionMathModal');
                 this.passwordModal = document.getElementById('passwordModal');
                 this.certificateModal = document.getElementById('certificateModal');
                 // close buttons
                 document.getElementById('closeCustomerModal').onclick = ()=> this.customerModal.classList.remove('active');
                 document.getElementById('closeLoanModal').onclick = ()=> this.loanModal.classList.remove('active');
+                document.getElementById('closeCustomerLoansModal').onclick = ()=> this.customerLoansModal.classList.remove('active');
+                document.getElementById('closeCommissionMathModal').onclick = ()=> this.commissionMathModal.classList.remove('active');
                 document.getElementById('closePasswordModal').onclick = ()=> this.passwordModal.classList.remove('active');
                 document.getElementById('closeCertificateModal').onclick = ()=> this.certificateModal.classList.remove('active');
                 // settings buttons
@@ -646,20 +785,16 @@
             },
             showSection(section) {
                 Object.values(this.sections).forEach(s => s.classList.add('d-none'));
-                if (section === 'about') {
-                    this.sections.settings.classList.remove('d-none');
-                    document.getElementById('aboutCard').scrollIntoView({behavior:'smooth'});
-                } else {
-                    this.sections[section]?.classList.remove('d-none');
-                    if (section === 'home') this.renderCustomers();
-                    if (section === 'loans') this.renderCustomersWithLoans();
-                    if (section === 'commission') this.renderCommission();
-                }
+                this.sections[section]?.classList.remove('d-none');
+                if (section === 'home') this.renderCustomers();
+                if (section === 'loans') this.renderCustomersWithLoans();
+                if (section === 'commission') this.renderCommission();
             },
             async loadAgentData() {
                 await FirebaseService.checkAuth();
                 const agent = AppState.agentData;
                 this.agentFullName.innerHTML = `${agent.fullName || 'Agent'} <small>ID: ${agent.agentId || AppState.agentId.substring(0,8)}</small>`;
+                this.headerAvatar.src = agent.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent.fullName||'A')+'&background=007AFF&color=fff';
                 this.settingsName.textContent = agent.fullName || '';
                 this.settingsEmail.textContent = AppState.currentUser?.email || '';
                 this.settingsAvatar.src = agent.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent.fullName||'A')+'&background=007AFF&color=fff';
@@ -675,16 +810,18 @@
                     this.customersList.innerHTML = '<div class="customer-card"><div class="customer-info">No customers assigned.</div></div>';
                     return;
                 }
-                this.customersList.innerHTML = AppState.customers.map(c => `
+                this.customersList.innerHTML = AppState.customers.map(c => {
+                    const loanCount = AppState.loans.filter(l => l.customerId === c.id).length;
+                    return `
                     <div class="customer-card" data-id="${c.id}" onclick="UIManager.showCustomerModal('${c.id}')">
                         <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar" onerror="this.src='https://ui-avatars.com/api/?name=C&background=007AFF&color=fff'">
                         <div class="customer-info">
                             <div class="customer-name">${c.fullName || 'Unknown'}</div>
                             <div class="customer-meta"><i class="fas fa-phone"></i> ${c.phone || 'N/A'}</div>
-                            <span class="badge"><i class="fas fa-file-invoice"></i> ${c.activeLoans || 0} loans</span>
+                            <span class="badge"><i class="fas fa-file-invoice"></i> ${loanCount} loans</span>
                         </div>
                     </div>
-                `).join('');
+                `}).join('');
             },
             renderCustomersWithLoans() {
                 const customersWithLoans = AppState.customers.filter(c => 
@@ -695,7 +832,7 @@
                     return;
                 }
                 this.customersWithLoansList.innerHTML = customersWithLoans.map(c => `
-                    <div class="customer-card" data-id="${c.id}" onclick="UIManager.showLoansForCustomer('${c.id}')">
+                    <div class="customer-card" data-id="${c.id}" onclick="UIManager.showCustomerLoansList('${c.id}')">
                         <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
                         <div class="customer-info">
                             <div class="customer-name">${c.fullName}</div>
@@ -703,6 +840,22 @@
                         </div>
                     </div>
                 `).join('');
+            },
+            showCustomerLoansList(customerId) {
+                const customer = AppState.customers.find(c => c.id === customerId);
+                const loans = AppState.loans.filter(l => l.customerId === customerId);
+                if (!loans.length) return Utils.showToast('Info','No loans for this customer','info');
+                const listHtml = loans.map(loan => `
+                    <div class="loan-summary-card" onclick="UIManager.showLoanModal('${loan.id}')">
+                        <div style="display:flex; justify-content:space-between; align-items:center;">
+                            <span><strong>${Utils.formatCurrency(loan.amount)}</strong> (${loan.status})</span>
+                            <span class="badge">Due: ${loan.repaymentSchedule?.find(p=>p.status==='pending')?.dueDate ? Utils.formatDate(loan.repaymentSchedule.find(p=>p.status==='pending').dueDate) : 'None'}</span>
+                        </div>
+                        <div style="margin-top:8px; color:#617388;">Purpose: ${loan.purpose || 'N/A'}</div>
+                    </div>
+                `).join('');
+                document.getElementById('customerLoansList').innerHTML = listHtml;
+                this.customerLoansModal.classList.add('active');
             },
             showCustomerModal(customerId) {
                 const customer = AppState.customers.find(c => c.id === customerId);
@@ -721,19 +874,13 @@
                 `;
                 this.customerModal.classList.add('active');
             },
-            showLoansForCustomer(customerId) {
-                const customer = AppState.customers.find(c => c.id === customerId);
-                const loans = AppState.loans.filter(l => l.customerId === customerId);
-                if (!loans.length) return Utils.showToast('Info','No loans for this customer','info');
-                // For simplicity, show the first loan's details
-                this.showLoanModal(loans[0].id);
-            },
             showLoanModal(loanId) {
                 const loan = AppState.loans.find(l => l.id === loanId);
                 if (!loan) return;
                 const customer = AppState.customers.find(c => c.id === loan.customerId);
-                const nextPayment = loan.repaymentSchedule?.find(p => p.status === 'pending') || {};
-                const paidPayments = AppState.payments?.filter(p => p.loanId === loanId) || [];
+                const payments = loan.repaymentSchedule || [];
+                const paidPayments = payments.filter(p => p.status === 'paid');
+                const pendingPayments = payments.filter(p => p.status === 'pending');
                 const content = `
                     <div style="margin-bottom:20px;">
                         <span class="badge" style="background:#007aff; color:white;">${loan.status}</span>
@@ -754,10 +901,22 @@
                     <h4 style="margin:16px 0 8px;">Agreement</h4>
                     ${loan.signedAgreementUrl ? `<a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-small">View Signed Agreement</a>` : '<p>Not available</p>'}
 
-                    <h4 style="margin:16px 0 8px;">Payments</h4>
-                    <div>Paid: ${Utils.formatCurrency(loan.totalPaid || 0)}</div>
-                    <div>Next due: ${nextPayment.dueDate ? Utils.formatDate(nextPayment.dueDate) : 'None'} - ${Utils.formatCurrency(nextPayment.totalDue||0)}</div>
-                    ${paidPayments.length ? `<button class="btn-outline btn-small" onclick="alert('Payment history: '+${JSON.stringify(paidPayments)})">View all payments</button>` : ''}
+                    <h4 style="margin:16px 0 8px;">Payment Schedule</h4>
+                    <div class="payment-list">
+                        ${payments.length ? payments.map(p => `
+                            <div class="payment-item">
+                                <div>
+                                    <div class="payment-due">Due: ${Utils.formatDate(p.dueDate)}</div>
+                                    <div class="payment-amount">${Utils.formatCurrency(p.totalDue)}</div>
+                                </div>
+                                <span class="payment-status ${p.status === 'paid' ? 'status-paid' : 'status-pending'}">${p.status}</span>
+                            </div>
+                        `).join('') : '<p>No schedule available</p>'}
+                    </div>
+                    <div style="margin-top:12px;">
+                        <div>Total Paid: ${Utils.formatCurrency(loan.totalPaid || 0)}</div>
+                        <div>Remaining: ${Utils.formatCurrency((loan.totalPayable||0) - (loan.totalPaid||0))}</div>
+                    </div>
                 `;
                 document.getElementById('loanModalContent').innerHTML = content;
                 this.loanModal.classList.add('active');
@@ -766,7 +925,6 @@
                 const commissions = AppState.commissions;
                 const totalEarned = commissions.filter(c => c.status === 'paid').reduce((s,c)=> s + (c.amount||0),0);
                 const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=> s + (c.amount||0),0);
-                // future: interest from active loans not yet paid (15% of interest)
                 const activeLoans = AppState.loans.filter(l => l.status === 'active');
                 const future = activeLoans.reduce((s,loan)=> s + (loan.totalInterest * 0.15 || 0), 0);
                 this.totalCommissionEarned.textContent = Utils.formatCurrency(totalEarned);
@@ -777,7 +935,7 @@
                     const custCom = commissions.filter(com => com.customerId === c.id);
                     const custPending = custCom.filter(com => com.status === 'pending').reduce((s,com)=>s+com.amount,0);
                     return `
-                        <div class="customer-card">
+                        <div class="customer-card" onclick="UIManager.showCommissionMath('${c.id}')">
                             <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
                             <div class="customer-info">
                                 <div class="customer-name">${c.fullName}</div>
@@ -786,6 +944,44 @@
                         </div>
                     `;
                 }).join('');
+            },
+            showCommissionMath(customerId) {
+                const customer = AppState.customers.find(c => c.id === customerId);
+                const loans = AppState.loans.filter(l => l.customerId === customerId);
+                const commissions = AppState.commissions.filter(c => c.customerId === customerId);
+                
+                let totalInterest = 0;
+                loans.forEach(loan => { totalInterest += loan.totalInterest || 0; });
+                const totalCommissionPossible = totalInterest * 0.15;
+                const earned = commissions.filter(c => c.status === 'paid').reduce((s,c)=>s+c.amount,0);
+                const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=>s+c.amount,0);
+                const future = totalCommissionPossible - earned - pending;
+
+                const breakdownHtml = loans.map(loan => {
+                    const interest = loan.totalInterest || 0;
+                    const commission = interest * 0.15;
+                    return `
+                        <div class="commission-row">
+                            <span>Loan ${loan.id.substring(0,6)} (${Utils.formatCurrency(loan.amount)})</span>
+                            <span>Interest: ${Utils.formatCurrency(interest)} → 15% = ${Utils.formatCurrency(commission)}</span>
+                        </div>
+                    `;
+                }).join('');
+
+                const content = `
+                    <h4>${customer.fullName}</h4>
+                    <div class="commission-breakdown">
+                        ${breakdownHtml || '<p>No loans</p>'}
+                    </div>
+                    <div class="commission-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
+                    <div class="commission-row"><span>Total possible commission (15%)</span> <span>${Utils.formatCurrency(totalCommissionPossible)}</span></div>
+                    <div class="commission-row"><span>Already earned</span> <span class="text-success">${Utils.formatCurrency(earned)}</span></div>
+                    <div class="commission-row"><span>Pending (awaiting payment)</span> <span>${Utils.formatCurrency(pending)}</span></div>
+                    <div class="commission-row"><span>Future (active loans)</span> <span>${Utils.formatCurrency(future)}</span></div>
+                    <p style="margin-top:16px; font-size:14px; color:#617388;">Commission is credited when the customer pays interest. 15% of each interest payment.</p>
+                `;
+                document.getElementById('commissionMathContent').innerHTML = content;
+                this.commissionMathModal.classList.add('active');
             },
             copyAgentCode() {
                 navigator.clipboard.writeText(this.agentCodeDisplay.textContent);
@@ -806,7 +1002,6 @@
             },
             deleteAccount() {
                 if (confirm('Are you sure? This action cannot be undone.')) {
-                    // actual deletion would require reauth and removing user node
                     Utils.showToast('Info','Delete not implemented in demo','info');
                 }
             },
