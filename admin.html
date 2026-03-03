@@ -2,11 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>TruCash · Admin (iOS)</title>
-    <!-- Favicon -->
-    <link rel="icon" type="image/x-icon" href="https://ui-avatars.com/api/?name=T&background=007AFF&color=fff">
-    <!-- Font Awesome -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=yes, viewport-fit=cover">
+    <title>TruCash · Admin</title>
+    <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -14,496 +12,396 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <!-- Cloudinary -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
-    <!-- Chart.js -->
+    <!-- Chart.js (optional, kept) -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
-        /* ===== iOS THEME ===== */
+        /* === iOS 18 INSPIRED THEME — CLEAN, FLOATING, SOFT === */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+            font-family: -apple-system, 'Helvetica Neue', 'SF Pro Text', sans-serif;
         }
+
         :root {
-            --ios-white: #ffffff;
-            --ios-gray-0: #f8f9fa;
-            --ios-gray-1: #e9ecef;
-            --ios-gray-2: #dee2e6;
-            --ios-gray-3: #ced4da;
-            --ios-gray-4: #adb5bd;
-            --ios-gray-5: #6c757d;
-            --ios-gray-6: #343a40;
-            --ios-blue: #007AFF;
-            --ios-green: #34C759;
-            --ios-red: #FF3B30;
-            --ios-orange: #FF9500;
-            --ios-purple: #AF52DE;
-            --ios-teal: #5AC8FA;
-            --ios-indigo: #5856D6;
-            --ios-shadow-sm: 0 2px 8px rgba(0,0,0,0.04);
-            --ios-shadow-md: 0 4px 16px rgba(0,0,0,0.08);
-            --ios-shadow-lg: 0 8px 24px rgba(0,0,0,0.12);
-            --ios-radius-sm: 10px;
-            --ios-radius-md: 14px;
-            --ios-radius-lg: 18px;
-            --header-height: 60px;
-            --bottom-nav-height: 70px;
-            --sidebar-width: 260px;
-            --safe-bottom: env(safe-area-inset-bottom, 0px);
+            --ios-bg: #f8fafc;
+            --ios-card: #ffffff;
+            --ios-separator: #e9edf2;
+            --ios-text: #1e293b;
+            --ios-text-light: #64748b;
+            --ios-blue: #2563eb;
+            --ios-green: #16a34a;
+            --ios-red: #dc2626;
+            --ios-orange: #ea580c;
+            --ios-purple: #9333ea;
+            --ios-shadow: 0 10px 25px -5px rgba(0,0,0,0.05), 0 8px 10px -6px rgba(0,0,0,0.02);
+            --ios-radius: 24px;
+            --ios-radius-sm: 16px;
+            --header-height: 64px;
+            --bottom-nav-height: 72px;
+            --sidebar-width: 280px;
         }
+
         body {
-            background: var(--ios-gray-0);
-            color: var(--ios-gray-6);
+            background-color: var(--ios-bg);
+            color: var(--ios-text);
             min-height: 100vh;
-        }
-        .app-container {
             display: flex;
-            min-height: 100vh;
-            padding-top: var(--header-height);
-            padding-bottom: calc(var(--bottom-nav-height) + var(--safe-bottom));
+            flex-direction: column;
         }
-        /* Header */
-        .header {
+
+        /* === HEADER (ADMIN & USERNAME) === */
+        .app-header {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             height: var(--header-height);
-            background: rgba(255,255,255,0.85);
+            background: rgba(255,255,255,0.8);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--ios-gray-2);
+            border-bottom: 1px solid var(--ios-separator);
             display: flex;
             align-items: center;
             justify-content: space-between;
-            padding: 0 20px;
-            z-index: 1000;
+            padding: 0 24px;
+            z-index: 100;
         }
-        .logo {
-            font-size: 22px;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+
+        .logo-area {
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 12px;
+        }
+        .logo-icon {
+            background: var(--ios-blue);
+            width: 36px;
+            height: 36px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 18px;
+        }
+        .logo-text {
+            font-weight: 600;
+            font-size: 18px;
+            letter-spacing: -0.3px;
+        }
+
+        .admin-profile {
+            display: flex;
+            align-items: center;
+            gap: 16px;
         }
         .admin-badge {
+            background: var(--ios-blue);
+            color: white;
+            padding: 6px 16px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
             display: flex;
             align-items: center;
-            gap: 8px;
-            background: var(--ios-gray-1);
-            padding: 6px 16px;
-            border-radius: 30px;
-            font-size: 14px;
+            gap: 6px;
+        }
+        .admin-badge i { font-size: 12px; }
+        .logout-btn {
+            background: transparent;
+            border: 1px solid var(--ios-separator);
+            border-radius: 40px;
+            padding: 8px 16px;
+            font-size: 13px;
             font-weight: 500;
+            color: var(--ios-text-light);
+            cursor: pointer;
+            transition: all 0.2s;
         }
-        .admin-badge i {
-            color: var(--ios-green);
+        .logout-btn:hover {
+            background: var(--ios-red);
+            border-color: var(--ios-red);
+            color: white;
         }
-        /* Sidebar */
+
+        /* === MAIN LAYOUT (SIDEBAR + CONTENT) === */
+        .app-container {
+            display: flex;
+            margin-top: var(--header-height);
+            margin-bottom: var(--bottom-nav-height);
+            min-height: calc(100vh - var(--header-height) - var(--bottom-nav-height));
+        }
+
+        /* SIDEBAR (DESKTOP) */
         .sidebar {
             width: var(--sidebar-width);
-            background: var(--ios-white);
-            border-right: 1px solid var(--ios-gray-2);
-            padding: 20px 0;
+            background: var(--ios-card);
+            border-right: 1px solid var(--ios-separator);
+            padding: 24px 16px;
+            overflow-y: auto;
             position: fixed;
             top: var(--header-height);
             left: 0;
             bottom: var(--bottom-nav-height);
-            overflow-y: auto;
-            z-index: 900;
             transition: transform 0.25s ease;
+            z-index: 90;
         }
-        @media (max-width: 992px) {
+        @media (max-width: 900px) {
             .sidebar {
                 transform: translateX(-100%);
-                box-shadow: var(--ios-shadow-lg);
+                box-shadow: none;
             }
             .sidebar.active {
                 transform: translateX(0);
-            }
-            .app-container {
-                padding-left: 0;
+                box-shadow: 20px 0 30px -10px rgba(0,0,0,0.15);
             }
         }
-        .sidebar-header {
-            padding: 0 20px 20px;
-            border-bottom: 1px solid var(--ios-gray-2);
-            margin-bottom: 16px;
+
+        .sidebar-section {
+            margin-bottom: 32px;
         }
-        .admin-info {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .admin-avatar {
-            width: 44px;
-            height: 44px;
-            border-radius: 50%;
-            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: white;
-            font-weight: 600;
-            font-size: 16px;
-        }
-        .admin-details {
-            flex: 1;
-        }
-        .admin-name {
-            font-weight: 600;
-            font-size: 15px;
-        }
-        .admin-role {
-            font-size: 12px;
-            color: var(--ios-gray-5);
-        }
-        .nav-section {
-            padding: 0 16px;
-            margin-bottom: 24px;
-        }
-        .nav-section-title {
-            font-size: 12px;
-            font-weight: 600;
+        .sidebar-title {
+            font-size: 11px;
             text-transform: uppercase;
-            color: var(--ios-gray-5);
             letter-spacing: 0.5px;
-            margin-bottom: 12px;
-            padding-left: 8px;
+            color: var(--ios-text-light);
+            margin-bottom: 16px;
+            font-weight: 600;
         }
         .nav-item {
             display: flex;
             align-items: center;
-            gap: 12px;
+            gap: 14px;
             padding: 12px 16px;
-            border-radius: var(--ios-radius-sm);
-            margin-bottom: 2px;
-            color: var(--ios-gray-6);
-            transition: background 0.2s;
+            border-radius: 18px;
+            color: var(--ios-text);
+            font-weight: 500;
+            margin-bottom: 4px;
+            transition: 0.15s;
             cursor: pointer;
         }
-        .nav-item:hover {
-            background: var(--ios-gray-1);
-        }
+        .nav-item i { width: 22px; color: var(--ios-text-light); }
         .nav-item.active {
             background: var(--ios-blue);
             color: white;
         }
-        .nav-item.active i {
-            color: white;
-        }
-        .nav-icon {
-            width: 20px;
-            text-align: center;
-            color: var(--ios-gray-5);
-        }
-        .nav-badge {
+        .nav-item.active i { color: white; }
+        .nav-item .badge {
+            margin-left: auto;
             background: var(--ios-red);
             color: white;
             font-size: 11px;
-            min-width: 20px;
-            height: 20px;
-            border-radius: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 5px;
-            margin-left: auto;
+            padding: 2px 8px;
+            border-radius: 30px;
         }
-        /* Main content */
+
+        /* MAIN CONTENT */
         .main-content {
             flex: 1;
             margin-left: var(--sidebar-width);
-            padding: 24px;
+            padding: 24px 32px;
             overflow-y: auto;
         }
-        @media (max-width: 992px) {
+        @media (max-width: 900px) {
             .main-content {
                 margin-left: 0;
-                padding: 16px;
+                padding: 20px 16px;
             }
         }
+
+        /* CONTENT SECTIONS */
         .content-section {
             display: none;
+            animation: fade 0.2s ease;
         }
         .content-section.active {
             display: block;
-            animation: fadeIn 0.2s ease;
         }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
-        /* Bottom navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: calc(var(--bottom-nav-height) + var(--safe-bottom));
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid var(--ios-gray-2);
-            display: flex;
-            justify-content: space-around;
-            align-items: center;
-            padding-bottom: var(--safe-bottom);
-            z-index: 950;
-        }
-        .bottom-nav-item {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            color: var(--ios-gray-5);
-            font-size: 12px;
-            transition: color 0.2s;
-            cursor: pointer;
-            padding: 8px 0;
-        }
-        .bottom-nav-item i {
-            font-size: 20px;
-            margin-bottom: 2px;
-        }
-        .bottom-nav-item.active {
-            color: var(--ios-blue);
-        }
-        /* Cards */
-        .card-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
+        @keyframes fade { from { opacity:0.3; } to { opacity:1; } }
+
+        /* iOS CARDS */
         .card {
-            background: var(--ios-white);
-            border-radius: var(--ios-radius-md);
-            padding: 20px;
-            box-shadow: var(--ios-shadow-sm);
-            border: 1px solid var(--ios-gray-2);
-            transition: transform 0.2s, box-shadow 0.2s;
-        }
-        .card:hover {
-            transform: translateY(-2px);
-            box-shadow: var(--ios-shadow-md);
+            background: var(--ios-card);
+            border-radius: var(--ios-radius);
+            padding: 22px;
+            box-shadow: var(--ios-shadow);
+            border: 1px solid var(--ios-separator);
+            margin-bottom: 24px;
         }
         .card-header {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 12px;
+            margin-bottom: 16px;
         }
         .card-title {
-            font-size: 14px;
             font-weight: 600;
-            color: var(--ios-gray-5);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            font-size: 16px;
         }
-        .card-value {
+        .grid-4 {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px,1fr));
+            gap: 20px;
+        }
+        .stat-value {
             font-size: 32px;
             font-weight: 700;
-            margin-bottom: 4px;
-            color: var(--ios-gray-6);
+            color: var(--ios-text);
         }
-        .card-trend {
+        .stat-label {
+            color: var(--ios-text-light);
             font-size: 13px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
+            margin-top: 4px;
         }
-        .card-trend.positive { color: var(--ios-green); }
-        .card-trend.negative { color: var(--ios-red); }
-        .card-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            color: white;
+
+        /* TABLES */
+        .table-wrapper {
+            overflow-x: auto;
+            border-radius: var(--ios-radius-sm);
+            background: var(--ios-card);
         }
-        .card-icon.loans { background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple)); }
-        .card-icon.agents { background: linear-gradient(135deg, var(--ios-green), var(--ios-teal)); }
-        .card-icon.customers { background: linear-gradient(135deg, var(--ios-orange), var(--ios-red)); }
-        .card-icon.commissions { background: linear-gradient(135deg, var(--ios-purple), var(--ios-indigo)); }
-        /* Tables */
-        .table-container {
-            background: var(--ios-white);
-            border-radius: var(--ios-radius-md);
-            overflow: hidden;
-            box-shadow: var(--ios-shadow-sm);
-            border: 1px solid var(--ios-gray-2);
-            margin-bottom: 24px;
-        }
-        .table-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--ios-gray-2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .table-title {
-            font-size: 16px;
-            font-weight: 600;
-        }
-        .data-table {
+        table {
             width: 100%;
             border-collapse: collapse;
             font-size: 14px;
         }
-        .data-table th {
+        th {
             text-align: left;
-            padding: 14px 20px;
-            background: var(--ios-gray-1);
-            color: var(--ios-gray-6);
+            padding: 16px 16px;
+            background: #f1f5f9;
             font-weight: 600;
-            font-size: 13px;
+            color: var(--ios-text);
         }
-        .data-table td {
-            padding: 14px 20px;
-            border-bottom: 1px solid var(--ios-gray-2);
+        td {
+            padding: 14px 16px;
+            border-bottom: 1px solid var(--ios-separator);
         }
-        .data-table tbody tr:hover {
-            background: var(--ios-gray-0);
-        }
-        /* Badges */
         .status-badge {
             display: inline-block;
             padding: 4px 12px;
             border-radius: 30px;
             font-size: 12px;
-            font-weight: 600;
-            text-transform: capitalize;
+            font-weight: 500;
         }
-        .status-badge.pending { background: rgba(255,149,0,0.15); color: var(--ios-orange); }
-        .status-badge.active { background: rgba(52,199,89,0.15); color: var(--ios-green); }
-        .status-badge.approved { background: rgba(0,122,255,0.15); color: var(--ios-blue); }
-        .status-badge.rejected { background: rgba(255,59,48,0.15); color: var(--ios-red); }
-        .status-badge.suspended { background: rgba(108,117,125,0.15); color: var(--ios-gray-5); }
-        /* Buttons */
+        .status-badge.pending { background: #fef9c3; color: #854d0e; }
+        .status-badge.active { background: #dcfce7; color: #166534; }
+        .status-badge.approved { background: #dbeafe; color: #1e40af; }
+        .status-badge.rejected { background: #fee2e2; color: #991b1b; }
+        .status-badge.paid { background: #e0f2fe; color: #0369a1; }
+
+        /* BUTTONS */
         .btn {
+            border: none;
+            background: white;
+            padding: 10px 18px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 13px;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+            border: 1px solid var(--ios-separator);
+            cursor: pointer;
+            transition: 0.15s;
             display: inline-flex;
             align-items: center;
-            justify-content: center;
             gap: 8px;
-            padding: 10px 20px;
-            border-radius: var(--ios-radius-sm);
-            font-weight: 600;
-            font-size: 14px;
-            border: none;
-            cursor: pointer;
-            transition: all 0.2s;
         }
-        .btn-primary { background: var(--ios-blue); color: white; }
-        .btn-primary:hover { background: #0062cc; }
-        .btn-success { background: var(--ios-green); color: white; }
-        .btn-success:hover { background: #2db84b; }
-        .btn-danger { background: var(--ios-red); color: white; }
-        .btn-danger:hover { background: #d32f2f; }
+        .btn-primary {
+            background: var(--ios-blue);
+            border-color: var(--ios-blue);
+            color: white;
+        }
+        .btn-success {
+            background: var(--ios-green);
+            border-color: var(--ios-green);
+            color: white;
+        }
+        .btn-danger {
+            background: var(--ios-red);
+            border-color: var(--ios-red);
+            color: white;
+        }
         .btn-outline {
             background: transparent;
-            border: 1px solid var(--ios-gray-3);
-            color: var(--ios-gray-6);
+            border: 1px solid var(--ios-separator);
         }
-        .btn-outline:hover { background: var(--ios-gray-1); }
-        .btn-small { padding: 6px 12px; font-size: 13px; }
-        /* Forms */
-        .form-group { margin-bottom: 16px; }
-        .form-label {
-            display: block;
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 6px;
-            color: var(--ios-gray-6);
+
+        /* BOTTOM NAVIGATION (4 ITEMS) */
+        .bottom-nav {
+            position: fixed;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: var(--bottom-nav-height);
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--ios-separator);
+            display: flex;
+            align-items: center;
+            justify-content: space-around;
+            padding-bottom: env(safe-area-inset-bottom, 0);
+            z-index: 99;
         }
-        .form-input {
-            width: 100%;
-            padding: 12px 16px;
-            background: var(--ios-white);
-            border: 1px solid var(--ios-gray-3);
-            border-radius: var(--ios-radius-sm);
-            font-size: 14px;
-            transition: border-color 0.2s;
+        .bottom-nav-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--ios-text-light);
+            font-size: 11px;
+            transition: 0.1s;
+            padding: 8px 12px;
+            border-radius: 30px;
         }
-        .form-input:focus {
-            outline: none;
-            border-color: var(--ios-blue);
+        .bottom-nav-item i { font-size: 20px; }
+        .bottom-nav-item.active {
+            color: var(--ios-blue);
+            background: rgba(37,99,235,0.1);
         }
-        .form-row {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 16px;
-        }
-        /* Modals */
+
+        /* MODAL */
         .modal-overlay {
             position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background: rgba(0,0,0,0.4);
-            backdrop-filter: blur(8px);
+            top:0; left:0; right:0; bottom:0;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(6px);
             display: none;
             align-items: center;
             justify-content: center;
-            z-index: 2000;
-            padding: 16px;
+            z-index: 200;
         }
         .modal-overlay.active { display: flex; }
-        .modal {
-            background: var(--ios-white);
-            border-radius: var(--ios-radius-lg);
-            max-width: 800px;
+        .modal-card {
+            background: white;
+            border-radius: 32px;
+            max-width: 700px;
+            width: 90%;
+            max-height: 85vh;
+            overflow: auto;
+            padding: 24px;
+            box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+        }
+
+        /* forms */
+        .form-input {
             width: 100%;
-            max-height: 90vh;
-            overflow: hidden;
-            box-shadow: var(--ios-shadow-lg);
-            animation: modalUp 0.25s ease;
+            padding: 14px 18px;
+            border: 1px solid var(--ios-separator);
+            border-radius: 18px;
+            font-size: 14px;
+            background: white;
         }
-        .modal.large { max-width: 1000px; }
-        @keyframes modalUp {
-            from { opacity: 0; transform: scale(0.95) translateY(20px); }
-            to { opacity: 1; transform: scale(1) translateY(0); }
-        }
-        .modal-header {
-            padding: 20px 24px;
-            border-bottom: 1px solid var(--ios-gray-2);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-title { font-size: 20px; font-weight: 600; }
-        .modal-close {
-            width: 32px; height: 32px;
-            border-radius: 50%;
-            background: var(--ios-gray-1);
-            border: none;
-            color: var(--ios-gray-5);
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-body { padding: 24px; overflow-y: auto; max-height: calc(90vh - 140px); }
-        .modal-footer {
-            padding: 16px 24px;
-            border-top: 1px solid var(--ios-gray-2);
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        /* Signature pad */
+
+        /* signature canvas */
         .signature-container {
-            border: 1px solid var(--ios-gray-3);
+            border: 1px solid var(--ios-separator);
             border-radius: var(--ios-radius-sm);
             background: white;
-            margin-bottom: 16px;
+            margin: 15px 0;
         }
         .signature-canvas {
             width: 100%;
-            height: 160px;
+            height: 150px;
             display: block;
             cursor: crosshair;
             touch-action: none;
@@ -514,878 +412,2659 @@
             display: flex;
             gap: 8px;
             padding: 8px;
-            border-top: 1px solid var(--ios-gray-2);
-            background: var(--ios-gray-1);
+            border-top: 1px solid var(--ios-separator);
+            background: #f8fafc;
             border-radius: 0 0 var(--ios-radius-sm) var(--ios-radius-sm);
         }
-        /* Document grid */
+
+        /* document viewer */
         .document-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
-            gap: 16px;
-        }
-        .document-card {
-            background: var(--ios-gray-1);
-            border-radius: var(--ios-radius-sm);
-            padding: 12px;
-            text-align: center;
+            grid-template-columns: repeat(auto-fill, minmax(120px,1fr));
+            gap: 12px;
         }
         .document-thumb {
-            width: 80px;
-            height: 80px;
-            object-fit: cover;
-            border-radius: 8px;
-            margin: 0 auto 8px;
-        }
-        /* Upload box */
-        .upload-box {
-            aspect-ratio: 1;
-            border: 2px dashed var(--ios-gray-3);
-            border-radius: var(--ios-radius-sm);
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            background: var(--ios-white);
-            position: relative;
+            border-radius: 12px;
+            border: 1px solid var(--ios-separator);
             overflow: hidden;
-        }
-        .upload-box i { font-size: 24px; color: var(--ios-gray-4); }
-        .upload-box span { font-size: 12px; color: var(--ios-gray-5); }
-        .upload-preview {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-        }
-        /* Loading & toast */
-        .loading-overlay {
-            position: fixed; inset: 0;
-            background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(8px);
-            display: none;
+            height: 100px;
+            background: #f1f5f9;
+            display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 3000;
-            flex-direction: column;
         }
-        .loading-overlay.active { display: flex; }
-        .loading-spinner {
-            width: 40px; height: 40px;
-            border: 3px solid var(--ios-gray-2);
-            border-top-color: var(--ios-blue);
-            border-radius: 50%;
-            animation: spin 0.8s linear infinite;
+        .document-thumb img { width:100%; height:100%; object-fit:cover; }
+
+        /* profit cards */
+        .profit-card {
+            background: linear-gradient(145deg, #ffffff, #f9f9fc);
+            border-radius: 24px;
+            padding: 20px;
+            border-left: 6px solid;
         }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .toast {
-            position: fixed; bottom: 20px; right: 20px;
-            background: var(--ios-white);
-            border-radius: var(--ios-radius-sm);
-            padding: 16px;
-            box-shadow: var(--ios-shadow-lg);
-            display: flex;
-            align-items: flex-start;
-            gap: 12px;
-            max-width: 380px;
-            z-index: 4000;
-            transform: translateY(100px);
-            opacity: 0;
-            transition: all 0.3s;
+
+        /* responsiveness */
+        @media (max-width:600px) {
+            .grid-4 { grid-template-columns: 1fr; }
         }
-        .toast.active { transform: translateY(0); opacity: 1; }
-        .toast.success { border-left: 4px solid var(--ios-green); }
-        .toast.error { border-left: 4px solid var(--ios-red); }
-        .toast.warning { border-left: 4px solid var(--ios-orange); }
-        .toast-icon { font-size: 20px; }
-        .toast.success .toast-icon { color: var(--ios-green); }
-        .toast.error .toast-icon { color: var(--ios-red); }
-        .toast.warning .toast-icon { color: var(--ios-orange); }
-        /* Utilities */
-        .d-none { display: none; }
-        .d-flex { display: flex; }
-        .gap-2 { gap: 8px; }
-        .gap-3 { gap: 12px; }
-        .mt-3 { margin-top: 12px; }
-        .mt-4 { margin-top: 16px; }
-        .mb-3 { margin-bottom: 12px; }
-        .mb-4 { margin-bottom: 16px; }
-        .w-100 { width: 100%; }
-        .text-center { text-align: center; }
-        .text-success { color: var(--ios-green); }
-        .text-danger { color: var(--ios-red); }
-        .text-muted { color: var(--ios-gray-5); }
+        .mobile-menu-btn {
+            display: none;
+        }
+        @media (max-width:900px) {
+            .mobile-menu-btn {
+                display: flex;
+            }
+        }
     </style>
 </head>
 <body>
-    <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay">
-        <div class="loading-spinner"></div>
-        <div class="loading-text" id="loadingText">Loading...</div>
-    </div>
-
-    <!-- Toast -->
-    <div class="toast" id="toast">
-        <div class="toast-icon"><i class="fas fa-check-circle"></i></div>
-        <div class="toast-content">
-            <div class="toast-title" id="toastTitle">Success</div>
-            <div class="toast-message" id="toastMessage">Operation completed</div>
+    <!-- loading overlay -->
+    <div class="modal-overlay" id="loadingOverlay" style="background:rgba(255,255,255,0.8);">
+        <div class="modal-card" style="text-align:center; width:auto; padding:30px;">
+            <div class="loading-spinner" style="border:3px solid #e2e8f0; border-top-color:var(--ios-blue); width:40px; height:40px; border-radius:50%; animation:spin 1s infinite; margin:0 auto 16px;"></div>
+            <div class="loading-text">Loading...</div>
         </div>
     </div>
+    <style>@keyframes spin{to{transform:rotate(360deg);}}</style>
 
-    <!-- Header -->
-    <header class="header">
-        <div class="d-flex align-items-center gap-3">
-            <i class="fas fa-bars d-lg-none" id="menuToggle" style="font-size: 20px; cursor: pointer;"></i>
-            <div class="logo">
-                <i class="fas fa-cash-register"></i>
-                <span>TruCash Admin</span>
-            </div>
+    <!-- HEADER with admin username -->
+    <header class="app-header">
+        <div class="logo-area">
+            <div class="logo-icon"><i class="fas fa-wallet"></i></div>
+            <span class="logo-text">TruCash Admin</span>
         </div>
-        <div class="admin-badge">
-            <i class="fas fa-user-circle"></i>
-            <span id="headerAdminName">Admin</span>
+        <div class="admin-profile">
+            <span class="admin-badge"><i class="fas fa-user-circle"></i> <span id="adminUsername">Admin</span></span>
+            <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
         </div>
     </header>
 
-    <!-- App Container -->
+    <!-- mobile sidebar toggle -->
+    <div class="mobile-menu-btn" id="menuToggle" style="position:fixed; top:12px; left:16px; z-index:101; background:white; border-radius:50%; width:40px; height:40px; display:none; align-items:center; justify-content:center; box-shadow:var(--ios-shadow);">
+        <i class="fas fa-bars"></i>
+    </div>
+
     <div class="app-container">
-        <!-- Sidebar -->
-        <nav class="sidebar" id="sidebar">
-            <div class="sidebar-header">
-                <div class="admin-info">
-                    <div class="admin-avatar" id="adminAvatar">A</div>
-                    <div class="admin-details">
-                        <div class="admin-name" id="adminName">Admin User</div>
-                        <div class="admin-role">Administrator</div>
-                    </div>
-                </div>
+        <!-- SIDEBAR (full menu) -->
+        <aside class="sidebar" id="sidebar">
+            <div class="sidebar-section">
+                <div class="sidebar-title">Overview</div>
+                <div class="nav-item" data-section="dashboard"><i class="fas fa-chart-pie"></i> Dashboard</div>
+                <div class="nav-item" data-section="profit"><i class="fas fa-chart-line"></i> Profit analytics</div>
+                <div class="nav-item" data-section="loans"><i class="fas fa-file-invoice"></i> Loans <span class="badge" id="pendingLoansBadge">0</span></div>
+                <div class="nav-item" data-section="agents"><i class="fas fa-user-tie"></i> Agents <span class="badge" id="pendingAgentsBadge">0</span></div>
+                <div class="nav-item" data-section="customers"><i class="fas fa-users"></i> Customers</div>
+                <div class="nav-item" data-section="payments"><i class="fas fa-credit-card"></i> Payments <span class="badge" id="pendingPaymentsBadge">0</span></div>
+                <div class="nav-item" data-section="approvals"><i class="fas fa-check-double"></i> Approvals</div>
+                <div class="nav-item" data-section="commissions"><i class="fas fa-hand-holding-usd"></i> Commissions</div>
+                <div class="nav-item" data-section="documents"><i class="fas fa-file-contract"></i> Documents</div>
+                <div class="nav-item" data-section="audit"><i class="fas fa-history"></i> Audit</div>
+                <div class="nav-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
             </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Overview</div>
-                <ul class="nav-items">
-                    <li class="nav-item active" data-section="dashboard">
-                        <div class="nav-icon"><i class="fas fa-chart-bar"></i></div>
-                        <div class="nav-label">Dashboard</div>
-                    </li>
-                    <li class="nav-item" data-section="loans">
-                        <div class="nav-icon"><i class="fas fa-file-invoice-dollar"></i></div>
-                        <div class="nav-label">Loan Management</div>
-                        <div class="nav-badge" id="pendingLoansBadge">0</div>
-                    </li>
-                    <li class="nav-item" data-section="agents">
-                        <div class="nav-icon"><i class="fas fa-user-tie"></i></div>
-                        <div class="nav-label">Agent Management</div>
-                        <div class="nav-badge" id="pendingAgentsBadge">0</div>
-                    </li>
-                    <li class="nav-item" data-section="customers">
-                        <div class="nav-icon"><i class="fas fa-users"></i></div>
-                        <div class="nav-label">Customer Management</div>
-                    </li>
-                </ul>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">Actions</div>
-                <ul class="nav-items">
-                    <li class="nav-item" data-section="approvals">
-                        <div class="nav-icon"><i class="fas fa-check-circle"></i></div>
-                        <div class="nav-label">Approve Requests</div>
-                        <div class="nav-badge" id="pendingApprovalsBadge">0</div>
-                    </li>
-                    <li class="nav-item" data-section="assignments">
-                        <div class="nav-icon"><i class="fas fa-handshake"></i></div>
-                        <div class="nav-label">Assignments</div>
-                    </li>
-                    <li class="nav-item" data-section="commissions">
-                        <div class="nav-icon"><i class="fas fa-money-check-alt"></i></div>
-                        <div class="nav-label">Commissions</div>
-                    </li>
-                    <li class="nav-item" data-section="paymentApprovals">
-                        <div class="nav-icon"><i class="fas fa-credit-card"></i></div>
-                        <div class="nav-label">Payment Approvals</div>
-                        <div class="nav-badge" id="pendingPaymentsBadge">0</div>
-                    </li>
-                </ul>
-            </div>
-            <div class="nav-section">
-                <div class="nav-section-title">System</div>
-                <ul class="nav-items">
-                    <li class="nav-item" data-section="documents">
-                        <div class="nav-icon"><i class="fas fa-file-contract"></i></div>
-                        <div class="nav-label">Document Viewer</div>
-                    </li>
-                    <li class="nav-item" data-section="audit">
-                        <div class="nav-icon"><i class="fas fa-history"></i></div>
-                        <div class="nav-label">Audit Log</div>
-                    </li>
-                    <li class="nav-item" data-section="settings">
-                        <div class="nav-icon"><i class="fas fa-cog"></i></div>
-                        <div class="nav-label">Settings</div>
-                    </li>
-                </ul>
-            </div>
-        </nav>
+        </aside>
 
-        <!-- Main Content -->
+        <!-- MAIN CONTENT -->
         <main class="main-content" id="mainContent">
-            <!-- Dashboard Section -->
-            <section class="content-section active" id="dashboardSection">
-                <div class="section-header">
-                    <div>
-                        <div class="section-title">Admin Dashboard</div>
-                        <div class="section-subtitle">Overview of system activities</div>
+            <!-- all original sections (placeholders, actual content filled by js) -->
+            <section class="content-section" id="dashboardSection"> <!-- content injected --> </section>
+            <section class="content-section" id="loansSection"> <!-- loans --> </section>
+            <section class="content-section" id="agentsSection"> <!-- agents --> </section>
+            <section class="content-section" id="customersSection"> <!-- customers --> </section>
+            <section class="content-section" id="approvalsSection"> <!-- approvals --> </section>
+            <section class="content-section" id="assignmentsSection"> <!-- assignments --> </section>
+            <section class="content-section" id="commissionsSection"> <!-- commissions --> </section>
+            <section class="content-section" id="documentsSection"> <!-- documents --> </section>
+            <section class="content-section" id="auditSection"> <!-- audit --> </section>
+            <section class="content-section" id="settingsSection"> <!-- settings --> </section>
+
+            <!-- NEW: Profit Analytics Section -->
+            <section class="content-section" id="profitSection">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">📊 Financial overview</span> <button class="btn btn-outline" id="refreshProfit"><i class="fas fa-sync-alt"></i></button></div>
+                    <div class="grid-4">
+                        <div class="profit-card" style="border-left-color:var(--ios-blue);">
+                            <div class="stat-label">Total loans issued</div>
+                            <div class="stat-value" id="profitTotalLoans">K0</div>
+                        </div>
+                        <div class="profit-card" style="border-left-color:var(--ios-green);">
+                            <div class="stat-label">Total repaid</div>
+                            <div class="stat-value" id="profitTotalRepaid">K0</div>
+                        </div>
+                        <div class="profit-card" style="border-left-color:var(--ios-orange);">
+                            <div class="stat-label">Remaining principal</div>
+                            <div class="stat-value" id="profitRemaining">K0</div>
+                        </div>
+                        <div class="profit-card" style="border-left-color:var(--ios-purple);">
+                            <div class="stat-label">Expected interest</div>
+                            <div class="stat-value" id="profitTotalInterest">K0</div>
+                        </div>
+                        <div class="profit-card" style="border-left-color:var(--ios-red);">
+                            <div class="stat-label">Commission paid</div>
+                            <div class="stat-value" id="profitCommissionPaid">K0</div>
+                        </div>
+                        <div class="profit-card" style="border-left-color:#0f172a;">
+                            <div class="stat-label">NET PROFIT</div>
+                            <div class="stat-value" id="profitNet">K0</div>
+                        </div>
                     </div>
-                    <button class="btn btn-primary" id="refreshDashboard">
-                        <i class="fas fa-sync-alt"></i> Refresh
-                    </button>
                 </div>
-                <div class="card-grid" id="dashboardCards"></div>
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Pending Approvals</div>
-                    </div>
-                    <table class="data-table" id="pendingApprovalsTable"></table>
-                </div>
-                <div class="table-container">
-                    <div class="table-header">
-                        <div class="table-title">Recent Activities</div>
-                    </div>
-                    <table class="data-table" id="recentActivitiesTable"></table>
-                </div>
+                <div class="card"><div class="card-title">Interest per loan (15% commission)</div><div class="table-wrapper" id="interestTable"></div></div>
             </section>
 
-            <!-- Loans Section -->
-            <section class="content-section" id="loansSection">...</section>
-            <!-- Agents Section -->
-            <section class="content-section" id="agentsSection">...</section>
-            <!-- Customers Section -->
-            <section class="content-section" id="customersSection">...</section>
-            <!-- Approvals Section -->
-            <section class="content-section" id="approvalsSection">...</section>
-            <!-- Assignments Section -->
-            <section class="content-section" id="assignmentsSection">...</section>
-            <!-- Commissions Section -->
-            <section class="content-section" id="commissionsSection">...</section>
-            <!-- Payment Approvals Section -->
-            <section class="content-section" id="paymentApprovalsSection">
-                <div class="section-header">
-                    <div>
-                        <div class="section-title">Payment Approvals</div>
-                        <div class="section-subtitle">Review and verify customer payments</div>
-                    </div>
+            <!-- NEW: Payments approval section -->
+            <section class="content-section" id="paymentsSection">
+                <div class="card">
+                    <div class="card-header"><span class="card-title">⏳ Pending payment proofs</span></div>
+                    <div class="table-wrapper" id="pendingPaymentsTable"></div>
                 </div>
-                <div class="table-container">
-                    <table class="data-table" id="pendingPaymentsTable">
-                        <thead>
-                            <tr>
-                                <th>Payment ID</th>
-                                <th>Customer</th>
-                                <th>Loan ID</th>
-                                <th>Amount</th>
-                                <th>Method</th>
-                                <th>Proof</th>
-                                <th>Submitted</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody></tbody>
-                    </table>
+                <div class="card">
+                    <div class="card-header"><span class="card-title">✅ Verified payments</span></div>
+                    <div class="table-wrapper" id="verifiedPaymentsTable"></div>
                 </div>
             </section>
-            <!-- Documents Section -->
-            <section class="content-section" id="documentsSection">...</section>
-            <!-- Audit Section -->
-            <section class="content-section" id="auditSection">...</section>
-            <!-- Settings Section -->
-            <section class="content-section" id="settingsSection">...</section>
         </main>
     </div>
 
-    <!-- Bottom Navigation -->
+    <!-- BOTTOM NAVIGATION (4 items) -->
     <nav class="bottom-nav">
-        <div class="bottom-nav-item active" data-section="dashboard"><i class="fas fa-chart-bar"></i><span>Dashboard</span></div>
         <div class="bottom-nav-item" data-section="agents"><i class="fas fa-user-tie"></i><span>Agents</span></div>
         <div class="bottom-nav-item" data-section="customers"><i class="fas fa-users"></i><span>Customers</span></div>
-        <div class="bottom-nav-item" data-section="loans"><i class="fas fa-file-invoice-dollar"></i><span>Loans</span></div>
-        <div class="bottom-nav-item" data-section="paymentApprovals"><i class="fas fa-credit-card"></i><span>Payments</span></div>
+        <div class="bottom-nav-item" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
+        <div class="bottom-nav-item" data-section="payments"><i class="fas fa-credit-card"></i><span>Payments</span></div>
     </nav>
 
-    <!-- Modals (all original plus new ones) -->
-    <div class="modal-overlay" id="createAgentModal">...</div>
-    <div class="modal-overlay" id="createCustomerModal">...</div>
-    <div class="modal-overlay" id="loanDetailsModal">...</div>
-    <div class="modal-overlay" id="agentDetailsModal">...</div>
-    <div class="modal-overlay" id="customerDetailsModal">...</div>
-    <div class="modal-overlay" id="documentViewerModal">...</div>
-    <div class="modal-overlay" id="changePasswordModal">...</div>
-    <div class="modal-overlay" id="approveAgentAppModal">...</div>
-    <div class="modal-overlay" id="approveLoanModal">...</div>
-    <!-- New Lender Signature Modal -->
-    <div class="modal-overlay" id="lenderSignModal">
-        <div class="modal large">
-            <div class="modal-header">
-                <div class="modal-title">Sign Agreement as Lender</div>
-                <button class="modal-close" onclick="AdminUI.closeModal('lenderSignModal')"><i class="fas fa-times"></i></button>
+    <!-- ========== ORIGINAL MODALS (PRESERVED) ========== -->
+    <!-- Create Agent Modal -->
+    <div class="modal-overlay" id="createAgentModal">
+        <div class="modal-card">
+            <div class="modal-header" style="display:flex; justify-content:space-between;">
+                <h3>Create New Agent</h3>
+                <span style="cursor:pointer" onclick="closeModal('createAgentModal')">✖</span>
             </div>
             <div class="modal-body">
-                <div id="lenderSignContent"></div>
-                <div class="signature-container">
-                    <canvas id="lenderSignatureCanvas" class="signature-canvas"></canvas>
-                    <div class="signature-tools">
-                        <button class="btn btn-outline btn-small" id="clearLenderSignature">Clear</button>
+                <div class="form-group"><label>Full Name *</label><input type="text" class="form-input" id="agentFullName"></div>
+                <div class="form-row" style="display:grid; grid-template-columns:1fr 1fr; gap:12px;">
+                    <div class="form-group"><label>Phone *</label><input type="tel" class="form-input" id="agentPhone"></div>
+                    <div class="form-group"><label>NRC *</label><input type="text" class="form-input" id="agentNRC"></div>
+                </div>
+                <div class="form-group"><label>Address *</label><input type="text" class="form-input" id="agentAddress"></div>
+                <div class="form-group"><label>Email *</label><input type="email" class="form-input" id="agentEmail"></div>
+                <div class="form-row">
+                    <div class="form-group"><label>Agent ID *</label><input type="text" class="form-input" id="agentCustomId"></div>
+                    <div class="form-group"><label>Password *</label><input type="password" class="form-input" id="agentPassword"></div>
+                </div>
+                <div class="form-group"><label>Branch</label><input type="text" class="form-input" id="agentBranch"></div>
+                <div class="form-group"><label>Notes</label><textarea class="form-input" id="agentNotes"></textarea></div>
+            </div>
+            <div class="modal-footer" style="display:flex; gap:12px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeModal('createAgentModal')">Cancel</button>
+                <button class="btn btn-primary" id="submitAgentBtn">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Create Customer Modal -->
+    <div class="modal-overlay" id="createCustomerModal">
+        <div class="modal-card">
+            <div class="modal-header"><h3>Create Customer</h3><span onclick="closeModal('createCustomerModal')">✖</span></div>
+            <div class="modal-body">
+                <div class="form-group"><label>Full Name *</label><input class="form-input" id="customerFullName"></div>
+                <div class="form-row"><div><label>Email *</label><input class="form-input" id="customerEmail"></div><div><label>Phone *</label><input class="form-input" id="customerPhone"></div></div>
+                <div class="form-row"><div><label>NRC *</label><input class="form-input" id="customerNRC"></div><div><label>Password *</label><input type="password" class="form-input" id="customerPassword"></div></div>
+                <div class="form-group"><label>Address *</label><input class="form-input" id="customerAddress"></div>
+                <div class="form-row"><div><label>House No</label><input class="form-input" id="customerHouseNumber"></div><div><label>Income</label><input type="number" class="form-input" id="customerIncome"></div></div>
+                <div class="form-group"><label>Occupation</label><input class="form-input" id="customerOccupation"></div>
+                <div class="form-group"><label>Assign Agent</label><select class="form-input" id="customerAgentSelect"></select></div>
+                <div class="form-group"><label>Status</label><select class="form-input" id="customerStatus"><option value="active">Active</option><option value="pending">Pending</option></select></div>
+            </div>
+            <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('createCustomerModal')">Cancel</button><button class="btn btn-primary" id="submitCustomerBtn">Create</button></div>
+        </div>
+    </div>
+
+    <!-- Loan Details Modal -->
+    <div class="modal-overlay" id="loanDetailsModal">
+        <div class="modal-card" style="max-width:900px;">
+            <div class="modal-header"><h3>Loan Details</h3><span onclick="closeModal('loanDetailsModal')">✖</span></div>
+            <div class="modal-body" id="loanDetailsContent"></div>
+        </div>
+    </div>
+
+    <!-- Agent Details Modal -->
+    <div class="modal-overlay" id="agentDetailsModal">
+        <div class="modal-card"><div class="modal-header"><h3>Agent Details</h3><span onclick="closeModal('agentDetailsModal')">✖</span></div><div class="modal-body" id="agentDetailsContent"></div></div>
+    </div>
+
+    <!-- Customer Details Modal -->
+    <div class="modal-overlay" id="customerDetailsModal">
+        <div class="modal-card"><div class="modal-header"><h3>Customer Details</h3><span onclick="closeModal('customerDetailsModal')">✖</span></div><div class="modal-body" id="customerDetailsContent"></div></div>
+    </div>
+
+    <!-- Document Viewer Modal -->
+    <div class="modal-overlay" id="documentViewerModal">
+        <div class="modal-card"><div class="modal-header"><h3>Document Viewer</h3><span onclick="closeModal('documentViewerModal')">✖</span></div><div class="modal-body" id="documentViewerContent"></div></div>
+    </div>
+
+    <!-- Change Password Modal -->
+    <div class="modal-overlay" id="changePasswordModal">
+        <div class="modal-card"><div class="modal-header"><h3>Change Password</h3><span onclick="closeModal('changePasswordModal')">✖</span></div><div class="modal-body"><input type="password" class="form-input" id="currentPassword" placeholder="Current"><input type="password" class="form-input" id="newPassword" placeholder="New"><input type="password" class="form-input" id="confirmNewPassword" placeholder="Confirm"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('changePasswordModal')">Cancel</button><button class="btn btn-primary" id="savePasswordBtn">Change</button></div></div>
+    </div>
+
+    <!-- Approve Agent Application Modal -->
+    <div class="modal-overlay" id="approveAgentAppModal">
+        <div class="modal-card"><div class="modal-header"><h3>Approve Agent Application</h3><span onclick="closeModal('approveAgentAppModal')">✖</span></div><div class="modal-body" id="agentAppContent"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('approveAgentAppModal')">Cancel</button><button class="btn btn-danger" id="rejectAgentAppBtn">Reject</button><button class="btn btn-primary" id="approveAgentAppBtn">Approve</button></div></div>
+    </div>
+
+    <!-- ENHANCED Approve Loan Modal with signature -->
+    <div class="modal-overlay" id="approveLoanModal">
+        <div class="modal-card">
+            <div class="modal-header" style="display:flex; justify-content:space-between; align-items:center;">
+                <h3>Approve Loan & Sign</h3>
+                <span style="cursor:pointer" onclick="closeModal('approveLoanModal')">✖</span>
+            </div>
+            <div class="modal-body">
+                <div id="approveLoanContent"></div>
+                <div class="form-group">
+                    <label>Approval notes</label>
+                    <textarea class="form-input" id="loanApprovalNotes" rows="2"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>Approved amount (ZMW)</label>
+                    <input type="number" class="form-input" id="approvedAmount">
+                </div>
+                <!-- Lender signature pad -->
+                <div style="margin:20px 0">
+                    <label>Lender (admin) signature</label>
+                    <div class="signature-container">
+                        <canvas id="lenderSignatureCanvas" class="signature-canvas" width="500" height="150"></canvas>
+                        <div class="signature-tools">
+                            <button class="btn btn-outline btn-small" id="clearLenderSignature">Clear</button>
+                        </div>
                     </div>
                 </div>
+                <!-- link to customer-signed agreement -->
+                <div id="signedAgreementLink" style="margin-bottom:16px;"></div>
             </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="AdminUI.closeModal('lenderSignModal')">Cancel</button>
-                <button class="btn btn-primary" id="submitLenderSignature">Sign & Upload</button>
-            </div>
-        </div>
-    </div>
-    <!-- New Payment Approval Modal -->
-    <div class="modal-overlay" id="paymentApprovalModal">
-        <div class="modal">
-            <div class="modal-header">
-                <div class="modal-title">Review Payment</div>
-                <button class="modal-close" onclick="AdminUI.closeModal('paymentApprovalModal')"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body" id="paymentApprovalContent"></div>
-            <div class="modal-footer">
-                <button class="btn btn-danger" id="rejectPaymentBtn">Reject</button>
-                <button class="btn btn-success" id="approvePaymentBtn">Approve</button>
+            <div class="modal-footer" style="display:flex; gap:12px; justify-content:flex-end;">
+                <button class="btn btn-outline" onclick="closeModal('approveLoanModal')">Cancel</button>
+                <button class="btn btn-danger" id="rejectLoanBtn">Reject</button>
+                <button class="btn btn-primary" id="approveLoanBtn">Approve & Sign</button>
             </div>
         </div>
     </div>
 
+    <!-- Payment Proof Modal -->
+    <div class="modal-overlay" id="paymentProofModal">
+        <div class="modal-card">
+            <h3 style="margin-bottom:16px;">Payment proof</h3>
+            <img id="proofImage" src="" style="max-width:100%; max-height:300px; border-radius:16px;">
+            <div style="display:flex; gap:12px; margin-top:20px;">
+                <button class="btn btn-success" id="approvePaymentBtn"><i class="fas fa-check"></i> Approve</button>
+                <button class="btn btn-danger" id="rejectPaymentBtn"><i class="fas fa-times"></i> Reject</button>
+                <button class="btn btn-outline" onclick="closeModal('paymentProofModal')">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ========== FULL ORIGINAL JAVASCRIPT (PRESERVED) WITH MODIFICATIONS ========== -->
     <script>
-        // ========== FIREBASE CONFIG ==========
-        const firebaseConfig = {
-            apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
-            authDomain: "trucash-9fee8.firebaseapp.com",
-            databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
-            projectId: "trucash-9fee8",
-            storageBucket: "trucash-9fee8.firebasestorage.app",
-            messagingSenderId: "622416212225",
-            appId: "1:622416212225:web:07418a9b16f955c330ab00"
-        };
+// ==================== FIREBASE CONFIGURATION ====================
+const firebaseConfig = {
+    apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
+    authDomain: "trucash-9fee8.firebaseapp.com",
+    databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
+    projectId: "trucash-9fee8",
+    storageBucket: "trucash-9fee8.firebasestorage.app",
+    messagingSenderId: "622416212225",
+    appId: "1:622416212225:web:07418a9b16f955c330ab00"
+};
 
-        // Initialize Firebase
-        let firebaseApp, auth, db;
+let firebaseApp, auth, db;
+try {
+    firebaseApp = firebase.initializeApp(firebaseConfig);
+    auth = firebase.auth();
+    db = firebase.database();
+    console.log("✅ Firebase initialized successfully for Admin Panel");
+} catch (error) {
+    console.error("❌ Firebase initialization error:", error);
+}
+
+// ===== CLOUDINARY CONFIGURATION =====
+const cloudinaryConfig = {
+    cloudName: 'dd3lcymrk',
+    uploadPreset: 'h3eyhc2o',
+    folder: 'trucash/admin',
+    maxFileSize: 10485760,
+    allowedFormats: ['jpg', 'jpeg', 'png', 'pdf', 'doc', 'docx'],
+    multiple: false
+};
+
+// ===== APPLICATION STATE =====
+const AppState = {
+    currentUser: null,
+    adminData: null,
+    realtimeListeners: [],
+    currentSection: 'dashboard',
+
+    // Data stores
+    loans: [],
+    agents: [],
+    customers: [],
+    agentApplications: [],
+    commissions: [],
+    payments: [],          // NEW: for payment approvals
+    auditLogs: [],
+    systemSettings: null,
+
+    // Current selections
+    selectedLoan: null,
+    selectedAgent: null,
+    selectedCustomer: null,
+    selectedApplication: null,
+    selectedPayment: null, // NEW
+
+    // UI state
+    isLoading: false,
+    cloudinaryWidget: null
+};
+
+// ===== UTILITY FUNCTIONS =====
+const Utils = {
+    showLoading(message = 'Loading...') {
+        const overlay = document.getElementById('loadingOverlay');
+        const text = overlay?.querySelector('.loading-text');
+        if (text) text.textContent = message;
+        if (overlay) overlay.classList.add('active');
+        AppState.isLoading = true;
+    },
+
+    hideLoading() {
+        const overlay = document.getElementById('loadingOverlay');
+        if (overlay) overlay.classList.remove('active');
+        AppState.isLoading = false;
+    },
+
+    formatCurrency(amount) {
+        if (!amount && amount !== 0) return 'K0.00';
+        return 'K' + parseFloat(amount).toLocaleString('en-US', {
+            minimumFractionDigits: 2,
+            maximumFractionDigits: 2
+        });
+    },
+
+    formatDate(timestamp) {
+        if (!timestamp) return 'N/A';
         try {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.database();
-            console.log("✅ Firebase initialized");
+            const date = new Date(Number(timestamp));
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+                hour: '2-digit',
+                minute: '2-digit'
+            });
         } catch (e) {
-            console.error("Firebase init error:", e);
+            return 'Invalid Date';
+        }
+    },
+
+    formatDateOnly(timestamp) {
+        if (!timestamp) return 'N/A';
+        try {
+            const date = new Date(Number(timestamp));
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric'
+            });
+        } catch (e) {
+            return 'Invalid Date';
+        }
+    },
+
+    validateEmail(email) {
+        const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+        return re.test(email);
+    },
+
+    validatePhone(phone) {
+        const re = /^\+?[\d\s\-\(\)]{10,}$/;
+        return re.test(phone);
+    },
+
+    validateNRC(nrc) {
+        const re = /^\d{6}\/\d{2}\/\d{1}$/;
+        return re.test(nrc);
+    },
+
+    generateId(prefix = '') {
+        return prefix + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
+    },
+
+    debounce(func, wait) {
+        let timeout;
+        return function executedFunction(...args) {
+            const later = () => {
+                clearTimeout(timeout);
+                func(...args);
+            };
+            clearTimeout(timeout);
+            timeout = setTimeout(later, wait);
+        };
+    },
+
+    truncateText(text, maxLength = 30) {
+        if (!text) return '';
+        if (text.length <= maxLength) return text;
+        return text.substr(0, maxLength) + '...';
+    },
+
+    getInitials(name) {
+        if (!name) return 'A';
+        return name.split(' ').map(n => n[0]).join('').toUpperCase().substring(0, 2);
+    },
+
+    async sleep(ms) {
+        return new Promise(resolve => setTimeout(resolve, ms));
+    }
+};
+
+// ===== TOAST NOTIFICATION MANAGER =====
+const ToastManager = {
+    show(title, message, type = 'success', duration = 5000) {
+        const toast = document.getElementById('toast');
+        const toastTitle = document.getElementById('toastTitle');
+        const toastMessage = document.getElementById('toastMessage');
+        const toastIcon = toast?.querySelector('.toast-icon');
+
+        if (!toast) return;
+
+        if (toastTitle) toastTitle.textContent = title;
+        if (toastMessage) toastMessage.textContent = message;
+
+        let iconClass = 'fa-check';
+        if (toastIcon) {
+            toastIcon.className = 'toast-icon';
+            switch(type) {
+                case 'success':
+                    iconClass = 'fa-check';
+                    toastIcon.classList.add('success');
+                    break;
+                case 'error':
+                    iconClass = 'fa-exclamation-circle';
+                    toastIcon.classList.add('error');
+                    break;
+                case 'warning':
+                    iconClass = 'fa-exclamation-triangle';
+                    toastIcon.classList.add('warning');
+                    break;
+            }
+            toastIcon.innerHTML = `<i class="fas ${iconClass}"></i>`;
         }
 
-        // ========== CLOUDINARY ==========
-        const cloudinaryConfig = {
-            cloudName: 'dd3lcymrk',
-            uploadPreset: 'h3eyhc2o',
-            folder: 'trucash/admin',
-            maxFileSize: 10485760,
-            allowedFormats: ['jpg','jpeg','png','pdf','doc','docx']
-        };
+        toast.classList.add('active');
 
-        // ========== UTILS (full original) ==========
-        const Utils = {
-            showLoading: (msg = 'Loading...') => {
-                document.getElementById('loadingText').textContent = msg;
-                document.getElementById('loadingOverlay').classList.add('active');
-            },
-            hideLoading: () => document.getElementById('loadingOverlay').classList.remove('active'),
-            showToast: (title, msg, type = 'success', duration = 4000) => {
-                const toast = document.getElementById('toast');
-                document.getElementById('toastTitle').textContent = title;
-                document.getElementById('toastMessage').textContent = msg;
-                toast.className = 'toast ' + type;
-                toast.classList.add('active');
-                setTimeout(() => toast.classList.remove('active'), duration);
-            },
-            formatCurrency: (amount) => 'K' + (parseFloat(amount) || 0).toFixed(2),
-            formatDate: (ts) => ts ? new Date(Number(ts)).toLocaleDateString() : 'N/A',
-            formatDateTime: (ts) => ts ? new Date(Number(ts)).toLocaleString() : 'N/A',
-            validateEmail: (email) => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
-            validateNRC: (nrc) => /^\d{6}\/\d{2}\/\d{1}$/.test(nrc),
-            generateId: (prefix = '') => prefix + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase(),
-            debounce: (fn, delay) => { let t; return (...a) => { clearTimeout(t); t = setTimeout(() => fn(...a), delay); }; },
-            getInitials: (name) => name ? name.split(' ').map(n => n[0]).join('').toUpperCase() : 'A',
-            calculateTotalInterest: (loan) => {
-                if (!loan.amount) return 0;
-                const rate = loan.interestRate || 35; // monthly %
-                const duration = loan.duration || 1;
-                const unit = loan.durationUnit || 'months';
-                if (unit === 'weeks') {
-                    // weekly rate: 10%
-                    return loan.amount * 0.10 * duration;
-                } else {
-                    return loan.amount * (rate / 100) * duration;
-                }
-            }
-        };
+        setTimeout(() => {
+            toast.classList.remove('active');
+        }, duration);
 
-        // ========== APP STATE ==========
-        const AppState = {
-            currentUser: null,
-            adminData: null,
-            loans: [],
-            agents: [],
-            customers: [],
-            agentApplications: [],
-            commissions: [],
-            auditLogs: [],
-            systemSettings: null,
-            selectedLoan: null,
-            selectedAgent: null,
-            selectedCustomer: null,
-            selectedApplication: null,
-            selectedPayment: null,
-            realtimeListeners: [],
-            currentSection: 'dashboard'
-        };
+        return toast;
+    },
 
-        // ========== FIREBASE SERVICE (full original with modifications) ==========
-        const FirebaseService = {
-            async checkAdminAuth() {
-                return new Promise((resolve, reject) => {
-                    const unsubscribe = auth.onAuthStateChanged(async (user) => {
-                        unsubscribe();
-                        if (!user) {
-                            window.location.href = 'login.html';
-                            resolve(null);
-                            return;
-                        }
-                        try {
-                            const userRef = db.ref('users/' + user.uid);
-                            const snapshot = await userRef.once('value');
-                            if (!snapshot.exists() || (snapshot.val().userType !== 'admin' && user.email !== 'sudo@gmail.com')) {
-                                Utils.showToast('Access Denied', 'Not an admin', 'error');
-                                await auth.signOut();
-                                window.location.href = 'login.html';
-                                resolve(null);
-                                return;
-                            }
-                            AppState.currentUser = user;
-                            AppState.adminData = snapshot.val();
-                            resolve(AppState.adminData);
-                        } catch (error) {
-                            console.error(error);
-                            resolve(null);
-                        }
-                    });
-                });
-            },
-            async loadAllData() {
-                try {
-                    const loansSnap = await db.ref('loans').once('value');
-                    AppState.loans = [];
-                    loansSnap.forEach(c => AppState.loans.push({ id: c.key, ...c.val() }));
-                    AppState.loans.sort((a,b) => b.createdAt - a.createdAt);
+    hide() {
+        const toast = document.getElementById('toast');
+        if (toast) toast.classList.remove('active');
+    }
+};
 
-                    const agentsSnap = await db.ref('users').orderByChild('userType').equalTo('agent').once('value');
-                    AppState.agents = [];
-                    agentsSnap.forEach(c => AppState.agents.push({ id: c.key, ...c.val() }));
+// ===== FIREBASE SERVICE =====
+const FirebaseService = {
+    async checkAdminAuth() {
+        return new Promise((resolve, reject) => {
+            const unsubscribe = auth.onAuthStateChanged(async (currentUser) => {
+                unsubscribe();
 
-                    const customersSnap = await db.ref('users').orderByChild('userType').equalTo('customer').once('value');
-                    AppState.customers = [];
-                    customersSnap.forEach(c => AppState.customers.push({ id: c.key, ...c.val() }));
-
-                    const appsSnap = await db.ref('agentApplications').once('value');
-                    AppState.agentApplications = [];
-                    appsSnap.forEach(c => { const a = c.val(); a.id = c.key; if (a.status === 'pending') AppState.agentApplications.push(a); });
-
-                    const commSnap = await db.ref('commissions').once('value');
-                    AppState.commissions = [];
-                    commSnap.forEach(c => AppState.commissions.push({ id: c.key, ...c.val() }));
-
-                    const settingsSnap = await db.ref('systemSettings').once('value');
-                    AppState.systemSettings = settingsSnap.val() || { maxLoanAmount:50000, interestRate:15, commissionRate:2.5 };
-
-                    const auditSnap = await db.ref('auditLogs').limitToLast(100).once('value');
-                    AppState.auditLogs = [];
-                    auditSnap.forEach(c => AppState.auditLogs.unshift(c.val()));
-
-                    return true;
-                } catch (error) {
-                    console.error(error);
-                    return false;
-                }
-            },
-            async createAgent(agentData) { /* original full implementation */ },
-            async createCustomer(customerData) { /* original full implementation */ },
-            async updateLoanStatus(loanId, status, approvedAmount = null, notes = '') {
-                try {
-                    const loanRef = db.ref('loans/' + loanId);
-                    const updates = {
-                        status, updatedAt: Date.now(), updatedByAdmin: AppState.currentUser.uid,
-                        adminName: AppState.adminData.fullName, statusNotes: notes
-                    };
-                    if (status === 'approved' && approvedAmount) {
-                        updates.approvedAmount = approvedAmount;
-                        updates.approvedAt = Date.now();
-                        updates.approvedBy = AppState.currentUser.uid;
-                    }
-                    if (status === 'rejected') {
-                        updates.rejectedAt = Date.now();
-                        updates.rejectedBy = AppState.currentUser.uid;
-                    }
-                    await loanRef.update(updates);
-
-                    // Commission = 15% of total interest
-                    if (status === 'approved') {
-                        const loanSnap = await loanRef.once('value');
-                        const loan = loanSnap.val();
-                        if (loan.agentId) {
-                            const totalInterest = Utils.calculateTotalInterest(loan);
-                            const commissionAmount = totalInterest * 0.15;
-                            await this.createCommissionRecord({
-                                agentId: loan.agentId,
-                                agentName: loan.agentName,
-                                customerId: loan.customerId,
-                                customerName: loan.customerName,
-                                loanId,
-                                loanAmount: approvedAmount || loan.amount,
-                                type: 'loan_approval',
-                                amount: commissionAmount,
-                                status: 'pending',
-                                createdAt: Date.now(),
-                                approvedBy: AppState.currentUser.uid
-                            });
-                        }
-                    }
-                    await this.createAuditLog('loan_status_update', { loanId, newStatus: status });
-                    return { success: true };
-                } catch (error) {
-                    return { success: false, error: error.message };
-                }
-            },
-            async updateUserStatus(userId, status, userType) { /* original */ },
-            async assignAgentToCustomer(customerId, agentId) { /* original */ },
-            async processCommissionPayout(commissionId, paymentMethod, reference) { /* original */ },
-            async createCommissionRecord(data) { /* original */ },
-            async createAuditLog(action, data) { /* original */ },
-            async updateSystemSettings(settings) { /* original */ },
-            async approveAgentApplication(applicationId, credentials) { /* original */ },
-            async rejectAgentApplication(applicationId, reason = '') { /* original */ },
-            async changeAdminPassword(currentPassword, newPassword) { /* original */ },
-            async signOut() { /* original */ },
-
-            // Payment approval methods
-            async loadPendingPayments() {
-                try {
-                    const snap = await db.ref('payments').orderByChild('status').equalTo('pending').once('value');
-                    const payments = [];
-                    snap.forEach(c => payments.push({ id: c.key, ...c.val() }));
-                    return payments;
-                } catch (error) {
-                    console.error(error);
-                    return [];
-                }
-            },
-            async approvePayment(paymentId, adminNotes = '') {
-                try {
-                    const payRef = db.ref('payments/' + paymentId);
-                    const snap = await payRef.once('value');
-                    const payment = snap.val();
-                    if (!payment) return { success: false, error: 'Payment not found' };
-
-                    await payRef.update({
-                        status: 'verified',
-                        verifiedBy: AppState.currentUser.uid,
-                        verifiedAt: Date.now(),
-                        adminNotes
-                    });
-
-                    const loanRef = db.ref('loans/' + payment.loanId);
-                    const loanSnap = await loanRef.once('value');
-                    const loan = loanSnap.val();
-                    const newTotalPaid = (loan.totalPaid || 0) + payment.amount;
-                    let updatedStatus = loan.status;
-                    if (newTotalPaid >= loan.totalPayable) updatedStatus = 'completed';
-
-                    await loanRef.update({
-                        totalPaid: newTotalPaid,
-                        status: updatedStatus,
-                        updatedAt: Date.now()
-                    });
-
-                    if (loan.repaymentSchedule) {
-                        const schedule = loan.repaymentSchedule.map(inst => {
-                            if (inst.status === 'pending' && inst.totalDue <= payment.amount) {
-                                return { ...inst, status: 'paid', paidAt: Date.now() };
-                            }
-                            return inst;
-                        });
-                        await loanRef.update({ repaymentSchedule: schedule });
-                    }
-
-                    await this.createAuditLog('payment_approved', { paymentId, loanId: payment.loanId });
-                    return { success: true };
-                } catch (error) {
-                    return { success: false, error: error.message };
-                }
-            },
-            async rejectPayment(paymentId, reason = '') {
-                try {
-                    await db.ref('payments/' + paymentId).update({
-                        status: 'rejected',
-                        rejectedBy: AppState.currentUser.uid,
-                        rejectedAt: Date.now(),
-                        rejectionReason: reason
-                    });
-                    await this.createAuditLog('payment_rejected', { paymentId, reason });
-                    return { success: true };
-                } catch (error) {
-                    return { success: false, error: error.message };
-                }
-            },
-
-            // Lender signature upload
-            async uploadSignedAgreementWithLender(originalHtml, lenderSigDataUrl) {
-                const updatedHtml = originalHtml.replace('</body>', `<div><h4>Lender Signature:</h4><img src="${lenderSigDataUrl}" style="max-width:300px;"/></div></body>`);
-                const blob = new Blob([updatedHtml], { type: 'text/html' });
-                const formData = new FormData();
-                formData.append('file', blob, `agreement_lender_${Date.now()}.html`);
-                formData.append('upload_preset', cloudinaryConfig.uploadPreset);
-                formData.append('folder', 'trucash/agreements');
-                formData.append('resource_type', 'raw');
-                const res = await fetch(`https://api.cloudinary.com/v1_1/${cloudinaryConfig.cloudName}/raw/upload`, { method: 'POST', body: formData });
-                const data = await res.json();
-                return data.secure_url;
-            },
-
-            setupRealtimeListeners() {
-                // original listeners
-            }
-        };
-
-        // ========== UI MANAGER (full with new methods) ==========
-        const AdminUI = {
-            // original properties and methods (abbreviated here for length, but in actual file they are all present)
-            // We'll include the new methods explicitly:
-
-            async showPaymentApprovalModal(paymentId) {
-                const payments = await FirebaseService.loadPendingPayments();
-                const payment = payments.find(p => p.id === paymentId);
-                if (!payment) return;
-                AppState.selectedPayment = payment;
-                const content = document.getElementById('paymentApprovalContent');
-                content.innerHTML = `
-                    <div class="card">
-                        <p><strong>Payment ID:</strong> ${payment.id}</p>
-                        <p><strong>Customer:</strong> ${payment.customerName}</p>
-                        <p><strong>Loan ID:</strong> ${payment.loanId}</p>
-                        <p><strong>Amount:</strong> ${Utils.formatCurrency(payment.amount)}</p>
-                        <p><strong>Method:</strong> ${payment.method}</p>
-                        <p><strong>Reference:</strong> ${payment.reference || '—'}</p>
-                        <p><strong>Proof:</strong> <a href="${payment.proofUrl}" target="_blank">View Screenshot</a></p>
-                        <p><strong>Submitted:</strong> ${Utils.formatDateTime(payment.timestamp)}</p>
-                    </div>
-                `;
-                document.getElementById('paymentApprovalModal').classList.add('active');
-            },
-            async approvePayment() {
-                if (!AppState.selectedPayment) return;
-                const result = await FirebaseService.approvePayment(AppState.selectedPayment.id);
-                if (result.success) {
-                    Utils.showToast('Approved', 'Payment verified', 'success');
-                    AdminUI.closeModal('paymentApprovalModal');
-                    AdminUI.updatePaymentApprovalsTable();
-                } else {
-                    Utils.showToast('Error', result.error, 'error');
-                }
-            },
-            async rejectPayment() {
-                if (!AppState.selectedPayment) return;
-                const reason = prompt('Reason for rejection (optional):');
-                const result = await FirebaseService.rejectPayment(AppState.selectedPayment.id, reason);
-                if (result.success) {
-                    Utils.showToast('Rejected', 'Payment rejected', 'warning');
-                    AdminUI.closeModal('paymentApprovalModal');
-                    AdminUI.updatePaymentApprovalsTable();
-                } else {
-                    Utils.showToast('Error', result.error, 'error');
-                }
-            },
-            async updatePaymentApprovalsTable() {
-                const tbody = document.querySelector('#pendingPaymentsTable tbody');
-                if (!tbody) return;
-                const payments = await FirebaseService.loadPendingPayments();
-                if (payments.length === 0) {
-                    tbody.innerHTML = '<tr><td colspan="8" class="text-center text-muted py-4">No pending payments</td></tr>';
+                if (!currentUser) {
+                    window.location.href = 'login.html';
+                    resolve(null);
                     return;
                 }
-                let html = '';
-                payments.forEach(p => {
-                    html += `<tr>
-                        <td>${p.id}</td>
-                        <td>${p.customerName}</td>
-                        <td>${p.loanId}</td>
-                        <td>${Utils.formatCurrency(p.amount)}</td>
-                        <td>${p.method}</td>
-                        <td><a href="${p.proofUrl}" target="_blank"><i class="fas fa-eye"></i> View</a></td>
-                        <td>${Utils.formatDateTime(p.timestamp)}</td>
-                        <td>
-                            <button class="btn btn-small btn-outline" onclick="AdminUI.showPaymentApprovalModal('${p.id}')">Review</button>
-                        </td>
-                    </tr>`;
-                });
-                tbody.innerHTML = html;
-                document.getElementById('pendingPaymentsBadge').textContent = payments.length;
-            },
-            async showLenderSignModal(loanId) {
-                const loan = AppState.loans.find(l => l.id === loanId);
-                if (!loan || !loan.signedAgreementUrl) {
-                    Utils.showToast('Error', 'No signed agreement found', 'error');
-                    return;
-                }
-                AppState.selectedLoan = loan;
-                document.getElementById('lenderSignContent').innerHTML = `
-                    <p><strong>Loan ID:</strong> ${loan.id}</p>
-                    <p><strong>Customer:</strong> ${loan.customerName}</p>
-                    <p><a href="${loan.signedAgreementUrl}" target="_blank">View Current Agreement</a></p>
-                    <p>Sign below as lender:</p>
-                `;
-                this.lenderSignaturePad = SignaturePad.init('lenderSignatureCanvas', 'clearLenderSignature');
-                document.getElementById('lenderSignModal').classList.add('active');
-            },
-            async submitLenderSignature() {
-                if (!this.lenderSignaturePad) return;
-                const sigDataUrl = this.lenderSignaturePad.getDataURL();
-                if (!sigDataUrl) {
-                    Utils.showToast('Error', 'Please provide signature', 'error');
-                    return;
-                }
-                Utils.showLoading('Uploading signed agreement...');
-                const loan = AppState.selectedLoan;
-                // fetch original HTML
-                const response = await fetch(loan.signedAgreementUrl);
-                const originalHtml = await response.text();
-                const newUrl = await FirebaseService.uploadSignedAgreementWithLender(originalHtml, sigDataUrl);
-                Utils.hideLoading();
-                if (newUrl) {
-                    await db.ref('loans/' + loan.id).update({
-                        signedAgreementUrl: newUrl,
-                        lenderSignedAt: Date.now(),
-                        lenderSignedBy: AppState.currentUser.uid
-                    });
-                    Utils.showToast('Success', 'Agreement signed and updated', 'success');
-                    AdminUI.closeModal('lenderSignModal');
-                } else {
-                    Utils.showToast('Error', 'Upload failed', 'error');
-                }
-            },
-            // ... all other original UI methods (showSection, updateDashboard, etc.)
-            // They are exactly as in the original file.
-        };
 
-        // ========== SIGNATURE PAD HELPER ==========
-        const SignaturePad = {
-            init(canvasId, clearBtnId) {
-                const canvas = document.getElementById(canvasId);
-                if (!canvas) return null;
-                const ctx = canvas.getContext('2d');
-                let drawing = false;
-                let lastX = 0, lastY = 0;
+                try {
+                    const userRef = db.ref('users/' + currentUser.uid);
+                    const snapshot = await userRef.once('value');
 
-                const resize = () => {
-                    const container = canvas.parentElement;
-                    canvas.width = container.clientWidth;
-                    canvas.height = 160;
-                    ctx.strokeStyle = '#000';
-                    ctx.lineWidth = 2;
-                    ctx.lineCap = 'round';
-                };
-                resize();
-                window.addEventListener('resize', resize);
-
-                const getCoords = (e) => {
-                    const rect = canvas.getBoundingClientRect();
-                    const scaleX = canvas.width / rect.width;
-                    const scaleY = canvas.height / rect.height;
-                    let clientX, clientY;
-                    if (e.touches) {
-                        clientX = e.touches[0].clientX;
-                        clientY = e.touches[0].clientY;
-                    } else {
-                        clientX = e.clientX;
-                        clientY = e.clientY;
+                    if (!snapshot.exists()) {
+                        ToastManager.show('Access Denied', 'Admin account not found.', 'error');
+                        await auth.signOut();
+                        window.location.href = 'login.html';
+                        resolve(null);
+                        return;
                     }
-                    return {
-                        x: (clientX - rect.left) * scaleX,
-                        y: (clientY - rect.top) * scaleY
-                    };
-                };
 
-                const start = (e) => {
-                    e.preventDefault();
-                    drawing = true;
-                    const pos = getCoords(e);
-                    lastX = pos.x;
-                    lastY = pos.y;
-                    ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                };
-                const move = (e) => {
-                    e.preventDefault();
-                    if (!drawing) return;
-                    const pos = getCoords(e);
-                    ctx.lineTo(pos.x, pos.y);
-                    ctx.stroke();
-                    lastX = pos.x;
-                    lastY = pos.y;
-                };
-                const stop = () => { drawing = false; ctx.closePath(); };
+                    const userData = snapshot.val();
 
-                canvas.addEventListener('mousedown', start);
-                canvas.addEventListener('mousemove', move);
-                canvas.addEventListener('mouseup', stop);
-                canvas.addEventListener('mouseleave', stop);
-                canvas.addEventListener('touchstart', start);
-                canvas.addEventListener('touchmove', move);
-                canvas.addEventListener('touchend', stop);
-                canvas.addEventListener('touchcancel', stop);
+                    if (userData.userType !== 'admin' && userData.email !== 'sudo@gmail.com') {
+                        ToastManager.show('Access Denied', 'This panel is for administrators only.', 'error');
+                        await auth.signOut();
+                        window.location.href = 'login.html';
+                        resolve(null);
+                        return;
+                    }
 
-                const clearBtn = document.getElementById(clearBtnId);
-                if (clearBtn) {
-                    clearBtn.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+                    AppState.currentUser = currentUser;
+                    AppState.adminData = userData;
+
+                    // Update admin username in header
+                    const adminUsernameSpan = document.getElementById('adminUsername');
+                    if (adminUsernameSpan) adminUsernameSpan.textContent = userData.fullName || 'Admin';
+
+                    resolve(userData);
+                } catch (error) {
+                    console.error('Auth check error:', error);
+                    ToastManager.show('Authentication Error', 'Failed to verify admin status.', 'error');
+                    resolve(null);
                 }
-
-                return {
-                    clear: () => ctx.clearRect(0, 0, canvas.width, canvas.height),
-                    getDataURL: () => canvas.toDataURL('image/png')
-                };
-            }
-        };
-
-        // ========== INIT ==========
-        document.addEventListener('DOMContentLoaded', async () => {
-            // original init steps
-            Utils.showLoading();
-            const adminData = await FirebaseService.checkAdminAuth();
-            if (!adminData) return;
-            await FirebaseService.loadAllData();
-            FirebaseService.setupRealtimeListeners();
-            AdminUI.init(); // original init method (should be defined)
-            Utils.hideLoading();
-
-            // Bind new modal buttons
-            document.getElementById('approvePaymentBtn').addEventListener('click', () => AdminUI.approvePayment());
-            document.getElementById('rejectPaymentBtn').addEventListener('click', () => AdminUI.rejectPayment());
-            document.getElementById('submitLenderSignature').addEventListener('click', () => AdminUI.submitLenderSignature());
-            document.getElementById('clearLenderSignature').addEventListener('click', () => {
-                if (AdminUI.lenderSignaturePad) AdminUI.lenderSignaturePad.clear();
-            });
-
-            // Update payment approvals table when section shown
-            const paymentSection = document.querySelector('[data-section="paymentApprovals"]');
-            paymentSection.addEventListener('click', async () => {
-                await AdminUI.updatePaymentApprovalsTable();
+            }, (error) => {
+                console.error('Auth state listener error:', error);
+                window.location.href = 'login.html';
+                resolve(null);
             });
         });
+    },
+
+    async loadAllData() {
+        try {
+            // Load loans
+            const loansRef = db.ref('loans');
+            const loansSnapshot = await loansRef.once('value');
+            AppState.loans = [];
+
+            if (loansSnapshot.exists()) {
+                loansSnapshot.forEach((childSnapshot) => {
+                    const loan = childSnapshot.val();
+                    loan.id = childSnapshot.key;
+                    AppState.loans.push(loan);
+                });
+
+                AppState.loans.sort((a, b) => b.createdAt - a.createdAt);
+            }
+
+            // Load agents
+            const agentsRef = db.ref('users').orderByChild('userType').equalTo('agent');
+            const agentsSnapshot = await agentsRef.once('value');
+            AppState.agents = [];
+
+            if (agentsSnapshot.exists()) {
+                agentsSnapshot.forEach((childSnapshot) => {
+                    const agent = childSnapshot.val();
+                    agent.id = childSnapshot.key;
+                    AppState.agents.push(agent);
+                });
+            }
+
+            // Load customers
+            const customersRef = db.ref('users').orderByChild('userType').equalTo('customer');
+            const customersSnapshot = await customersRef.once('value');
+            AppState.customers = [];
+
+            if (customersSnapshot.exists()) {
+                customersSnapshot.forEach((childSnapshot) => {
+                    const customer = childSnapshot.val();
+                    customer.id = childSnapshot.key;
+                    AppState.customers.push(customer);
+                });
+            }
+
+            // Load agent applications
+            const appsRef = db.ref('agentApplications');
+            const appsSnapshot = await appsRef.once('value');
+            AppState.agentApplications = [];
+
+            if (appsSnapshot.exists()) {
+                appsSnapshot.forEach((childSnapshot) => {
+                    const app = childSnapshot.val();
+                    app.id = childSnapshot.key;
+                    if (app.status === 'pending') {
+                        AppState.agentApplications.push(app);
+                    }
+                });
+            }
+
+            // Load commissions
+            const commissionsRef = db.ref('commissions');
+            const commissionsSnapshot = await commissionsRef.once('value');
+            AppState.commissions = [];
+
+            if (commissionsSnapshot.exists()) {
+                commissionsSnapshot.forEach((childSnapshot) => {
+                    const commission = childSnapshot.val();
+                    commission.id = childSnapshot.key;
+                    AppState.commissions.push(commission);
+                });
+            }
+
+            // NEW: Load payments
+            await this.loadPayments();
+
+            // Load system settings
+            const settingsRef = db.ref('systemSettings');
+            const settingsSnapshot = await settingsRef.once('value');
+
+            if (settingsSnapshot.exists()) {
+                AppState.systemSettings = settingsSnapshot.val();
+            } else {
+                AppState.systemSettings = {
+                    maxLoanAmount: 50000,
+                    interestRate: 15,
+                    commissionRate: 2.5
+                };
+            }
+
+            // Load audit logs (last 100)
+            const auditRef = db.ref('auditLogs').limitToLast(100);
+            const auditSnapshot = await auditRef.once('value');
+            AppState.auditLogs = [];
+
+            if (auditSnapshot.exists()) {
+                auditSnapshot.forEach((childSnapshot) => {
+                    const log = childSnapshot.val();
+                    AppState.auditLogs.unshift(log);
+                });
+            }
+
+            return true;
+        } catch (error) {
+            console.error('Error loading data:', error);
+            ToastManager.show('Data Error', 'Failed to load system data.', 'error');
+            return false;
+        }
+    },
+
+    // NEW: load payments
+    async loadPayments() {
+        try {
+            const paymentsRef = db.ref('payments');
+            const snapshot = await paymentsRef.once('value');
+            const payments = [];
+            if (snapshot.exists()) {
+                snapshot.forEach(child => {
+                    const p = child.val();
+                    p.id = child.key;
+                    payments.push(p);
+                });
+                payments.sort((a, b) => b.timestamp - a.timestamp);
+            }
+            AppState.payments = payments;
+        } catch (e) {
+            console.error('Error loading payments:', e);
+        }
+    },
+
+    async createAgent(agentData) {
+        try {
+            Utils.showLoading('Creating agent account...');
+
+            const userCredential = await auth.createUserWithEmailAndPassword(
+                agentData.email,
+                agentData.password
+            );
+
+            const agentId = userCredential.user.uid;
+
+            const agentDoc = {
+                uid: agentId,
+                fullName: agentData.fullName,
+                email: agentData.email,
+                phone: agentData.phone,
+                nrc: agentData.nrc,
+                residence: agentData.address,
+                profilePhoto: agentData.profilePhoto || '',
+                nrcFront: agentData.nrcFront || '',
+                nrcBack: agentData.nrcBack || '',
+                userType: 'agent',
+                agentId: agentData.agentId,
+                branch: agentData.branch || '',
+                status: 'active',
+                isApproved: true,
+                approvedBy: AppState.currentUser.email,
+                approvedAt: Date.now(),
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                totalCustomers: 0,
+                totalLoans: 0,
+                totalCommission: 0,
+                notes: agentData.notes || ''
+            };
+
+            await db.ref('users/' + agentId).set(agentDoc);
+
+            await this.createAuditLog('agent_create', {
+                agentId: agentId,
+                agentName: agentData.fullName,
+                agentEmail: agentData.email,
+                agentCustomId: agentData.agentId,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: 'Agent created manually by admin'
+            });
+
+            Utils.hideLoading();
+            return {
+                success: true,
+                agentId: agentId,
+                message: 'Agent created successfully'
+            };
+        } catch (error) {
+            console.error('Error creating agent:', error);
+            Utils.hideLoading();
+
+            let errorMessage = 'Failed to create agent account';
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = 'Email already registered';
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = 'Password is too weak';
+            }
+
+            return { success: false, error: errorMessage };
+        }
+    },
+
+    async createCustomer(customerData) {
+        try {
+            Utils.showLoading('Creating customer account...');
+
+            const userCredential = await auth.createUserWithEmailAndPassword(
+                customerData.email,
+                customerData.password
+            );
+
+            const customerId = userCredential.user.uid;
+
+            const customerDoc = {
+                uid: customerId,
+                fullName: customerData.fullName,
+                email: customerData.email,
+                phone: customerData.phone,
+                nrc: customerData.nrc,
+                residence: customerData.address,
+                houseNumber: customerData.houseNumber || '',
+                occupation: customerData.occupation || '',
+                monthlyIncome: customerData.income || 0,
+                userType: 'customer',
+                assignedAgentId: customerData.agentId || '',
+                status: customerData.status || 'active',
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                verified: true,
+                createdByAdmin: AppState.currentUser.uid,
+                accountBalance: 0,
+                totalLoans: 0,
+                activeLoans: 0
+            };
+
+            await db.ref('users/' + customerId).set(customerDoc);
+
+            if (customerData.agentId) {
+                await db.ref('users/' + customerData.agentId + '/totalCustomers').set(
+                    firebase.database.ServerValue.increment(1)
+                );
+            }
+
+            await this.createAuditLog('customer_create', {
+                customerId: customerId,
+                customerName: customerData.fullName,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: 'Customer created manually by admin'
+            });
+
+            Utils.hideLoading();
+            return {
+                success: true,
+                customerId: customerId,
+                message: 'Customer created successfully'
+            };
+        } catch (error) {
+            console.error('Error creating customer:', error);
+            Utils.hideLoading();
+
+            let errorMessage = 'Failed to create customer account';
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = 'Email already registered';
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = 'Password is too weak';
+            }
+
+            return { success: false, error: errorMessage };
+        }
+    },
+
+    // MODIFIED: updateLoanStatus with 15% commission
+    async updateLoanStatus(loanId, status, approvedAmount = null, notes = '', lenderSignatureUrl = '') {
+        try {
+            const loanRef = db.ref('loans/' + loanId);
+            const updates = {
+                status: status,
+                updatedAt: Date.now(),
+                updatedByAdmin: AppState.currentUser.uid,
+                adminName: AppState.adminData?.fullName,
+                statusNotes: notes
+            };
+
+            if (status === 'approved' && approvedAmount) {
+                updates.approvedAmount = approvedAmount;
+                updates.approvedAt = Date.now();
+                updates.approvedBy = AppState.currentUser.uid;
+                updates.lenderSignature = lenderSignatureUrl; // store lender signature
+            }
+
+            if (status === 'rejected') {
+                updates.rejectedAt = Date.now();
+                updates.rejectedBy = AppState.currentUser.uid;
+            }
+
+            await loanRef.update(updates);
+
+            // If approved, create commission record for agent (15% of total interest)
+            if (status === 'approved') {
+                const loanSnap = await loanRef.once('value');
+                const loan = loanSnap.val();
+
+                if (loan.agentId) {
+                    // totalInterest should be stored in loan object (calculated at application)
+                    const totalInterest = loan.totalInterest || 0;
+                    const commissionAmount = totalInterest * 0.15; // 15% of interest
+
+                    await this.createCommissionRecord({
+                        agentId: loan.agentId,
+                        agentName: loan.agentName,
+                        customerId: loan.customerId,
+                        customerName: loan.customerName,
+                        loanId: loanId,
+                        loanAmount: approvedAmount || loan.amount,
+                        type: 'loan_approval',
+                        amount: commissionAmount,
+                        status: 'pending',
+                        createdAt: Date.now(),
+                        approvedBy: AppState.currentUser.uid
+                    });
+                }
+            }
+
+            await this.createAuditLog('loan_status_update', {
+                loanId: loanId,
+                oldStatus: AppState.selectedLoan?.status,
+                newStatus: status,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: notes || `Loan ${status} by admin`
+            });
+
+            return { success: true, message: `Loan ${status} successfully` };
+        } catch (error) {
+            console.error('Error updating loan status:', error);
+            return { success: false, error: 'Failed to update loan status' };
+        }
+    },
+
+    async updateUserStatus(userId, status, userType) {
+        try {
+            const userRef = db.ref('users/' + userId);
+            await userRef.update({
+                status: status,
+                updatedAt: Date.now(),
+                updatedByAdmin: AppState.currentUser.uid
+            });
+
+            await this.createAuditLog('user_status_update', {
+                userId: userId,
+                userType: userType,
+                newStatus: status,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: `${userType} status changed to ${status}`
+            });
+
+            return { success: true, message: `${userType} status updated to ${status}` };
+        } catch (error) {
+            console.error('Error updating user status:', error);
+            return { success: false, error: 'Failed to update user status' };
+        }
+    },
+
+    async assignAgentToCustomer(customerId, agentId) {
+        try {
+            const customerRef = db.ref('users/' + customerId);
+            const agentRef = db.ref('users/' + agentId);
+
+            const customerSnap = await customerRef.once('value');
+            const agentSnap = await agentRef.once('value');
+
+            const customer = customerSnap.val();
+            const agent = agentSnap.val();
+
+            await customerRef.update({
+                assignedAgentId: agentId,
+                agentName: agent.fullName,
+                updatedAt: Date.now(),
+                updatedByAdmin: AppState.currentUser.uid
+            });
+
+            await agentRef.update({
+                totalCustomers: firebase.database.ServerValue.increment(1),
+                updatedAt: Date.now()
+            });
+
+            await this.createAuditLog('agent_assignment', {
+                customerId: customerId,
+                customerName: customer.fullName,
+                agentId: agentId,
+                agentName: agent.fullName,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: 'Agent manually assigned to customer by admin'
+            });
+
+            return {
+                success: true,
+                message: `Agent ${agent.fullName} assigned to customer ${customer.fullName}`
+            };
+        } catch (error) {
+            console.error('Error assigning agent:', error);
+            return { success: false, error: 'Failed to assign agent' };
+        }
+    },
+
+    async processCommissionPayout(commissionId, paymentMethod, reference) {
+        try {
+            const commissionRef = db.ref('commissions/' + commissionId);
+            await commissionRef.update({
+                status: 'paid',
+                paidAt: Date.now(),
+                paidBy: AppState.currentUser.uid,
+                paymentMethod: paymentMethod,
+                paymentReference: reference,
+                updatedAt: Date.now()
+            });
+
+            const commissionSnap = await commissionRef.once('value');
+            const commission = commissionSnap.val();
+
+            if (commission.agentId) {
+                const agentRef = db.ref('users/' + commission.agentId);
+                await agentRef.update({
+                    totalCommission: firebase.database.ServerValue.increment(commission.amount),
+                    updatedAt: Date.now()
+                });
+            }
+
+            await this.createAuditLog('commission_payout', {
+                commissionId: commissionId,
+                agentId: commission.agentId,
+                agentName: commission.agentName,
+                amount: commission.amount,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: `Commission paid via ${paymentMethod}`
+            });
+
+            return { success: true, message: 'Commission paid successfully' };
+        } catch (error) {
+            console.error('Error processing commission:', error);
+            return { success: false, error: 'Failed to process commission' };
+        }
+    },
+
+    async createCommissionRecord(commissionData) {
+        try {
+            const commissionId = Utils.generateId('COM');
+            const commissionRef = db.ref('commissions/' + commissionId);
+
+            const commission = {
+                id: commissionId,
+                ...commissionData
+            };
+
+            await commissionRef.set(commission);
+            return { success: true, commissionId: commissionId };
+        } catch (error) {
+            console.error('Error creating commission record:', error);
+            return { success: false, error: 'Failed to create commission record' };
+        }
+    },
+
+    async createAuditLog(action, data) {
+        try {
+            const auditId = Utils.generateId('AUD');
+            const auditRef = db.ref('auditLogs/' + auditId);
+
+            const auditLog = {
+                id: auditId,
+                action: action,
+                userId: AppState.currentUser.uid,
+                userName: AppState.adminData?.fullName || 'Admin',
+                userRole: 'admin',
+                userEmail: AppState.currentUser.email,
+                timestamp: Date.now(),
+                ipAddress: '',
+                userAgent: navigator.userAgent,
+                data: data
+            };
+
+            await auditRef.set(auditLog);
+
+            AppState.auditLogs.unshift(auditLog);
+            if (AppState.auditLogs.length > 100) {
+                AppState.auditLogs = AppState.auditLogs.slice(0, 100);
+            }
+
+            return auditId;
+        } catch (error) {
+            console.error('Error creating audit log:', error);
+            return null;
+        }
+    },
+
+    async updateSystemSettings(settings) {
+        try {
+            const settingsRef = db.ref('systemSettings');
+            await settingsRef.update({
+                ...settings,
+                updatedAt: Date.now(),
+                updatedBy: AppState.currentUser.uid
+            });
+
+            AppState.systemSettings = { ...AppState.systemSettings, ...settings };
+
+            await this.createAuditLog('settings_update', {
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                settings: settings
+            });
+
+            return { success: true, message: 'Settings updated successfully' };
+        } catch (error) {
+            console.error('Error updating settings:', error);
+            return { success: false, error: 'Failed to update settings' };
+        }
+    },
+
+    async approveAgentApplication(applicationId, credentials) {
+        try {
+            Utils.showLoading('Approving agent application...');
+
+            const appRef = db.ref('agentApplications/' + applicationId);
+            const appSnap = await appRef.once('value');
+            const application = appSnap.val();
+
+            if (!application) {
+                throw new Error('Application not found');
+            }
+
+            const userCredential = await auth.createUserWithEmailAndPassword(
+                credentials.email,
+                credentials.password
+            );
+
+            const agentId = userCredential.user.uid;
+
+            const agentDoc = {
+                uid: agentId,
+                fullName: application.fullName,
+                email: credentials.email,
+                phone: application.phone,
+                nrc: application.nrc,
+                residence: application.residence,
+                profilePhoto: application.profilePhoto || '',
+                nrcFront: application.nrcFront || '',
+                nrcBack: application.nrcBack || '',
+                additionalDoc: application.additionalDoc || '',
+                userType: 'agent',
+                agentId: credentials.agentId,
+                status: 'active',
+                isApproved: true,
+                applicationId: applicationId,
+                approvedBy: AppState.currentUser.email,
+                approvedAt: Date.now(),
+                createdAt: Date.now(),
+                updatedAt: Date.now(),
+                totalCustomers: 0,
+                totalLoans: 0,
+                totalCommission: 0,
+                notes: 'Approved from application'
+            };
+
+            await db.ref('users/' + agentId).set(agentDoc);
+
+            await appRef.update({
+                status: 'approved',
+                approvedAt: Date.now(),
+                approvedBy: AppState.currentUser.email,
+                assignedCredentials: credentials
+            });
+
+            await this.createAuditLog('agent_application_approve', {
+                applicationId: applicationId,
+                agentId: agentId,
+                agentName: application.fullName,
+                agentEmail: credentials.email,
+                agentCustomId: credentials.agentId,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: 'Agent application approved by admin'
+            });
+
+            Utils.hideLoading();
+            return {
+                success: true,
+                agentId: agentId,
+                message: 'Agent application approved successfully'
+            };
+        } catch (error) {
+            console.error('Error approving agent application:', error);
+            Utils.hideLoading();
+
+            let errorMessage = 'Failed to approve agent application';
+            if (error.code === 'auth/email-already-in-use') {
+                errorMessage = 'Email already registered';
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = 'Password is too weak';
+            }
+
+            return { success: false, error: errorMessage };
+        }
+    },
+
+    async rejectAgentApplication(applicationId, reason = '') {
+        try {
+            const appRef = db.ref('agentApplications/' + applicationId);
+            await appRef.update({
+                status: 'rejected',
+                rejectedAt: Date.now(),
+                rejectedBy: AppState.currentUser.email,
+                rejectionReason: reason
+            });
+
+            await this.createAuditLog('agent_application_reject', {
+                applicationId: applicationId,
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                reason: reason,
+                details: 'Agent application rejected by admin'
+            });
+
+            return { success: true, message: 'Agent application rejected' };
+        } catch (error) {
+            console.error('Error rejecting agent application:', error);
+            return { success: false, error: 'Failed to reject application' };
+        }
+    },
+
+    async changeAdminPassword(currentPassword, newPassword) {
+        try {
+            const credential = firebase.auth.EmailAuthProvider.credential(
+                AppState.currentUser.email,
+                currentPassword
+            );
+
+            await AppState.currentUser.reauthenticateWithCredential(credential);
+            await AppState.currentUser.updatePassword(newPassword);
+
+            await this.createAuditLog('password_change', {
+                adminId: AppState.currentUser.uid,
+                adminEmail: AppState.currentUser.email,
+                details: 'Admin password changed'
+            });
+
+            return { success: true, message: 'Password changed successfully' };
+        } catch (error) {
+            console.error('Error changing password:', error);
+            let errorMessage = 'Failed to change password';
+            if (error.code === 'auth/wrong-password') {
+                errorMessage = 'Current password is incorrect';
+            } else if (error.code === 'auth/weak-password') {
+                errorMessage = 'New password is too weak';
+            }
+
+            return { success: false, error: errorMessage };
+        }
+    },
+
+    // NEW: verify payment (admin approves payment proof)
+    async verifyPayment(paymentId, loanId, amount) {
+        try {
+            const payRef = db.ref('payments/' + paymentId);
+            await payRef.update({
+                status: 'verified',
+                verifiedAt: Date.now(),
+                verifiedBy: AppState.currentUser.uid
+            });
+
+            const loanRef = db.ref('loans/' + loanId);
+            const loanSnap = await loanRef.once('value');
+            const loan = loanSnap.val();
+            const newTotalPaid = (loan.totalPaid || 0) + amount;
+
+            const updates = { totalPaid: newTotalPaid, updatedAt: Date.now() };
+            if (newTotalPaid >= (loan.totalPayable || 0)) {
+                updates.status = 'completed';
+            }
+            await loanRef.update(updates);
+
+            await this.createAuditLog('payment_verified', {
+                paymentId: paymentId,
+                loanId: loanId,
+                amount: amount,
+                adminId: AppState.currentUser.uid,
+                details: 'Payment proof verified'
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error verifying payment:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    // NEW: reject payment
+    async rejectPayment(paymentId, reason) {
+        try {
+            const payRef = db.ref('payments/' + paymentId);
+            await payRef.update({
+                status: 'rejected',
+                rejectedAt: Date.now(),
+                rejectedBy: AppState.currentUser.uid,
+                rejectionReason: reason
+            });
+
+            await this.createAuditLog('payment_rejected', {
+                paymentId: paymentId,
+                reason: reason,
+                adminId: AppState.currentUser.uid
+            });
+
+            return { success: true };
+        } catch (error) {
+            console.error('Error rejecting payment:', error);
+            return { success: false, error: error.message };
+        }
+    },
+
+    async signOut() {
+        try {
+            AppState.realtimeListeners.forEach(listener => {
+                if (typeof listener === 'function') listener();
+            });
+            AppState.realtimeListeners = [];
+
+            AppState.currentUser = null;
+            AppState.adminData = null;
+            AppState.loans = [];
+            AppState.agents = [];
+            AppState.customers = [];
+            AppState.agentApplications = [];
+            AppState.commissions = [];
+            AppState.payments = [];
+
+            await auth.signOut();
+            window.location.href = 'login.html';
+        } catch (error) {
+            console.error('Error signing out:', error);
+            ToastManager.show('Logout Error', 'Failed to sign out properly', 'error');
+        }
+    },
+
+    setupRealtimeListeners() {
+        // Loans listener
+        const loansRef = db.ref('loans');
+        const loansListener = loansRef.on('value', (snapshot) => {
+            const loans = [];
+            snapshot.forEach((childSnapshot) => {
+                const loan = childSnapshot.val();
+                loan.id = childSnapshot.key;
+                loans.push(loan);
+            });
+            loans.sort((a, b) => b.createdAt - a.createdAt);
+            AppState.loans = loans;
+            if (AppState.currentSection === 'loans' || AppState.currentSection === 'dashboard' || AppState.currentSection === 'profit') {
+                AdminUI.updateLoansUI?.();
+                AdminUI.updateDashboardUI?.();
+                AdminUI.updateProfitAnalytics?.();
+            }
+        });
+        AppState.realtimeListeners.push(() => loansRef.off('value', loansListener));
+
+        // Agents listener
+        const agentsRef = db.ref('users').orderByChild('userType').equalTo('agent');
+        const agentsListener = agentsRef.on('value', (snapshot) => {
+            const agents = [];
+            snapshot.forEach((childSnapshot) => {
+                const agent = childSnapshot.val();
+                agent.id = childSnapshot.key;
+                agents.push(agent);
+            });
+            AppState.agents = agents;
+            if (AppState.currentSection === 'agents' || AppState.currentSection === 'dashboard') {
+                AdminUI.updateAgentsUI?.();
+                AdminUI.updateDashboardUI?.();
+            }
+        });
+        AppState.realtimeListeners.push(() => agentsRef.off('value', agentsListener));
+
+        // Customers listener
+        const customersRef = db.ref('users').orderByChild('userType').equalTo('customer');
+        const customersListener = customersRef.on('value', (snapshot) => {
+            const customers = [];
+            snapshot.forEach((childSnapshot) => {
+                const customer = childSnapshot.val();
+                customer.id = childSnapshot.key;
+                customers.push(customer);
+            });
+            AppState.customers = customers;
+            if (AppState.currentSection === 'customers' || AppState.currentSection === 'dashboard') {
+                AdminUI.updateCustomersUI?.();
+                AdminUI.updateDashboardUI?.();
+            }
+        });
+        AppState.realtimeListeners.push(() => customersRef.off('value', customersListener));
+
+        // Agent applications listener
+        const appsRef = db.ref('agentApplications');
+        const appsListener = appsRef.on('value', (snapshot) => {
+            const applications = [];
+            snapshot.forEach((childSnapshot) => {
+                const app = childSnapshot.val();
+                app.id = childSnapshot.key;
+                if (app.status === 'pending') {
+                    applications.push(app);
+                }
+            });
+            AppState.agentApplications = applications;
+            if (AppState.currentSection === 'agents' || AppState.currentSection === 'approvals') {
+                AdminUI.updateAgentApplicationsUI?.();
+                AdminUI.updateApprovalsUI?.();
+            }
+        });
+        AppState.realtimeListeners.push(() => appsRef.off('value', appsListener));
+
+        // Commissions listener
+        const commissionsRef = db.ref('commissions');
+        const commissionsListener = commissionsRef.on('value', (snapshot) => {
+            const commissions = [];
+            snapshot.forEach((childSnapshot) => {
+                const commission = childSnapshot.val();
+                commission.id = childSnapshot.key;
+                commissions.push(commission);
+            });
+            AppState.commissions = commissions;
+            if (AppState.currentSection === 'commissions' || AppState.currentSection === 'dashboard' || AppState.currentSection === 'profit') {
+                AdminUI.updateCommissionsUI?.();
+                AdminUI.updateDashboardUI?.();
+                AdminUI.updateProfitAnalytics?.();
+            }
+        });
+        AppState.realtimeListeners.push(() => commissionsRef.off('value', commissionsListener));
+
+        // NEW: Payments listener
+        const paymentsRef = db.ref('payments');
+        const paymentsListener = paymentsRef.on('value', (snapshot) => {
+            const payments = [];
+            snapshot.forEach((childSnapshot) => {
+                const p = childSnapshot.val();
+                p.id = childSnapshot.key;
+                payments.push(p);
+            });
+            payments.sort((a, b) => b.timestamp - a.timestamp);
+            AppState.payments = payments;
+            if (AppState.currentSection === 'payments' || AppState.currentSection === 'dashboard' || AppState.currentSection === 'profit') {
+                AdminUI.updatePaymentsUI?.();
+                AdminUI.updateProfitAnalytics?.();
+            }
+        });
+        AppState.realtimeListeners.push(() => paymentsRef.off('value', paymentsListener));
+
+        // Audit logs listener
+        const auditRef = db.ref('auditLogs').limitToLast(100);
+        const auditListener = auditRef.on('value', (snapshot) => {
+            const logs = [];
+            snapshot.forEach((childSnapshot) => {
+                const log = childSnapshot.val();
+                logs.unshift(log);
+            });
+            AppState.auditLogs = logs;
+            if (AppState.currentSection === 'audit') {
+                AdminUI.updateAuditLogUI?.();
+            }
+        });
+        AppState.realtimeListeners.push(() => auditRef.off('value', auditListener));
+    }
+};
+
+// ===== UI MANAGER =====
+const AdminUI = {
+    init() {
+        this.cacheElements();
+        this.bindEvents();
+        this.initAuth();
+        this.setupResponsive();
+        this.initLenderSignaturePad?.(); // for lender signature
+    },
+
+    cacheElements() {
+        this.navItems = document.querySelectorAll('.nav-item');
+        this.bottomNavItems = document.querySelectorAll('.bottom-nav-item');
+        this.contentSections = document.querySelectorAll('.content-section');
+
+        this.logoutBtn = document.getElementById('logoutBtn');
+        this.refreshDashboard = document.getElementById('refreshDashboard');
+        this.createAgentBtn = document.getElementById('createAgentBtn');
+        this.createCustomerBtn = document.getElementById('createCustomerBtn');
+        this.assignAgentBtn = document.getElementById('assignAgentBtn');
+        this.processPayoutsBtn = document.getElementById('processPayoutsBtn');
+        this.saveSettingsBtn = document.getElementById('saveSettingsBtn');
+        this.changePasswordBtn = document.getElementById('changePasswordBtn');
+        this.clearCacheBtn = document.getElementById('clearCacheBtn');
+
+        this.submitAgentBtn = document.getElementById('submitAgentBtn');
+        this.submitCustomerBtn = document.getElementById('submitCustomerBtn');
+        this.savePasswordBtn = document.getElementById('savePasswordBtn');
+
+        this.adminAvatar = document.getElementById('adminAvatar');
+        this.adminName = document.getElementById('adminName');
+        this.adminEmail = document.getElementById('adminEmail');
+        this.pageTitle = document.getElementById('pageTitle');
+
+        // NEW profit refresh button
+        this.refreshProfit = document.getElementById('refreshProfit');
+        if (this.refreshProfit) {
+            this.refreshProfit.addEventListener('click', () => this.updateProfitAnalytics());
+        }
+
+        // Payment proof modal buttons
+        this.approvePaymentBtn = document.getElementById('approvePaymentBtn');
+        this.rejectPaymentBtn = document.getElementById('rejectPaymentBtn');
+        if (this.approvePaymentBtn) {
+            this.approvePaymentBtn.addEventListener('click', () => this.approveSelectedPayment());
+        }
+        if (this.rejectPaymentBtn) {
+            this.rejectPaymentBtn.addEventListener('click', () => this.rejectSelectedPayment());
+        }
+
+        // Approve loan modal buttons
+        this.approveLoanBtn = document.getElementById('approveLoanBtn');
+        this.rejectLoanBtn = document.getElementById('rejectLoanBtn');
+        if (this.approveLoanBtn) {
+            this.approveLoanBtn.addEventListener('click', () => this.submitLoanApproval());
+        }
+        if (this.rejectLoanBtn) {
+            this.rejectLoanBtn.addEventListener('click', () => this.rejectLoan());
+        }
+
+        // Clear signature button
+        this.clearLenderSignature = document.getElementById('clearLenderSignature');
+        if (this.clearLenderSignature) {
+            this.clearLenderSignature.addEventListener('click', () => {
+                const canvas = document.getElementById('lenderSignatureCanvas');
+                if (canvas) {
+                    const ctx = canvas.getContext('2d');
+                    ctx.clearRect(0, 0, canvas.width, canvas.height);
+                }
+            });
+        }
+    },
+
+    bindEvents() {
+        this.navItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.dataset.section;
+                this.showSection(section);
+                this.navItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                document.querySelectorAll('.bottom-nav-item').forEach(nav => nav.classList.remove('active'));
+                const bottomItem = document.querySelector(`.bottom-nav-item[data-section="${section}"]`);
+                if (bottomItem) bottomItem.classList.add('active');
+            });
+        });
+
+        this.bottomNavItems.forEach(item => {
+            item.addEventListener('click', (e) => {
+                e.preventDefault();
+                const section = item.dataset.section;
+                this.showSection(section);
+                this.bottomNavItems.forEach(nav => nav.classList.remove('active'));
+                item.classList.add('active');
+                this.navItems.forEach(nav => nav.classList.remove('active'));
+                const sideItem = document.querySelector(`.nav-item[data-section="${section}"]`);
+                if (sideItem) sideItem.classList.add('active');
+            });
+        });
+
+        this.logoutBtn.addEventListener('click', () => FirebaseService.signOut());
+
+        this.refreshDashboard?.addEventListener('click', () => {
+            this.updateDashboardUI();
+            ToastManager.show('Refreshed', 'Dashboard data updated', 'success');
+        });
+
+        this.createAgentBtn?.addEventListener('click', () => {
+            this.showModal('createAgentModal');
+            this.populateAgentForm();
+        });
+
+        this.createCustomerBtn?.addEventListener('click', () => {
+            this.showModal('createCustomerModal');
+            this.populateCustomerForm();
+        });
+
+        this.assignAgentBtn?.addEventListener('click', () => this.assignAgentToCustomer());
+
+        this.processPayoutsBtn?.addEventListener('click', () => this.processCommissionPayouts());
+
+        this.saveSettingsBtn?.addEventListener('click', () => this.saveSystemSettings());
+
+        this.changePasswordBtn?.addEventListener('click', () => this.showModal('changePasswordModal'));
+
+        this.clearCacheBtn?.addEventListener('click', () => {
+            if (confirm('Clear cache?')) {
+                localStorage.clear();
+                ToastManager.show('Cache Cleared', 'Local cache cleared', 'success');
+            }
+        });
+
+        this.submitAgentBtn?.addEventListener('click', () => this.submitAgentForm());
+
+        this.submitCustomerBtn?.addEventListener('click', () => this.submitCustomerForm());
+
+        this.savePasswordBtn?.addEventListener('click', () => this.changeAdminPassword());
+
+        // Search and filter events (original)
+        const loanSearch = document.getElementById('loanSearch');
+        if (loanSearch) loanSearch.addEventListener('input', Utils.debounce(() => this.filterLoans(), 300));
+        const loanStatusFilter = document.getElementById('loanStatusFilter');
+        if (loanStatusFilter) loanStatusFilter.addEventListener('change', () => this.filterLoans());
+
+        const agentSearch = document.getElementById('agentSearch');
+        if (agentSearch) agentSearch.addEventListener('input', Utils.debounce(() => this.filterAgents(), 300));
+        const agentStatusFilter = document.getElementById('agentStatusFilter');
+        if (agentStatusFilter) agentStatusFilter.addEventListener('change', () => this.filterAgents());
+
+        const customerSearch = document.getElementById('customerSearch');
+        if (customerSearch) customerSearch.addEventListener('input', Utils.debounce(() => this.filterCustomers(), 300));
+        const customerStatusFilter = document.getElementById('customerStatusFilter');
+        if (customerStatusFilter) customerStatusFilter.addEventListener('change', () => this.filterCustomers());
+
+        window.addEventListener('online', () => this.updateConnectionStatus());
+        window.addEventListener('offline', () => this.updateConnectionStatus());
+
+        // Mobile menu toggle
+        const menuToggle = document.getElementById('menuToggle');
+        if (menuToggle) {
+            menuToggle.addEventListener('click', () => {
+                document.getElementById('sidebar')?.classList.toggle('active');
+            });
+        }
+    },
+
+    setupResponsive() {
+        const handleResize = () => {
+            if (window.innerWidth > 900) {
+                document.getElementById('sidebar')?.classList.remove('active');
+            }
+        };
+        window.addEventListener('resize', handleResize);
+    },
+
+    updateConnectionStatus() {
+        const statusElement = document.getElementById('connectionStatus');
+        if (statusElement) {
+            statusElement.textContent = navigator.onLine ? 'Online' : 'Offline';
+            statusElement.style.color = navigator.onLine ? 'var(--ios-green)' : 'var(--ios-red)';
+        }
+        const desktopStatus = document.getElementById('desktopConnectionStatus');
+        if (desktopStatus) {
+            desktopStatus.textContent = navigator.onLine ? 'Online' : 'Offline';
+        }
+    },
+
+    async initAuth() {
+        Utils.showLoading('Authenticating Admin...');
+        try {
+            const adminData = await FirebaseService.checkAdminAuth();
+            if (!adminData) return;
+
+            await FirebaseService.loadAllData();
+            FirebaseService.setupRealtimeListeners();
+
+            this.updateAdminInfo();
+            this.updateDashboardUI();
+            this.updateLoansUI();
+            this.updateAgentsUI();
+            this.updateCustomersUI();
+            this.updateCommissionsUI();
+            this.updateSettingsUI();
+            this.updateProfitAnalytics(); // NEW
+
+            Utils.hideLoading();
+            ToastManager.show('Welcome Admin', `Hello ${adminData.fullName || 'Admin'}!`, 'success');
+        } catch (error) {
+            console.error('Authentication error:', error);
+            Utils.hideLoading();
+            ToastManager.show('Authentication Error', 'Failed to authenticate.', 'error');
+        }
+    },
+
+    updateAdminInfo() {
+        if (!AppState.adminData) return;
+        const admin = AppState.adminData;
+        const nameSpan = document.getElementById('adminUsername');
+        if (nameSpan) nameSpan.textContent = admin.fullName || 'Admin';
+        if (this.adminName) this.adminName.textContent = admin.fullName || 'Admin User';
+        if (this.adminAvatar) {
+            this.adminAvatar.textContent = Utils.getInitials(admin.fullName);
+            if (admin.profilePhoto) {
+                this.adminAvatar.style.backgroundImage = `url(${admin.profilePhoto})`;
+                this.adminAvatar.style.backgroundSize = 'cover';
+                this.adminAvatar.textContent = '';
+            }
+        }
+        if (this.adminEmail) this.adminEmail.value = AppState.currentUser.email;
+        const adminFullNameInput = document.getElementById('adminFullName');
+        if (adminFullNameInput) adminFullNameInput.value = admin.fullName || '';
+    },
+
+    showSection(sectionId) {
+        AppState.currentSection = sectionId;
+        this.contentSections.forEach(section => section.classList.remove('active'));
+        const section = document.getElementById(sectionId + 'Section');
+        if (section) section.classList.add('active');
+
+        const titles = {
+            dashboard: 'Dashboard',
+            profit: 'Profit Analytics',
+            loans: 'Loan Management',
+            agents: 'Agent Management',
+            customers: 'Customer Management',
+            approvals: 'Approve Requests',
+            assignments: 'Manual Assignments',
+            commissions: 'Commission Management',
+            documents: 'Document Viewer',
+            audit: 'Audit Log',
+            settings: 'Settings',
+            payments: 'Payments'
+        };
+        if (this.pageTitle) this.pageTitle.textContent = titles[sectionId] || 'Admin Panel';
+
+        // Load section-specific data
+        switch(sectionId) {
+            case 'loans': this.updateLoansUI(); break;
+            case 'agents': this.updateAgentsUI(); this.updateAgentApplicationsUI(); break;
+            case 'customers': this.updateCustomersUI(); break;
+            case 'approvals': this.updateApprovalsUI(); break;
+            case 'assignments': this.updateAssignmentsUI(); break;
+            case 'commissions': this.updateCommissionsUI(); break;
+            case 'documents': this.updateDocumentsUI(); break;
+            case 'audit': this.updateAuditLogUI(); break;
+            case 'settings': this.updateSettingsUI(); break;
+            case 'payments': this.updatePaymentsUI(); break;
+            case 'profit': this.updateProfitAnalytics(); break;
+        }
+        document.getElementById('mainContent')?.scrollTo(0, 0);
+    },
+
+    // ========== ORIGINAL UI METHODS (preserved) ==========
+    updateDashboardUI() {
+        const totalLoans = AppState.loans.length;
+        const activeAgents = AppState.agents.filter(a => a.status === 'active').length;
+        const totalCustomers = AppState.customers.length;
+        const pendingLoans = AppState.loans.filter(l => l.status === 'pending').length;
+        const pendingAgents = AppState.agentApplications.length;
+        const pendingCommissions = AppState.commissions.filter(c => c.status === 'pending').length;
+        const pendingPayments = AppState.payments?.filter(p => p.status === 'pending').length || 0;
+
+        const totalCommission = AppState.commissions
+            .filter(c => c.status === 'paid')
+            .reduce((sum, com) => sum + (com.amount || 0), 0);
+
+        document.getElementById('totalLoans') && (document.getElementById('totalLoans').textContent = totalLoans);
+        document.getElementById('activeAgents') && (document.getElementById('activeAgents').textContent = activeAgents);
+        document.getElementById('totalCustomers') && (document.getElementById('totalCustomers').textContent = totalCustomers);
+        document.getElementById('totalCommission') && (document.getElementById('totalCommission').textContent = Utils.formatCurrency(totalCommission));
+
+        document.getElementById('pendingLoansBadge') && (document.getElementById('pendingLoansBadge').textContent = pendingLoans);
+        document.getElementById('pendingAgentsBadge') && (document.getElementById('pendingAgentsBadge').textContent = pendingAgents);
+        document.getElementById('pendingApprovalsBadge') && (document.getElementById('pendingApprovalsBadge').textContent = pendingLoans + pendingAgents + pendingCommissions + pendingPayments);
+        document.getElementById('pendingPaymentsBadge') && (document.getElementById('pendingPaymentsBadge').textContent = pendingPayments);
+
+        this.updatePendingApprovalsTable();
+        this.updateRecentActivitiesTable();
+    },
+
+    updatePendingApprovalsTable() {
+        const table = document.getElementById('pendingApprovalsTable');
+        if (!table) return;
+        const pendingLoans = AppState.loans.filter(l => l.status === 'pending').slice(0, 5);
+        const pendingAgents = AppState.agentApplications.slice(0, 5);
+        if (pendingLoans.length === 0 && pendingAgents.length === 0) {
+            table.innerHTML = `<tr><td colspan="5" class="text-center text-muted" style="padding:40px;">No pending approvals</td></tr>`;
+            return;
+        }
+        let html = '';
+        pendingLoans.forEach(loan => {
+            html += `<tr>
+                <td><i class="fas fa-file-invoice-dollar text-primary"></i> Loan</td>
+                <td><div>${loan.customerName || 'Unknown'}</div><div class="text-muted">${Utils.formatCurrency(loan.amount)}</div></td>
+                <td>${Utils.formatDateOnly(loan.createdAt)}</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td><button class="btn btn-outline btn-small" onclick="AdminUI.viewLoanDetails('${loan.id}')">Review</button></td>
+            </tr>`;
+        });
+        pendingAgents.forEach(app => {
+            html += `<tr>
+                <td><i class="fas fa-user-tie text-success"></i> Agent</td>
+                <td><div>${app.fullName || 'Unknown'}</div><div class="text-muted">${app.phone || ''}</div></td>
+                <td>${Utils.formatDateOnly(app.submittedAt)}</td>
+                <td><span class="status-badge pending">Pending</span></td>
+                <td><button class="btn btn-outline btn-small" onclick="AdminUI.reviewAgentApplication('${app.id}')">Review</button></td>
+            </tr>`;
+        });
+        table.innerHTML = html;
+    },
+
+    updateRecentActivitiesTable() {
+        const table = document.getElementById('recentActivitiesTable');
+        if (!table) return;
+        const recentLogs = AppState.auditLogs.slice(0, 10);
+        if (recentLogs.length === 0) {
+            table.innerHTML = `<tr><td colspan="4" class="text-center text-muted" style="padding:40px;">No recent activities</td></tr>`;
+            return;
+        }
+        let html = '';
+        recentLogs.forEach(log => {
+            let actionText = '';
+            let details = '';
+            switch(log.action) {
+                case 'loan_status_update': actionText = 'Loan Status Updated'; details = `Loan ${log.data.loanId}: ${log.data.oldStatus} → ${log.data.newStatus}`; break;
+                case 'agent_create': actionText = 'Agent Created'; details = log.data.agentName; break;
+                case 'customer_create': actionText = 'Customer Created'; details = log.data.customerName; break;
+                case 'agent_assignment': actionText = 'Agent Assigned'; details = `${log.data.agentName} → ${log.data.customerName}`; break;
+                case 'commission_payout': actionText = 'Commission Paid'; details = `${log.data.agentName}: ${Utils.formatCurrency(log.data.amount)}`; break;
+                default: actionText = log.action.replace(/_/g, ' '); details = JSON.stringify(log.data).substring(0,50);
+            }
+            html += `<tr><td>${log.userName || 'System'}</td><td>${actionText}</td><td>${Utils.truncateText(details,40)}</td><td>${Utils.formatDate(log.timestamp)}</td></tr>`;
+        });
+        table.innerHTML = html;
+    },
+
+    updateLoansUI() {
+        const table = document.getElementById('loansTable');
+        if (!table) return;
+        if (AppState.loans.length === 0) {
+            table.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:40px;">No loans found</td></tr>`;
+            return;
+        }
+        let html = '';
+        AppState.loans.forEach(loan => {
+            const statusClass = `status-${loan.status}`;
+            const statusText = loan.status.charAt(0).toUpperCase() + loan.status.slice(1);
+            html += `<tr>
+                <td><strong>${loan.id}</strong></td>
+                <td>${loan.customerName || 'Unknown'}</td>
+                <td>${loan.agentName || 'Unassigned'}</td>
+                <td>${Utils.formatCurrency(loan.amount)}</td>
+                <td>${Utils.truncateText(loan.purpose || 'Not specified', 20)}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${Utils.formatDateOnly(loan.createdAt)}</td>
+                <td><div class="d-flex gap-2"><button class="btn btn-outline btn-small" onclick="AdminUI.viewLoanDetails('${loan.id}')"><i class="fas fa-eye"></i></button>${loan.status === 'pending' ? `<button class="btn btn-success btn-small" onclick="AdminUI.showApproveLoanModal('${loan.id}')"><i class="fas fa-check"></i></button>` : ''}</div></td>
+            </tr>`;
+        });
+        table.innerHTML = html;
+    },
+
+    filterLoans() {
+        const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
+        const statusFilter = document.getElementById('loanStatusFilter')?.value || 'all';
+        const rows = document.querySelectorAll('#loansTable tr');
+        rows.forEach(row => {
+            if (row.cells.length < 8) return;
+            const customerName = row.cells[1].textContent.toLowerCase();
+            const agentName = row.cells[2].textContent.toLowerCase();
+            const purpose = row.cells[4].textContent.toLowerCase();
+            const status = row.cells[5].querySelector('.status-badge')?.textContent.toLowerCase() || '';
+            const matchesSearch = !searchTerm || customerName.includes(searchTerm) || agentName.includes(searchTerm) || purpose.includes(searchTerm);
+            const matchesFilter = statusFilter === 'all' || status === statusFilter;
+            row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+        });
+    },
+
+    updateAgentsUI() {
+        const table = document.getElementById('agentsTable');
+        if (!table) return;
+        if (AppState.agents.length === 0) {
+            table.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:40px;">No agents found</td></tr>`;
+            return;
+        }
+        let html = '';
+        AppState.agents.forEach(agent => {
+            const statusClass = `status-${agent.status}`;
+            const statusText = agent.status.charAt(0).toUpperCase() + agent.status.slice(1);
+            html += `<tr>
+                <td><strong>${agent.agentId || agent.id.substring(0,8)}</strong></td>
+                <td>${agent.fullName || 'Unknown'}</td>
+                <td>${agent.email || 'No email'}</td>
+                <td>${agent.phone || 'No phone'}</td>
+                <td>${agent.totalCustomers || 0}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td>${Utils.formatDateOnly(agent.createdAt)}</td>
+                <td><div class="d-flex gap-2"><button class="btn btn-outline btn-small" onclick="AdminUI.viewAgentDetails('${agent.id}')"><i class="fas fa-eye"></i></button><button class="btn btn-danger btn-small" onclick="AdminUI.toggleAgentStatus('${agent.id}', '${agent.status === 'active' ? 'suspended' : 'active'}')"><i class="fas fa-${agent.status === 'active' ? 'ban' : 'check'}"></i></button></div></td>
+            </tr>`;
+        });
+        table.innerHTML = html;
+    },
+
+    filterAgents() {
+        const searchTerm = document.getElementById('agentSearch')?.value.toLowerCase() || '';
+        const statusFilter = document.getElementById('agentStatusFilter')?.value || 'all';
+        const rows = document.querySelectorAll('#agentsTable tr');
+        rows.forEach(row => {
+            if (row.cells.length < 8) return;
+            const agentName = row.cells[1].textContent.toLowerCase();
+            const agentEmail = row.cells[2].textContent.toLowerCase();
+            const status = row.cells[5].querySelector('.status-badge')?.textContent.toLowerCase() || '';
+            const matchesSearch = !searchTerm || agentName.includes(searchTerm) || agentEmail.includes(searchTerm);
+            const matchesFilter = statusFilter === 'all' || status === statusFilter;
+            row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+        });
+    },
+
+    updateAgentApplicationsUI() {
+        const table = document.getElementById('agentApplicationsTable');
+        if (!table) return;
+        if (AppState.agentApplications.length === 0) {
+            table.innerHTML = `<tr><td colspan="7" class="text-center text-muted" style="padding:40px;">No pending applications</td></tr>`;
+            return;
+        }
+        let html = '';
+        AppState.agentApplications.forEach(app => {
+            html += `<tr>
+                <td><strong>${app.id}</strong></td>
+                <td>${app.fullName || 'Unknown'}</td>
+                <td>${app.phone || 'No phone'}</td>
+                <td>${app.nrc || 'No NRC'}</td>
+                <td>${Utils.formatDateOnly(app.submittedAt)}</td>
+                <td><button class="btn btn-outline btn-small" onclick="AdminUI.viewApplicationDocuments('${app.id}')"><i class="fas fa-file-alt"></i> View</button></td>
+                <td><div class="d-flex gap-2"><button class="btn btn-success btn-small" onclick="AdminUI.reviewAgentApplication('${app.id}')"><i class="fas fa-check"></i> Review</button></div></td>
+            </tr>`;
+        });
+        table.innerHTML = html;
+        document.getElementById('pendingAgentsCount') && (document.getElementById('pendingAgentsCount').textContent = AppState.agentApplications.length);
+    },
+
+    updateCustomersUI() {
+        const table = document.getElementById('customersTable');
+        if (!table) return;
+        if (AppState.customers.length === 0) {
+            table.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:40px;">No customers found</td></tr>`;
+            return;
+        }
+        let html = '';
+        AppState.customers.forEach(customer => {
+            const statusClass = `status-${customer.status}`;
+            const statusText = customer.status.charAt(0).toUpperCase() + customer.status.slice(1);
+            html += `<tr>
+                <td><strong>${customer.id.substring(0,8)}</strong></td>
+                <td>${customer.fullName || 'Unknown'}</td>
+                <td>${customer.email || 'No email'}</td>
+                <td>${customer.phone || 'No phone'}</td>
+                <td>${customer.agentName || 'Unassigned'}</td>
+                <td>${customer.totalLoans || 0}</td>
+                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
+                <td><div class="d-flex gap-2"><button class="btn btn-outline btn-small" onclick="AdminUI.viewCustomerDetails('${customer.id}')"><i class="fas fa-eye"></i></button><button class="btn btn-danger btn-small" onclick="AdminUI.toggleCustomerStatus('${customer.id}', '${customer.status === 'active' ? 'suspended' : 'active'}')"><i class="fas fa-${customer.status === 'active' ? 'ban' : 'check'}"></i></button></div></td>
+            </tr>`;
+        });
+        table.innerHTML = html;
+    },
+
+    filterCustomers() {
+        const searchTerm = document.getElementById('customerSearch')?.value.toLowerCase() || '';
+        const statusFilter = document.getElementById('customerStatusFilter')?.value || 'all';
+        const rows = document.querySelectorAll('#customersTable tr');
+        rows.forEach(row => {
+            if (row.cells.length < 8) return;
+            const customerName = row.cells[1].textContent.toLowerCase();
+            const customerEmail = row.cells[2].textContent.toLowerCase();
+            const agentName = row.cells[4].textContent.toLowerCase();
+            const status = row.cells[6].querySelector('.status-badge')?.textContent.toLowerCase() || '';
+            const matchesSearch = !searchTerm || customerName.includes(searchTerm) || customerEmail.includes(searchTerm) || agentName.includes(searchTerm);
+            const matchesFilter = statusFilter === 'all' || status === statusFilter;
+            row.style.display = (matchesSearch && matchesFilter) ? '' : 'none';
+        });
+    },
+
+    updateApprovalsUI() {
+        const pendingLoans = AppState.loans.filter(l => l.status === 'pending').length;
+        const pendingAgents = AppState.agentApplications.length;
+        const pendingCommissions = AppState.commissions.filter(c => c.status === 'pending').length;
+        const pendingPayments = AppState.payments?.filter(p => p.status === 'pending').length || 0;
+        document.getElementById('pendingLoansCount') && (document.getElementById('pendingLoansCount').textContent = pendingLoans);
+        document.getElementById('pendingAgentsCount') && (document.getElementById('pendingAgentsCount').textContent = pendingAgents);
+        document.getElementById('pendingCommissionsCount') && (document.getElementById('pendingCommissionsCount').textContent = pendingCommissions);
+    },
+
+    updateAssignmentsUI() {
+        const customerSelect = document.getElementById('assignCustomerSelect');
+        const agentSelect = document.getElementById('assignAgentSelect');
+        if (customerSelect) {
+            customerSelect.innerHTML = '<option value="">Choose customer...</option>';
+            AppState.customers.forEach(c => {
+                customerSelect.innerHTML += `<option value="${c.id}">${c.fullName} (${c.email})</option>`;
+            });
+        }
+        if (agentSelect) {
+            agentSelect.innerHTML = '<option value="">Choose agent...</option>';
+            AppState.agents.forEach(a => {
+                agentSelect.innerHTML += `<option value="${a.id}">${a.fullName} (${a.agentId || a.id.substring(0,8)})</option>`;
+            });
+        }
+        this.updateRecentAssignmentsTable();
+    },
+
+    updateRecentAssignmentsTable() {
+        const table = document.getElementById('recentAssignmentsTable');
+        if (!table) return;
+        const assignments = AppState.auditLogs.filter(log => log.action === 'agent_assignment').slice(0, 10);
+        if (assignments.length === 0) {
+            table.innerHTML = `<tr><td colspan="4" class="text-center text-muted">No assignments yet</td></tr>`;
+            return;
+        }
+        let html = '';
+        assignments.forEach(log => {
+            html += `<tr><td>${log.data.customerName}</td><td>${log.data.agentName}</td><td>${log.userName}</td><td>${Utils.formatDateOnly(log.timestamp)}</td></tr>`;
+        });
+        table.innerHTML = html;
+    },
+
+    async assignAgentToCustomer() {
+        const customerId = document.getElementById('assignCustomerSelect')?.value;
+        const agentId = document.getElementById('assignAgentSelect')?.value;
+        if (!customerId || !agentId) {
+            ToastManager.show('Error', 'Please select both', 'error');
+            return;
+        }
+        const result = await FirebaseService.assignAgentToCustomer(customerId, agentId);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            document.getElementById('assignCustomerSelect').value = '';
+            document.getElementById('assignAgentSelect').value = '';
+            this.updateRecentAssignmentsTable();
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    updateCommissionsUI() {
+        const pendingTable = document.getElementById('pendingCommissionsTable');
+        const historyTable = document.getElementById('commissionHistoryTable');
+        if (pendingTable) {
+            const pending = AppState.commissions.filter(c => c.status === 'pending');
+            if (pending.length === 0) {
+                pendingTable.innerHTML = `<tr><td colspan="8" class="text-center text-muted" style="padding:40px;">No pending commissions</td></tr>`;
+            } else {
+                let html = '';
+                pending.forEach(c => {
+                    html += `<tr><td>${c.id}</td><td>${c.agentName}</td><td>${c.customerName}</td><td>${c.loanId}</td><td>${Utils.formatCurrency(c.amount)}</td><td>${c.type}</td><td>${Utils.formatDateOnly(c.createdAt)}</td><td><button class="btn btn-success btn-small" onclick="AdminUI.payCommission('${c.id}')"><i class="fas fa-money-bill-wave"></i> Pay</button></td></tr>`;
+                });
+                pendingTable.innerHTML = html;
+            }
+        }
+        if (historyTable) {
+            const paid = AppState.commissions.filter(c => c.status === 'paid').slice(0,20);
+            if (paid.length === 0) {
+                historyTable.innerHTML = `<tr><td colspan="6" class="text-center text-muted" style="padding:40px;">No commission history</td></tr>`;
+            } else {
+                let html = '';
+                paid.forEach(c => {
+                    html += `<tr><td>${Utils.formatDateOnly(c.paidAt)}</td><td>${c.agentName}</td><td>${Utils.formatCurrency(c.amount)}</td><td>${c.loanId}</td><td>${c.paymentMethod || 'Bank Transfer'}</td><td>${c.paymentReference || 'N/A'}</td></tr>`;
+                });
+                historyTable.innerHTML = html;
+            }
+        }
+    },
+
+    async payCommission(commissionId) {
+        const commission = AppState.commissions.find(c => c.id === commissionId);
+        if (!commission) return;
+        const paymentMethod = prompt('Payment method:', 'Bank Transfer');
+        if (!paymentMethod) return;
+        const reference = prompt('Reference:');
+        if (!reference) return;
+        const result = await FirebaseService.processCommissionPayout(commissionId, paymentMethod, reference);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.updateCommissionsUI();
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async processCommissionPayouts() {
+        const pending = AppState.commissions.filter(c => c.status === 'pending');
+        if (pending.length === 0) {
+            ToastManager.show('Info', 'No pending commissions', 'info');
+            return;
+        }
+        if (!confirm(`Process ${pending.length} payouts?`)) return;
+        Utils.showLoading('Processing...');
+        let success = 0, error = 0;
+        for (const c of pending) {
+            try {
+                await FirebaseService.processCommissionPayout(c.id, 'Batch Transfer', `BATCH-${Date.now()}`);
+                success++;
+                await Utils.sleep(100);
+            } catch (e) {
+                error++;
+            }
+        }
+        Utils.hideLoading();
+        ToastManager.show('Payouts', `Processed ${success}, failed ${error}`, success>0?'success':'error');
+        this.updateCommissionsUI();
+    },
+
+    updateDocumentsUI() {
+        const container = document.getElementById('documentsContainer');
+        if (container) {
+            container.innerHTML = `<div class="text-center text-muted" style="padding:60px;"><i class="fas fa-file-alt fa-3x mb-4"></i><h4>Document Viewer</h4><p class="mb-4">Use the View buttons in loan, agent, and customer details to see uploaded documents</p><div class="d-flex justify-center gap-3"><button class="btn btn-outline" onclick="AdminUI.showSection('loans')"><i class="fas fa-file-invoice-dollar"></i> View Loan Documents</button><button class="btn btn-outline" onclick="AdminUI.showSection('agents')"><i class="fas fa-user-tie"></i> View Agent Documents</button></div></div>`;
+        }
+    },
+
+    updateAuditLogUI() {
+        const table = document.getElementById('auditLogTable');
+        if (!table) return;
+        if (AppState.auditLogs.length === 0) {
+            table.innerHTML = `<tr><td colspan="5" class="text-center text-muted" style="padding:40px;">No audit logs</td></tr>`;
+            return;
+        }
+        let html = '';
+        AppState.auditLogs.forEach(log => {
+            let actionText = log.action.replace(/_/g, ' ');
+            html += `<tr><td>${Utils.formatDate(log.timestamp)}</td><td>${log.userName || 'System'}<br><span class="text-muted">${log.userEmail||''}</span></td><td>${actionText}</td><td>${Utils.truncateText(JSON.stringify(log.data),60)}</td><td>${log.ipAddress||'N/A'}</td></tr>`;
+        });
+        table.innerHTML = html;
+    },
+
+    updateSettingsUI() {
+        if (!AppState.systemSettings) return;
+        const s = AppState.systemSettings;
+        const maxLoan = document.getElementById('maxLoanAmount');
+        if (maxLoan) maxLoan.value = s.maxLoanAmount || 50000;
+        const interest = document.getElementById('interestRate');
+        if (interest) interest.value = s.interestRate || 15;
+        const commission = document.getElementById('commissionRate');
+        if (commission) commission.value = s.commissionRate || 2.5;
+    },
+
+    async saveSystemSettings() {
+        const maxLoan = parseFloat(document.getElementById('maxLoanAmount')?.value) || 50000;
+        const interest = parseFloat(document.getElementById('interestRate')?.value) || 15;
+        const commission = parseFloat(document.getElementById('commissionRate')?.value) || 2.5;
+        const settings = { maxLoanAmount: maxLoan, interestRate: interest, commissionRate: commission };
+        const result = await FirebaseService.updateSystemSettings(settings);
+        if (result.success) ToastManager.show('Success', result.message, 'success');
+        else ToastManager.show('Error', result.error, 'error');
+    },
+
+    async changeAdminPassword() {
+        const current = document.getElementById('currentPassword')?.value;
+        const newPass = document.getElementById('newPassword')?.value;
+        const confirm = document.getElementById('confirmNewPassword')?.value;
+        if (!current || !newPass || !confirm) {
+            ToastManager.show('Error', 'Fill all fields', 'error');
+            return;
+        }
+        if (newPass.length < 6) {
+            ToastManager.show('Error', 'Password too short', 'error');
+            return;
+        }
+        if (newPass !== confirm) {
+            ToastManager.show('Error', 'Passwords do not match', 'error');
+            return;
+        }
+        const result = await FirebaseService.changeAdminPassword(current, newPass);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('changePasswordModal');
+            document.getElementById('currentPassword').value = '';
+            document.getElementById('newPassword').value = '';
+            document.getElementById('confirmNewPassword').value = '';
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    showModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+    },
+
+    closeModal(modalId) {
+        const modal = document.getElementById(modalId);
+        if (modal) {
+            modal.classList.remove('active');
+            document.body.style.overflow = 'auto';
+        }
+    },
+
+    populateAgentForm() {
+        ['agentFullName','agentPhone','agentNRC','agentAddress','agentEmail','agentCustomId','agentPassword','agentBranch','agentNotes'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.value = '';
+        });
+    },
+
+    populateCustomerForm() {
+        const agentSelect = document.getElementById('customerAgentSelect');
+        if (agentSelect) {
+            agentSelect.innerHTML = '<option value="">Select agent...</option>';
+            AppState.agents.forEach(a => {
+                agentSelect.innerHTML += `<option value="${a.id}">${a.fullName} (${a.agentId || a.id.substring(0,8)})</option>`;
+            });
+        }
+    },
+
+    async submitAgentForm() {
+        const agentData = {
+            fullName: document.getElementById('agentFullName')?.value.trim(),
+            phone: document.getElementById('agentPhone')?.value.trim(),
+            nrc: document.getElementById('agentNRC')?.value.trim(),
+            address: document.getElementById('agentAddress')?.value.trim(),
+            email: document.getElementById('agentEmail')?.value.trim(),
+            agentId: document.getElementById('agentCustomId')?.value.trim(),
+            password: document.getElementById('agentPassword')?.value,
+            branch: document.getElementById('agentBranch')?.value.trim(),
+            notes: document.getElementById('agentNotes')?.value.trim()
+        };
+        if (!agentData.fullName || !agentData.phone || !agentData.nrc || !agentData.address || !agentData.email || !agentData.agentId || !agentData.password) {
+            ToastManager.show('Error', 'Fill required fields', 'error'); return;
+        }
+        if (!Utils.validateEmail(agentData.email)) { ToastManager.show('Error', 'Invalid email', 'error'); return; }
+        if (!Utils.validateNRC(agentData.nrc)) { ToastManager.show('Error', 'Invalid NRC', 'error'); return; }
+        if (agentData.password.length < 6) { ToastManager.show('Error', 'Password too short', 'error'); return; }
+        const result = await FirebaseService.createAgent(agentData);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('createAgentModal');
+            alert(`Agent created!\nID: ${agentData.agentId}\nEmail: ${agentData.email}\nPassword: ${agentData.password}`);
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async submitCustomerForm() {
+        const customerData = {
+            fullName: document.getElementById('customerFullName')?.value.trim(),
+            email: document.getElementById('customerEmail')?.value.trim(),
+            phone: document.getElementById('customerPhone')?.value.trim(),
+            nrc: document.getElementById('customerNRC')?.value.trim(),
+            address: document.getElementById('customerAddress')?.value.trim(),
+            houseNumber: document.getElementById('customerHouseNumber')?.value.trim(),
+            occupation: document.getElementById('customerOccupation')?.value.trim(),
+            income: parseFloat(document.getElementById('customerIncome')?.value) || 0,
+            password: document.getElementById('customerPassword')?.value,
+            agentId: document.getElementById('customerAgentSelect')?.value || '',
+            status: document.getElementById('customerStatus')?.value
+        };
+        if (!customerData.fullName || !customerData.email || !customerData.phone || !customerData.nrc || !customerData.address || !customerData.password) {
+            ToastManager.show('Error', 'Fill required fields', 'error'); return;
+        }
+        if (!Utils.validateEmail(customerData.email)) { ToastManager.show('Error', 'Invalid email', 'error'); return; }
+        if (!Utils.validateNRC(customerData.nrc)) { ToastManager.show('Error', 'Invalid NRC', 'error'); return; }
+        if (customerData.password.length < 6) { ToastManager.show('Error', 'Password too short', 'error'); return; }
+        const result = await FirebaseService.createCustomer(customerData);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('createCustomerModal');
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    // ========== DETAIL VIEWERS ==========
+    async viewLoanDetails(loanId) {
+        const loan = AppState.loans.find(l => l.id === loanId);
+        if (!loan) return;
+        AppState.selectedLoan = loan;
+        const customer = AppState.customers.find(c => c.id === loan.customerId) || {};
+        const agent = AppState.agents.find(a => a.id === loan.agentId) || {};
+        let docsHtml = '';
+        if (loan.documents) {
+            docsHtml = `<div class="mb-6"><h4>Loan Documents</h4><div class="document-grid">`;
+            if (loan.documents.collateralImages) {
+                loan.documents.collateralImages.forEach((img,i) => {
+                    docsHtml += `<div class="document-card"><div class="document-preview"><img src="${img}" onclick="AdminUI.viewDocument('${img}','Collateral ${i+1}')" style="cursor:pointer; max-width:100%; height:80px; object-fit:cover;"></div><div class="document-info"><div class="document-title">Collateral ${i+1}</div></div></div>`;
+                });
+            }
+            docsHtml += '</div></div>';
+        }
+        const content = document.getElementById('loanDetailsContent');
+        content.innerHTML = `<div class="mb-6"><div class="d-flex justify-between align-center"><h3>Loan ${loan.id}</h3><span class="status-badge status-${loan.status}">${loan.status}</span></div>
+            <div class="form-row"><div><label>Customer</label><div>${customer.fullName||loan.customerName} (${customer.phone||'N/A'}) <button class="btn btn-outline btn-small" onclick="AdminUI.viewCustomerDetails('${loan.customerId}')">View</button></div></div>
+            <div><label>Agent</label><div>${agent.fullName||loan.agentName||'Unassigned'} ${agent.id?`<button class="btn btn-outline btn-small" onclick="AdminUI.viewAgentDetails('${agent.id}')">View</button>`:''}</div></div></div>
+            <div class="form-row"><div><label>Loan Amount</label><div>${Utils.formatCurrency(loan.amount)}</div></div><div><label>Approved Amount</label><div>${Utils.formatCurrency(loan.approvedAmount||loan.amount)}</div></div></div>
+            <div class="form-row"><div><label>Duration</label><div>${loan.duration} ${loan.durationUnit||'months'}</div></div><div><label>Interest Rate</label><div>${loan.interestRate||15}%</div></div></div>
+            <div><label>Purpose</label><div>${loan.purpose||'Not specified'}</div></div>
+            ${docsHtml}
+            ${loan.signedAgreementUrl ? `<div><label>Signed Agreement</label><div><a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-primary btn-small">View</a></div></div>` : ''}
+            ${loan.witness ? `<div><label>Witness</label><div>${loan.witness.name} (${loan.witness.nrc})</div></div>` : ''}
+            ${loan.lenderSignature ? `<div><label>Lender Signature</label><div><img src="${loan.lenderSignature}" style="max-height:60px;"></div></div>` : ''}
+            </div>`;
+        this.showModal('loanDetailsModal');
+    },
+
+    async viewAgentDetails(agentId) {
+        const agent = AppState.agents.find(a => a.id === agentId);
+        if (!agent) return;
+        AppState.selectedAgent = agent;
+        const content = document.getElementById('agentDetailsContent');
+        content.innerHTML = `<h3>${agent.fullName}</h3><p>ID: ${agent.agentId||agent.id}</p><p>Email: ${agent.email}</p><p>Phone: ${agent.phone}</p><p>Status: ${agent.status}</p><p>Branch: ${agent.branch||'N/A'}</p>${agent.nrcFront?`<img src="${agent.nrcFront}" style="max-width:200px;">`:''}`;
+        this.showModal('agentDetailsModal');
+    },
+
+    async viewCustomerDetails(customerId) {
+        const cust = AppState.customers.find(c => c.id === customerId);
+        if (!cust) return;
+        AppState.selectedCustomer = cust;
+        const content = document.getElementById('customerDetailsContent');
+        content.innerHTML = `<h3>${cust.fullName}</h3><p>Email: ${cust.email}</p><p>Phone: ${cust.phone}</p><p>NRC: ${cust.nrc}</p><p>Address: ${cust.residence}</p><p>Assigned Agent: ${cust.agentName||'None'}</p>`;
+        this.showModal('customerDetailsModal');
+    },
+
+    viewDocument(url, title) {
+        const content = document.getElementById('documentViewerContent');
+        content.innerHTML = `<h4>${title}</h4><img src="${url}" style="max-width:100%;">`;
+        this.showModal('documentViewerModal');
+    },
+
+    async viewApplicationDocuments(appId) {
+        const app = AppState.agentApplications.find(a => a.id === appId);
+        if (!app) return;
+        const content = document.getElementById('documentViewerContent');
+        content.innerHTML = `<h4>Application Documents - ${app.fullName}</h4>${app.nrcFront?`<img src="${app.nrcFront}" style="max-width:200px;">`:''}`;
+        this.showModal('documentViewerModal');
+    },
+
+    // ========== ACTION FUNCTIONS ==========
+    async showApproveLoanModal(loanId) {
+        const loan = AppState.loans.find(l => l.id === loanId);
+        if (!loan) return;
+        AppState.selectedLoan = loan;
+        const content = document.getElementById('approveLoanContent');
+        content.innerHTML = `<p><strong>Loan ID:</strong> ${loan.id}</p><p><strong>Customer:</strong> ${loan.customerName}</p><p><strong>Amount requested:</strong> ${Utils.formatCurrency(loan.amount)}</p><p><strong>Purpose:</strong> ${loan.purpose}</p>`;
+        const approvedInput = document.getElementById('approvedAmount');
+        if (approvedInput) approvedInput.value = loan.amount;
+        const signedLinkDiv = document.getElementById('signedAgreementLink');
+        if (loan.signedAgreementUrl) {
+            signedLinkDiv.innerHTML = `<a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-outline btn-small">View Customer Signed Agreement</a>`;
+        } else {
+            signedLinkDiv.innerHTML = '';
+        }
+        // Initialize lender signature pad
+        this.initLenderSignaturePad?.();
+        this.showModal('approveLoanModal');
+    },
+
+    async submitLoanApproval() {
+        if (!AppState.selectedLoan) return;
+        const notes = document.getElementById('loanApprovalNotes')?.value || '';
+        const approvedAmount = parseFloat(document.getElementById('approvedAmount')?.value) || AppState.selectedLoan.amount;
+        // Get lender signature as data URL
+        const canvas = document.getElementById('lenderSignatureCanvas');
+        let signatureUrl = '';
+        if (canvas) {
+            signatureUrl = canvas.toDataURL('image/png');
+        }
+        const result = await FirebaseService.updateLoanStatus(AppState.selectedLoan.id, 'approved', approvedAmount, notes, signatureUrl);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('approveLoanModal');
+            this.closeModal('loanDetailsModal');
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async rejectLoan() {
+        if (!AppState.selectedLoan) return;
+        const reason = prompt('Rejection reason:');
+        if (!reason) return;
+        const result = await FirebaseService.updateLoanStatus(AppState.selectedLoan.id, 'rejected', null, reason);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('approveLoanModal');
+            this.closeModal('loanDetailsModal');
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async toggleAgentStatus(agentId, newStatus) {
+        const agent = AppState.agents.find(a => a.id === agentId);
+        if (!agent) return;
+        if (!confirm(`Change agent status to ${newStatus}?`)) return;
+        const result = await FirebaseService.updateUserStatus(agentId, newStatus, 'agent');
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('agentDetailsModal');
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async toggleCustomerStatus(customerId, newStatus) {
+        const cust = AppState.customers.find(c => c.id === customerId);
+        if (!cust) return;
+        if (!confirm(`Change customer status to ${newStatus}?`)) return;
+        const result = await FirebaseService.updateUserStatus(customerId, newStatus, 'customer');
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('customerDetailsModal');
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async assignAgentToCustomerFromDetails(customerId) {
+        this.closeModal('customerDetailsModal');
+        const select = document.getElementById('assignCustomerSelect');
+        if (select) select.value = customerId;
+        this.showSection('assignments');
+        ToastManager.show('Info', 'Select an agent to assign', 'info');
+    },
+
+    async reviewAgentApplication(appId) {
+        const app = AppState.agentApplications.find(a => a.id === appId);
+        if (!app) return;
+        AppState.selectedApplication = app;
+        const content = document.getElementById('agentAppContent');
+        content.innerHTML = `<p><strong>Name:</strong> ${app.fullName}</p><p><strong>Phone:</strong> ${app.phone}</p><p><strong>NRC:</strong> ${app.nrc}</p><p><strong>Address:</strong> ${app.residence}</p><hr><div class="form-group"><label>Email</label><input type="email" class="form-input" id="appAgentEmail" value="${app.email||''}" placeholder="agent@trucash.com"></div><div class="form-row"><div class="form-group"><label>Agent ID</label><input type="text" class="form-input" id="appAgentId" placeholder="AGENT123"></div><div class="form-group"><label>Password</label><input type="password" class="form-input" id="appAgentPassword" placeholder="********"></div></div>`;
+        this.showModal('approveAgentAppModal');
+    },
+
+    async submitAgentApplicationApproval() {
+        if (!AppState.selectedApplication) return;
+        const email = document.getElementById('appAgentEmail')?.value.trim();
+        const agentId = document.getElementById('appAgentId')?.value.trim();
+        const password = document.getElementById('appAgentPassword')?.value;
+        if (!email || !agentId || !password) {
+            ToastManager.show('Error', 'Fill all fields', 'error');
+            return;
+        }
+        if (!Utils.validateEmail(email)) {
+            ToastManager.show('Error', 'Invalid email', 'error');
+            return;
+        }
+        if (password.length < 6) {
+            ToastManager.show('Error', 'Password too short', 'error');
+            return;
+        }
+        const credentials = { email, agentId, password };
+        const result = await FirebaseService.approveAgentApplication(AppState.selectedApplication.id, credentials);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('approveAgentAppModal');
+            alert(`Agent approved!\nID: ${agentId}\nEmail: ${email}\nPassword: ${password}`);
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async rejectAgentApplication() {
+        if (!AppState.selectedApplication) return;
+        const reason = prompt('Rejection reason:');
+        if (!reason) return;
+        const result = await FirebaseService.rejectAgentApplication(AppState.selectedApplication.id, reason);
+        if (result.success) {
+            ToastManager.show('Success', result.message, 'success');
+            this.closeModal('approveAgentAppModal');
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    // ========== NEW PROFIT ANALYTICS ==========
+    async updateProfitAnalytics() {
+        const loans = AppState.loans.filter(l => ['approved','active','completed'].includes(l.status));
+        const totalIssued = loans.reduce((s,l)=> s + (l.amount||0), 0);
+        const totalRepaid = (AppState.payments||[]).filter(p=>p.status==='verified').reduce((s,p)=> s + (p.amount||0),0);
+        const remaining = totalIssued - totalRepaid;
+        const totalInterest = loans.reduce((s,l)=> s + (l.totalInterest||0), 0);
+        const commissionPaid = (AppState.commissions||[]).filter(c=>c.status==='paid').reduce((s,c)=> s + (c.amount||0),0);
+        const net = totalInterest - commissionPaid;
+
+        const profitTotalLoans = document.getElementById('profitTotalLoans');
+        if (profitTotalLoans) profitTotalLoans.textContent = Utils.formatCurrency(totalIssued);
+        const profitTotalRepaid = document.getElementById('profitTotalRepaid');
+        if (profitTotalRepaid) profitTotalRepaid.textContent = Utils.formatCurrency(totalRepaid);
+        const profitRemaining = document.getElementById('profitRemaining');
+        if (profitRemaining) profitRemaining.textContent = Utils.formatCurrency(remaining);
+        const profitTotalInterest = document.getElementById('profitTotalInterest');
+        if (profitTotalInterest) profitTotalInterest.textContent = Utils.formatCurrency(totalInterest);
+        const profitCommissionPaid = document.getElementById('profitCommissionPaid');
+        if (profitCommissionPaid) profitCommissionPaid.textContent = Utils.formatCurrency(commissionPaid);
+        const profitNet = document.getElementById('profitNet');
+        if (profitNet) profitNet.textContent = Utils.formatCurrency(net);
+
+        const interestTable = document.getElementById('interestTable');
+        if (interestTable) {
+            let html = '<table><tr><th>Loan ID</th><th>Customer</th><th>Interest</th><th>Commission (15%)</th></tr>';
+            loans.forEach(l => {
+                const interest = l.totalInterest || 0;
+                const commission = interest * 0.15;
+                html += `<tr><td>${l.id}</td><td>${l.customerName}</td><td>${Utils.formatCurrency(interest)}</td><td>${Utils.formatCurrency(commission)}</td></tr>`;
+            });
+            html += '</table>';
+            interestTable.innerHTML = html;
+        }
+    },
+
+    // ========== NEW PAYMENTS UI ==========
+    async updatePaymentsUI() {
+        const pendingTable = document.getElementById('pendingPaymentsTable');
+        const verifiedTable = document.getElementById('verifiedPaymentsTable');
+
+        const pending = AppState.payments?.filter(p => p.status === 'pending') || [];
+        const verified = AppState.payments?.filter(p => p.status === 'verified') || [];
+
+        if (pendingTable) {
+            if (pending.length === 0) {
+                pendingTable.innerHTML = '<p class="text-muted text-center py-4">No pending payments</p>';
+            } else {
+                let html = '<table><tr><th>ID</th><th>Loan</th><th>Customer</th><th>Amount</th><th>Proof</th><th>Action</th></tr>';
+                pending.forEach(p => {
+                    html += `<tr>
+                        <td>${p.id.substring(0,8)}</td>
+                        <td>${p.loanId}</td>
+                        <td>${p.customerName}</td>
+                        <td>${Utils.formatCurrency(p.amount)}</td>
+                        <td><button class="btn btn-outline btn-small" onclick="AdminUI.viewProof('${p.id}')">View</button></td>
+                        <td><button class="btn btn-success btn-small" onclick="AdminUI.approvePayment('${p.id}')"><i class="fas fa-check"></i></button> <button class="btn btn-danger btn-small" onclick="AdminUI.rejectPayment('${p.id}')"><i class="fas fa-times"></i></button></td>
+                    </tr>`;
+                });
+                html += '</table>';
+                pendingTable.innerHTML = html;
+            }
+        }
+
+        if (verifiedTable) {
+            if (verified.length === 0) {
+                verifiedTable.innerHTML = '<p class="text-muted text-center py-4">No verified payments</p>';
+            } else {
+                let html = '<table><tr><th>ID</th><th>Loan</th><th>Customer</th><th>Amount</th><th>Date</th></tr>';
+                verified.slice(0,10).forEach(p => {
+                    html += `<tr><td>${p.id.substring(0,8)}</td><td>${p.loanId}</td><td>${p.customerName}</td><td>${Utils.formatCurrency(p.amount)}</td><td>${Utils.formatDate(p.timestamp)}</td></tr>`;
+                });
+                html += '</table>';
+                verifiedTable.innerHTML = html;
+            }
+        }
+    },
+
+    viewProof(paymentId) {
+        const payment = AppState.payments?.find(p => p.id === paymentId);
+        if (!payment || !payment.proofUrl) {
+            ToastManager.show('Error', 'No proof URL', 'error');
+            return;
+        }
+        const img = document.getElementById('proofImage');
+        if (img) img.src = payment.proofUrl;
+        AppState.selectedPayment = payment;
+        this.showModal('paymentProofModal');
+    },
+
+    async approveSelectedPayment() {
+        if (!AppState.selectedPayment) return;
+        Utils.showLoading('Approving payment...');
+        const result = await FirebaseService.verifyPayment(AppState.selectedPayment.id, AppState.selectedPayment.loanId, AppState.selectedPayment.amount);
+        Utils.hideLoading();
+        if (result.success) {
+            ToastManager.show('Success', 'Payment approved', 'success');
+            this.closeModal('paymentProofModal');
+            await this.updatePaymentsUI();
+            this.updateProfitAnalytics();
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    async rejectSelectedPayment() {
+        if (!AppState.selectedPayment) return;
+        const reason = prompt('Rejection reason:');
+        if (!reason) return;
+        Utils.showLoading('Rejecting payment...');
+        const result = await FirebaseService.rejectPayment(AppState.selectedPayment.id, reason);
+        Utils.hideLoading();
+        if (result.success) {
+            ToastManager.show('Success', 'Payment rejected', 'success');
+            this.closeModal('paymentProofModal');
+            await this.updatePaymentsUI();
+        } else {
+            ToastManager.show('Error', result.error, 'error');
+        }
+    },
+
+    initLenderSignaturePad() {
+        const canvas = document.getElementById('lenderSignatureCanvas');
+        if (!canvas) return;
+        const ctx = canvas.getContext('2d');
+        ctx.strokeStyle = '#000';
+        ctx.lineWidth = 2;
+        let drawing = false;
+        canvas.addEventListener('mousedown', (e) => {
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(e.offsetX, e.offsetY);
+        });
+        canvas.addEventListener('mousemove', (e) => {
+            if (drawing) {
+                ctx.lineTo(e.offsetX, e.offsetY);
+                ctx.stroke();
+            }
+        });
+        canvas.addEventListener('mouseup', () => { drawing = false; });
+        canvas.addEventListener('mouseleave', () => { drawing = false; });
+        canvas.addEventListener('touchstart', (e) => {
+            e.preventDefault();
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            drawing = true;
+            ctx.beginPath();
+            ctx.moveTo(x, y);
+        });
+        canvas.addEventListener('touchmove', (e) => {
+            e.preventDefault();
+            if (!drawing) return;
+            const touch = e.touches[0];
+            const rect = canvas.getBoundingClientRect();
+            const x = touch.clientX - rect.left;
+            const y = touch.clientY - rect.top;
+            ctx.lineTo(x, y);
+            ctx.stroke();
+        });
+        canvas.addEventListener('touchend', (e) => { e.preventDefault(); drawing = false; });
+        canvas.addEventListener('touchcancel', (e) => { e.preventDefault(); drawing = false; });
+    }
+};
+
+// ===== EXPOSE GLOBALLY =====
+window.AdminUI = AdminUI;
+window.FirebaseService = FirebaseService;
+window.Utils = Utils;
+window.ToastManager = ToastManager;
+
+// ===== INITIALIZE =====
+document.addEventListener('DOMContentLoaded', () => {
+    AdminUI.init();
+    AdminUI.updateConnectionStatus();
+});
+
+// ===== MODAL CLOSE HANDLER =====
+window.closeModal = function(modalId) {
+    document.getElementById(modalId)?.classList.remove('active');
+};
+
+// ===== CLOUDINARY WIDGET HELPERS =====
+window.openCloudinaryWidget = function(element) {
+    if (!AppState.cloudinaryWidget) {
+        AppState.cloudinaryWidget = cloudinary.createUploadWidget(cloudinaryConfig, (error, result) => {
+            if (error) {
+                console.error('Upload error:', error);
+                ToastManager.show('Upload Error', 'Failed to upload', 'error');
+                return;
+            }
+            if (result && result.event === "success") {
+                // Handle upload success - could be for collateral or other
+                console.log('Upload success:', result.info);
+                ToastManager.show('Upload Successful', 'File uploaded', 'success');
+                // Optionally update the box preview
+                const box = document.querySelector('.upload-box.active');
+                if (box) {
+                    const preview = document.createElement('img');
+                    preview.className = 'upload-preview';
+                    preview.src = result.info.secure_url;
+                    box.appendChild(preview);
+                    box.classList.remove('active');
+                }
+            }
+        });
+    }
+    document.querySelectorAll('.upload-box').forEach(b => b.classList.remove('active'));
+    element.classList.add('active');
+    AppState.cloudinaryWidget.open();
+};
+
+window.openPaymentProofUpload = function() {
+    if (!AppState.cloudinaryWidget) {
+        AppState.cloudinaryWidget = cloudinary.createUploadWidget(cloudinaryConfig, (error, result) => {
+            if (error) {
+                ToastManager.show('Upload Error', 'Failed to upload', 'error');
+                return;
+            }
+            if (result && result.event === "success") {
+                window.paymentProofUrl = result.info.secure_url;
+                const uploadBox = document.querySelector('.upload-box[onclick="openPaymentProofUpload()"]');
+                if (uploadBox) {
+                    uploadBox.innerHTML = '<i class="fas fa-check-circle" style="color:green;"></i><span>Proof Uploaded</span>';
+                }
+                ToastManager.show('Upload Successful', 'Proof uploaded', 'success');
+            }
+        });
+    }
+    AppState.cloudinaryWidget.open();
+};
     </script>
 </body>
 </html>
