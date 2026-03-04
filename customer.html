@@ -1412,6 +1412,56 @@
                 grid-template-columns: 1fr;
             }
         }
+
+        /* Notification bell in header */
+        .badge-container {
+            position: relative;
+            cursor: pointer;
+        }
+        .badge-container i {
+            font-size: 24px;
+            color: #2d3a4a;
+        }
+        .unread-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: #ff3b30;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(255,59,48,0.3);
+        }
+        /* Notification items */
+        .notification-item {
+            background: #f8fafd;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid #007aff;
+        }
+        .notification-item.unread {
+            background: #eef5ff;
+            border-left-color: #ff3b30;
+        }
+        .notification-message {
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .notification-time {
+            font-size: 12px;
+            color: #7e8c9c;
+        }
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
@@ -1424,7 +1474,7 @@
     <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Mobile Header -->
+    <!-- Mobile Header with notification bell -->
     <div class="mobile-header">
         <button class="hamburger-menu" id="menuToggle">
             <i class="fas fa-bars"></i>
@@ -1433,9 +1483,9 @@
             <i class="fas fa-wallet"></i>
             <span>TruCash</span>
         </div>
-        <div class="status-badge">
-            <i class="fas fa-circle"></i>
-            <span id="connectionStatus">Online</span>
+        <div class="badge-container" id="mobileNotificationBell">
+            <i class="fas fa-bell"></i>
+            <span class="unread-badge d-none" id="mobileUnreadCount">0</span>
         </div>
     </div>
 
@@ -1506,10 +1556,14 @@
 
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Header -->
+            <!-- Header with notification bell -->
             <header class="header">
                 <div class="header-title" id="pageTitle">Customer Dashboard</div>
                 <div class="header-actions">
+                    <div class="badge-container" id="desktopNotificationBell">
+                        <i class="fas fa-bell"></i>
+                        <span class="unread-badge d-none" id="desktopUnreadCount">0</span>
+                    </div>
                     <div class="status-badge">
                         <i class="fas fa-circle"></i>
                         <span id="desktopConnectionStatus">Online</span>
@@ -1907,7 +1961,7 @@
                     </div>
                 </section>
 
-                <!-- Payments Section -->
+                <!-- Payments Section (with improved history) -->
                 <section id="paymentsSection" class="content-section d-none">
                     <div class="section">
                         <div class="section-header">
@@ -1923,10 +1977,7 @@
                             <div class="section-title">Payment History</div>
                         </div>
                         <div id="paymentHistory">
-                            <div class="text-center py-4">
-                                <i class="fas fa-history" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
-                                <p class="text-muted">No payment history found</p>
-                            </div>
+                            <!-- Will be populated with cards showing proof thumbnails -->
                         </div>
                     </div>
                 </section>
@@ -1950,13 +2001,13 @@
                     </div>
                 </section>
 
-                <!-- Loan History Section -->
+                <!-- Loan History Section (completed loans) -->
                 <section id="historySection" class="content-section d-none">
                     <div class="section">
                         <div class="section-header">
-                            <div class="section-title">Loan History</div>
+                            <div class="section-title">Completed & Historical Loans</div>
                         </div>
-                        <div id="loanHistoryTable">
+                        <div id="loanHistoryList">
                             <div class="text-center py-4">
                                 <i class="fas fa-file-alt" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
                                 <p class="text-muted">No loan history found</p>
@@ -2151,7 +2202,7 @@
         </div>
     </div>
 
-    <!-- Agent Profile Modal (unchanged) -->
+    <!-- Agent Profile Modal -->
     <div class="modal" id="agentProfileModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -2169,7 +2220,7 @@
         </div>
     </div>
 
-    <!-- Document Modal (unchanged) -->
+    <!-- Document Modal -->
     <div class="modal" id="documentModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -2184,7 +2235,7 @@
         </div>
     </div>
 
-    <!-- Change Password Modal (unchanged) -->
+    <!-- Change Password Modal -->
     <div class="modal" id="changePasswordModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -2215,7 +2266,7 @@
         </div>
     </div>
 
-    <!-- Edit Profile Modal (unchanged) -->
+    <!-- Edit Profile Modal -->
     <div class="modal" id="editProfileModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -2295,6 +2346,24 @@
                     <div class="loading-spinner"></div>
                     <p class="mt-3">Loading...</p>
                 </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Notifications Modal (for quick view) -->
+    <div class="modal" id="notificationsModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Notifications</h3>
+                <button class="modal-close" id="closeNotificationsModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                    <button class="btn-small btn-outline" id="markAllReadModalBtn">Mark all as read</button>
+                </div>
+                <div id="notificationsModalList"></div>
             </div>
         </div>
     </div>
@@ -2691,7 +2760,6 @@
                     return;
                 }
                 if (result && result.event === "success") {
-                    // Store URL globally and update the upload box appearance
                     window.paymentProofUrl = result.info.secure_url;
                     const uploadBox = document.querySelector('.upload-box[onclick="openPaymentProofUpload()"]');
                     if (uploadBox) {
@@ -2861,7 +2929,8 @@
                 }
                 await this.loadCustomerLoans();
                 await this.loadPayments();
-                await this.loadNotifications();
+                await this.loadNotifications(); // NEW
+                this.listenForNotifications();   // NEW
             } catch (error) {
                 console.error('Error loading customer data:', error);
                 Utils.showToast('Data Error', 'Failed to load customer data', 'error');
@@ -3067,25 +3136,49 @@
                 return [];
             }
         },
+        // NEW: load notifications (messages) for this customer
         async loadNotifications() {
             try {
-                const notificationsRef = db.ref('notifications/' + AppState.currentUser.uid);
-                const snapshot = await notificationsRef.once('value');
-                const notifications = [];
-                if (snapshot.exists()) {
-                    snapshot.forEach((childSnapshot) => {
-                        const notification = childSnapshot.val();
-                        notification.id = childSnapshot.key;
-                        notifications.push(notification);
-                    });
-                    notifications.sort((a, b) => b.timestamp - a.timestamp);
-                    AppState.notifications = notifications;
-                }
-                return notifications;
+                const snap = await db.ref('messages')
+                    .orderByChild('recipientId')
+                    .once('value');
+                const allMessages = snap.val() || {};
+                AppState.notifications = [];
+                Object.entries(allMessages).forEach(([id, msg]) => {
+                    // message is for this customer if recipientId equals customerId or "all_customers"
+                    if (msg.recipientId === AppState.currentUser?.uid || msg.recipientId === 'all_customers') {
+                        AppState.notifications.push({ id, ...msg });
+                    }
+                });
+                AppState.notifications.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
             } catch (error) {
                 console.error('Error loading notifications:', error);
-                return [];
             }
+        },
+        // NEW: realtime listener for new messages
+        listenForNotifications() {
+            if (!AppState.currentUser) return;
+            db.ref('messages').on('child_added', (snap) => {
+                const msg = snap.val();
+                if (msg.recipientId === AppState.currentUser.uid || msg.recipientId === 'all_customers') {
+                    AppState.notifications.unshift({ id: snap.key, ...msg });
+                    UIManager.updateNotificationBadge();
+                    if (AppState.currentSection === 'notifications') {
+                        UIManager.updateNotificationsUI();
+                    }
+                }
+            });
+            db.ref('messages').on('child_changed', (snap) => {
+                const msg = snap.val();
+                if (msg.recipientId === AppState.currentUser.uid || msg.recipientId === 'all_customers') {
+                    const index = AppState.notifications.findIndex(n => n.id === snap.key);
+                    if (index !== -1) AppState.notifications[index] = { id: snap.key, ...msg };
+                    UIManager.updateNotificationBadge();
+                    if (AppState.currentSection === 'notifications') {
+                        UIManager.updateNotificationsUI();
+                    }
+                }
+            });
         },
         async createNotification(userId, type, data) {
             try {
@@ -3320,6 +3413,35 @@
                 return { success: false, error: 'Failed to process payment' };
             }
         },
+        async markNotificationAsRead(notificationId) {
+            try {
+                await db.ref('messages/' + notificationId).update({ read: true });
+                const n = AppState.notifications.find(n => n.id === notificationId);
+                if (n) n.read = true;
+                return { success: true };
+            } catch (error) {
+                console.error('Error marking notification as read:', error);
+                return { success: false };
+            }
+        },
+        async markAllNotificationsAsRead() {
+            try {
+                const updates = {};
+                AppState.notifications.forEach(n => {
+                    if (!n.read) {
+                        updates['messages/' + n.id + '/read'] = true;
+                        n.read = true;
+                    }
+                });
+                if (Object.keys(updates).length) {
+                    await db.ref().update(updates);
+                }
+                return { success: true };
+            } catch (error) {
+                console.error('Error marking all as read:', error);
+                return { success: false };
+            }
+        },
         async updateProfile(profileData) {
             try {
                 Utils.showLoading('Updating Profile...');
@@ -3361,21 +3483,6 @@
                     errorMessage = 'Please re-login to change password';
                 }
                 return { success: false, error: errorMessage };
-            }
-        },
-        async markNotificationsAsRead() {
-            try {
-                const notificationsRef = db.ref('notifications/' + AppState.currentUser.uid);
-                const snapshot = await notificationsRef.once('value');
-                const updates = {};
-                snapshot.forEach((childSnapshot) => {
-                    updates[childSnapshot.key + '/read'] = true;
-                });
-                await notificationsRef.update(updates);
-                return { success: true };
-            } catch (error) {
-                console.error('Error marking notifications as read:', error);
-                return { success: false, error: 'Failed to update notifications' };
             }
         },
         async signOut() {
@@ -3466,7 +3573,18 @@
             this.closeSupportModal = document.getElementById('closeSupportModal');
             this.showCertificateBtn = document.getElementById('showCertificateBtn');
             this.certificateContainer = document.getElementById('certificateContainer');
+            // Notification elements
             this.notificationBadge = document.getElementById('notificationCount');
+            this.mobileUnreadBadge = document.getElementById('mobileUnreadCount');
+            this.desktopUnreadBadge = document.getElementById('desktopUnreadCount');
+            this.mobileNotificationBell = document.getElementById('mobileNotificationBell');
+            this.desktopNotificationBell = document.getElementById('desktopNotificationBell');
+            this.notificationsModal = document.getElementById('notificationsModal');
+            this.closeNotificationsModal = document.getElementById('closeNotificationsModal');
+            this.markAllReadBtn = document.getElementById('markAllReadBtn');
+            this.markAllReadModalBtn = document.getElementById('markAllReadModalBtn');
+            this.notificationsList = document.getElementById('notificationsList');
+            this.notificationsModalList = document.getElementById('notificationsModalList');
             this.loanTabs = document.querySelectorAll('.loan-tab');
             this.durationUnitOptions = document.querySelectorAll('.duration-unit-option');
         },
@@ -3549,6 +3667,9 @@
             document.getElementById('closeSupportModal')?.addEventListener('click', () => {
                 this.supportModal.classList.remove('active');
             });
+            document.getElementById('closeNotificationsModal')?.addEventListener('click', () => {
+                this.notificationsModal.classList.remove('active');
+            });
             document.getElementById('submitPasswordChange')?.addEventListener('click', () => {
                 this.changePassword();
             });
@@ -3613,6 +3734,11 @@
                     this.populateDurationOptions();
                 });
             });
+            // Notification bell clicks
+            this.mobileNotificationBell.addEventListener('click', () => this.openNotificationsModal());
+            this.desktopNotificationBell.addEventListener('click', () => this.openNotificationsModal());
+            this.markAllReadBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
+            this.markAllReadModalBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
         },
         populateDurationOptions() {
             const select = document.getElementById('loanDuration');
@@ -3648,6 +3774,7 @@
             this.updateProfileUI();
             this.updateDashboardUI();
             this.updateAgentUI();
+            this.updateNotificationBadge();
             setTimeout(() => {
                 Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
             }, 1000);
@@ -3708,22 +3835,7 @@
                 this.updateDashboardUI();
             });
             AppState.realtimeListeners.push(() => paymentsRef.off('value', paymentsListener));
-            const notificationsRef = db.ref('notifications/' + AppState.currentUser.uid);
-            const notificationsListener = notificationsRef.on('value', (snapshot) => {
-                const notifications = [];
-                snapshot.forEach((childSnapshot) => {
-                    const notification = childSnapshot.val();
-                    notification.id = childSnapshot.key;
-                    notifications.push(notification);
-                });
-                notifications.sort((a, b) => b.timestamp - a.timestamp);
-                AppState.notifications = notifications;
-                this.updateNotificationBadge();
-                if (AppState.currentSection === 'notifications') {
-                    this.updateNotificationsUI();
-                }
-            });
-            AppState.realtimeListeners.push(() => notificationsRef.off('value', notificationsListener));
+            // No need for separate notifications listener here because FirebaseService already set it up
         },
         showSection(sectionId) {
             AppState.currentSection = sectionId;
@@ -3768,6 +3880,49 @@
                     this.updateLoanHistoryUI();
                     break;
             }
+        },
+        openNotificationsModal() {
+            this.renderNotificationsModal();
+            this.notificationsModal.classList.add('active');
+        },
+        renderNotificationsModal() {
+            if (!this.notificationsModalList) return;
+            if (AppState.notifications.length === 0) {
+                this.notificationsModalList.innerHTML = '<p class="text-muted">No notifications</p>';
+                return;
+            }
+            this.notificationsModalList.innerHTML = AppState.notifications.map(n => `
+                <div class="notification-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+                    <div class="notification-message">${n.message || n.type}</div>
+                    <div class="notification-time">${Utils.formatDateTime(n.timestamp)}</div>
+                    ${!n.read ? `<button class="mark-read-btn" onclick="UIManager.markNotificationRead('${n.id}')"><i class="fas fa-check-circle"></i> Mark as read</button>` : ''}
+                </div>
+            `).join('');
+        },
+        async markNotificationRead(notificationId) {
+            await FirebaseService.markNotificationAsRead(notificationId);
+            this.renderNotificationsModal();
+            this.updateNotificationBadge();
+            if (AppState.currentSection === 'notifications') this.updateNotificationsUI();
+        },
+        async markAllNotificationsAsRead() {
+            await FirebaseService.markAllNotificationsAsRead();
+            this.renderNotificationsModal();
+            this.updateNotificationBadge();
+            if (AppState.currentSection === 'notifications') this.updateNotificationsUI();
+        },
+        updateNotificationBadge() {
+            const unread = AppState.notifications.filter(n => !n.read).length;
+            [this.notificationBadge, this.mobileUnreadBadge, this.desktopUnreadBadge].forEach(badge => {
+                if (badge) {
+                    if (unread > 0) {
+                        badge.textContent = unread;
+                        badge.classList.remove('d-none');
+                    } else {
+                        badge.classList.add('d-none');
+                    }
+                }
+            });
         },
         updateDocumentGrid() {
             const grid = document.getElementById('documentGrid');
@@ -4401,7 +4556,7 @@
             this.paymentModal.classList.add('active');
             this.updatePaymentsUI();
         },
-        // UPDATED: Payment history now uses mobile-friendly cards instead of a table
+        // UPDATED: Payment history now uses mobile-friendly cards with proof thumbnails
         updatePaymentsUI() {
             const container = document.getElementById('paymentModalContent');
             const activeLoans = AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved');
@@ -4449,7 +4604,7 @@
                 window.paymentProofUrl = null;
             }
 
-            // Payment history – now displayed as cards for better mobile experience
+            // Payment history – now displayed as cards with proof thumbnails
             const historyEl = document.getElementById('paymentHistory');
             if (AppState.payments.length === 0) {
                 historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-history" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No payment history found</p></div>';
@@ -4470,7 +4625,7 @@
                                 <div><strong>Loan:</strong> ${p.loanId}</div>
                                 <div><strong>Method:</strong> ${p.method}</div>
                                 ${p.reference ? `<div><strong>Ref:</strong> ${p.reference}</div>` : ''}
-                                ${p.proofUrl ? `<div><strong>Proof:</strong> <a href="${p.proofUrl}" target="_blank">View</a></div>` : ''}
+                                ${p.proofUrl ? `<div><strong>Proof:</strong> <img src="${p.proofUrl}" style="max-width:100%; max-height:80px; border-radius:8px; margin-top:6px; cursor:pointer;" onclick="window.open('${p.proofUrl}')"></div>` : ''}
                             </div>
                         </div>
                     `;
@@ -4621,20 +4776,45 @@
             }
         },
         updateNotificationsUI() {
-            // Implement if needed
-        },
-        updateNotificationBadge() {
-            const unread = AppState.notifications.filter(n => !n.read).length;
-            const badge = document.getElementById('notificationCount');
-            if (unread > 0) {
-                badge.textContent = unread;
-                badge.style.display = 'inline';
-            } else {
-                badge.style.display = 'none';
+            // Update the notifications section content
+            const list = document.getElementById('notificationsList');
+            if (!list) return;
+            if (AppState.notifications.length === 0) {
+                list.innerHTML = '<div class="text-center py-4"><i class="fas fa-bell" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No notifications yet</p></div>';
+                return;
             }
+            list.innerHTML = AppState.notifications.map(n => `
+                <div class="notification-item ${n.read ? '' : 'unread'}">
+                    <div class="notification-message">${n.message || n.type}</div>
+                    <div class="notification-time">${Utils.formatDateTime(n.timestamp)}</div>
+                </div>
+            `).join('');
         },
         updateLoanHistoryUI() {
-            // Implement if needed
+            // Show completed/defaulted/rejected loans
+            const container = document.getElementById('loanHistoryList');
+            if (!container) return;
+            if (AppState.completedLoans.length === 0) {
+                container.innerHTML = '<div class="text-center py-4"><i class="fas fa-file-alt" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No completed loans found</p></div>';
+                return;
+            }
+            let html = '';
+            AppState.completedLoans.forEach(loan => {
+                html += `
+                    <div class="loan-card" onclick="UIManager.showLoanDetails('${loan.id}')">
+                        <div class="loan-card-header">
+                            <span class="loan-id">${loan.id}</span>
+                            <span class="status-badge-tag ${loan.status === 'completed' ? 'status-active' : 'status-rejected'}">${loan.status}</span>
+                        </div>
+                        <div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div>
+                        <div class="loan-dates">
+                            <span>Created: ${Utils.formatDate(loan.createdAt)}</span>
+                            <span>Closed: ${Utils.formatDate(loan.updatedAt || loan.completedAt)}</span>
+                        </div>
+                    </div>
+                `;
+            });
+            container.innerHTML = html;
         }
     };
 
@@ -4716,6 +4896,9 @@
     window.addEventListener('resize', setVhProperty);
     window.addEventListener('orientationchange', setVhProperty);
     setVhProperty();
+
+    // Attach UIManager to window for inline handlers
+    window.UIManager = UIManager;
 
     // Initialize app
     document.addEventListener('DOMContentLoaded', () => {
