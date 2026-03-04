@@ -526,8 +526,9 @@
         }
 
         .btn-small {
-            padding: 8px 16px;
-            font-size: 13px;
+            padding: 6px 14px;
+            font-size: 12px;
+            gap: 4px;
         }
 
         /* ===== Cards ===== */
@@ -1484,7 +1485,7 @@
             <div id="pendingApplicationsList" style="display: none;"></div>
         </section>
 
-        <!-- LOANS SECTION -->
+        <!-- LOANS SECTION (enhanced) -->
         <section class="content-section" id="loansSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('loans')"><i class="fas fa-download"></i> Export Loans CSV</button>
@@ -2029,7 +2030,7 @@
         </div>
     </div>
 
-    <!-- Loan Details Modal -->
+    <!-- Loan Details Modal (enhanced) -->
     <div class="modal-overlay" id="loanDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
@@ -2038,11 +2039,11 @@
             </div>
             <div class="modal-body" id="loanDetailsContent"></div>
             <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button>
-                <button class="btn btn-success" id="approveLoanBtn">Approve</button>
-                <button class="btn btn-danger" id="rejectLoanBtn">Reject</button>
-                <button class="btn btn-warning" id="markDefaultedBtn">Default</button>
-                <button class="btn btn-primary" id="editLoanBtn">Edit</button>
+                <button class="btn btn-outline btn-small" onclick="closeModal('loanDetailsModal')">Close</button>
+                <button class="btn btn-success btn-small" id="approveLoanBtn">Approve</button>
+                <button class="btn btn-danger btn-small" id="rejectLoanBtn">Reject</button>
+                <button class="btn btn-warning btn-small" id="markDefaultedBtn">Default</button>
+                <button class="btn btn-primary btn-small" id="editLoanBtn">Edit</button>
             </div>
         </div>
     </div>
@@ -2113,6 +2114,7 @@
     <script>
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE
+        // with advanced loan details: collateral images, witness, signed agreement
         // =========================================================================
         
         // Firebase configuration
@@ -2278,7 +2280,10 @@
                         Created: Utils.formatDate(l.createdAt),
                         Approved: l.approvedAt ? Utils.formatDate(l.approvedAt) : 'N/A',
                         'Collateral Type': l.collateral?.category || 'N/A',
-                        'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0)
+                        'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0),
+                        'Witness Name': l.witness?.name || 'N/A',
+                        'Witness NRC': l.witness?.nrc || 'N/A',
+                        'Signed Agreement': l.signedAgreementUrl || 'N/A'
                     }));
                     filename = 'loans.csv';
                     break;
@@ -2382,7 +2387,7 @@
             }));
             zip.file("agents.csv", Papa.unparse(agentsData));
             
-            // Loans
+            // Loans (enhanced)
             const loansData = allLoans.map(l => ({
                 'Loan ID': l.id,
                 Customer: l.customerName,
@@ -2399,7 +2404,10 @@
                 Created: Utils.formatDate(l.createdAt),
                 Approved: l.approvedAt ? Utils.formatDate(l.approvedAt) : 'N/A',
                 'Collateral Type': l.collateral?.category || 'N/A',
-                'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0)
+                'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0),
+                'Witness Name': l.witness?.name || 'N/A',
+                'Witness NRC': l.witness?.nrc || 'N/A',
+                'Signed Agreement': l.signedAgreementUrl || 'N/A'
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
@@ -2508,7 +2516,7 @@
             updateDashboardStats();
             renderCustomers();
             renderAgents();
-            renderLoans();
+            renderLoans();      // includes sorting by newest first
             renderPayments();
             renderAnalytics();
             renderCommission();
@@ -2661,11 +2669,14 @@
             `).join('');
         }
 
-        // ===== LOAN RENDERING =====
+        // ===== LOAN RENDERING (enhanced with sorting newest first) =====
         function renderLoans() {
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
             if (currentLoanFilter !== 'all') filtered = filtered.filter(l => l.status === currentLoanFilter);
+            
+            // Sort by newest first (createdAt descending)
+            filtered = filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
             
             if (searchTerm) {
                 filtered = filtered.filter(l => 
@@ -2726,6 +2737,13 @@
                         <div class="progress-bar mt-1" style="height:6px; background:var(--ios-gray2); border-radius:3px;">
                             <div class="progress-fill" style="width: ${progress}%; height:6px; background:var(--ios-blue); border-radius:3px;"></div>
                         </div>
+                    </div>
+                    
+                    <!-- Quick badge for collateral/witness -->
+                    <div class="mt-2 d-flex gap-2">
+                        ${l.collateral?.images ? `<span class="status-badge"><i class="fas fa-image"></i> ${l.collateral.images.length} img</span>` : ''}
+                        ${l.witness ? `<span class="status-badge"><i class="fas fa-user"></i> Witness</span>` : ''}
+                        ${l.signedAgreementUrl ? `<span class="status-badge"><i class="fas fa-file-signature"></i> Signed</span>` : ''}
                     </div>
                 </div>
             `}).join('');
@@ -3145,6 +3163,7 @@
             openModal('agentDetailsModal');
         };
 
+        // Enhanced loan details with witness, collateral images, and signed agreement button
         window.showLoanDetails = async (id) => {
             const loan = allLoans.find(l => l.id === id);
             if (!loan) return;
@@ -3153,6 +3172,27 @@
             const agent = allAgents.find(a => a.id === loan.agentId);
             const payments = allPayments.filter(p => p.loanId === id && p.status === 'confirmed');
             const totalPaid = payments.reduce((s,p) => s + p.amount, 0);
+            
+            // Collateral images grid
+            const collateralImagesHtml = loan.collateral?.images && loan.collateral.images.length ? `
+                <div class="collateral-grid">
+                    ${loan.collateral.images.map(img => `
+                        <div class="doc-thumb" onclick="window.open('${img}')">
+                            <img src="${img}">
+                        </div>
+                    `).join('')}
+                </div>
+            ` : '<p class="text-muted">No collateral images</p>';
+            
+            // Witness info
+            const witnessHtml = loan.witness ? `
+                <div class="detail-card">
+                    <div class="detail-label">Witness Name</div>
+                    <div class="detail-value">${loan.witness.name}</div>
+                    <div class="detail-label mt-2">Witness NRC</div>
+                    <div class="detail-value">${loan.witness.nrc}</div>
+                </div>
+            ` : '<p class="text-muted">No witness recorded</p>';
             
             const scheduleHtml = loan.repaymentSchedule ? `
                 <table class="repayment-table">
@@ -3249,9 +3289,50 @@
                 </div>
                 
                 <div class="detail-section">
+                    <h3 class="detail-title">Collateral Details</h3>
+                    <div class="grid-2">
+                        <div class="detail-card">
+                            <div class="detail-label">Category</div>
+                            <div class="detail-value">${loan.collateral?.category || 'N/A'}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Value</div>
+                            <div class="detail-value">${Utils.formatCurrency(loan.collateral?.value || 0)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Location</div>
+                            <div class="detail-value">${loan.collateral?.location || 'N/A'}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Description</div>
+                            <div class="detail-value">${loan.collateral?.description || 'N/A'}</div>
+                        </div>
+                    </div>
+                    <div class="mt-4">
+                        <h4>Collateral Images</h4>
+                        ${collateralImagesHtml}
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3 class="detail-title">Witness Information</h3>
+                    <div class="grid-2">
+                        ${witnessHtml}
+                    </div>
+                </div>
+                
+                <div class="detail-section">
                     <h3 class="detail-title">Repayment Schedule</h3>
                     ${scheduleHtml}
                 </div>
+                
+                ${loan.signedAgreementUrl ? `
+                <div class="detail-section text-center">
+                    <a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-primary btn-small">
+                        <i class="fas fa-file-signature"></i> View Signed Agreement
+                    </a>
+                </div>
+                ` : ''}
             `;
             
             document.getElementById('loanDetailsContent').innerHTML = content;
