@@ -273,7 +273,7 @@
             color: var(--ios-red);
         }
 
-        /* ===== Bottom Navigation ===== */
+        /* ===== Bottom Navigation with Badges ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -302,6 +302,7 @@
             cursor: pointer;
             flex: 1;
             max-width: 80px;
+            position: relative;
         }
 
         .nav-item-bottom i {
@@ -314,6 +315,26 @@
 
         .nav-item-bottom.active i {
             transform: translateY(-2px);
+        }
+
+        /* Badge style for bottom nav */
+        .nav-badge {
+            position: absolute;
+            top: -4px;
+            right: 12px;
+            background: var(--ios-red);
+            color: white;
+            font-size: 10px;
+            font-weight: 600;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 5px;
+            box-shadow: 0 2px 4px rgba(255,59,48,0.3);
+            border: 1px solid white;
         }
 
         /* ===== Main Content ===== */
@@ -1361,20 +1382,36 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
-            <!-- NEW: Notifications Section -->
             <div class="sidebar-item" data-section="notifications"><i class="fas fa-bell"></i> Notifications</div>
+            <!-- NEW: Signed Agreements button -->
+            <div class="sidebar-item" id="signedAgreementsBtn"><i class="fas fa-file-signature"></i> Signed Agreements</div>
             <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
             <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
         </div>
     </div>
 
-    <!-- Bottom Navigation -->
+    <!-- Bottom Navigation with Badges -->
     <div class="bottom-nav">
-        <div class="nav-item-bottom active" data-section="dashboard"><i class="fas fa-home"></i><span>Home</span></div>
-        <div class="nav-item-bottom" data-section="agents"><i class="fas fa-user-tie"></i><span>Agents</span></div>
-        <div class="nav-item-bottom" data-section="customers"><i class="fas fa-users"></i><span>Customers</span></div>
-        <div class="nav-item-bottom" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
-        <div class="nav-item-bottom" data-section="payments"><i class="fas fa-credit-card"></i><span>Payments</span></div>
+        <div class="nav-item-bottom active" data-section="dashboard">
+            <i class="fas fa-home"></i><span>Home</span>
+            <span class="nav-badge" id="badgeDashboard" style="display:none;">0</span>
+        </div>
+        <div class="nav-item-bottom" data-section="agents">
+            <i class="fas fa-user-tie"></i><span>Agents</span>
+            <span class="nav-badge" id="badgeAgents" style="display:none;">0</span>
+        </div>
+        <div class="nav-item-bottom" data-section="customers">
+            <i class="fas fa-users"></i><span>Customers</span>
+            <span class="nav-badge" id="badgeCustomers" style="display:none;">0</span>
+        </div>
+        <div class="nav-item-bottom" data-section="loans">
+            <i class="fas fa-file-invoice"></i><span>Loans</span>
+            <span class="nav-badge" id="badgeLoans" style="display:none;">0</span>
+        </div>
+        <div class="nav-item-bottom" data-section="payments">
+            <i class="fas fa-credit-card"></i><span>Payments</span>
+            <span class="nav-badge" id="badgePayments" style="display:none;">0</span>
+        </div>
     </div>
 
     <!-- Main Content -->
@@ -1488,7 +1525,7 @@
                 <span class="tab" data-status="pending">Pending</span>
                 <span class="tab" data-status="banned">Banned</span>
                 <span class="tab" data-status="applications">Pending Applications</span>
-                <span class="tab" data-status="rejected">Rejected Applications</span> <!-- NEW -->
+                <span class="tab" data-status="rejected">Rejected Applications</span>
             </div>
             
             <!-- Quick Actions Dropdown -->
@@ -1503,7 +1540,7 @@
             
             <div id="agentsList"></div>
             <div id="pendingApplicationsList" style="display: none;"></div>
-            <div id="rejectedApplicationsList" style="display: none;"></div> <!-- NEW -->
+            <div id="rejectedApplicationsList" style="display: none;"></div>
         </section>
 
         <!-- LOANS SECTION (enhanced) -->
@@ -1534,7 +1571,7 @@
             
             <div class="tab-bar">
                 <span class="tab" data-status="all">All Loans</span>
-                <span class="tab active" data-status="pending">Pending</span> <!-- default active -->
+                <span class="tab active" data-status="pending">Pending</span>
                 <span class="tab" data-status="approved">Approved</span>
                 <span class="tab" data-status="active">Active</span>
                 <span class="tab" data-status="rejected">Rejected</span>
@@ -2060,7 +2097,7 @@
                 <button class="btn btn-outline" onclick="closeModal('customerDetailsModal')">Close</button>
                 <button class="btn btn-primary" id="editCustomerBtn">Edit Profile</button>
                 <button class="btn btn-danger" id="deleteCustomerBtn">Delete</button>
-                <button class="btn btn-warning" id="banCustomerBtn">Ban</button> <!-- NEW Ban button -->
+                <button class="btn btn-warning" id="banCustomerBtn">Ban</button>
             </div>
         </div>
     </div>
@@ -2092,7 +2129,7 @@
                 <button class="btn btn-outline" onclick="closeModal('agentDetailsModal')">Close</button>
                 <button class="btn btn-primary" id="editAgentBtn">Edit Profile</button>
                 <button class="btn btn-danger" id="deleteAgentBtn">Delete</button>
-                <button class="btn btn-warning" id="banAgentBtn">Ban</button> <!-- NEW Ban button -->
+                <button class="btn btn-warning" id="banAgentBtn">Ban</button>
             </div>
         </div>
     </div>
@@ -2122,7 +2159,6 @@
             <div class="modal-body" id="loanDetailsContent"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-small" onclick="closeModal('loanDetailsModal')">Close</button>
-                <!-- Conditionally show/hide buttons via JS -->
                 <button class="btn btn-success btn-small" id="approveLoanBtn">Approve</button>
                 <button class="btn btn-danger btn-small" id="rejectLoanBtn">Reject</button>
                 <button class="btn btn-warning btn-small" id="markDefaultedBtn">Default</button>
@@ -2170,6 +2206,22 @@
                 <span class="modal-close" onclick="closeModal('commissionMathModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="commissionMathContent"></div>
+        </div>
+    </div>
+
+    <!-- NEW: Signed Agreements Modal -->
+    <div class="modal-overlay" id="signedAgreementsModal">
+        <div class="modal-container large">
+            <div class="modal-header">
+                <span>Signed Agreements</span>
+                <span class="modal-close" onclick="closeModal('signedAgreementsModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body" id="signedAgreementsContent">
+                <p>Loading...</p>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('signedAgreementsModal')">Close</button>
+            </div>
         </div>
     </div>
 
@@ -2306,8 +2358,80 @@
                     ip: 'admin'
                 };
                 await db.ref('auditLogs/' + Utils.generateId('LOG')).set(log);
+            },
+            // NEW: Send notification to user (agent or customer)
+            sendNotification: async (recipientId, message, type, relatedId = null) => {
+                if (!recipientId) return;
+                await db.ref('notifications/' + Utils.generateId('NOTIF')).set({
+                    recipientId,
+                    message,
+                    type, // 'loan_approved', 'loan_rejected', 'commission_paid'
+                    relatedId,
+                    timestamp: Date.now(),
+                    read: false
+                });
             }
         };
+
+        // ========== UPDATE BADGE NUMBERS ==========
+        function updateBadges() {
+            const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
+            const pendingAgentApps = allAgentApplications.filter(a => a.status === 'pending').length;
+            const pendingPayments = allPayments.filter(p => p.status === 'pending').length;
+            const bannedCustomers = allCustomers.filter(c => c.status === 'banned').length;
+
+            const badgeDashboard = document.getElementById('badgeDashboard');
+            const badgeAgents = document.getElementById('badgeAgents');
+            const badgeCustomers = document.getElementById('badgeCustomers');
+            const badgeLoans = document.getElementById('badgeLoans');
+            const badgePayments = document.getElementById('badgePayments');
+
+            if (badgeDashboard) {
+                const totalPending = pendingLoans + pendingAgentApps + pendingPayments;
+                if (totalPending > 0) {
+                    badgeDashboard.style.display = 'flex';
+                    badgeDashboard.innerText = totalPending > 99 ? '99+' : totalPending;
+                } else {
+                    badgeDashboard.style.display = 'none';
+                }
+            }
+
+            if (badgeAgents) {
+                if (pendingAgentApps > 0) {
+                    badgeAgents.style.display = 'flex';
+                    badgeAgents.innerText = pendingAgentApps > 99 ? '99+' : pendingAgentApps;
+                } else {
+                    badgeAgents.style.display = 'none';
+                }
+            }
+
+            if (badgeCustomers) {
+                if (bannedCustomers > 0) {
+                    badgeCustomers.style.display = 'flex';
+                    badgeCustomers.innerText = bannedCustomers > 99 ? '99+' : bannedCustomers;
+                } else {
+                    badgeCustomers.style.display = 'none';
+                }
+            }
+
+            if (badgeLoans) {
+                if (pendingLoans > 0) {
+                    badgeLoans.style.display = 'flex';
+                    badgeLoans.innerText = pendingLoans > 99 ? '99+' : pendingLoans;
+                } else {
+                    badgeLoans.style.display = 'none';
+                }
+            }
+
+            if (badgePayments) {
+                if (pendingPayments > 0) {
+                    badgePayments.style.display = 'flex';
+                    badgePayments.innerText = pendingPayments > 99 ? '99+' : pendingPayments;
+                } else {
+                    badgePayments.style.display = 'none';
+                }
+            }
+        }
 
         // ========== CSV EXPORT ==========
         function exportData(type) {
@@ -2618,9 +2742,10 @@
             renderAssignments();
             renderAuditLogs();
             renderPendingApplications();
-            renderRejectedApplications(); // NEW
-            renderNotifications(); // NEW
-            renderMessages(); // NEW
+            renderRejectedApplications();
+            renderNotifications(); 
+            renderMessages(); 
+            updateBadges(); // update bottom nav badges
         }
 
         function updateDashboardStats() {
@@ -3346,7 +3471,7 @@
             document.getElementById('customerDetailsContent').innerHTML = content;
             document.getElementById('editCustomerBtn').onclick = () => editCustomer(customer);
             document.getElementById('deleteCustomerBtn').onclick = () => deleteCustomer(customer.id);
-            document.getElementById('banCustomerBtn').onclick = () => banUser(customer.id, 'customer'); // NEW
+            document.getElementById('banCustomerBtn').onclick = () => banUser(customer.id, 'customer'); 
             openModal('customerDetailsModal');
         };
 
@@ -3445,7 +3570,7 @@
             document.getElementById('agentDetailsContent').innerHTML = content;
             document.getElementById('editAgentBtn').onclick = () => editAgent(agent);
             document.getElementById('deleteAgentBtn').onclick = () => deleteAgent(agent.id);
-            document.getElementById('banAgentBtn').onclick = () => banUser(agent.id, 'agent'); // NEW
+            document.getElementById('banAgentBtn').onclick = () => banUser(agent.id, 'agent'); 
             openModal('agentDetailsModal');
         };
 
@@ -4106,6 +4231,16 @@
                     
                     await db.ref().update(updates);
                     
+                    // NEW: Send notification to agent
+                    for (const entry of pendingEntries) {
+                        await Utils.sendNotification(
+                            agentId,
+                            `Your commission payment of ${Utils.formatCurrency(entry.amount)} for loan ${entry.loanId.substring(0,8)} has been processed via ${method}.`,
+                            'commission_paid',
+                            entry.loanId
+                        );
+                    }
+                    
                     await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: pendingEntries.reduce((s,e) => s + e.amount, 0), method });
                     Utils.showToast('Success', 'Commission paid', 'success');
                     closeModal('payCommissionModal');
@@ -4131,6 +4266,14 @@
                     approvedBy: currentUser?.uid
                 });
                 
+                // NEW: Send notifications
+                if (loan.customerId) {
+                    await Utils.sendNotification(loan.customerId, `Your loan application (${loanId.substring(0,8)}) has been approved.`, 'loan_approved', loanId);
+                }
+                if (loan.agentId) {
+                    await Utils.sendNotification(loan.agentId, `Loan for customer ${loan.customerName} (${loanId.substring(0,8)}) has been approved.`, 'loan_approved', loanId);
+                }
+                
                 await Utils.logAudit('APPROVE_LOAN', { loanId, amount: loan.amount });
                 Utils.showToast('Success', 'Loan approved', 'success');
                 closeModal('loanDetailsModal');
@@ -4152,6 +4295,17 @@
                     rejectedBy: currentUser?.uid,
                     rejectionReason: reason
                 });
+                
+                // NEW: Send notifications
+                const loan = allLoans.find(l => l.id === loanId);
+                if (loan) {
+                    if (loan.customerId) {
+                        await Utils.sendNotification(loan.customerId, `Your loan application (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
+                    }
+                    if (loan.agentId) {
+                        await Utils.sendNotification(loan.agentId, `Loan for customer ${loan.customerName} (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
+                    }
+                }
                 
                 await Utils.logAudit('REJECT_LOAN', { loanId, reason });
                 Utils.showToast('Success', 'Loan rejected', 'info');
@@ -4331,6 +4485,9 @@
                     reviewedBy: currentUser?.email,
                     assignedCredentials: { email, agentId }
                 });
+                
+                // Send notification to new agent (optional)
+                await Utils.sendNotification(uid, 'Your agent application has been approved. Welcome to TruCash!', 'agent_approved');
                 
                 await Utils.logAudit('APPROVE_AGENT', { appId, agentId, email });
                 Utils.showToast('Success', `Agent ${app.fullName} approved`, 'success');
@@ -4962,7 +5119,7 @@
                 assignment: 'assignmentSection',
                 audit: 'auditSection',
                 applications: 'applicationsSection',
-                notifications: 'notificationsSection', // NEW
+                notifications: 'notificationsSection',
                 settings: 'settingsSection'
             };
             
@@ -5006,6 +5163,35 @@
                 document.getElementById('sidebar').classList.remove('active');
                 document.getElementById('sidebarOverlay').classList.remove('active');
             });
+        });
+
+        // NEW: Signed Agreements button click
+        document.getElementById('signedAgreementsBtn').addEventListener('click', () => {
+            const loansWithAgreements = allLoans.filter(l => l.signedAgreementUrl);
+            const contentDiv = document.getElementById('signedAgreementsContent');
+            
+            if (loansWithAgreements.length === 0) {
+                contentDiv.innerHTML = '<p class="text-muted">No signed agreements found.</p>';
+            } else {
+                contentDiv.innerHTML = loansWithAgreements.map(loan => `
+                    <div class="detail-card mb-4">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <strong>Loan ID:</strong> ${loan.id.substring(0,8)}...<br>
+                                <strong>Customer:</strong> ${loan.customerName}<br>
+                                <strong>Amount:</strong> ${Utils.formatCurrency(loan.amount)}
+                            </div>
+                            <a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-primary btn-small">
+                                <i class="fas fa-download"></i> Download
+                            </a>
+                        </div>
+                    </div>
+                `).join('');
+            }
+            
+            openModal('signedAgreementsModal');
+            document.getElementById('sidebar').classList.remove('active');
+            document.getElementById('sidebarOverlay').classList.remove('active');
         });
 
         // Sidebar toggle
