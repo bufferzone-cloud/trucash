@@ -1299,6 +1299,23 @@
                 border-bottom: 1px dashed var(--ios-gray3);
             }
         }
+
+        /* ===== Notifications specific ===== */
+        .notification-item {
+            background: var(--ios-card);
+            border-radius: var(--radius-sm);
+            padding: 16px;
+            margin-bottom: 12px;
+            border: 1px solid var(--ios-gray2);
+        }
+        .reminder-badge {
+            background: var(--ios-orange);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
     </style>
 </head>
 <body>
@@ -1344,6 +1361,8 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
+            <!-- NEW: Notifications Section -->
+            <div class="sidebar-item" data-section="notifications"><i class="fas fa-bell"></i> Notifications</div>
             <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
             <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
         </div>
@@ -1463,12 +1482,13 @@
                 <button class="btn btn-small btn-outline" id="clearAgentSearch"><i class="fas fa-times"></i></button>
             </div>
             
-            <!-- Tabs: Active, Pending, Banned, Pending Applications -->
+            <!-- Tabs: Active, Pending, Banned, Pending Applications, Rejected Applications -->
             <div class="tab-bar">
                 <span class="tab active" data-status="active">Active</span>
                 <span class="tab" data-status="pending">Pending</span>
                 <span class="tab" data-status="banned">Banned</span>
                 <span class="tab" data-status="applications">Pending Applications</span>
+                <span class="tab" data-status="rejected">Rejected Applications</span> <!-- NEW -->
             </div>
             
             <!-- Quick Actions Dropdown -->
@@ -1483,6 +1503,7 @@
             
             <div id="agentsList"></div>
             <div id="pendingApplicationsList" style="display: none;"></div>
+            <div id="rejectedApplicationsList" style="display: none;"></div> <!-- NEW -->
         </section>
 
         <!-- LOANS SECTION (enhanced) -->
@@ -1497,9 +1518,23 @@
                 <button class="btn btn-small btn-outline" id="clearLoanSearch"><i class="fas fa-times"></i></button>
             </div>
             
+            <!-- Quick Actions Dropdown for Loans -->
+            <div class="action-row">
+                <div class="quick-actions-dropdown">
+                    <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
+                    <div class="quick-actions-menu">
+                        <button class="dropdown-item" id="filterLoansAll"><i class="fas fa-list"></i> All Loans</button>
+                        <button class="dropdown-item" id="filterLoansPending"><i class="fas fa-clock"></i> Pending</button>
+                        <button class="dropdown-item" id="filterLoansActive"><i class="fas fa-play-circle"></i> Active</button>
+                        <button class="dropdown-item" id="filterLoansCompleted"><i class="fas fa-check-circle"></i> Completed</button>
+                        <button class="dropdown-item" id="filterLoansDefaulted"><i class="fas fa-exclamation-triangle"></i> Defaulted</button>
+                    </div>
+                </div>
+            </div>
+            
             <div class="tab-bar">
-                <span class="tab active" data-status="all">All Loans</span>
-                <span class="tab" data-status="pending">Pending</span>
+                <span class="tab" data-status="all">All Loans</span>
+                <span class="tab active" data-status="pending">Pending</span> <!-- default active -->
                 <span class="tab" data-status="approved">Approved</span>
                 <span class="tab" data-status="active">Active</span>
                 <span class="tab" data-status="rejected">Rejected</span>
@@ -1520,6 +1555,18 @@
                 <i class="fas fa-search"></i>
                 <input type="text" id="paymentSearch" placeholder="Search payments by ID, loan ID, customer...">
                 <button class="btn btn-small btn-outline" id="clearPaymentSearch"><i class="fas fa-times"></i></button>
+            </div>
+            
+            <!-- Quick Actions Dropdown for Payments -->
+            <div class="action-row">
+                <div class="quick-actions-dropdown">
+                    <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
+                    <div class="quick-actions-menu">
+                        <button class="dropdown-item" id="filterPaymentsPending"><i class="fas fa-clock"></i> Pending</button>
+                        <button class="dropdown-item" id="filterPaymentsConfirmed"><i class="fas fa-check-circle"></i> Confirmed</button>
+                        <button class="dropdown-item" id="filterPaymentsRejected"><i class="fas fa-ban"></i> Rejected</button>
+                    </div>
+                </div>
             </div>
             
             <div class="tab-bar">
@@ -1692,6 +1739,39 @@
             <div class="floating-card">
                 <h3 class="mb-4">Pending Agent Applications</h3>
                 <div id="pendingApplicationsListFull"></div>
+            </div>
+        </section>
+
+        <!-- NEW NOTIFICATIONS SECTION -->
+        <section class="content-section" id="notificationsSection">
+            <div class="floating-card">
+                <h3 class="mb-4">Upcoming Payments & Reminders</h3>
+                <div id="upcomingPaymentsList"></div>
+            </div>
+            <div class="floating-card">
+                <h3 class="mb-4">Send Message</h3>
+                <div class="form-group">
+                    <label class="form-label">Recipient Type</label>
+                    <select id="msgRecipientType" class="form-select">
+                        <option value="all_customers">All Customers</option>
+                        <option value="all_agents">All Agents</option>
+                        <option value="specific_customer">Specific Customer</option>
+                        <option value="specific_agent">Specific Agent</option>
+                    </select>
+                </div>
+                <div class="form-group" id="specificRecipientSelect" style="display: none;">
+                    <label class="form-label">Select Recipient</label>
+                    <select id="specificRecipientId" class="form-select"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Message</label>
+                    <textarea id="msgText" class="form-textarea" rows="3" placeholder="Type your message..."></textarea>
+                </div>
+                <button class="btn btn-primary w-100" id="sendMessageBtn"><i class="fas fa-paper-plane"></i> Send Message</button>
+            </div>
+            <div class="floating-card">
+                <h3 class="mb-4">Recent Messages</h3>
+                <div id="recentMessagesList"></div>
             </div>
         </section>
 
@@ -1980,6 +2060,7 @@
                 <button class="btn btn-outline" onclick="closeModal('customerDetailsModal')">Close</button>
                 <button class="btn btn-primary" id="editCustomerBtn">Edit Profile</button>
                 <button class="btn btn-danger" id="deleteCustomerBtn">Delete</button>
+                <button class="btn btn-warning" id="banCustomerBtn">Ban</button> <!-- NEW Ban button -->
             </div>
         </div>
     </div>
@@ -2011,6 +2092,7 @@
                 <button class="btn btn-outline" onclick="closeModal('agentDetailsModal')">Close</button>
                 <button class="btn btn-primary" id="editAgentBtn">Edit Profile</button>
                 <button class="btn btn-danger" id="deleteAgentBtn">Delete</button>
+                <button class="btn btn-warning" id="banAgentBtn">Ban</button> <!-- NEW Ban button -->
             </div>
         </div>
     </div>
@@ -2040,6 +2122,7 @@
             <div class="modal-body" id="loanDetailsContent"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-small" onclick="closeModal('loanDetailsModal')">Close</button>
+                <!-- Conditionally show/hide buttons via JS -->
                 <button class="btn btn-success btn-small" id="approveLoanBtn">Approve</button>
                 <button class="btn btn-danger btn-small" id="rejectLoanBtn">Reject</button>
                 <button class="btn btn-warning btn-small" id="markDefaultedBtn">Default</button>
@@ -2149,9 +2232,10 @@
         let allPayments = [];
         let allCommissionHistory = [];
         let allAuditLogs = [];
-        let allAgentApplications = [];
+        let allAgentApplications = []; // includes all statuses (pending, rejected, approved)
+        let allMessages = [];
         let systemSettings = {};
-        let currentLoanFilter = 'all';
+        let currentLoanFilter = 'pending'; // default to pending
         let currentPaymentFilter = 'pending';
         let agentFilter = 'active';
         let customerFilter = 'all';
@@ -2330,7 +2414,7 @@
                     break;
                     
                 case 'applications':
-                    data = allAgentApplications.map(app => ({
+                    data = allAgentApplications.filter(app => app.status === 'pending').map(app => ({
                         Name: app.fullName,
                         Phone: app.phone,
                         NRC: app.nrc,
@@ -2440,12 +2524,13 @@
             });
             zip.file("commission.csv", Papa.unparse(commissionData));
             
-            // Agent Applications
+            // Agent Applications (all)
             const appsData = allAgentApplications.map(app => ({
                 Name: app.fullName,
                 Phone: app.phone,
                 NRC: app.nrc,
                 Residence: app.residence,
+                Status: app.status,
                 Submitted: Utils.formatDateTime(app.submittedAt)
             }));
             zip.file("applications.csv", Papa.unparse(appsData));
@@ -2458,6 +2543,14 @@
                 Timestamp: Utils.formatDateTime(log.timestamp)
             }));
             zip.file("audit.csv", Papa.unparse(auditData));
+            
+            // Messages (optional)
+            const messagesData = allMessages.map(m => ({
+                Recipient: m.recipientId,
+                Message: m.message,
+                Sent: Utils.formatDateTime(m.timestamp)
+            }));
+            zip.file("messages.csv", Papa.unparse(messagesData));
             
             // Generate zip
             const content = await zip.generateAsync({ type: "blob" });
@@ -2484,9 +2577,7 @@
                     .map(([id,u]) => ({...u, id}));
 
                 const appsSnap = await db.ref('agentApplications').once('value');
-                allAgentApplications = Object.entries(appsSnap.val() || {})
-                    .filter(([_,a]) => a.status === 'pending')
-                    .map(([id,a]) => ({...a, id}));
+                allAgentApplications = Object.entries(appsSnap.val() || {}).map(([id,a]) => ({...a, id})); // all statuses
 
                 const loansSnap = await db.ref('loans').once('value');
                 allLoans = Object.entries(loansSnap.val() || {}).map(([id,l]) => ({...l, id}));
@@ -2502,6 +2593,9 @@
 
                 const settingsSnap = await db.ref('systemSettings').once('value');
                 systemSettings = settingsSnap.val() || {};
+
+                const messagesSnap = await db.ref('messages').once('value');
+                allMessages = Object.entries(messagesSnap.val() || {}).map(([id,m]) => ({...m, id})).sort((a,b) => b.timestamp - a.timestamp);
 
                 updateUI();
                 Utils.hideLoading();
@@ -2524,6 +2618,9 @@
             renderAssignments();
             renderAuditLogs();
             renderPendingApplications();
+            renderRejectedApplications(); // NEW
+            renderNotifications(); // NEW
+            renderMessages(); // NEW
         }
 
         function updateDashboardStats() {
@@ -2537,7 +2634,7 @@
             document.getElementById('statPendingPayments').innerText = pendingPayments.length;
             
             const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
-            const pendingAgents = allAgentApplications.length;
+            const pendingAgents = allAgentApplications.filter(a => a.status === 'pending').length;
             const pendingPays = pendingPayments.length;
             
             document.getElementById('pendingCount').innerText = pendingLoans + pendingAgents + pendingPays;
@@ -2594,16 +2691,24 @@
         function renderAgents() {
             const agentsListEl = document.getElementById('agentsList');
             const pendingAppsEl = document.getElementById('pendingApplicationsList');
+            const rejectedAppsEl = document.getElementById('rejectedApplicationsList');
             
             if (agentFilter === 'applications') {
-                // Show pending applications
                 agentsListEl.style.display = 'none';
                 pendingAppsEl.style.display = 'block';
+                rejectedAppsEl.style.display = 'none';
                 renderPendingApplicationsInAgents();
+                return;
+            } else if (agentFilter === 'rejected') {
+                agentsListEl.style.display = 'none';
+                pendingAppsEl.style.display = 'none';
+                rejectedAppsEl.style.display = 'block';
+                renderRejectedApplicationsInAgents();
                 return;
             } else {
                 agentsListEl.style.display = 'block';
                 pendingAppsEl.style.display = 'none';
+                rejectedAppsEl.style.display = 'none';
             }
             
             const searchTerm = document.getElementById('agentSearch')?.value.toLowerCase() || '';
@@ -2653,7 +2758,8 @@
 
         function renderPendingApplicationsInAgents() {
             const container = document.getElementById('pendingApplicationsList');
-            container.innerHTML = allAgentApplications.map(app => `
+            const pendingApps = allAgentApplications.filter(app => app.status === 'pending');
+            container.innerHTML = pendingApps.map(app => `
                 <div class="app-card" onclick="showAgentApplication('${app.id}')">
                     <img src="${app.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(app.fullName||'A')+'&background=007AFF&color=fff'}" class="app-avatar">
                     <div class="app-info">
@@ -2665,6 +2771,25 @@
                         </div>
                     </div>
                     <div class="status-badge pending">Pending</div>
+                </div>
+            `).join('');
+        }
+
+        function renderRejectedApplicationsInAgents() {
+            const container = document.getElementById('rejectedApplicationsList');
+            const rejectedApps = allAgentApplications.filter(app => app.status === 'rejected');
+            container.innerHTML = rejectedApps.map(app => `
+                <div class="app-card" onclick="showAgentApplication('${app.id}')">
+                    <img src="${app.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(app.fullName||'A')+'&background=007AFF&color=fff'}" class="app-avatar">
+                    <div class="app-info">
+                        <div class="app-name">${app.fullName}</div>
+                        <div class="app-meta">
+                            <i class="fas fa-phone"></i> ${app.phone} · 
+                            <i class="fas fa-id-card"></i> ${app.nrc} · 
+                            <i class="fas fa-calendar"></i> ${Utils.formatDate(app.submittedAt)}
+                        </div>
+                    </div>
+                    <div class="status-badge rejected">Rejected</div>
                 </div>
             `).join('');
         }
@@ -2792,7 +2917,8 @@
             const container = document.getElementById('pendingApplicationsListFull');
             if (!container) return;
             
-            container.innerHTML = allAgentApplications.map(app => `
+            const pendingApps = allAgentApplications.filter(app => app.status === 'pending');
+            container.innerHTML = pendingApps.map(app => `
                 <div class="app-card" onclick="showAgentApplication('${app.id}')">
                     <img src="${app.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(app.fullName||'A')+'&background=007AFF&color=fff'}" class="app-avatar">
                     <div class="app-info">
@@ -2806,6 +2932,11 @@
                     <div class="status-badge pending">Pending</div>
                 </div>
             `).join('');
+        }
+
+        // NEW: render rejected applications in the full section (if needed)
+        function renderRejectedApplications() {
+            // not needed separately, but we keep for consistency
         }
 
         // ===== RENDER ANALYTICS =====
@@ -2953,6 +3084,159 @@
             `).join('');
         }
 
+        // ===== NOTIFICATIONS & MESSAGES =====
+        function renderNotifications() {
+            // Upcoming payments: active loans with pending installments due within next 7 days
+            const now = Date.now();
+            const sevenDays = 7 * 24 * 60 * 60 * 1000;
+            const upcoming = [];
+            
+            allLoans.filter(l => l.status === 'active').forEach(loan => {
+                if (loan.repaymentSchedule) {
+                    loan.repaymentSchedule.forEach(inst => {
+                        if (inst.status === 'pending' && inst.dueDate > now && inst.dueDate < now + sevenDays) {
+                            upcoming.push({
+                                loanId: loan.id,
+                                customerId: loan.customerId,
+                                customerName: loan.customerName,
+                                agentId: loan.agentId,
+                                agentName: loan.agentName,
+                                dueDate: inst.dueDate,
+                                amount: inst.totalDue,
+                                installment: inst.installment
+                            });
+                        }
+                    });
+                }
+            });
+            
+            upcoming.sort((a,b) => a.dueDate - b.dueDate);
+            
+            const container = document.getElementById('upcomingPaymentsList');
+            if (!container) return;
+            
+            if (upcoming.length === 0) {
+                container.innerHTML = '<p class="text-muted">No upcoming payments in the next 7 days.</p>';
+            } else {
+                container.innerHTML = upcoming.map(p => {
+                    const daysLeft = Math.ceil((p.dueDate - now) / (1000*60*60*24));
+                    return `
+                    <div class="notification-item">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
+                            </div>
+                            <span class="reminder-badge">${daysLeft} day${daysLeft>1?'s':''}</span>
+                        </div>
+                        <div class="profile-meta">Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · Amount: ${Utils.formatCurrency(p.amount)}</div>
+                        <div class="profile-meta">Agent: ${p.agentName || 'None'}</div>
+                        <div class="action-row mt-2">
+                            <button class="btn btn-primary btn-small" onclick="sendReminder('${p.customerId}', '${p.loanId}', ${p.installment})"><i class="fas fa-bell"></i> Remind Customer</button>
+                            <button class="btn btn-outline btn-small" onclick="sendReminder('${p.agentId}', '${p.loanId}', ${p.installment})"><i class="fas fa-bell"></i> Remind Agent</button>
+                        </div>
+                    </div>
+                `}).join('');
+            }
+        }
+
+        // NEW: Send reminder (stores a message for the user)
+        window.sendReminder = async (recipientId, loanId, installment) => {
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan) return;
+            const message = `Reminder: Payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${Utils.formatCurrency(loan.repaymentSchedule[installment-1].totalDue)} is due on ${Utils.formatDate(loan.repaymentSchedule[installment-1].dueDate)}. Please pay promptly.`;
+            
+            Utils.showLoading('Sending reminder...');
+            try {
+                await db.ref('messages/' + Utils.generateId('MSG')).set({
+                    recipientId: recipientId,
+                    message: message,
+                    timestamp: Date.now(),
+                    senderId: currentUser.uid,
+                    senderName: adminData?.fullName,
+                    read: false,
+                    type: 'reminder'
+                });
+                Utils.showToast('Reminder sent', 'Message saved', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        };
+
+        // NEW: Send custom message
+        document.getElementById('sendMessageBtn')?.addEventListener('click', async () => {
+            const recipientType = document.getElementById('msgRecipientType').value;
+            const message = document.getElementById('msgText').value.trim();
+            if (!message) {
+                Utils.showToast('Error', 'Message cannot be empty', 'error');
+                return;
+            }
+            
+            let recipientId = null;
+            if (recipientType === 'specific_customer' || recipientType === 'specific_agent') {
+                recipientId = document.getElementById('specificRecipientId').value;
+                if (!recipientId) {
+                    Utils.showToast('Error', 'Please select a recipient', 'error');
+                    return;
+                }
+            } else if (recipientType === 'all_customers') {
+                recipientId = 'all_customers';
+            } else if (recipientType === 'all_agents') {
+                recipientId = 'all_agents';
+            }
+            
+            Utils.showLoading('Sending message...');
+            try {
+                await db.ref('messages/' + Utils.generateId('MSG')).set({
+                    recipientId: recipientId,
+                    message: message,
+                    timestamp: Date.now(),
+                    senderId: currentUser.uid,
+                    senderName: adminData?.fullName,
+                    read: false,
+                    type: 'admin'
+                });
+                Utils.showToast('Message sent', 'Message saved', 'success');
+                document.getElementById('msgText').value = '';
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        // Update recipient dropdown based on type
+        document.getElementById('msgRecipientType')?.addEventListener('change', (e) => {
+            const type = e.target.value;
+            const specificDiv = document.getElementById('specificRecipientSelect');
+            const select = document.getElementById('specificRecipientId');
+            
+            if (type === 'specific_customer') {
+                specificDiv.style.display = 'block';
+                select.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName} (${c.phone})</option>`).join('');
+            } else if (type === 'specific_agent') {
+                specificDiv.style.display = 'block';
+                select.innerHTML = allAgents.map(a => `<option value="${a.id}">${a.fullName} (${a.agentId})</option>`).join('');
+            } else {
+                specificDiv.style.display = 'none';
+            }
+        });
+
+        function renderMessages() {
+            const container = document.getElementById('recentMessagesList');
+            if (!container) return;
+            
+            const recent = allMessages.slice(0, 20);
+            container.innerHTML = recent.map(m => `
+                <div class="detail-card mb-2">
+                    <div class="d-flex justify-between">
+                        <strong>To: ${m.recipientId === 'all_customers' ? 'All Customers' : m.recipientId === 'all_agents' ? 'All Agents' : m.recipientId.substring(0,8)}</strong>
+                        <span class="text-muted">${Utils.formatDateTime(m.timestamp)}</span>
+                    </div>
+                    <div class="profile-meta">${m.message}</div>
+                </div>
+            `).join('');
+        }
+
         // ========== DETAIL VIEWS ==========
         window.showCustomerDetails = async (id) => {
             const customer = allCustomers.find(c => c.id === id);
@@ -3062,6 +3346,7 @@
             document.getElementById('customerDetailsContent').innerHTML = content;
             document.getElementById('editCustomerBtn').onclick = () => editCustomer(customer);
             document.getElementById('deleteCustomerBtn').onclick = () => deleteCustomer(customer.id);
+            document.getElementById('banCustomerBtn').onclick = () => banUser(customer.id, 'customer'); // NEW
             openModal('customerDetailsModal');
         };
 
@@ -3160,8 +3445,24 @@
             document.getElementById('agentDetailsContent').innerHTML = content;
             document.getElementById('editAgentBtn').onclick = () => editAgent(agent);
             document.getElementById('deleteAgentBtn').onclick = () => deleteAgent(agent.id);
+            document.getElementById('banAgentBtn').onclick = () => banUser(agent.id, 'agent'); // NEW
             openModal('agentDetailsModal');
         };
+
+        // NEW: Ban user function
+        async function banUser(userId, type) {
+            if (!confirm(`Are you sure you want to ban this ${type}? They will not be able to log in.`)) return;
+            Utils.showLoading('Banning user...');
+            try {
+                await db.ref('users/' + userId).update({ status: 'banned' });
+                await Utils.logAudit('BAN_USER', { userId, type });
+                Utils.showToast('Success', `${type} banned`, 'success');
+                closeModal(type === 'customer' ? 'customerDetailsModal' : 'agentDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        }
 
         // Enhanced loan details with witness, collateral images, and signed agreement button
         window.showLoanDetails = async (id) => {
@@ -3337,6 +3638,12 @@
             
             document.getElementById('loanDetailsContent').innerHTML = content;
             
+            // Conditionally show buttons based on loan status
+            document.getElementById('approveLoanBtn').style.display = loan.status === 'pending' ? 'inline-flex' : 'none';
+            document.getElementById('rejectLoanBtn').style.display = loan.status === 'pending' ? 'inline-flex' : 'none';
+            document.getElementById('markDefaultedBtn').style.display = loan.status === 'active' ? 'inline-flex' : 'none';
+            document.getElementById('editLoanBtn').style.display = 'inline-flex'; // always show edit
+            
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
             document.getElementById('rejectLoanBtn').onclick = () => rejectLoan(loan.id);
             document.getElementById('markDefaultedBtn').onclick = () => markAsDefaulted(loan.id);
@@ -3408,7 +3715,7 @@
                     <div>
                         <h2>${app.fullName}</h2>
                         <p class="text-muted">Application ID: ${app.id.substring(0,8)}...</p>
-                        <p><span class="status-badge pending">Pending Review</span></p>
+                        <p><span class="status-badge ${app.status}">${app.status}</span></p>
                     </div>
                 </div>
                 
@@ -3452,6 +3759,7 @@
                     </div>
                 </div>
                 
+                ${app.status === 'pending' ? `
                 <div class="detail-section">
                     <h3 class="detail-title">Account Credentials</h3>
                     <div class="grid-2">
@@ -3473,19 +3781,27 @@
                         </div>
                     </div>
                 </div>
+                ` : ''}
             `;
             
             document.getElementById('agentApplicationContent').innerHTML = content;
             
-            document.getElementById('manualApproveAgent').onclick = () => approveAgentApplicationManually(appId);
-            document.getElementById('rejectAgentApplication').onclick = () => rejectAgentApplication(appId);
+            if (app.status === 'pending') {
+                document.getElementById('manualApproveAgent').style.display = 'inline-flex';
+                document.getElementById('rejectAgentApplication').style.display = 'inline-flex';
+                document.getElementById('manualApproveAgent').onclick = () => approveAgentApplicationManually(appId);
+                document.getElementById('rejectAgentApplication').onclick = () => rejectAgentApplication(appId);
+            } else {
+                document.getElementById('manualApproveAgent').style.display = 'none';
+                document.getElementById('rejectAgentApplication').style.display = 'none';
+            }
             
             openModal('agentApplicationModal');
         };
 
         // ========== EDIT FUNCTIONS ==========
         function editCustomer(customer) {
-            // Build edit form
+            // Build edit form (same as before)
             const content = `
                 <form id="editCustomerForm">
                     <div class="grid-2">
@@ -3895,10 +4211,18 @@
                     newInterestPaid = loan.totalInterest;
                 }
                 
-                await loanRef.update({ 
+                const updates = { 
                     totalPaid: newTotalPaid,
                     interestPaid: newInterestPaid
-                });
+                };
+                
+                // If total paid reaches total payable, mark loan as completed
+                if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
+                    updates.status = 'completed';
+                    updates.completedAt = Date.now();
+                }
+                
+                await loanRef.update(updates);
                 
                 // Create commission entry for interest portion
                 if (payment.amount > 0 && loan.agentId) {
@@ -4412,6 +4736,38 @@
             });
         });
 
+        // Quick actions for loans
+        document.getElementById('filterLoansAll')?.addEventListener('click', () => {
+            currentLoanFilter = 'all';
+            document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#loansSection .tab[data-status="all"]').classList.add('active');
+            renderLoans();
+        });
+        document.getElementById('filterLoansPending')?.addEventListener('click', () => {
+            currentLoanFilter = 'pending';
+            document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#loansSection .tab[data-status="pending"]').classList.add('active');
+            renderLoans();
+        });
+        document.getElementById('filterLoansActive')?.addEventListener('click', () => {
+            currentLoanFilter = 'active';
+            document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#loansSection .tab[data-status="active"]').classList.add('active');
+            renderLoans();
+        });
+        document.getElementById('filterLoansCompleted')?.addEventListener('click', () => {
+            currentLoanFilter = 'completed';
+            document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#loansSection .tab[data-status="completed"]').classList.add('active');
+            renderLoans();
+        });
+        document.getElementById('filterLoansDefaulted')?.addEventListener('click', () => {
+            currentLoanFilter = 'defaulted';
+            document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#loansSection .tab[data-status="defaulted"]').classList.add('active');
+            renderLoans();
+        });
+
         document.getElementById('loanSearch').addEventListener('input', renderLoans);
         document.getElementById('clearLoanSearch').addEventListener('click', () => {
             document.getElementById('loanSearch').value = '';
@@ -4425,6 +4781,26 @@
                 currentPaymentFilter = tab.dataset.status;
                 renderPayments();
             });
+        });
+
+        // Quick actions for payments
+        document.getElementById('filterPaymentsPending')?.addEventListener('click', () => {
+            currentPaymentFilter = 'pending';
+            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
+            renderPayments();
+        });
+        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', () => {
+            currentPaymentFilter = 'confirmed';
+            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
+            renderPayments();
+        });
+        document.getElementById('filterPaymentsRejected')?.addEventListener('click', () => {
+            currentPaymentFilter = 'rejected';
+            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
+            renderPayments();
         });
 
         document.getElementById('paymentSearch').addEventListener('input', renderPayments);
@@ -4586,6 +4962,7 @@
                 assignment: 'assignmentSection',
                 audit: 'auditSection',
                 applications: 'applicationsSection',
+                notifications: 'notificationsSection', // NEW
                 settings: 'settingsSection'
             };
             
@@ -4602,6 +4979,18 @@
             if (sectionId === 'audit') renderAuditLogs();
             if (sectionId === 'analytics') renderAnalytics();
             if (sectionId === 'applications') renderPendingApplications();
+            if (sectionId === 'notifications') {
+                renderNotifications();
+                renderMessages();
+            }
+            
+            // Set default loan filter to pending when loans section is opened
+            if (sectionId === 'loans') {
+                currentLoanFilter = 'pending';
+                document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+                document.querySelector('#loansSection .tab[data-status="pending"]').classList.add('active');
+                renderLoans();
+            }
         }
         window.showSection = showSection;
 
@@ -4748,6 +5137,13 @@
                 auth.signOut();
                 return;
             }
+
+            // Check if user is banned (should not happen for admin, but just in case)
+            if (adminData?.status === 'banned') {
+                Utils.showToast('Access Denied', 'Your account has been banned', 'error');
+                auth.signOut();
+                return;
+            }
             
             document.getElementById('adminNameDisplay').innerText = adminData?.fullName || 'Admin';
             document.getElementById('sidebarName').innerText = adminData?.fullName || 'Admin User';
@@ -4784,15 +5180,18 @@
             });
             
             db.ref('agentApplications').on('value', (snap) => {
-                allAgentApplications = Object.entries(snap.val() || {})
-                    .filter(([_,a]) => a.status === 'pending')
-                    .map(([id,a]) => ({...a, id}));
+                allAgentApplications = Object.entries(snap.val() || {}).map(([id,a]) => ({...a, id}));
                 updateUI();
             });
             
             db.ref('auditLogs').on('value', (snap) => {
                 allAuditLogs = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id})).sort((a,b) => b.timestamp - a.timestamp);
                 if (document.getElementById('auditSection').classList.contains('active')) renderAuditLogs();
+            });
+
+            db.ref('messages').on('value', (snap) => {
+                allMessages = Object.entries(snap.val() || {}).map(([id,m]) => ({...m, id})).sort((a,b) => b.timestamp - a.timestamp);
+                if (document.getElementById('notificationsSection').classList.contains('active')) renderMessages();
             });
         }
 
