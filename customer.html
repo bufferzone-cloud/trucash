@@ -98,11 +98,12 @@
             justify-content: space-between;
         }
 
-        @media (max-width: 768px) {
-            .mobile-header {
-                display: flex;
-            }
-        }
+        .mobile-header {
+    display: flex; /* always visible */
+}
+.header {
+    display: none; /* hide desktop header */
+}
 
         .hamburger-menu {
             width: 40px;
@@ -1475,20 +1476,28 @@
     <div class="toast-container" id="toastContainer"></div>
 
     <!-- Mobile Header with notification bell -->
-    <div class="mobile-header">
-        <button class="hamburger-menu" id="menuToggle">
-            <i class="fas fa-bars"></i>
-        </button>
-        <div class="mobile-logo">
-            <i class="fas fa-wallet"></i>
-            <span>TruCash</span>
-        </div>
+   <div class="mobile-header">
+    <button class="hamburger-menu" id="menuToggle">
+        <i class="fas fa-bars"></i>
+    </button>
+    <div class="mobile-logo">
+        <i class="fas fa-wallet"></i>
+        <span>TruCash</span>
+    </div>
+    <div style="display: flex; align-items: center; gap: 10px;">
         <div class="badge-container" id="mobileNotificationBell">
             <i class="fas fa-bell"></i>
             <span class="unread-badge d-none" id="mobileUnreadCount">0</span>
         </div>
+        <div class="status-badge">
+            <i class="fas fa-circle"></i>
+            <span id="connectionStatus">Online</span>
+        </div>
+        <button class="logout-btn" id="mobileLogoutBtn">
+            <i class="fas fa-sign-out-alt"></i>
+        </button>
     </div>
-
+</div>
     <!-- Main Container -->
     <div class="dashboard-container">
         <!-- Sidebar -->
@@ -1561,6 +1570,10 @@
                 <div class="header-title" id="pageTitle">Customer Dashboard</div>
                 <div class="header-actions">
                    
+                    <div class="status-badge">
+                        <i class="fas fa-circle"></i>
+                        <span id="desktopConnectionStatus">Online</span>
+                    </div>
                     <button class="logout-btn" id="logoutBtn">
                         <i class="fas fa-sign-out-alt"></i>
                         Logout
@@ -3639,6 +3652,7 @@
             this.editProfileBtn.addEventListener('click', () => this.showEditProfileModal());
             this.logoutBtn.addEventListener('click', () => FirebaseService.signOut());
             this.sidebarLogoutBtn.addEventListener('click', () => FirebaseService.signOut());
+            document.getElementById('mobileLogoutBtn').addEventListener('click', () => FirebaseService.signOut());
             document.getElementById('closePaymentModal')?.addEventListener('click', () => {
                 this.paymentModal.classList.remove('active');
             });
