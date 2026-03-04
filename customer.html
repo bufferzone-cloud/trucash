@@ -4306,168 +4306,217 @@
             document.getElementById('submitSignedAgreement').addEventListener('click', () => this.submitSignedAgreement());
             this.loanAgreementModal.classList.add('active');
         },
-        async submitSignedAgreement() {
-            const borrowerSig = this.signaturePadBorrower?.getDataURL();
-            const witnessSig = this.signaturePadWitness?.getDataURL();
-            const witnessName = document.getElementById('witnessName')?.value.trim();
-            const witnessNrc = document.getElementById('witnessNrc')?.value.trim();
-            if (!borrowerSig) {
-                Utils.showToast('Signature Required', 'Please provide borrower signature', 'error');
-                return;
+       async submitSignedAgreement() {
+    const borrowerSig = this.signaturePadBorrower?.getDataURL();
+    const witnessSig = this.signaturePadWitness?.getDataURL();
+    const witnessName = document.getElementById('witnessName')?.value.trim();
+    const witnessNrc = document.getElementById('witnessNrc')?.value.trim();
+    if (!borrowerSig) {
+        Utils.showToast('Signature Required', 'Please provide borrower signature', 'error');
+        return;
+    }
+    if (!witnessSig) {
+        Utils.showToast('Signature Required', 'Please provide witness signature', 'error');
+        return;
+    }
+    if (!witnessName || !witnessNrc) {
+        Utils.showToast('Witness Info', 'Please fill witness name and NRC', 'error');
+        return;
+    }
+    const borrower = AppState.userData;
+    const loanData = AppState.pendingLoanData;
+    const today = new Date();
+    const day = today.getDate();
+    const month = today.toLocaleString('default', { month: 'long' });
+    const year = today.getFullYear();
+    const isWeekly = loanData.durationUnit === 'weeks';
+    const rate = isWeekly ? 0.10 : 0.35;
+    const totalInterest = Utils.calculateTotalInterest(loanData.amount, rate, loanData.duration, isWeekly);
+    const totalPayable = loanData.amount + totalInterest;
+    const periodicPayment = isWeekly
+        ? Utils.calculateWeeklyPayment(loanData.amount, rate, loanData.duration)
+        : Utils.calculateMonthlyPayment(loanData.amount, rate * 12, loanData.duration);
+    
+    // Enhanced style block to match TruCash look
+    const styleBlock = `
+        <style>
+            body {
+                font-family: 'Times New Roman', serif;
+                background: #fefefe;
+                padding: 30px;
+                color: #2c3e50;
+                line-height: 1.5;
             }
-            if (!witnessSig) {
-                Utils.showToast('Signature Required', 'Please provide witness signature', 'error');
-                return;
+            .agreement-wrapper {
+                max-width: 900px;
+                margin: 0 auto;
+                background: white;
+                border-radius: 14px;
+                box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+                padding: 30px;
             }
-            if (!witnessName || !witnessNrc) {
-                Utils.showToast('Witness Info', 'Please fill witness name and NRC', 'error');
-                return;
+            h1, h2 {
+                text-align: center;
+                color: #1a5276;
+                margin-bottom: 10px;
             }
-            const borrower = AppState.userData;
-            const loanData = AppState.pendingLoanData;
-            const today = new Date();
-            const day = today.getDate();
-            const month = today.toLocaleString('default', { month: 'long' });
-            const year = today.getFullYear();
-            const isWeekly = loanData.durationUnit === 'weeks';
-            const rate = isWeekly ? 0.10 : 0.35;
-            const totalInterest = Utils.calculateTotalInterest(loanData.amount, rate, loanData.duration, isWeekly);
-            const totalPayable = loanData.amount + totalInterest;
-            const periodicPayment = isWeekly
-                ? Utils.calculateWeeklyPayment(loanData.amount, rate, loanData.duration)
-                : Utils.calculateMonthlyPayment(loanData.amount, rate * 12, loanData.duration);
-            const finalHTML = `
-                <!DOCTYPE html>
-                <html>
-                <head><meta charset="UTF-8"><title>Signed Loan Agreement</title>
-                <style>
-                    body { font-family: Arial, sans-serif; padding: 30px; }
-                    h1, h2 { text-align: center; }
-                    .section { margin-top: 25px; }
-                    .label { font-weight: bold; }
-                    .signature-img { max-width: 200px; max-height: 80px; border: 1px solid #ccc; }
-                </style>
-                </head>
-                <body>
+            h3 {
+                background: #1a5276;
+                color: white;
+                padding: 8px 12px;
+                border-radius: 4px;
+                margin: 20px 0 10px;
+                font-size: 1.17em;
+                font-weight: bold;
+            }
+            .detail {
+                margin: 8px 0;
+                display: flex;
+                flex-wrap: wrap;
+            }
+            .label {
+                font-weight: bold;
+                width: 200px;
+                color: #1a5276;
+            }
+            .value {
+                flex: 1;
+            }
+            .signature-line {
+                border-bottom: 1px solid #000;
+                width: 250px;
+                margin: 5px 0;
+            }
+            .logo {
+                text-align: center;
+                margin-bottom: 20px;
+            }
+            .logo i {
+                font-size: 50px;
+                color: #1a5276;
+            }
+            .signature-img {
+                max-width: 200px;
+                max-height: 80px;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                background: white;
+            }
+            table {
+                width: 100%;
+                border-collapse: collapse;
+                margin: 15px 0;
+            }
+            th, td {
+                border: 1px solid #ddd;
+                padding: 8px;
+                text-align: left;
+            }
+            th {
+                background-color: #f2f2f7;
+                color: #1a5276;
+            }
+            .footer-note {
+                margin-top: 30px;
+                font-size: 0.9em;
+                color: #7e8c9c;
+                text-align: center;
+            }
+        </style>
+    `;
+
+    const finalHTML = `
+        <!DOCTYPE html>
+        <html>
+        <head>
+            <meta charset="UTF-8">
+            <title>Signed Loan Agreement - TruCash</title>
+            ${styleBlock}
+        </head>
+        <body>
+            <div class="agreement-wrapper">
+                <div class="logo">
+                    <i class="fas fa-wallet"></i>
                     <h1>TrueCash Money Lender Firm</h1>
-                    <h2>Loan Agreement Form</h2>
-                    <p>This Loan Agreement is made and entered into on this ${day} day of ${month}, ${year}.</p>
-                    
-                    <div class="section">
-                        <h3>1. Lender Details</h3>
-                        <p><span class="label">Lending Firm:</span> TrueCash Money Lender</p>
-                        <p><span class="label">Representatives:</span> Eng. Hambayi, Dr. Ilunga, Mr. Mukandawire</p>
-                    </div>
-                    
-                    <div class="section">
-                        <h3>2. Borrower Details</h3>
-                        <p>Full Name: ${borrower.fullName || ''}</p>
-                        <p>NRC Number: ${borrower.nrc || ''}</p>
-                        <p>Address: ${borrower.residence || ''}, ${borrower.houseNumber || ''}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <h3>3. Loan Terms</h3>
-                        <p>Loan Amount: ZMW ${Utils.formatCurrency(loanData.amount)}</p>
-                        <p>Interest Rate: Weekly 10%, Monthly 35%</p>
-                        <p>Duration: ${loanData.duration} ${loanData.durationUnit}</p>
-                        <p>Total Interest: ZMW ${Utils.formatCurrency(totalInterest)}</p>
-                        <p>Total Payable: ZMW ${Utils.formatCurrency(totalPayable)}</p>
-                        <p>${isWeekly ? 'Weekly' : 'Monthly'} Payment: ZMW ${Utils.formatCurrency(periodicPayment)}</p>
-                        <p>Repayment Date: ${new Date(today.setMonth(today.getMonth() + (isWeekly ? Math.ceil(loanData.duration/4) : loanData.duration))).toLocaleDateString()}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <h3>4. Collateral Details</h3>
-                        <p>Collateral Item: ${loanData.collateralCategory}</p>
-                        <p>Description: ${loanData.collateralDescription}</p>
-                        <p>Estimated Value: ZMW ${Utils.formatCurrency(loanData.collateralValue)}</p>
-                        <p>Location: ${loanData.collateralLocation}</p>
-                    </div>
-                    
-                    <div class="section">
-                        <h3>5. Terms and Conditions</h3>
-                        <p>Standard terms apply.</p>
-                    </div>
-                    
-                    <div class="section">
-                        <h3>6. Signatures</h3>
-                        <p><b>Lender Representatives:</b> (to be signed by admin)</p>
-                        <p><b>Borrower Signature:</b><br><img src="${borrowerSig}" class="signature-img"></p>
-                        <p><b>Witness Signature:</b><br><img src="${witnessSig}" class="signature-img"></p>
-                        <p><b>Witness Name:</b> ${witnessName}</p>
-                        <p><b>Witness NRC:</b> ${witnessNrc}</p>
-                    </div>
-                    
-                    <p><b>Acknowledgment:</b> This Agreement is binding.</p>
-                </body>
-                </html>
-            `;
-            Utils.showLoading('Uploading signed agreement...');
-            const uploadResult = await FirebaseService.uploadSignedAgreement(finalHTML);
-            if (!uploadResult.success) {
-                Utils.hideLoading();
-                Utils.showToast('Upload Error', 'Failed to upload signed agreement', 'error');
-                return;
-            }
-            const witnessData = { name: witnessName, nrc: witnessNrc };
-            const result = await FirebaseService.submitLoanApplication(loanData, uploadResult.url, witnessData);
-            Utils.hideLoading();
-            if (result.success) {
-                Utils.showToast('Success', result.message || 'Loan application submitted!', 'info');
-                this.loanAmount.value = '';
-                document.getElementById('purposeDescription').value = '';
-                document.getElementById('collateralDescription').value = '';
-                document.getElementById('collateralLocation').value = '';
-                document.getElementById('collateralValue').value = '';
-                this.acceptTerms.checked = false;
-                AppState.uploadedCollateral = {};
-                document.querySelectorAll('.upload-preview').forEach(preview => preview.remove());
-                document.querySelectorAll('.upload-box').forEach(box => box.classList.remove('has-preview'));
-                const statusElement = document.getElementById('collateralUploadStatus');
-                if (statusElement) {
-                    statusElement.textContent = 'Click on boxes to upload images';
-                    statusElement.className = 'form-text text-muted';
-                }
-                this.loanAgreementModal.classList.remove('active');
-                this.showSection('loans');
-            } else {
-                Utils.showToast('Submission Failed', result.error || 'Failed to submit application', 'error');
-            }
-        },
-        updateLoansUI() {
-            const loans = AppState.activeLoans.filter(loan => {
-                if (AppState.currentLoanStatusFilter === 'active') return loan.status === 'active';
-                if (AppState.currentLoanStatusFilter === 'pending') return loan.status === 'pending';
-                if (AppState.currentLoanStatusFilter === 'approved') return loan.status === 'approved';
-                if (AppState.currentLoanStatusFilter === 'rejected') return loan.status === 'rejected';
-                return true;
-            });
-            const loansList = document.getElementById('loansList');
-            if (loans.length === 0) {
-                loansList.innerHTML = '<p class="text-muted text-center py-4">No loans found for this status.</p>';
-                return;
-            }
-            let html = '';
-            loans.forEach(loan => {
-                const showPayBtn = (loan.status === 'approved' || loan.status === 'active');
-                html += `
-                    <div class="loan-card" onclick="UIManager.showLoanDetails('${loan.id}')">
-                        <div class="loan-card-header">
-                            <span class="loan-id">${loan.id}</span>
-                            <span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span>
-                        </div>
-                        <div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div>
-                        <div class="loan-dates">
-                            <span>Created: ${Utils.formatDate(loan.createdAt)}</span>
-                            <span>Due: ${loan.repaymentSchedule && loan.repaymentSchedule[0] ? Utils.formatDate(loan.repaymentSchedule[0].dueDate) : 'N/A'}</span>
-                        </div>
-                        ${showPayBtn ? `<button class="loan-pay-btn" onclick="event.stopPropagation(); UIManager.preparePaymentForLoan('${loan.id}');"><i class="fas fa-credit-card"></i> Pay Now</button>` : ''}
-                    </div>
-                `;
-            });
-            loansList.innerHTML = html;
-        },
+                </div>
+                <h2>Loan Agreement Form</h2>
+                <p>This Loan Agreement is made and entered into on this ${day} day of ${month}, ${year}.</p>
+                
+                <h3>1. Lender Details</h3>
+                <div class="detail"><span class="label">Lending Firm:</span> TrueCash Money Lender</div>
+                <div class="detail"><span class="label">Representatives:</span> Eng. Hambayi, Dr. Ilunga, Mr. Mukandawire</div>
+                
+                <h3>2. Borrower Details</h3>
+                <div class="detail"><span class="label">Full Name:</span> ${borrower.fullName || ''}</div>
+                <div class="detail"><span class="label">NRC Number:</span> ${borrower.nrc || ''}</div>
+                <div class="detail"><span class="label">Address:</span> ${borrower.residence || ''}, ${borrower.houseNumber || ''}</div>
+                
+                <h3>3. Loan Terms</h3>
+                <div class="detail"><span class="label">Loan Amount:</span> ZMW ${Utils.formatCurrency(loanData.amount)}</div>
+                <div class="detail"><span class="label">Interest Rate:</span> Weekly 10%, Monthly 35%</div>
+                <div class="detail"><span class="label">Duration:</span> ${loanData.duration} ${loanData.durationUnit}</div>
+                <div class="detail"><span class="label">Total Interest:</span> ZMW ${Utils.formatCurrency(totalInterest)}</div>
+                <div class="detail"><span class="label">Total Payable:</span> ZMW ${Utils.formatCurrency(totalPayable)}</div>
+                <div class="detail"><span class="label">${isWeekly ? 'Weekly' : 'Monthly'} Payment:</span> ZMW ${Utils.formatCurrency(periodicPayment)}</div>
+                <div class="detail"><span class="label">Repayment Date:</span> ${new Date(today.setMonth(today.getMonth() + (isWeekly ? Math.ceil(loanData.duration/4) : loanData.duration))).toLocaleDateString()}</div>
+                
+                <h3>4. Collateral Details</h3>
+                <div class="detail"><span class="label">Collateral Item:</span> ${loanData.collateralCategory}</div>
+                <div class="detail"><span class="label">Description:</span> ${loanData.collateralDescription}</div>
+                <div class="detail"><span class="label">Estimated Value:</span> ZMW ${Utils.formatCurrency(loanData.collateralValue)}</div>
+                <div class="detail"><span class="label">Location:</span> ${loanData.collateralLocation}</div>
+                
+                <h3>5. Terms and Conditions</h3>
+                <p><b>1. Repayment:</b> The Borrower agrees to repay the full loan amount with interest as specified by the repayment date.</p>
+                <p><b>2. Default:</b> If the Borrower fails to repay on time, the Lender has the right to sell the collateral to recover the loan and take legal action.</p>
+                <p><b>3. Third-Party Witness:</b> A third-party witness is required to validate the agreement.</p>
+                
+                <h3>6. Signatures</h3>
+                <p><b>Lender Representatives:</b> (to be signed by admin)</p>
+                <p><b>Borrower Signature:</b><br><img src="${borrowerSig}" class="signature-img"></p>
+                <p><b>Witness Signature:</b><br><img src="${witnessSig}" class="signature-img"></p>
+                <p><b>Witness Name:</b> ${witnessName}</p>
+                <p><b>Witness NRC:</b> ${witnessNrc}</p>
+                
+                <p><b>Acknowledgment:</b> This Agreement is binding.</p>
+                <div class="footer-note">Generated by TruCash on ${Utils.formatDateTime(Date.now())}</div>
+            </div>
+        </body>
+        </html>
+    `;
+    
+    Utils.showLoading('Uploading signed agreement...');
+    const uploadResult = await FirebaseService.uploadSignedAgreement(finalHTML);
+    if (!uploadResult.success) {
+        Utils.hideLoading();
+        Utils.showToast('Upload Error', 'Failed to upload signed agreement', 'error');
+        return;
+    }
+    const witnessData = { name: witnessName, nrc: witnessNrc };
+    const result = await FirebaseService.submitLoanApplication(loanData, uploadResult.url, witnessData);
+    Utils.hideLoading();
+    if (result.success) {
+        Utils.showToast('Success', result.message || 'Loan application submitted!', 'info');
+        this.loanAmount.value = '';
+        document.getElementById('purposeDescription').value = '';
+        document.getElementById('collateralDescription').value = '';
+        document.getElementById('collateralLocation').value = '';
+        document.getElementById('collateralValue').value = '';
+        this.acceptTerms.checked = false;
+        AppState.uploadedCollateral = {};
+        document.querySelectorAll('.upload-preview').forEach(preview => preview.remove());
+        document.querySelectorAll('.upload-box').forEach(box => box.classList.remove('has-preview'));
+        const statusElement = document.getElementById('collateralUploadStatus');
+        if (statusElement) {
+            statusElement.textContent = 'Click on boxes to upload images';
+            statusElement.className = 'form-text text-muted';
+        }
+        this.loanAgreementModal.classList.remove('active');
+        this.showSection('loans');
+    } else {
+        Utils.showToast('Submission Failed', result.error || 'Failed to submit application', 'error');
+    }
+}
         async showLoanDetails(loanId) {
             const loan = AppState.activeLoans.find(l => l.id === loanId) || AppState.completedLoans.find(l => l.id === loanId);
             if (!loan) return;
