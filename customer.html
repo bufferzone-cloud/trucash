@@ -2792,7 +2792,7 @@
         }
     };
 
-    // ===== Signature Pad Handler =====
+    // ===== Signature Pad Handler (FIXED: no longer clears on window resize) =====
     const SignaturePad = {
         init(canvasId, clearBtnId) {
             const canvas = document.getElementById(canvasId);
@@ -2803,15 +2803,19 @@
 
             const resizeCanvas = () => {
                 const container = canvas.parentElement;
-                canvas.width = container.clientWidth;
-                canvas.height = 150;
+                // Use container width, fallback to 300 if hidden
+                let width = container.clientWidth;
+                if (width === 0) width = 300; 
+                canvas.width = width;
+                canvas.height = 150; // fixed height
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
             };
             resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+            // REMOVED the resize event listener – signatures will not be cleared on window resize
+            // window.addEventListener('resize', resizeCanvas);
 
             const startDrawing = (e) => {
                 e.preventDefault();
