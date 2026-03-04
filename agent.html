@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +12,7 @@
     <!-- Cloudinary -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* === iOS‑inspired Mobile Theme (extended) === */
+        /* === iOS‑inspired Mobile Theme (extended with richer design) === */
         * {
             margin: 0;
             padding: 0;
@@ -30,7 +29,7 @@
             display: flex;
             flex-direction: column;
         }
-        /* header with profile pic and title */
+        /* header with profile pic, title and notification bell */
         .agent-header {
             background: white;
             padding: 12px 20px;
@@ -43,6 +42,7 @@
             z-index: 10;
             backdrop-filter: blur(10px);
             background: rgba(255,255,255,0.9);
+            box-shadow: 0 2px 12px rgba(0,0,0,0.02);
         }
         .header-left {
             display: flex;
@@ -53,12 +53,12 @@
             width: 44px;
             height: 44px;
             border-radius: 22px;
-            background: #e1e8f0;
+            background: linear-gradient(145deg, #e1e8f0, #d0d8e8);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 20px;
-            color: #4a5a6e;
+            color: #2d3a4a;
             object-fit: cover;
             border: 2px solid #007aff;
         }
@@ -75,6 +75,31 @@
             margin-top: 2px;
         }
         .header-right {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+        }
+        .badge-container {
+            position: relative;
+            cursor: pointer;
+        }
+        .badge-container i {
+            font-size: 24px;
+            color: #2d3a4a;
+        }
+        .unread-badge {
+            position: absolute;
+            top: -6px;
+            right: -8px;
+            background: #ff3b30;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 8px;
+            font-size: 11px;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(255,59,48,0.3);
+        }
+        .agent-code-badge {
             font-weight: 700;
             font-size: 16px;
             color: #007aff;
@@ -94,6 +119,7 @@
             margin-bottom: 16px;
             padding-left: 4px;
             color: #1c1e24;
+            border-left: 4px solid #007aff;
         }
         .customer-grid {
             display: flex;
@@ -120,14 +146,16 @@
             width: 56px;
             height: 56px;
             border-radius: 28px;
-            background: #e1e8f0;
+            background: linear-gradient(145deg, #e1e8f0, #d0d8e8);
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 24px;
-            color: #4a5a6e;
+            color: #2d3a4a;
             flex-shrink: 0;
             object-fit: cover;
+            border: 2px solid white;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
         }
         .customer-info {
             flex: 1;
@@ -193,8 +221,9 @@
         .nav-item.active {
             color: #007aff;
             font-weight: 500;
+            transform: translateY(-2px);
         }
-        /* modals */
+        /* modals (enhanced) */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -232,6 +261,9 @@
         .modal-header h3 {
             font-size: 20px;
             font-weight: 600;
+            background: linear-gradient(135deg, #007aff, #5856d6);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .modal-close {
             background: none;
@@ -285,7 +317,7 @@
             border: 1px solid #dee6ed;
         }
         .btn {
-            background: #007aff;
+            background: linear-gradient(135deg, #007aff, #005bbf);
             color: white;
             border: none;
             padding: 14px 20px;
@@ -335,6 +367,7 @@
             align-items: center;
             gap: 6px;
             cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,122,255,0.2);
         }
         .section-card {
             background: white;
@@ -355,7 +388,7 @@
         .fw-600 { font-weight: 600; }
         .d-none { display: none; }
 
-        /* New styles for payment list & about page */
+        /* payment list & loan cards */
         .payment-list {
             margin-top: 16px;
             border-top: 1px solid #edf2f7;
@@ -431,17 +464,51 @@
             justify-content: space-between;
             padding: 8px 0;
         }
+        /* notifications modal specific */
+        .notification-item {
+            background: #f8fafd;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid #007aff;
+        }
+        .notification-item.unread {
+            background: #eef5ff;
+            border-left-color: #ff3b30;
+        }
+        .notification-message {
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .notification-time {
+            font-size: 12px;
+            color: #7e8c9c;
+        }
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
 
-    <!-- Header with agent profile picture and TRUCASH AGENT -->
+    <!-- Header with agent profile picture, TRUCASH AGENT and notification bell -->
     <div class="agent-header">
         <div class="header-left">
             <img src="" alt="avatar" class="agent-avatar" id="headerAvatar">
             <div class="agent-name" id="agentFullName">Loading... <small>Agent</small></div>
         </div>
-        <div class="header-right">TRUCASH AGENT</div>
+        <div class="header-right">
+            <div class="badge-container" id="notificationBell">
+                <i class="fas fa-bell"></i>
+                <span class="unread-badge d-none" id="unreadCount">0</span>
+            </div>
+            <div class="agent-code-badge">TRUCASH</div>
+        </div>
     </div>
 
     <!-- Main content area (sections) -->
@@ -495,7 +562,7 @@
             </div>
         </div>
 
-        <!-- About section (new separate page) -->
+        <!-- About section -->
         <div id="aboutSection" class="section d-none">
             <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
             <div class="section-card about-page">
@@ -521,7 +588,7 @@
         </div>
     </div>
 
-    <!-- Bottom navigation (About now points to its own section) -->
+    <!-- Bottom navigation (unchanged) -->
     <div class="bottom-nav">
         <div class="nav-item active" data-section="home"><i class="fas fa-home"></i><span>Home</span></div>
         <div class="nav-item" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
@@ -530,7 +597,7 @@
         <div class="nav-item" data-section="about"><i class="fas fa-info-circle"></i><span>About</span></div>
     </div>
 
-    <!-- Modals (existing + new ones) -->
+    <!-- Modals -->
     <!-- Customer details modal -->
     <div class="modal-overlay" id="customerModal">
         <div class="modal-card">
@@ -542,7 +609,7 @@
         </div>
     </div>
 
-    <!-- Loan details modal (enhanced payment styling) -->
+    <!-- Loan details modal -->
     <div class="modal-overlay" id="loanModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -604,11 +671,25 @@
         </div>
     </div>
 
+    <!-- NEW: Notifications modal -->
+    <div class="modal-overlay" id="notificationsModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Notifications</h3>
+                <button class="modal-close" id="closeNotificationsModal">&times;</button>
+            </div>
+            <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
+                <button class="btn-small btn-outline" id="markAllReadBtn">Mark all as read</button>
+            </div>
+            <div id="notificationsList"></div>
+        </div>
+    </div>
+
     <!-- Toast container -->
     <div id="toastContainer" style="position:fixed; top:20px; right:20px; z-index:9999;"></div>
 
     <script>
-        // ==================== FIREBASE CONFIG (same as original) ====================
+        // ==================== FIREBASE CONFIG ====================
         const firebaseConfig = {
             apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
             authDomain: "trucash-9fee8.firebaseapp.com",
@@ -638,7 +719,7 @@
             customers: [],
             loans: [],
             commissions: [],
-            notifications: []
+            notifications: []          // will hold messages for this agent
         };
 
         // ==================== UTILS ====================
@@ -647,6 +728,7 @@
             hideLoading() {},
             formatCurrency(amount) { return 'K' + (amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); },
             formatDate(ts) { return ts ? new Date(ts).toLocaleDateString() : 'N/A'; },
+            formatDateTime(ts) { return ts ? new Date(ts).toLocaleString() : 'N/A'; },
             showToast(title, msg, type='info') {
                 const toast = document.createElement('div');
                 toast.style.background = type==='error'?'#ff3b30':'#007aff';
@@ -658,7 +740,7 @@
             }
         };
 
-        // ==================== FIREBASE SERVICE ====================
+        // ==================== FIREBASE SERVICE (extended with notifications) ====================
         const FirebaseService = {
             async checkAuth() {
                 return new Promise((resolve) => {
@@ -676,6 +758,8 @@
                             await this.loadCustomers();
                             await this.loadLoans();
                             await this.loadCommissions();
+                            await this.loadNotifications();   // NEW
+                            this.listenForNotifications();     // NEW
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
                     });
@@ -710,6 +794,67 @@
                     AppState.commissions.push(c);
                 });
             },
+            // NEW: load notifications (messages) for this agent
+            async loadNotifications() {
+                const snap = await db.ref('messages')
+                    .orderByChild('recipientId')
+                    .once('value');
+                const allMessages = snap.val() || {};
+                AppState.notifications = [];
+                Object.entries(allMessages).forEach(([id, msg]) => {
+                    // message is for this agent if recipientId equals agentId or "all_agents"
+                    if (msg.recipientId === AppState.agentId || msg.recipientId === 'all_agents') {
+                        AppState.notifications.push({ id, ...msg });
+                    }
+                });
+                // sort by timestamp desc
+                AppState.notifications.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
+            },
+            // NEW: realtime listener for new messages
+            listenForNotifications() {
+                db.ref('messages').on('child_added', (snap) => {
+                    const msg = snap.val();
+                    if (msg.recipientId === AppState.agentId || msg.recipientId === 'all_agents') {
+                        AppState.notifications.unshift({ id: snap.key, ...msg });
+                        UIManager.updateNotificationBadge();
+                        if (document.getElementById('notificationsModal').classList.contains('active')) {
+                            UIManager.renderNotifications();
+                        }
+                    }
+                });
+                db.ref('messages').on('child_changed', (snap) => {
+                    const msg = snap.val();
+                    if (msg.recipientId === AppState.agentId || msg.recipientId === 'all_agents') {
+                        const index = AppState.notifications.findIndex(n => n.id === snap.key);
+                        if (index !== -1) AppState.notifications[index] = { id: snap.key, ...msg };
+                        UIManager.updateNotificationBadge();
+                        if (document.getElementById('notificationsModal').classList.contains('active')) {
+                            UIManager.renderNotifications();
+                        }
+                    }
+                });
+            },
+            async markNotificationAsRead(notificationId) {
+                await db.ref('messages/' + notificationId).update({ read: true });
+                // local update
+                const n = AppState.notifications.find(n => n.id === notificationId);
+                if (n) n.read = true;
+                UIManager.updateNotificationBadge();
+            },
+            async markAllAsRead() {
+                const updates = {};
+                AppState.notifications.forEach(n => {
+                    if (!n.read) {
+                        updates['messages/' + n.id + '/read'] = true;
+                        n.read = true;
+                    }
+                });
+                if (Object.keys(updates).length) {
+                    await db.ref().update(updates);
+                }
+                UIManager.updateNotificationBadge();
+                UIManager.renderNotifications();
+            },
             async updateProfile(data) {
                 await db.ref('users/'+AppState.agentId).update(data);
                 Object.assign(AppState.agentData, data);
@@ -722,7 +867,7 @@
             async signOut() { await auth.signOut(); window.location.href='login.html'; }
         };
 
-        // ==================== UI MANAGER (extended) ====================
+        // ==================== UI MANAGER (extended with notifications) ====================
         const UIManager = {
             init() {
                 this.cacheElements();
@@ -752,6 +897,12 @@
                 this.totalCommissionEarned = document.getElementById('totalCommissionEarned');
                 this.pendingCommission = document.getElementById('pendingCommission');
                 this.futureCommission = document.getElementById('futureCommission');
+                // notification elements
+                this.notificationBell = document.getElementById('notificationBell');
+                this.unreadBadge = document.getElementById('unreadCount');
+                this.notificationsModal = document.getElementById('notificationsModal');
+                this.notificationsList = document.getElementById('notificationsList');
+                this.markAllReadBtn = document.getElementById('markAllReadBtn');
                 // modals
                 this.customerModal = document.getElementById('customerModal');
                 this.loanModal = document.getElementById('loanModal');
@@ -766,6 +917,7 @@
                 document.getElementById('closeCommissionMathModal').onclick = ()=> this.commissionMathModal.classList.remove('active');
                 document.getElementById('closePasswordModal').onclick = ()=> this.passwordModal.classList.remove('active');
                 document.getElementById('closeCertificateModal').onclick = ()=> this.certificateModal.classList.remove('active');
+                document.getElementById('closeNotificationsModal').onclick = ()=> this.notificationsModal.classList.remove('active');
                 // settings buttons
                 document.getElementById('copyAgentCode').onclick = ()=> this.copyAgentCode();
                 document.getElementById('changePasswordBtn').onclick = ()=> this.passwordModal.classList.add('active');
@@ -773,6 +925,9 @@
                 document.getElementById('logoutBtn').onclick = ()=> FirebaseService.signOut();
                 document.getElementById('deleteAccountBtn').onclick = ()=> this.deleteAccount();
                 document.getElementById('showCertificateBtn').onclick = ()=> this.showCertificate();
+                // notification bell click
+                this.notificationBell.addEventListener('click', ()=> this.openNotificationsModal());
+                this.markAllReadBtn.addEventListener('click', ()=> FirebaseService.markAllAsRead());
             },
             bindEvents() {
                 this.navItems.forEach(item => {
@@ -805,6 +960,37 @@
                 this.renderCustomers();
                 this.renderCustomersWithLoans();
                 this.renderCommission();
+                this.updateNotificationBadge();
+            },
+            updateNotificationBadge() {
+                const unread = AppState.notifications.filter(n => !n.read).length;
+                if (unread > 0) {
+                    this.unreadBadge.classList.remove('d-none');
+                    this.unreadBadge.textContent = unread;
+                } else {
+                    this.unreadBadge.classList.add('d-none');
+                }
+            },
+            openNotificationsModal() {
+                this.renderNotifications();
+                this.notificationsModal.classList.add('active');
+            },
+            renderNotifications() {
+                if (!AppState.notifications.length) {
+                    this.notificationsList.innerHTML = '<p class="text-muted">No notifications</p>';
+                    return;
+                }
+                this.notificationsList.innerHTML = AppState.notifications.map(n => `
+                    <div class="notification-item ${n.read ? '' : 'unread'}" data-id="${n.id}">
+                        <div class="notification-message">${n.message}</div>
+                        <div class="notification-time">${Utils.formatDateTime(n.timestamp)}</div>
+                        ${!n.read ? `<button class="mark-read-btn" onclick="UIManager.markNotificationRead('${n.id}')"><i class="fas fa-check-circle"></i> Mark as read</button>` : ''}
+                    </div>
+                `).join('');
+            },
+            async markNotificationRead(notificationId) {
+                await FirebaseService.markNotificationAsRead(notificationId);
+                this.renderNotifications();
             },
             renderCustomers() {
                 if (!AppState.customers.length) {
@@ -1015,6 +1201,9 @@
                 this.certificateModal.classList.add('active');
             }
         };
+
+        // Attach UIManager to window for inline onclick handlers
+        window.UIManager = UIManager;
 
         // Start app
         document.addEventListener('DOMContentLoaded', () => UIManager.init());
