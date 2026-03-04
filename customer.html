@@ -3053,24 +3053,17 @@
                 AppState.userData.assignedAgentId = agentData.uid;
                 AppState.userData.agentCustomId = agentData.agentId;
                 AppState.agentData = agentData;
-                await this.createNotification(
+                // Send notification to customer
+                await this.addMessage(
                     AppState.currentUser.uid,
-                    'agent_assigned',
-                    {
-                        agentId: agentData.uid,
-                        agentName: agentData.fullName,
-                        agentCustomId: agentData.agentId,
-                        timestamp: Date.now()
-                    }
+                    `You have been assigned agent ${agentData.fullName} (ID: ${agentData.agentId})`,
+                    'system'
                 );
-                await this.createNotification(
+                // Send notification to agent
+                await this.addMessage(
                     agentData.uid,
-                    'customer_assigned',
-                    {
-                        customerId: AppState.currentUser.uid,
-                        customerName: AppState.userData.fullName,
-                        timestamp: Date.now()
-                    }
+                    `Customer ${AppState.userData.fullName} has been assigned to you`,
+                    'system'
                 );
                 Utils.hideLoading();
                 return { 
@@ -3177,21 +3170,20 @@
                 }
             });
         },
-        async createNotification(userId, type, data) {
+        // NEW: Unified method to add a message to the 'messages' node
+        async addMessage(recipientId, message, type = 'system') {
             try {
-                const notificationRef = db.ref('notifications/' + userId).push();
-                const notificationId = notificationRef.key;
-                const notification = {
-                    id: notificationId,
-                    type: type,
-                    data: data,
+                const msgRef = db.ref('messages/' + Utils.generateId('MSG'));
+                await msgRef.set({
+                    recipientId,
+                    message,
                     timestamp: Date.now(),
-                    read: false
-                };
-                await notificationRef.set(notification);
-                return { success: true, id: notificationId };
+                    read: false,
+                    type
+                });
+                return { success: true };
             } catch (error) {
-                console.error('Error creating notification:', error);
+                console.error('Error adding message:', error);
                 return { success: false, error: error.message };
             }
         },
@@ -3304,26 +3296,16 @@
                     totalPaid: 0
                 };
                 await loanRef.set(loan);
-                await this.createNotification(
+                await this.addMessage(
                     AppState.currentUser.uid,
-                    'loan_submitted',
-                    {
-                        loanId: loanId,
-                        amount: loanData.amount,
-                        timestamp: Date.now()
-                    }
+                    `Your loan application for ${Utils.formatCurrency(loanData.amount)} has been submitted.`,
+                    'system'
                 );
                 if (AppState.userData.assignedAgentId) {
-                    await this.createNotification(
+                    await this.addMessage(
                         AppState.userData.assignedAgentId,
-                        'customer_loan_submitted',
-                        {
-                            customerId: AppState.currentUser.uid,
-                            customerName: AppState.userData.fullName,
-                            loanId: loanId,
-                            amount: loanData.amount,
-                            timestamp: Date.now()
-                        }
+                        `${AppState.userData.fullName} has submitted a loan application for ${Utils.formatCurrency(loanData.amount)}.`,
+                        'system'
                     );
                 }
                 await this.loadCustomerLoans();
@@ -3392,14 +3374,10 @@
                     });
                 }
 
-                await this.createNotification(
+                await this.addMessage(
                     AppState.currentUser.uid,
-                    'payment_submitted',
-                    {
-                        paymentId: paymentId,
-                        amount: paymentData.amount,
-                        timestamp: Date.now()
-                    }
+                    `Payment of ${Utils.formatCurrency(paymentData.amount)} submitted for verification.`,
+                    'system'
                 );
 
                 Utils.hideLoading();
