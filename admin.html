@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1288,6 +1289,47 @@
             gap: 16px;
         }
 
+        /* ===== Toggle Switch for Settings ===== */
+        .toggle-switch {
+            position: relative;
+            display: inline-block;
+            width: 50px;
+            height: 24px;
+        }
+        .toggle-switch input {
+            opacity: 0;
+            width: 0;
+            height: 0;
+        }
+        .toggle-label {
+            position: absolute;
+            cursor: pointer;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-color: var(--ios-gray3);
+            transition: .2s;
+            border-radius: 24px;
+        }
+        .toggle-label:before {
+            position: absolute;
+            content: "";
+            height: 20px;
+            width: 20px;
+            left: 2px;
+            bottom: 2px;
+            background-color: white;
+            transition: .2s;
+            border-radius: 50%;
+        }
+        input:checked + .toggle-label {
+            background-color: var(--ios-blue);
+        }
+        input:checked + .toggle-label:before {
+            transform: translateX(26px);
+        }
+
         /* ===== Responsive ===== */
         @media (max-width: 768px) {
             .main-content {
@@ -1779,7 +1821,7 @@
             </div>
         </section>
 
-        <!-- NEW NOTIFICATIONS SECTION -->
+        <!-- NOTIFICATIONS SECTION (enhanced) -->
         <section class="content-section" id="notificationsSection">
             <div class="floating-card">
                 <h3 class="mb-4">Upcoming Payments & Reminders</h3>
@@ -1805,6 +1847,8 @@
                     <textarea id="msgText" class="form-textarea" rows="3" placeholder="Type your message..."></textarea>
                 </div>
                 <button class="btn btn-primary w-100" id="sendMessageBtn"><i class="fas fa-paper-plane"></i> Send Message</button>
+                <!-- NEW: Send Promotion button -->
+                <button class="btn btn-warning w-100 mt-2" id="openPromotionModalBtn"><i class="fas fa-bullhorn"></i> Send Promotion</button>
             </div>
             <div class="floating-card">
                 <h3 class="mb-4">Recent Messages</h3>
@@ -1812,7 +1856,7 @@
             </div>
         </section>
 
-        <!-- SETTINGS SECTION -->
+        <!-- SETTINGS SECTION (enhanced with app toggles) -->
         <section class="content-section" id="settingsSection">
             <div class="grid-2">
                 <div class="floating-card">
@@ -1836,6 +1880,21 @@
                     <div class="form-group">
                         <label class="form-label">Min Loan Amount (K)</label>
                         <input type="number" id="minLoanAmount" class="form-input" value="100">
+                    </div>
+                    <!-- NEW: App enable toggles -->
+                    <div class="form-group">
+                        <label class="form-label">Enable Customer App</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="enableCustomerApp" class="toggle-input">
+                            <label for="enableCustomerApp" class="toggle-label"></label>
+                        </div>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Enable Agent App</label>
+                        <div class="toggle-switch">
+                            <input type="checkbox" id="enableAgentApp" class="toggle-input">
+                            <label for="enableAgentApp" class="toggle-label"></label>
+                        </div>
                     </div>
                     <button class="btn btn-primary w-100" id="saveSettings">Save Settings</button>
                 </div>
@@ -2225,6 +2284,49 @@
         </div>
     </div>
 
+    <!-- NEW: Promotion Modal -->
+    <div class="modal-overlay" id="promotionModal">
+        <div class="modal-container compact">
+            <div class="modal-header">
+                <span>Send Promotion</span>
+                <span class="modal-close" onclick="closeModal('promotionModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <form id="promotionForm">
+                    <div class="form-group">
+                        <label class="form-label">Title *</label>
+                        <input type="text" id="promoTitle" class="form-input" required>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Message *</label>
+                        <textarea id="promoMessage" class="form-textarea" rows="3" required></textarea>
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Image (optional)</label>
+                        <div class="upload-box" data-type="promo-image" onclick="openCloudinaryUpload('promo-image')">
+                            <i class="fas fa-image"></i>
+                            <span>Click to upload image</span>
+                            <div class="upload-preview" id="promoImagePreview"></div>
+                        </div>
+                        <input type="hidden" id="promoImageUrl">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Send to</label>
+                        <select id="promoRecipients" class="form-select">
+                            <option value="all_customers">All Customers</option>
+                            <option value="all_agents">All Agents</option>
+                            <option value="both">Both Customers and Agents</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('promotionModal')">Cancel</button>
+                <button class="btn btn-primary" id="sendPromotionBtn">Send Promotion</button>
+            </div>
+        </div>
+    </div>
+
     <!-- Sudo Reset Modal -->
     <div class="modal-overlay" id="sudoModal">
         <div class="modal-container compact">
@@ -2359,13 +2461,13 @@
                 };
                 await db.ref('auditLogs/' + Utils.generateId('LOG')).set(log);
             },
-            // NEW: Send notification to user (agent or customer)
+            // Send notification to user (agent or customer)
             sendNotification: async (recipientId, message, type, relatedId = null) => {
                 if (!recipientId) return;
                 await db.ref('notifications/' + Utils.generateId('NOTIF')).set({
                     recipientId,
                     message,
-                    type, // 'loan_approved', 'loan_rejected', 'commission_paid'
+                    type, // 'loan_approved', 'loan_rejected', 'commission_paid', 'payment_confirmed'
                     relatedId,
                     timestamp: Date.now(),
                     read: false
@@ -2721,12 +2823,24 @@
                 const messagesSnap = await db.ref('messages').once('value');
                 allMessages = Object.entries(messagesSnap.val() || {}).map(([id,m]) => ({...m, id})).sort((a,b) => b.timestamp - a.timestamp);
 
+                populateSettingsForm(); // NEW: populate settings form with loaded values
                 updateUI();
                 Utils.hideLoading();
             } catch (error) {
                 Utils.showToast('Error', 'Failed to load data: ' + error.message, 'error');
                 Utils.hideLoading();
             }
+        }
+
+        // NEW: Populate settings form with systemSettings
+        function populateSettingsForm() {
+            document.getElementById('commissionRate').value = systemSettings.commissionRate || 15;
+            document.getElementById('monthlyInterest').value = systemSettings.monthlyInterestRate || 35;
+            document.getElementById('weeklyInterest').value = systemSettings.weeklyInterestRate || 10;
+            document.getElementById('maxLoanAmount').value = systemSettings.maxLoanAmount || 50000;
+            document.getElementById('minLoanAmount').value = systemSettings.minLoanAmount || 100;
+            document.getElementById('enableCustomerApp').checked = systemSettings.enableCustomerApp !== false;
+            document.getElementById('enableAgentApp').checked = systemSettings.enableAgentApp !== false;
         }
 
         // ========== UI UPDATE FUNCTIONS ==========
@@ -4397,6 +4511,12 @@
                     }
                 }
                 
+                // NEW: Send notifications
+                await Utils.sendNotification(payment.customerId, `Your payment of ${Utils.formatCurrency(payment.amount)} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
+                if (loan.agentId) {
+                    await Utils.sendNotification(loan.agentId, `Payment of ${Utils.formatCurrency(payment.amount)} from customer ${payment.customerName} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
+                }
+                
                 await Utils.logAudit('CONFIRM_PAYMENT', { paymentId, loanId: payment.loanId });
                 Utils.showToast('Success', 'Payment confirmed', 'success');
                 closeModal('paymentDetailsModal');
@@ -4818,11 +4938,14 @@
                 weeklyInterestRate: parseFloat(document.getElementById('weeklyInterest').value),
                 maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value),
                 minLoanAmount: parseFloat(document.getElementById('minLoanAmount').value),
+                enableCustomerApp: document.getElementById('enableCustomerApp').checked,
+                enableAgentApp: document.getElementById('enableAgentApp').checked,
                 updatedAt: Date.now(),
                 updatedBy: currentUser?.uid
             };
             
             await db.ref('systemSettings').set(settings);
+            systemSettings = settings; // update local copy
             await Utils.logAudit('UPDATE_SETTINGS', settings);
             Utils.showToast('Success', 'Settings saved', 'success');
         });
@@ -5246,6 +5369,48 @@
         
         document.getElementById('createAgentBtn').addEventListener('click', () => openModal('createAgentModal'));
 
+        // NEW: Promotion modal handling
+        document.getElementById('openPromotionModalBtn').addEventListener('click', () => {
+            // Reset form
+            document.getElementById('promoTitle').value = '';
+            document.getElementById('promoMessage').value = '';
+            document.getElementById('promoImageUrl').value = '';
+            const preview = document.getElementById('promoImagePreview');
+            if (preview) preview.style.backgroundImage = '';
+            openModal('promotionModal');
+        });
+
+        document.getElementById('sendPromotionBtn').addEventListener('click', async () => {
+            const title = document.getElementById('promoTitle').value.trim();
+            const message = document.getElementById('promoMessage').value.trim();
+            const imageUrl = document.getElementById('promoImageUrl').value;
+            const recipients = document.getElementById('promoRecipients').value;
+
+            if (!title || !message) {
+                Utils.showToast('Error', 'Title and message are required', 'error');
+                return;
+            }
+
+            Utils.showLoading('Sending promotion...');
+            try {
+                const promotionData = {
+                    title,
+                    message,
+                    imageUrl: imageUrl || null,
+                    recipients, // 'all_customers', 'all_agents', or 'both'
+                    createdAt: Date.now(),
+                    createdBy: currentUser.uid,
+                    active: true
+                };
+                await db.ref('promotions/' + Utils.generateId('PROMO')).set(promotionData);
+                Utils.showToast('Success', 'Promotion sent', 'success');
+                closeModal('promotionModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
         // Modal helpers
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
@@ -5290,6 +5455,7 @@
                         else if (type === 'agent-nrc-back' || type === 'edit-agent-nrc-back') hiddenId = type.startsWith('edit') ? 'editAgentNrcBackUrl' : 'agentNrcBackUrl';
                         else if (type === 'agent-profile' || type === 'edit-agent-profile') hiddenId = type.startsWith('edit') ? 'editAgentProfileUrl' : 'agentProfileUrl';
                         else if (type === 'agent-additional') hiddenId = 'agentAdditionalUrl';
+                        else if (type === 'promo-image') hiddenId = 'promoImageUrl'; // NEW
                         
                         if (hiddenId) document.getElementById(hiddenId).value = info.secure_url;
                         
@@ -5378,6 +5544,11 @@
             db.ref('messages').on('value', (snap) => {
                 allMessages = Object.entries(snap.val() || {}).map(([id,m]) => ({...m, id})).sort((a,b) => b.timestamp - a.timestamp);
                 if (document.getElementById('notificationsSection').classList.contains('active')) renderMessages();
+            });
+
+            db.ref('systemSettings').on('value', (snap) => {
+                systemSettings = snap.val() || {};
+                populateSettingsForm();
             });
         }
 
