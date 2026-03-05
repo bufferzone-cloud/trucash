@@ -1794,13 +1794,20 @@
             
             <button class="register-btn" id="registerBtn">Create New Account</button>
             
-            <!-- Quick Actions -->
+            <!-- Quick Actions (including admin approval button) -->
             <div class="quick-actions" id="quickActions">
                 <a href="#" class="quick-action-btn" id="dashboardPreviewBtn">
                     <div class="quick-action-icon">
                         <i class="fas fa-chart-line"></i>
                     </div>
                     <div class="quick-action-text">Dashboard</div>
+                </a>
+                <!-- NEW: Admin Approval Button (hidden by default) -->
+                <a href="#" class="quick-action-btn" id="adminApprovalBtn" style="display: none;">
+                    <div class="quick-action-icon">
+                        <i class="fas fa-clipboard-list"></i>
+                    </div>
+                    <div class="quick-action-text">Pending Apps</div>
                 </a>
                 <a href="#" class="quick-action-btn" id="supportBtn">
                     <div class="quick-action-icon">
@@ -2125,7 +2132,7 @@
         </div>
     </div>
 
-    <!-- JavaScript Implementation (FIXED) -->
+    <!-- JavaScript Implementation (MODIFIED to show admin button) -->
     <script>
         // ===== Firebase Configuration =====
         const firebaseConfig = {
@@ -2428,54 +2435,71 @@
                 }
             },
             
+            // MODIFIED: showUserGreeting now shows/hides admin approval button
             showUserGreeting: (email, userData = null) => {
                 const greetingElement = document.getElementById('userGreeting');
                 const greetingText = document.getElementById('greetingText');
                 const quickActions = document.getElementById('quickActions');
+                const adminBtn = document.getElementById('adminApprovalBtn');
+                
+                let userType = null;
                 
                 if (email.toLowerCase() === 'sudo@gmail.com') {
+                    userType = 'sudo';
                     greetingText.textContent = 'Hello sudo admin, please enter your password';
                     greetingElement.classList.add('visible');
                     quickActions.classList.add('visible');
                     AppState.userGreeting = 'sudo';
-                    return;
-                }
-                
-                if (!userData) {
+                } else if (userData) {
+                    userType = userData.userType || Utils.determineUserTypeFromEmail(email);
+                    const fullName = userData.fullName || 'User';
+                    
+                    let greeting = '';
+                    switch(userType) {
+                        case 'admin':
+                            greeting = `Hello Admin ${fullName}, please enter your password`;
+                            break;
+                        case 'agent':
+                            greeting = `Hello Agent ${fullName}, please enter your password`;
+                            break;
+                        case 'customer':
+                            greeting = `Hello ${fullName}, please enter your password`;
+                            break;
+                        default:
+                            greeting = `Hello, please enter your password`;
+                    }
+                    
+                    greetingText.textContent = greeting;
+                    greetingElement.classList.add('visible');
+                    quickActions.classList.add('visible');
+                    AppState.userGreeting = userType;
+                } else {
                     greetingElement.classList.remove('visible');
                     quickActions.classList.remove('visible');
-                    return;
+                    AppState.userGreeting = null;
                 }
                 
-                const userType = userData.userType || Utils.determineUserTypeFromEmail(email);
-                const fullName = userData.fullName || 'User';
-                
-                let greeting = '';
-                switch(userType) {
-                    case 'admin':
-                        greeting = `Hello Admin ${fullName}, please enter your password`;
-                        break;
-                    case 'agent':
-                        greeting = `Hello Agent ${fullName}, please enter your password`;
-                        break;
-                    case 'customer':
-                        greeting = `Hello ${fullName}, please enter your password`;
-                        break;
-                    default:
-                        greeting = `Hello, please enter your password`;
+                // Show admin approval button only for admin/sudo users
+                if (userType === 'admin' || userType === 'sudo') {
+                    if (adminBtn) {
+                        adminBtn.style.display = 'flex';
+                        adminBtn.onclick = (e) => {
+                            e.preventDefault();
+                            AdminApprovalService.openAdminApprovalModal();
+                        };
+                    }
+                } else {
+                    if (adminBtn) adminBtn.style.display = 'none';
                 }
-                
-                greetingText.textContent = greeting;
-                greetingElement.classList.add('visible');
-                quickActions.classList.add('visible');
-                AppState.userGreeting = userType;
             },
             
             hideUserGreeting: () => {
                 const greetingElement = document.getElementById('userGreeting');
                 const quickActions = document.getElementById('quickActions');
+                const adminBtn = document.getElementById('adminApprovalBtn');
                 greetingElement.classList.remove('visible');
                 quickActions.classList.remove('visible');
+                if (adminBtn) adminBtn.style.display = 'none';
                 AppState.userGreeting = null;
             },
             
@@ -2485,7 +2509,7 @@
             }
         };
 
-        // ===== Firebase Service (FIXED: using email mapping instead of queries) =====
+        // ===== Firebase Service (using email mapping instead of queries) =====
         const FirebaseService = {
             async checkEmailExists(email) {
                 try {
@@ -3727,6 +3751,9 @@
                 this.supportBtn = document.getElementById('supportBtn');
                 this.docsBtn = document.getElementById('docsBtn');
                 
+                // NEW: Admin approval button
+                this.adminApprovalBtn = document.getElementById('adminApprovalBtn');
+                
                 // User greeting
                 this.userGreeting = document.getElementById('userGreeting');
             },
@@ -4530,3 +4557,4 @@
     </script>
 </body>
 </html>
+
