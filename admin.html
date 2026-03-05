@@ -1850,13 +1850,18 @@
                 <!-- NEW: Send Promotion button -->
                 <button class="btn btn-warning w-100 mt-2" id="openPromotionModalBtn"><i class="fas fa-bullhorn"></i> Send Promotion</button>
             </div>
+            <!-- NEW: Promotion History Card -->
+            <div class="floating-card">
+                <h3 class="mb-4">Promotion History</h3>
+                <div id="promotionHistoryList"></div>
+            </div>
             <div class="floating-card">
                 <h3 class="mb-4">Recent Messages</h3>
                 <div id="recentMessagesList"></div>
             </div>
         </section>
 
-        <!-- SETTINGS SECTION (enhanced with app toggles) -->
+        <!-- SETTINGS SECTION (enhanced with app toggles and contact details) -->
         <section class="content-section" id="settingsSection">
             <div class="grid-2">
                 <div class="floating-card">
@@ -1881,7 +1886,20 @@
                         <label class="form-label">Min Loan Amount (K)</label>
                         <input type="number" id="minLoanAmount" class="form-input" value="100">
                     </div>
-                    <!-- NEW: App enable toggles -->
+                    <!-- NEW: Contact details for banned users -->
+                    <div class="form-group">
+                        <label class="form-label">Contact Phone (for banned users)</label>
+                        <input type="text" id="contactPhone" class="form-input" placeholder="+260 123 456 789">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Contact Email</label>
+                        <input type="email" id="contactEmail" class="form-input" placeholder="support@trucash.com">
+                    </div>
+                    <div class="form-group">
+                        <label class="form-label">Website</label>
+                        <input type="text" id="contactWebsite" class="form-input" placeholder="https://trucash.com">
+                    </div>
+                    <!-- App enable toggles -->
                     <div class="form-group">
                         <label class="form-label">Enable Customer App</label>
                         <div class="toggle-switch">
@@ -2352,6 +2370,7 @@
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE
         // with advanced loan details: collateral images, witness, signed agreement
+        // MODIFICATIONS: added promotion history, ban reason with prompt, contact details in settings, loan rejection reason display, ban reason display in user modals
         // =========================================================================
         
         // Firebase configuration
@@ -2388,6 +2407,7 @@
         let allAuditLogs = [];
         let allAgentApplications = []; // includes all statuses (pending, rejected, approved)
         let allMessages = [];
+        let allPromotions = []; // NEW: store promotions
         let systemSettings = {};
         let currentLoanFilter = 'pending'; // default to pending
         let currentPaymentFilter = 'pending';
@@ -2552,7 +2572,8 @@
                         Agent: c.agentName || 'None',
                         'Loans Count': allLoans.filter(l => l.customerId === c.id).length,
                         'Total Borrowed': Utils.formatCurrency(allLoans.filter(l => l.customerId === c.id).reduce((s,l) => s + (l.amount || 0), 0)),
-                        Created: Utils.formatDate(c.createdAt)
+                        Created: Utils.formatDate(c.createdAt),
+                        BanReason: c.banReason || ''
                     }));
                     filename = 'customers.csv';
                     break;
@@ -2568,7 +2589,8 @@
                         'Customers Count': a.totalCustomers || 0,
                         'Loans Count': allLoans.filter(l => l.agentId === a.id).length,
                         'Commission Earned': Utils.formatCurrency(allCommissionHistory.filter(c => c.agentId === a.id && c.status === 'paid').reduce((s,c) => s + c.amount, 0)),
-                        Created: Utils.formatDate(a.createdAt)
+                        Created: Utils.formatDate(a.createdAt),
+                        BanReason: a.banReason || ''
                     }));
                     filename = 'agents.csv';
                     break;
@@ -2593,7 +2615,8 @@
                         'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0),
                         'Witness Name': l.witness?.name || 'N/A',
                         'Witness NRC': l.witness?.nrc || 'N/A',
-                        'Signed Agreement': l.signedAgreementUrl || 'N/A'
+                        'Signed Agreement': l.signedAgreementUrl || 'N/A',
+                        RejectionReason: l.rejectionReason || ''
                     }));
                     filename = 'loans.csv';
                     break;
@@ -2678,7 +2701,8 @@
                 Agent: c.agentName || 'None',
                 'Loans Count': allLoans.filter(l => l.customerId === c.id).length,
                 'Total Borrowed': Utils.formatCurrency(allLoans.filter(l => l.customerId === c.id).reduce((s,l) => s + (l.amount || 0), 0)),
-                Created: Utils.formatDate(c.createdAt)
+                Created: Utils.formatDate(c.createdAt),
+                BanReason: c.banReason || ''
             }));
             zip.file("customers.csv", Papa.unparse(customersData));
             
@@ -2693,7 +2717,8 @@
                 'Customers Count': a.totalCustomers || 0,
                 'Loans Count': allLoans.filter(l => l.agentId === a.id).length,
                 'Commission Earned': Utils.formatCurrency(allCommissionHistory.filter(c => c.agentId === a.id && c.status === 'paid').reduce((s,c) => s + c.amount, 0)),
-                Created: Utils.formatDate(a.createdAt)
+                Created: Utils.formatDate(a.createdAt),
+                BanReason: a.banReason || ''
             }));
             zip.file("agents.csv", Papa.unparse(agentsData));
             
@@ -2717,7 +2742,8 @@
                 'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0),
                 'Witness Name': l.witness?.name || 'N/A',
                 'Witness NRC': l.witness?.nrc || 'N/A',
-                'Signed Agreement': l.signedAgreementUrl || 'N/A'
+                'Signed Agreement': l.signedAgreementUrl || 'N/A',
+                RejectionReason: l.rejectionReason || ''
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
@@ -2770,13 +2796,23 @@
             }));
             zip.file("audit.csv", Papa.unparse(auditData));
             
-            // Messages (optional)
+            // Messages
             const messagesData = allMessages.map(m => ({
                 Recipient: m.recipientId,
                 Message: m.message,
                 Sent: Utils.formatDateTime(m.timestamp)
             }));
             zip.file("messages.csv", Papa.unparse(messagesData));
+
+            // Promotions
+            const promotionsData = allPromotions.map(p => ({
+                Title: p.title,
+                Message: p.message,
+                Recipients: p.recipients,
+                Image: p.imageUrl || '',
+                Created: Utils.formatDateTime(p.createdAt)
+            }));
+            zip.file("promotions.csv", Papa.unparse(promotionsData));
             
             // Generate zip
             const content = await zip.generateAsync({ type: "blob" });
@@ -2823,6 +2859,10 @@
                 const messagesSnap = await db.ref('messages').once('value');
                 allMessages = Object.entries(messagesSnap.val() || {}).map(([id,m]) => ({...m, id})).sort((a,b) => b.timestamp - a.timestamp);
 
+                // NEW: Load promotions
+                const promoSnap = await db.ref('promotions').once('value');
+                allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
+
                 populateSettingsForm(); // NEW: populate settings form with loaded values
                 updateUI();
                 Utils.hideLoading();
@@ -2841,6 +2881,10 @@
             document.getElementById('minLoanAmount').value = systemSettings.minLoanAmount || 100;
             document.getElementById('enableCustomerApp').checked = systemSettings.enableCustomerApp !== false;
             document.getElementById('enableAgentApp').checked = systemSettings.enableAgentApp !== false;
+            // NEW: contact details
+            document.getElementById('contactPhone').value = systemSettings.contactPhone || '';
+            document.getElementById('contactEmail').value = systemSettings.contactEmail || '';
+            document.getElementById('contactWebsite').value = systemSettings.contactWebsite || '';
         }
 
         // ========== UI UPDATE FUNCTIONS ==========
@@ -2859,6 +2903,7 @@
             renderRejectedApplications();
             renderNotifications(); 
             renderMessages(); 
+            renderPromotionHistory(); // NEW
             updateBadges(); // update bottom nav badges
         }
 
@@ -2919,6 +2964,7 @@
                             <div>
                                 <span class="status-badge ${c.status === 'active' ? 'active' : 'banned'}">${c.status}</span>
                                 <span class="status-badge">${loanCount} loans (${activeLoanCount} active)</span>
+                                ${c.status === 'banned' && c.banReason ? `<span class="status-badge banned">Ban: ${c.banReason.substring(0,20)}...</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -2988,6 +3034,7 @@
                                 <span class="status-badge">${customerCount} customers</span>
                                 <span class="status-badge">${loanCount} loans</span>
                                 <span class="status-badge">Earned: ${Utils.formatCurrency(commissionEarned)}</span>
+                                ${a.status === 'banned' && a.banReason ? `<span class="status-badge banned">Ban: ${a.banReason.substring(0,20)}...</span>` : ''}
                             </div>
                         </div>
                     </div>
@@ -3108,6 +3155,7 @@
                         ${l.collateral?.images ? `<span class="status-badge"><i class="fas fa-image"></i> ${l.collateral.images.length} img</span>` : ''}
                         ${l.witness ? `<span class="status-badge"><i class="fas fa-user"></i> Witness</span>` : ''}
                         ${l.signedAgreementUrl ? `<span class="status-badge"><i class="fas fa-file-signature"></i> Signed</span>` : ''}
+                        ${l.status === 'rejected' && l.rejectionReason ? `<span class="status-badge rejected">Rejected</span>` : ''}
                     </div>
                 </div>
             `}).join('');
@@ -3476,6 +3524,27 @@
             `).join('');
         }
 
+        // NEW: Render promotion history
+        function renderPromotionHistory() {
+            const container = document.getElementById('promotionHistoryList');
+            if (!container) return;
+            if (allPromotions.length === 0) {
+                container.innerHTML = '<p class="text-muted">No promotions sent yet.</p>';
+                return;
+            }
+            container.innerHTML = allPromotions.map(p => `
+                <div class="detail-card mb-2">
+                    <div class="d-flex justify-between">
+                        <strong>${p.title}</strong>
+                        <span class="text-muted">${Utils.formatDateTime(p.createdAt)}</span>
+                    </div>
+                    <div class="profile-meta">${p.message}</div>
+                    <div class="profile-meta">Recipients: ${p.recipients}</div>
+                    ${p.imageUrl ? `<img src="${p.imageUrl}" style="max-width:100px; border-radius:8px; margin-top:8px;">` : ''}
+                </div>
+            `).join('');
+        }
+
         // ========== DETAIL VIEWS ==========
         window.showCustomerDetails = async (id) => {
             const customer = allCustomers.find(c => c.id === id);
@@ -3526,6 +3595,16 @@
                             <div class="detail-label">Member Since</div>
                             <div class="detail-value">${Utils.formatDate(customer.createdAt)}</div>
                         </div>
+                        ${customer.status === 'banned' ? `
+                        <div class="detail-card">
+                            <div class="detail-label">Ban Reason</div>
+                            <div class="detail-value">${customer.banReason || 'No reason provided'}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Banned On</div>
+                            <div class="detail-value">${Utils.formatDateTime(customer.bannedAt)}</div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 
@@ -3638,6 +3717,16 @@
                             <div class="detail-label">Total Loans</div>
                             <div class="detail-value">${loans.length}</div>
                         </div>
+                        ${agent.status === 'banned' ? `
+                        <div class="detail-card">
+                            <div class="detail-label">Ban Reason</div>
+                            <div class="detail-value">${agent.banReason || 'No reason provided'}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Banned On</div>
+                            <div class="detail-value">${Utils.formatDateTime(agent.bannedAt)}</div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 
@@ -3688,13 +3777,23 @@
             openModal('agentDetailsModal');
         };
 
-        // NEW: Ban user function
+        // NEW: Ban user function with reason
         async function banUser(userId, type) {
-            if (!confirm(`Are you sure you want to ban this ${type}? They will not be able to log in.`)) return;
+            const reason = prompt(`Enter reason for banning this ${type}:`);
+            if (reason === null) return; // cancelled
+            if (!reason.trim()) {
+                Utils.showToast('Error', 'Ban reason cannot be empty', 'error');
+                return;
+            }
             Utils.showLoading('Banning user...');
             try {
-                await db.ref('users/' + userId).update({ status: 'banned' });
-                await Utils.logAudit('BAN_USER', { userId, type });
+                await db.ref('users/' + userId).update({
+                    status: 'banned',
+                    banReason: reason,
+                    bannedAt: Date.now(),
+                    bannedBy: currentUser.uid
+                });
+                await Utils.logAudit('BAN_USER', { userId, type, reason });
                 Utils.showToast('Success', `${type} banned`, 'success');
                 closeModal(type === 'customer' ? 'customerDetailsModal' : 'agentDetailsModal');
             } catch (e) {
@@ -3703,7 +3802,7 @@
             Utils.hideLoading();
         }
 
-        // Enhanced loan details with witness, collateral images, and signed agreement button
+        // Enhanced loan details with witness, collateral images, signed agreement button, and rejection reason
         window.showLoanDetails = async (id) => {
             const loan = allLoans.find(l => l.id === id);
             if (!loan) return;
@@ -3799,6 +3898,12 @@
                             <div class="detail-label">Duration</div>
                             <div class="detail-value">${loan.duration} ${loan.durationUnit || 'months'}</div>
                         </div>
+                        ${loan.status === 'rejected' && loan.rejectionReason ? `
+                        <div class="detail-card">
+                            <div class="detail-label">Rejection Reason</div>
+                            <div class="detail-value">${loan.rejectionReason}</div>
+                        </div>
+                        ` : ''}
                     </div>
                 </div>
                 
@@ -4940,6 +5045,9 @@
                 minLoanAmount: parseFloat(document.getElementById('minLoanAmount').value),
                 enableCustomerApp: document.getElementById('enableCustomerApp').checked,
                 enableAgentApp: document.getElementById('enableAgentApp').checked,
+                contactPhone: document.getElementById('contactPhone').value,
+                contactEmail: document.getElementById('contactEmail').value,
+                contactWebsite: document.getElementById('contactWebsite').value,
                 updatedAt: Date.now(),
                 updatedBy: currentUser?.uid
             };
@@ -5262,6 +5370,7 @@
             if (sectionId === 'notifications') {
                 renderNotifications();
                 renderMessages();
+                renderPromotionHistory(); // NEW
             }
             
             // Set default loan filter to pending when loans section is opened
@@ -5544,6 +5653,11 @@
             db.ref('messages').on('value', (snap) => {
                 allMessages = Object.entries(snap.val() || {}).map(([id,m]) => ({...m, id})).sort((a,b) => b.timestamp - a.timestamp);
                 if (document.getElementById('notificationsSection').classList.contains('active')) renderMessages();
+            });
+
+            db.ref('promotions').on('value', (snap) => { // NEW listener
+                allPromotions = Object.entries(snap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
+                if (document.getElementById('notificationsSection').classList.contains('active')) renderPromotionHistory();
             });
 
             db.ref('systemSettings').on('value', (snap) => {
