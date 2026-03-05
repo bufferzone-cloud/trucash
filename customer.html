@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -14,7 +15,7 @@
     <!-- Cloudinary SDK -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* ===== iOS Optimized CSS Reset ===== (unchanged, keep all original styles) */
+        /* ===== iOS Optimized CSS Reset ===== (unchanged) */
         * {
             margin: 0;
             padding: 0;
@@ -475,7 +476,6 @@
             margin-bottom: 16px;
         }
 
-        /* ===== Agent Information – Floating Card Style ===== */
         .agent-validation {
             background: linear-gradient(135deg, rgba(52, 199, 89, 0.05), rgba(52, 199, 89, 0.02));
             border: 1px solid var(--ios-green-light);
@@ -575,7 +575,6 @@
             }
         }
 
-        /* Quick Actions 2x2 grid */
         .quick-actions-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1114,7 +1113,7 @@
             background: var(--ios-gray-4);
         }
 
-        /* ===== Signature Pad Styles ===== */
+        /* Signature Pad Styles */
         .signature-container {
             border: 1px solid var(--ios-gray-3);
             border-radius: var(--ios-border-radius-small);
@@ -1146,7 +1145,7 @@
             font-size: 12px;
         }
 
-        /* ===== About Us Certificate Styles ===== */
+        /* About Us Certificate Styles */
         .certificate-container {
             background: white;
             border-radius: var(--ios-border-radius);
@@ -1188,7 +1187,7 @@
             border-radius: 6px;
         }
 
-        /* ===== Loan Status Tabs ===== */
+        /* Loan Tabs */
         .loan-tabs {
             display: flex;
             gap: 8px;
@@ -1208,7 +1207,7 @@
             color: white;
         }
 
-        /* ===== Loan Cards ===== */
+        /* Loan Cards */
         .loan-card {
             background: var(--ios-white);
             border-radius: var(--ios-border-radius);
@@ -1262,7 +1261,7 @@
             background: var(--ios-green-dark);
         }
 
-        /* ===== Loan Details Card ===== */
+        /* Loan Details Card */
         .loan-detail-card {
             background: var(--ios-gray-1);
             border-radius: var(--ios-border-radius-small);
@@ -1290,7 +1289,7 @@
             color: var(--ios-gray-6);
         }
 
-        /* ===== Document Grid 2x2 ===== */
+        /* Document Grid 2x2 */
         .document-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1324,7 +1323,7 @@
             margin-bottom: 8px;
         }
 
-        /* ===== Settings Cards ===== */
+        /* Settings Cards */
         .settings-card {
             background: var(--ios-gray-1);
             border-radius: var(--ios-border-radius-small);
@@ -1335,7 +1334,7 @@
             margin-bottom: 10px;
         }
 
-        /* ===== Duration Unit Selector ===== */
+        /* Duration Unit Selector */
         .duration-unit-group {
             display: flex;
             gap: 10px;
@@ -1356,7 +1355,7 @@
             border-color: var(--ios-green);
         }
 
-        /* ===== Agreement Styles ===== */
+        /* Agreement Styles */
         .agreement-wrapper {
             font-family: 'Times New Roman', serif;
             background: #fefefe;
@@ -1462,6 +1461,32 @@
             cursor: pointer;
             margin-top: 6px;
         }
+
+        /* Maintenance overlay */
+        .maintenance-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .maintenance-overlay h2 {
+            color: var(--ios-red);
+            margin-bottom: 10px;
+        }
+        .maintenance-overlay p {
+            color: var(--ios-gray-6);
+            max-width: 400px;
+        }
     </style>
 </head>
 <body>
@@ -1469,6 +1494,13 @@
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <div class="loading-text">Loading Dashboard...</div>
+    </div>
+
+    <!-- Maintenance Overlay (shown when app disabled) -->
+    <div class="maintenance-overlay" id="maintenanceOverlay" style="display: none;">
+        <i class="fas fa-tools" style="font-size: 60px; color: var(--ios-red); margin-bottom: 20px;"></i>
+        <h2>Under Maintenance</h2>
+        <p>The customer app is currently disabled by the administrator. Please check back later.</p>
     </div>
 
     <!-- Toast Container -->
@@ -2365,6 +2397,23 @@
         </div>
     </div>
 
+    <!-- Promotion Modal (NEW) -->
+    <div class="modal" id="promotionModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title" id="promotionTitle">Promotion</h3>
+                <button class="modal-close" id="closePromotionModal"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="promotionBody">
+                <p id="promotionMessage"></p>
+                <img id="promotionImage" src="" alt="Promotion" style="max-width:100%; border-radius:8px; display:none;">
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" id="dismissPromotion">Close</button>
+            </div>
+        </div>
+    </div>
+
     <!-- JavaScript -->
 <script>
     // ===== Firebase Configuration =====
@@ -2423,7 +2472,9 @@
         pendingLoanData: null,
         selectedLoanForPayment: null,
         currentLoanStatusFilter: 'active',
-        durationUnit: 'months' // 'months' or 'weeks'
+        durationUnit: 'months',
+        promotions: [],           // NEW: list of active promotions for this user
+        currentPromotionIndex: 0  // NEW: index of currently displayed promotion
     };
 
     // ===== Initialize Firebase =====
@@ -2731,7 +2782,6 @@
                 Utils.showToast('Error', 'Failed to update profile photo', 'error');
             }
         },
-        // Payment proof upload – stores URL globally and updates UI
         openPaymentProofWidget(callback) {
             if (!this.widget) this.initUploadWidget();
             const proofWidget = cloudinary.createUploadWidget({
@@ -2767,7 +2817,6 @@
             });
             proofWidget.open();
         },
-        // Upload raw HTML agreement to Cloudinary
         async uploadRawFile(blob, filename) {
             const formData = new FormData();
             formData.append('file', blob, filename);
@@ -2792,7 +2841,7 @@
         }
     };
 
-    // ===== Signature Pad Handler (FIXED: no longer clears on window resize) =====
+    // ===== Signature Pad Handler =====
     const SignaturePad = {
         init(canvasId, clearBtnId) {
             const canvas = document.getElementById(canvasId);
@@ -2803,19 +2852,16 @@
 
             const resizeCanvas = () => {
                 const container = canvas.parentElement;
-                // Use container width, fallback to 300 if hidden
                 let width = container.clientWidth;
                 if (width === 0) width = 300; 
                 canvas.width = width;
-                canvas.height = 150; // fixed height
+                canvas.height = 150;
                 ctx.strokeStyle = '#000';
                 ctx.lineWidth = 2;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
             };
             resizeCanvas();
-            // REMOVED the resize event listener – signatures will not be cleared on window resize
-            // window.addEventListener('resize', resizeCanvas);
 
             const startDrawing = (e) => {
                 e.preventDefault();
@@ -2883,7 +2929,7 @@
         }
     };
 
-    // ===== Firebase Service (Storage removed, all uploads via Cloudinary) =====
+    // ===== Firebase Service =====
     const FirebaseService = {
         async checkAuth() {
             return new Promise((resolve) => {
@@ -2912,6 +2958,14 @@
                         }
                         AppState.currentUser = user;
                         AppState.userData = userData;
+                        await this.loadSystemSettings();
+                        // Check if customer app is enabled
+                        if (AppState.systemSettings && AppState.systemSettings.enableCustomerApp === false) {
+                            document.getElementById('maintenanceOverlay').style.display = 'flex';
+                            // Disable all interactions? We'll just show overlay and block actions.
+                        } else {
+                            document.getElementById('maintenanceOverlay').style.display = 'none';
+                        }
                         await this.loadCustomerData();
                         resolve(userData);
                     } catch (error) {
@@ -2921,21 +2975,6 @@
                     }
                 });
             });
-        },
-        async loadCustomerData() {
-            try {
-                await this.loadSystemSettings();
-                if (AppState.userData.assignedAgentId) {
-                    await this.loadAgentData(AppState.userData.assignedAgentId);
-                }
-                await this.loadCustomerLoans();
-                await this.loadPayments();
-                await this.loadNotifications(); // NEW
-                this.listenForNotifications();   // NEW
-            } catch (error) {
-                console.error('Error loading customer data:', error);
-                Utils.showToast('Data Error', 'Failed to load customer data', 'error');
-            }
         },
         async loadSystemSettings() {
             try {
@@ -2950,11 +2989,28 @@
                         monthlyInterestRate: 35,
                         weeklyInterestRate: 10,
                         maxLoanDuration: 24,
-                        minLoanDuration: 1
+                        minLoanDuration: 1,
+                        enableCustomerApp: true
                     };
                 }
             } catch (error) {
                 console.error('Error loading system settings:', error);
+            }
+        },
+        async loadCustomerData() {
+            try {
+                if (AppState.userData.assignedAgentId) {
+                    await this.loadAgentData(AppState.userData.assignedAgentId);
+                }
+                await this.loadCustomerLoans();
+                await this.loadPayments();
+                await this.loadNotifications();
+                this.listenForNotifications();
+                await this.loadPromotions(); // NEW
+                this.listenForPromotions();   // NEW
+            } catch (error) {
+                console.error('Error loading customer data:', error);
+                Utils.showToast('Data Error', 'Failed to load customer data', 'error');
             }
         },
         async loadAgentData(agentIdentifier) {
@@ -3057,13 +3113,11 @@
                 AppState.userData.assignedAgentId = agentData.uid;
                 AppState.userData.agentCustomId = agentData.agentId;
                 AppState.agentData = agentData;
-                // Send notification to customer
                 await this.addMessage(
                     AppState.currentUser.uid,
                     `You have been assigned agent ${agentData.fullName} (ID: ${agentData.agentId})`,
                     'system'
                 );
-                // Send notification to agent
                 await this.addMessage(
                     agentData.uid,
                     `Customer ${AppState.userData.fullName} has been assigned to you`,
@@ -3130,7 +3184,6 @@
                 return [];
             }
         },
-        // NEW: load notifications (messages) for this customer
         async loadNotifications() {
             try {
                 const snap = await db.ref('messages')
@@ -3139,7 +3192,6 @@
                 const allMessages = snap.val() || {};
                 AppState.notifications = [];
                 Object.entries(allMessages).forEach(([id, msg]) => {
-                    // message is for this customer if recipientId equals customerId or "all_customers"
                     if (msg.recipientId === AppState.currentUser?.uid || msg.recipientId === 'all_customers') {
                         AppState.notifications.push({ id, ...msg });
                     }
@@ -3149,7 +3201,6 @@
                 console.error('Error loading notifications:', error);
             }
         },
-        // NEW: realtime listener for new messages
         listenForNotifications() {
             if (!AppState.currentUser) return;
             db.ref('messages').on('child_added', (snap) => {
@@ -3174,7 +3225,66 @@
                 }
             });
         },
-        // NEW: Unified method to add a message to the 'messages' node
+        // NEW: load promotions
+        async loadPromotions() {
+            try {
+                const snap = await db.ref('promotions').once('value');
+                const allPromos = snap.val() || {};
+                AppState.promotions = [];
+                Object.entries(allPromos).forEach(([id, promo]) => {
+                    if (promo.active && (promo.recipients === 'all_customers' || promo.recipients === 'both')) {
+                        AppState.promotions.push({ id, ...promo });
+                    }
+                });
+                AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                // Show first promotion if any
+                if (AppState.promotions.length > 0) {
+                    AppState.currentPromotionIndex = 0;
+                    UIManager.showPromotion(AppState.promotions[0]);
+                }
+            } catch (error) {
+                console.error('Error loading promotions:', error);
+            }
+        },
+        listenForPromotions() {
+            db.ref('promotions').on('child_added', (snap) => {
+                const promo = snap.val();
+                if (promo.active && (promo.recipients === 'all_customers' || promo.recipients === 'both')) {
+                    // Check if already in list
+                    if (!AppState.promotions.find(p => p.id === snap.key)) {
+                        AppState.promotions.unshift({ id: snap.key, ...promo });
+                        AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                        // If no promotion currently showing, show this new one
+                        if (!document.getElementById('promotionModal').classList.contains('active')) {
+                            AppState.currentPromotionIndex = 0;
+                            UIManager.showPromotion(AppState.promotions[0]);
+                        }
+                    }
+                }
+            });
+            db.ref('promotions').on('child_changed', (snap) => {
+                const promo = snap.val();
+                const index = AppState.promotions.findIndex(p => p.id === snap.key);
+                if (index !== -1) {
+                    if (!promo.active || (promo.recipients !== 'all_customers' && promo.recipients !== 'both')) {
+                        // Remove from list
+                        AppState.promotions.splice(index, 1);
+                        // If currently showing this one, close modal and show next if any
+                        if (document.getElementById('promotionModal').classList.contains('active') && AppState.currentPromotionIndex === index) {
+                            UIManager.closePromotion();
+                            if (AppState.promotions.length > 0) {
+                                AppState.currentPromotionIndex = 0;
+                                UIManager.showPromotion(AppState.promotions[0]);
+                            }
+                        } else if (index < AppState.currentPromotionIndex) {
+                            AppState.currentPromotionIndex--;
+                        }
+                    } else {
+                        AppState.promotions[index] = { id: snap.key, ...promo };
+                    }
+                }
+            });
+        },
         async addMessage(recipientId, message, type = 'system') {
             try {
                 const msgRef = db.ref('messages/' + Utils.generateId('MSG'));
@@ -3191,7 +3301,6 @@
                 return { success: false, error: error.message };
             }
         },
-        // Upload signed agreement to Cloudinary (raw HTML)
         async uploadSignedAgreement(htmlContent) {
             try {
                 const blob = new Blob([htmlContent], { type: 'text/html' });
@@ -3326,10 +3435,7 @@
                 Utils.showLoading('Processing Payment...');
                 const paymentId = 'PAY' + Date.now() + Math.random().toString(36).substr(2, 6).toUpperCase();
                 const paymentRef = db.ref('payments/' + paymentId);
-
-                // proofUrl is directly from Cloudinary
                 const proofUrl = paymentData.proofUrl || '';
-
                 const payment = {
                     id: paymentId,
                     loanId: paymentData.loanId,
@@ -3347,7 +3453,6 @@
                 };
                 await paymentRef.set(payment);
 
-                // Update loan totalPaid and check for completion
                 const loanRef = db.ref('loans/' + paymentData.loanId);
                 const loanSnap = await loanRef.once('value');
                 const loan = loanSnap.val();
@@ -3356,7 +3461,6 @@
                 let updatedStatus = loan.status;
                 if (newTotalPaid >= loan.totalPayable) {
                     updatedStatus = 'completed';
-                    // Mark all schedule installments as paid (simplified)
                     const updatedSchedule = loan.repaymentSchedule.map(inst => ({
                         ...inst,
                         status: 'paid',
@@ -3552,10 +3656,8 @@
             this.closeSupportModal = document.getElementById('closeSupportModal');
             this.showCertificateBtn = document.getElementById('showCertificateBtn');
             this.certificateContainer = document.getElementById('certificateContainer');
-            // Notification elements
             this.notificationBadge = document.getElementById('notificationCount');
             this.mobileUnreadBadge = document.getElementById('mobileUnreadCount');
-            this.desktopUnreadBadge = document.getElementById('desktopUnreadCount');
             this.mobileNotificationBell = document.getElementById('mobileNotificationBell');
             this.notificationsModal = document.getElementById('notificationsModal');
             this.closeNotificationsModal = document.getElementById('closeNotificationsModal');
@@ -3565,6 +3667,13 @@
             this.notificationsModalList = document.getElementById('notificationsModalList');
             this.loanTabs = document.querySelectorAll('.loan-tab');
             this.durationUnitOptions = document.querySelectorAll('.duration-unit-option');
+            // NEW promotion modal elements
+            this.promotionModal = document.getElementById('promotionModal');
+            this.closePromotionModal = document.getElementById('closePromotionModal');
+            this.dismissPromotionBtn = document.getElementById('dismissPromotion');
+            this.promotionTitle = document.getElementById('promotionTitle');
+            this.promotionMessage = document.getElementById('promotionMessage');
+            this.promotionImage = document.getElementById('promotionImage');
         },
         bindEvents() {
             this.menuToggle?.addEventListener('click', () => {
@@ -3712,11 +3821,14 @@
                     this.populateDurationOptions();
                 });
             });
-            // Notification bell clicks
             this.mobileNotificationBell.addEventListener('click', () => this.openNotificationsModal());
             
             this.markAllReadBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
             this.markAllReadModalBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
+
+            // Promotion modal close events
+            this.closePromotionModal.addEventListener('click', () => this.closePromotion());
+            this.dismissPromotionBtn.addEventListener('click', () => this.closePromotion());
         },
         populateDurationOptions() {
             const select = document.getElementById('loanDuration');
@@ -3813,7 +3925,6 @@
                 this.updateDashboardUI();
             });
             AppState.realtimeListeners.push(() => paymentsRef.off('value', paymentsListener));
-            // No need for separate notifications listener here because FirebaseService already set it up
         },
         showSection(sectionId) {
             AppState.currentSection = sectionId;
@@ -3891,7 +4002,7 @@
         },
         updateNotificationBadge() {
             const unread = AppState.notifications.filter(n => !n.read).length;
-            [this.notificationBadge, this.mobileUnreadBadge, this.desktopUnreadBadge].forEach(badge => {
+            [this.notificationBadge, this.mobileUnreadBadge].forEach(badge => {
                 if (badge) {
                     if (unread > 0) {
                         badge.textContent = unread;
@@ -4193,7 +4304,7 @@
             const borrower = AppState.userData;
             const agent = AppState.agentData;
             const isWeekly = loanData.durationUnit === 'weeks';
-            const rate = isWeekly ? 0.10 : 0.35; // 10% weekly, 35% monthly
+            const rate = isWeekly ? 0.10 : 0.35;
             const totalInterest = Utils.calculateTotalInterest(loanData.amount, rate, loanData.duration, isWeekly);
             const totalPayable = loanData.amount + totalInterest;
             const periodicPayment = isWeekly
@@ -4534,7 +4645,6 @@
             this.paymentModal.classList.add('active');
             this.updatePaymentsUI();
         },
-        // UPDATED: Payment history now uses mobile-friendly cards with proof thumbnails
         updatePaymentsUI() {
             const container = document.getElementById('paymentModalContent');
             const activeLoans = AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved');
@@ -4582,7 +4692,6 @@
                 window.paymentProofUrl = null;
             }
 
-            // Payment history – now displayed as cards with proof thumbnails
             const historyEl = document.getElementById('paymentHistory');
             if (AppState.payments.length === 0) {
                 historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-history" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No payment history found</p></div>';
@@ -4754,7 +4863,6 @@
             }
         },
         updateNotificationsUI() {
-            // Update the notifications section content
             const list = document.getElementById('notificationsList');
             if (!list) return;
             if (AppState.notifications.length === 0) {
@@ -4769,7 +4877,6 @@
             `).join('');
         },
         updateLoanHistoryUI() {
-            // Show completed/defaulted/rejected loans
             const container = document.getElementById('loanHistoryList');
             if (!container) return;
             if (AppState.completedLoans.length === 0) {
@@ -4793,6 +4900,30 @@
                 `;
             });
             container.innerHTML = html;
+        },
+        // NEW: promotion functions
+        showPromotion(promo) {
+            if (!promo) return;
+            this.promotionTitle.textContent = promo.title || 'Promotion';
+            this.promotionMessage.textContent = promo.message || '';
+            if (promo.imageUrl) {
+                this.promotionImage.src = promo.imageUrl;
+                this.promotionImage.style.display = 'block';
+            } else {
+                this.promotionImage.style.display = 'none';
+            }
+            this.promotionModal.classList.add('active');
+        },
+        closePromotion() {
+            this.promotionModal.classList.remove('active');
+            // Move to next promotion if any
+            if (AppState.currentPromotionIndex < AppState.promotions.length - 1) {
+                AppState.currentPromotionIndex++;
+                this.showPromotion(AppState.promotions[AppState.currentPromotionIndex]);
+            } else {
+                // No more promotions, clear index
+                AppState.currentPromotionIndex = 0;
+            }
         }
     };
 
@@ -4801,9 +4932,7 @@
         CloudinaryService.openWidget(element);
     }
     function openPaymentProofUpload() {
-        CloudinaryService.openPaymentProofWidget((url) => {
-            // URL is already stored globally inside the widget callback
-        });
+        CloudinaryService.openPaymentProofWidget((url) => {});
     }
     function viewDocument(type) {
         const documentImage = document.getElementById('documentImage');
@@ -4836,12 +4965,10 @@
     }
 
     window.addEventListener('online', () => {
-        document.getElementById('connectionStatus').textContent = 'Online';
         document.getElementById('desktopConnectionStatus').textContent = 'Online';
         Utils.showToast('Connection Restored', 'You are back online', 'info');
     });
     window.addEventListener('offline', () => {
-        document.getElementById('connectionStatus').textContent = 'Offline';
         document.getElementById('desktopConnectionStatus').textContent = 'Offline';
         Utils.showToast('Connection Lost', 'Please check your internet connection', 'error');
     });
@@ -4875,10 +5002,8 @@
     window.addEventListener('orientationchange', setVhProperty);
     setVhProperty();
 
-    // Attach UIManager to window for inline handlers
     window.UIManager = UIManager;
 
-    // Initialize app
     document.addEventListener('DOMContentLoaded', () => {
         UIManager.init();
     });
