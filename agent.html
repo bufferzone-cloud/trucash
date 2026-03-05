@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -28,6 +29,28 @@
             min-height: 100vh;
             display: flex;
             flex-direction: column;
+        }
+        /* maintenance overlay */
+        .maintenance-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .maintenance-overlay h2 {
+            color: #ff3b30;
+            margin-bottom: 10px;
+        }
+        .maintenance-overlay p {
+            color: #1c1e24;
+            max-width: 400px;
         }
         /* header with profile pic, title and notification bell */
         .agent-header {
@@ -492,9 +515,24 @@
             cursor: pointer;
             margin-top: 6px;
         }
+        /* promotion modal */
+        .promotion-image {
+            max-width: 100%;
+            max-height: 200px;
+            object-fit: contain;
+            border-radius: 12px;
+            margin: 15px 0;
+        }
     </style>
 </head>
 <body>
+
+    <!-- Maintenance Overlay (shown when app disabled) -->
+    <div class="maintenance-overlay" id="maintenanceOverlay" style="display: none;">
+        <i class="fas fa-tools" style="font-size: 60px; color: #ff3b30; margin-bottom: 20px;"></i>
+        <h2>Under Maintenance</h2>
+        <p>The agent app is currently disabled by the administrator. Please check back later.</p>
+    </div>
 
     <!-- Header with agent profile picture, TRUCASH AGENT and notification bell -->
     <div class="agent-header">
@@ -671,7 +709,7 @@
         </div>
     </div>
 
-    <!-- NEW: Notifications modal -->
+    <!-- Notifications modal -->
     <div class="modal-overlay" id="notificationsModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -682,6 +720,23 @@
                 <button class="btn-small btn-outline" id="markAllReadBtn">Mark all as read</button>
             </div>
             <div id="notificationsList"></div>
+        </div>
+    </div>
+
+    <!-- Promotion Modal (NEW) -->
+    <div class="modal-overlay" id="promotionModal">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3 id="promotionTitle">Promotion</h3>
+                <button class="modal-close" id="closePromotionModal">&times;</button>
+            </div>
+            <div id="promotionBody">
+                <p id="promotionMessage"></p>
+                <img id="promotionImage" class="promotion-image" src="" alt="Promotion" style="display:none;">
+            </div>
+            <div style="margin-top: 20px;">
+                <button class="btn btn-outline" id="dismissPromotion">Close</button>
+            </div>
         </div>
     </div>
 
@@ -719,7 +774,10 @@
             customers: [],
             loans: [],
             commissions: [],
-            notifications: []          // will hold messages for this agent
+            notifications: [],          // messages
+            promotions: [],              // NEW: active promotions
+            currentPromotionIndex: 0,    // NEW
+            systemSettings: {}            // NEW
         };
 
         // ==================== UTILS ====================
@@ -740,7 +798,7 @@
             }
         };
 
-        // ==================== FIREBASE SERVICE (extended with notifications) ====================
+        // ==================== FIREBASE SERVICE (extended) ====================
         const FirebaseService = {
             async checkAuth() {
                 return new Promise((resolve) => {
@@ -755,15 +813,32 @@
                             AppState.currentUser = user;
                             AppState.agentData = snap.val();
                             AppState.agentId = user.uid;
+
+                            // Load system settings to check app enable status
+                            await this.loadSystemSettings();
+                            // Check if agent app is enabled
+                            if (AppState.systemSettings.enableAgentApp === false) {
+                                document.getElementById('maintenanceOverlay').style.display = 'flex';
+                                // Optionally disable all interactions (just show overlay)
+                            } else {
+                                document.getElementById('maintenanceOverlay').style.display = 'none';
+                            }
+
                             await this.loadCustomers();
                             await this.loadLoans();
                             await this.loadCommissions();
-                            await this.loadNotifications();   // NEW
-                            this.listenForNotifications();     // NEW
+                            await this.loadNotifications();
+                            this.listenForNotifications();
+                            await this.loadPromotions();       // NEW
+                            this.listenForPromotions();         // NEW
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
                     });
                 });
+            },
+            async loadSystemSettings() {
+                const snap = await db.ref('systemSettings').once('value');
+                AppState.systemSettings = snap.val() || {};
             },
             async loadCustomers() {
                 const snap = await db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).once('value');
@@ -786,7 +861,7 @@
                 });
             },
             async loadCommissions() {
-                const snap = await db.ref('commissions').orderByChild('agentId').equalTo(AppState.agentId).once('value');
+                const snap = await db.ref('commissionHistory').orderByChild('agentId').equalTo(AppState.agentId).once('value');
                 AppState.commissions = [];
                 snap.forEach(child => {
                     const c = child.val();
@@ -794,7 +869,7 @@
                     AppState.commissions.push(c);
                 });
             },
-            // NEW: load notifications (messages) for this agent
+            // Load notifications (messages)
             async loadNotifications() {
                 const snap = await db.ref('messages')
                     .orderByChild('recipientId')
@@ -802,15 +877,12 @@
                 const allMessages = snap.val() || {};
                 AppState.notifications = [];
                 Object.entries(allMessages).forEach(([id, msg]) => {
-                    // message is for this agent if recipientId equals agentId or "all_agents"
                     if (msg.recipientId === AppState.agentId || msg.recipientId === 'all_agents') {
                         AppState.notifications.push({ id, ...msg });
                     }
                 });
-                // sort by timestamp desc
                 AppState.notifications.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
             },
-            // NEW: realtime listener for new messages
             listenForNotifications() {
                 db.ref('messages').on('child_added', (snap) => {
                     const msg = snap.val();
@@ -834,9 +906,63 @@
                     }
                 });
             },
+            // NEW: load promotions
+            async loadPromotions() {
+                const snap = await db.ref('promotions').once('value');
+                const allPromos = snap.val() || {};
+                AppState.promotions = [];
+                Object.entries(allPromos).forEach(([id, promo]) => {
+                    if (promo.active && (promo.recipients === 'all_agents' || promo.recipients === 'both')) {
+                        AppState.promotions.push({ id, ...promo });
+                    }
+                });
+                AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                // Show first promotion if any
+                if (AppState.promotions.length > 0) {
+                    AppState.currentPromotionIndex = 0;
+                    UIManager.showPromotion(AppState.promotions[0]);
+                }
+            },
+            listenForPromotions() {
+                db.ref('promotions').on('child_added', (snap) => {
+                    const promo = snap.val();
+                    if (promo.active && (promo.recipients === 'all_agents' || promo.recipients === 'both')) {
+                        if (!AppState.promotions.find(p => p.id === snap.key)) {
+                            AppState.promotions.unshift({ id: snap.key, ...promo });
+                            AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                            // If no promotion currently showing, show this new one
+                            if (!document.getElementById('promotionModal').classList.contains('active')) {
+                                AppState.currentPromotionIndex = 0;
+                                UIManager.showPromotion(AppState.promotions[0]);
+                            }
+                        }
+                    }
+                });
+                db.ref('promotions').on('child_changed', (snap) => {
+                    const promo = snap.val();
+                    const index = AppState.promotions.findIndex(p => p.id === snap.key);
+                    if (index !== -1) {
+                        if (!promo.active || (promo.recipients !== 'all_agents' && promo.recipients !== 'both')) {
+                            // Remove from list
+                            AppState.promotions.splice(index, 1);
+                            // If currently showing this one, close modal and show next if any
+                            if (document.getElementById('promotionModal').classList.contains('active') && AppState.currentPromotionIndex === index) {
+                                UIManager.closePromotion();
+                                if (AppState.promotions.length > 0) {
+                                    AppState.currentPromotionIndex = 0;
+                                    UIManager.showPromotion(AppState.promotions[0]);
+                                }
+                            } else if (index < AppState.currentPromotionIndex) {
+                                AppState.currentPromotionIndex--;
+                            }
+                        } else {
+                            AppState.promotions[index] = { id: snap.key, ...promo };
+                        }
+                    }
+                });
+            },
             async markNotificationAsRead(notificationId) {
                 await db.ref('messages/' + notificationId).update({ read: true });
-                // local update
                 const n = AppState.notifications.find(n => n.id === notificationId);
                 if (n) n.read = true;
                 UIManager.updateNotificationBadge();
@@ -867,7 +993,7 @@
             async signOut() { await auth.signOut(); window.location.href='login.html'; }
         };
 
-        // ==================== UI MANAGER (extended with notifications) ====================
+        // ==================== UI MANAGER (extended) ====================
         const UIManager = {
             init() {
                 this.cacheElements();
@@ -903,6 +1029,13 @@
                 this.notificationsModal = document.getElementById('notificationsModal');
                 this.notificationsList = document.getElementById('notificationsList');
                 this.markAllReadBtn = document.getElementById('markAllReadBtn');
+                // promotion elements
+                this.promotionModal = document.getElementById('promotionModal');
+                this.promotionTitle = document.getElementById('promotionTitle');
+                this.promotionMessage = document.getElementById('promotionMessage');
+                this.promotionImage = document.getElementById('promotionImage');
+                this.closePromotionModal = document.getElementById('closePromotionModal');
+                this.dismissPromotionBtn = document.getElementById('dismissPromotion');
                 // modals
                 this.customerModal = document.getElementById('customerModal');
                 this.loanModal = document.getElementById('loanModal');
@@ -918,6 +1051,9 @@
                 document.getElementById('closePasswordModal').onclick = ()=> this.passwordModal.classList.remove('active');
                 document.getElementById('closeCertificateModal').onclick = ()=> this.certificateModal.classList.remove('active');
                 document.getElementById('closeNotificationsModal').onclick = ()=> this.notificationsModal.classList.remove('active');
+                // promotion close
+                this.closePromotionModal.onclick = ()=> this.closePromotion();
+                this.dismissPromotionBtn.onclick = ()=> this.closePromotion();
                 // settings buttons
                 document.getElementById('copyAgentCode').onclick = ()=> this.copyAgentCode();
                 document.getElementById('changePasswordBtn').onclick = ()=> this.passwordModal.classList.add('active');
@@ -1199,6 +1335,29 @@
                     <iframe src="Scan.pdf" style="width:100%; height:400px; border:none;"></iframe>
                 `;
                 this.certificateModal.classList.add('active');
+            },
+            // Promotion functions
+            showPromotion(promo) {
+                if (!promo) return;
+                this.promotionTitle.textContent = promo.title || 'Promotion';
+                this.promotionMessage.textContent = promo.message || '';
+                if (promo.imageUrl) {
+                    this.promotionImage.src = promo.imageUrl;
+                    this.promotionImage.style.display = 'block';
+                } else {
+                    this.promotionImage.style.display = 'none';
+                }
+                this.promotionModal.classList.add('active');
+            },
+            closePromotion() {
+                this.promotionModal.classList.remove('active');
+                // Move to next promotion if any
+                if (AppState.currentPromotionIndex < AppState.promotions.length - 1) {
+                    AppState.currentPromotionIndex++;
+                    this.showPromotion(AppState.promotions[AppState.currentPromotionIndex]);
+                } else {
+                    AppState.currentPromotionIndex = 0; // reset
+                }
             }
         };
 
