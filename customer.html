@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -834,6 +833,15 @@
             max-width: 800px;
         }
 
+        /* New smaller promotion modal */
+        .promotion-modal-content {
+            max-width: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: white;
+        }
+
         @keyframes modalSlideIn {
             from {
                 opacity: 0;
@@ -1487,6 +1495,32 @@
             color: var(--ios-gray-6);
             max-width: 400px;
         }
+
+        /* Ban overlay (same style as maintenance) */
+        .ban-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 5100;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 20px;
+        }
+        .ban-overlay h2 {
+            color: var(--ios-red);
+            margin-bottom: 10px;
+        }
+        .ban-overlay p {
+            color: var(--ios-gray-6);
+            max-width: 400px;
+        }
     </style>
 </head>
 <body>
@@ -1501,6 +1535,13 @@
         <i class="fas fa-tools" style="font-size: 60px; color: var(--ios-red); margin-bottom: 20px;"></i>
         <h2>Under Maintenance</h2>
         <p>The customer app is currently disabled by the administrator. Please check back later.</p>
+    </div>
+
+    <!-- Ban Overlay (shown when user banned) -->
+    <div class="ban-overlay" id="banOverlay" style="display: none;">
+        <i class="fas fa-ban" style="font-size: 60px; color: var(--ios-red); margin-bottom: 20px;"></i>
+        <h2 id="banMessage">Access Denied</h2>
+        <p id="banDetails">You have been banned from TruCash. For more inquiries, contact support@trucash.zm or call +260 123 456 789.</p>
     </div>
 
     <!-- Toast Container -->
@@ -2397,19 +2438,17 @@
         </div>
     </div>
 
-    <!-- Promotion Modal (NEW) -->
+    <!-- Promotion Modal (NEW) - made smaller and colorful -->
     <div class="modal" id="promotionModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="promotionTitle">Promotion</h3>
-                <button class="modal-close" id="closePromotionModal"><i class="fas fa-times"></i></button>
+        <div class="modal-content promotion-modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 14px 14px 0 0;">
+                <h3 class="modal-title" id="promotionTitle" style="color: white;">🎉 Special Offer!</h3>
+                <button class="modal-close" id="closePromotionModal" style="background: rgba(255,255,255,0.2); color: white;"><i class="fas fa-times"></i></button>
             </div>
-            <div class="modal-body" id="promotionBody">
-                <p id="promotionMessage"></p>
-                <img id="promotionImage" src="" alt="Promotion" style="max-width:100%; border-radius:8px; display:none;">
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="dismissPromotion">Close</button>
+            <div class="modal-body" id="promotionBody" style="text-align: center;">
+                <img id="promotionImage" src="" alt="Promotion" style="max-width:100%; border-radius:12px; margin-bottom:15px; display:none;">
+                <p id="promotionMessage" style="font-size: 16px; color: #333; margin-bottom: 20px;"></p>
+                <button class="btn btn-primary" id="dismissPromotion" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px 30px; border-radius: 50px; font-weight: bold;">Grab It Now</button>
             </div>
         </div>
     </div>
@@ -2473,8 +2512,9 @@
         selectedLoanForPayment: null,
         currentLoanStatusFilter: 'active',
         durationUnit: 'months',
-        promotions: [],           // NEW: list of active promotions for this user
-        currentPromotionIndex: 0  // NEW: index of currently displayed promotion
+        promotions: [],           // list of active promotions
+        currentPromotionIndex: 0,
+        seenPromotions: new Set() // IDs of promotions already seen
     };
 
     // ===== Initialize Firebase =====
@@ -2633,6 +2673,27 @@
                 return JSON.parse(str);
             } catch (e) {
                 return null;
+            }
+        },
+        // Load seen promotion IDs from localStorage
+        loadSeenPromotions() {
+            try {
+                const seen = localStorage.getItem('trucash_seen_promotions');
+                if (seen) {
+                    const ids = JSON.parse(seen);
+                    AppState.seenPromotions = new Set(ids);
+                }
+            } catch (e) {
+                console.warn('Failed to load seen promotions', e);
+            }
+        },
+        // Save seen promotion IDs to localStorage
+        saveSeenPromotions() {
+            try {
+                const ids = Array.from(AppState.seenPromotions);
+                localStorage.setItem('trucash_seen_promotions', JSON.stringify(ids));
+            } catch (e) {
+                console.warn('Failed to save seen promotions', e);
             }
         }
     };
@@ -2959,10 +3020,29 @@
                         AppState.currentUser = user;
                         AppState.userData = userData;
                         await this.loadSystemSettings();
+
+                        // Check if user is banned
+                        if (userData.banned === true) {
+                            document.getElementById('maintenanceOverlay').style.display = 'none';
+                            const banOverlay = document.getElementById('banOverlay');
+                            const banMessage = document.getElementById('banMessage');
+                            const banDetails = document.getElementById('banDetails');
+                            banMessage.textContent = `Sorry, ${userData.fullName || 'User'}`;
+                            banDetails.textContent = 'You have been banned from TruCash. For more inquiries, contact support@trucash.zm or call +260 123 456 789.';
+                            banOverlay.style.display = 'flex';
+                            // Hide all main content
+                            document.querySelector('.dashboard-container').style.opacity = '0.3';
+                            document.querySelector('.dashboard-container').style.pointerEvents = 'none';
+                            Utils.hideLoading();
+                            resolve(null);
+                            return;
+                        }
+
                         // Check if customer app is enabled
                         if (AppState.systemSettings && AppState.systemSettings.enableCustomerApp === false) {
                             document.getElementById('maintenanceOverlay').style.display = 'flex';
-                            // Disable all interactions? We'll just show overlay and block actions.
+                            document.querySelector('.dashboard-container').style.opacity = '0.3';
+                            document.querySelector('.dashboard-container').style.pointerEvents = 'none';
                         } else {
                             document.getElementById('maintenanceOverlay').style.display = 'none';
                         }
@@ -3006,8 +3086,8 @@
                 await this.loadPayments();
                 await this.loadNotifications();
                 this.listenForNotifications();
-                await this.loadPromotions(); // NEW
-                this.listenForPromotions();   // NEW
+                await this.loadPromotions();
+                this.listenForPromotions();
             } catch (error) {
                 console.error('Error loading customer data:', error);
                 Utils.showToast('Data Error', 'Failed to load customer data', 'error');
@@ -3225,22 +3305,27 @@
                 }
             });
         },
-        // NEW: load promotions
+        // load promotions and filter out seen ones
         async loadPromotions() {
             try {
                 const snap = await db.ref('promotions').once('value');
                 const allPromos = snap.val() || {};
+                const now = Date.now();
                 AppState.promotions = [];
                 Object.entries(allPromos).forEach(([id, promo]) => {
                     if (promo.active && (promo.recipients === 'all_customers' || promo.recipients === 'both')) {
+                        // Check expiry
+                        if (promo.expiresAt && promo.expiresAt < now) return;
                         AppState.promotions.push({ id, ...promo });
                     }
                 });
                 AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                // Show first promotion if any
-                if (AppState.promotions.length > 0) {
+                // Show first unseen promotion
+                Utils.loadSeenPromotions();
+                const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
+                if (unseen.length > 0) {
                     AppState.currentPromotionIndex = 0;
-                    UIManager.showPromotion(AppState.promotions[0]);
+                    UIManager.showPromotion(unseen[0]);
                 }
             } catch (error) {
                 console.error('Error loading promotions:', error);
@@ -3249,15 +3334,14 @@
         listenForPromotions() {
             db.ref('promotions').on('child_added', (snap) => {
                 const promo = snap.val();
-                if (promo.active && (promo.recipients === 'all_customers' || promo.recipients === 'both')) {
-                    // Check if already in list
+                const now = Date.now();
+                if (promo.active && (promo.recipients === 'all_customers' || promo.recipients === 'both') && (!promo.expiresAt || promo.expiresAt > now)) {
                     if (!AppState.promotions.find(p => p.id === snap.key)) {
                         AppState.promotions.unshift({ id: snap.key, ...promo });
                         AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                        // If no promotion currently showing, show this new one
-                        if (!document.getElementById('promotionModal').classList.contains('active')) {
-                            AppState.currentPromotionIndex = 0;
-                            UIManager.showPromotion(AppState.promotions[0]);
+                        // If this promotion is unseen and no modal is active, show it
+                        if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('promotionModal').classList.contains('active')) {
+                            UIManager.showPromotion({ id: snap.key, ...promo });
                         }
                     }
                 }
@@ -3266,18 +3350,12 @@
                 const promo = snap.val();
                 const index = AppState.promotions.findIndex(p => p.id === snap.key);
                 if (index !== -1) {
-                    if (!promo.active || (promo.recipients !== 'all_customers' && promo.recipients !== 'both')) {
+                    const now = Date.now();
+                    if (!promo.active || (promo.recipients !== 'all_customers' && promo.recipients !== 'both') || (promo.expiresAt && promo.expiresAt < now)) {
                         // Remove from list
                         AppState.promotions.splice(index, 1);
-                        // If currently showing this one, close modal and show next if any
-                        if (document.getElementById('promotionModal').classList.contains('active') && AppState.currentPromotionIndex === index) {
+                        if (document.getElementById('promotionModal').classList.contains('active') && AppState.promotions[AppState.currentPromotionIndex]?.id === snap.key) {
                             UIManager.closePromotion();
-                            if (AppState.promotions.length > 0) {
-                                AppState.currentPromotionIndex = 0;
-                                UIManager.showPromotion(AppState.promotions[0]);
-                            }
-                        } else if (index < AppState.currentPromotionIndex) {
-                            AppState.currentPromotionIndex--;
                         }
                     } else {
                         AppState.promotions[index] = { id: snap.key, ...promo };
@@ -3667,7 +3745,7 @@
             this.notificationsModalList = document.getElementById('notificationsModalList');
             this.loanTabs = document.querySelectorAll('.loan-tab');
             this.durationUnitOptions = document.querySelectorAll('.duration-unit-option');
-            // NEW promotion modal elements
+            // Promotion modal elements
             this.promotionModal = document.getElementById('promotionModal');
             this.closePromotionModal = document.getElementById('closePromotionModal');
             this.dismissPromotionBtn = document.getElementById('dismissPromotion');
@@ -4901,10 +4979,10 @@
             });
             container.innerHTML = html;
         },
-        // NEW: promotion functions
+        // Promotion functions
         showPromotion(promo) {
             if (!promo) return;
-            this.promotionTitle.textContent = promo.title || 'Promotion';
+            this.promotionTitle.textContent = promo.title || 'Special Offer!';
             this.promotionMessage.textContent = promo.message || '';
             if (promo.imageUrl) {
                 this.promotionImage.src = promo.imageUrl;
@@ -4915,15 +4993,21 @@
             this.promotionModal.classList.add('active');
         },
         closePromotion() {
-            this.promotionModal.classList.remove('active');
-            // Move to next promotion if any
-            if (AppState.currentPromotionIndex < AppState.promotions.length - 1) {
-                AppState.currentPromotionIndex++;
-                this.showPromotion(AppState.promotions[AppState.currentPromotionIndex]);
-            } else {
-                // No more promotions, clear index
-                AppState.currentPromotionIndex = 0;
+            const currentPromo = AppState.promotions[AppState.currentPromotionIndex];
+            if (currentPromo) {
+                AppState.seenPromotions.add(currentPromo.id);
+                Utils.saveSeenPromotions();
             }
+            this.promotionModal.classList.remove('active');
+            // Optionally, check for next unseen promotion but do not auto-show
+            // Uncomment to show next unseen after closing current (if any)
+            /*
+            const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
+            if (unseen.length > 0 && AppState.currentPromotionIndex < unseen.length - 1) {
+                AppState.currentPromotionIndex++;
+                this.showPromotion(unseen[AppState.currentPromotionIndex]);
+            }
+            */
         }
     };
 
