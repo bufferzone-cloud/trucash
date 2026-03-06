@@ -196,6 +196,28 @@
         .call-button i {
             font-size: 16px;
         }
+        .overdue-message {
+            font-size: 13px;
+            color: #ff3b30;
+            margin-top: 8px;
+            padding: 6px 12px;
+            background: rgba(255,59,48,0.05);
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            width: 100%;
+        }
+        .overdue-message i {
+            color: #ff3b30;
+            font-size: 14px;
+        }
+        .overdue-message .call-link {
+            color: #007aff;
+            font-weight: 500;
+            text-decoration: none;
+            margin-left: auto;
+        }
         .customer-avatar {
             width: 56px;
             height: 56px;
@@ -1008,9 +1030,14 @@
             },
             // Check if a customer has any overdue payment (pending payment with due date before today)
             hasOverduePayment(customerId) {
+                return this.getOverduePaymentDetails(customerId) !== null;
+            },
+            // Get the earliest overdue payment details for a customer
+            getOverduePaymentDetails(customerId) {
                 const customerLoans = AppState.loans.filter(l => l.customerId === customerId);
                 const today = new Date();
-                today.setHours(0, 0, 0, 0); // start of today
+                today.setHours(0, 0, 0, 0);
+                let earliestOverdue = null;
                 for (let loan of customerLoans) {
                     if (loan.repaymentSchedule && Array.isArray(loan.repaymentSchedule)) {
                         for (let payment of loan.repaymentSchedule) {
@@ -1018,13 +1045,19 @@
                                 const dueDate = new Date(payment.dueDate);
                                 dueDate.setHours(0, 0, 0, 0);
                                 if (dueDate < today) {
-                                    return true;
+                                    if (!earliestOverdue || dueDate < new Date(earliestOverdue.dueDate)) {
+                                        earliestOverdue = {
+                                            amount: payment.totalDue,
+                                            dueDate: payment.dueDate,
+                                            loanId: loan.id
+                                        };
+                                    }
                                 }
                             }
                         }
                     }
                 }
-                return false;
+                return earliestOverdue;
             }
         };
 
@@ -1058,6 +1091,7 @@
                             await this.loadCommissions();
                             await this.loadNotifications();
                             this.listenForNotifications();
+                            this.listenForLoans(); // NEW: listen for loan changes
                             Utils.loadSeenPromotions();
                             await this.loadPromotions();
                             this.listenForPromotions();
@@ -1088,6 +1122,40 @@
                     const l = child.val();
                     l.id = child.key;
                     AppState.loans.push(l);
+                });
+            },
+            // NEW: listen for real-time loan updates
+            listenForLoans() {
+                const loansRef = db.ref('loans').orderByChild('agentId').equalTo(AppState.agentId);
+                loansRef.on('child_added', (snap) => {
+                    const loan = snap.val();
+                    loan.id = snap.key;
+                    // avoid duplicates
+                    const existing = AppState.loans.findIndex(l => l.id === snap.key);
+                    if (existing === -1) {
+                        AppState.loans.push(loan);
+                    } else {
+                        AppState.loans[existing] = loan;
+                    }
+                    UIManager.updateLoanSections();
+                });
+                loansRef.on('child_changed', (snap) => {
+                    const loan = snap.val();
+                    loan.id = snap.key;
+                    const index = AppState.loans.findIndex(l => l.id === snap.key);
+                    if (index !== -1) {
+                        AppState.loans[index] = loan;
+                    } else {
+                        AppState.loans.push(loan);
+                    }
+                    UIManager.updateLoanSections();
+                });
+                loansRef.on('child_removed', (snap) => {
+                    const index = AppState.loans.findIndex(l => l.id === snap.key);
+                    if (index !== -1) {
+                        AppState.loans.splice(index, 1);
+                    }
+                    UIManager.updateLoanSections();
                 });
             },
             async loadCommissions() {
@@ -1332,6 +1400,15 @@
                 this.renderCommission();
                 this.updateNotificationBadge();
             },
+            // NEW: update loan-related sections when loans change
+            updateLoanSections() {
+                if (!this.sections.loans.classList.contains('d-none')) {
+                    this.renderCustomersWithLoans();
+                }
+                if (!this.sections.commission.classList.contains('d-none')) {
+                    this.renderCommission();
+                }
+            },
             updateNotificationBadge() {
                 const unread = AppState.notifications.filter(n => !n.read).length;
                 if (unread > 0) {
@@ -1391,11 +1468,22 @@
                 this.customersWithLoansList.innerHTML = customersWithLoans.map(c => {
                     const isOverdue = Utils.hasOverduePayment(c.id);
                     const overdueClass = isOverdue ? 'overdue' : '';
+                    // Get overdue details if any
+                    const overdueDetails = isOverdue ? Utils.getOverduePaymentDetails(c.id) : null;
                     // Create call button with tel: link, stop propagation so card click doesn't trigger
                     const callButton = c.phone ? `
                         <button class="call-button" onclick="event.stopPropagation(); window.location.href='tel:${c.phone}';">
                             <i class="fas fa-phone-alt"></i> Call
                         </button>
+                    ` : '';
+                    // Overdue message
+                    const overdueMessage = overdueDetails ? `
+                        <div class="overdue-message" onclick="event.stopPropagation()">
+                            <i class="fas fa-exclamation-triangle"></i>
+                            <span>Payment for ${Utils.formatCurrency(overdueDetails.amount)} (due ${Utils.formatDate(overdueDetails.dueDate)}) is overdue. 
+                                <a href="tel:${c.phone}" class="call-link" onclick="event.stopPropagation();">Call now</a>
+                            </span>
+                        </div>
                     ` : '';
                     return `
                         <div class="customer-card ${overdueClass}" data-id="${c.id}" onclick="UIManager.showCustomerLoansList('${c.id}')">
@@ -1403,6 +1491,7 @@
                             <div class="customer-info">
                                 <div class="customer-name">${c.fullName}</div>
                                 <div class="customer-meta"><i class="fas fa-file-invoice"></i> ${AppState.loans.filter(l=>l.customerId===c.id).length} loans</div>
+                                ${overdueMessage}
                             </div>
                             ${callButton}
                         </div>
