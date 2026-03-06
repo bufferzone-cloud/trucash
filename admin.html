@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -161,7 +160,7 @@
             transform: translateY(-1px);
         }
 
-        /* ===== Sidebar ===== */
+        /* ===== Sidebar - Enhanced with transparency and borders ===== */
         .sidebar-overlay {
             position: fixed;
             top: 0;
@@ -187,7 +186,10 @@
             right: -360px;
             width: 360px;
             height: 100%;
-            background: white;
+            background: rgba(255, 255, 255, 0.7); /* semi-transparent white */
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border-left: 1px solid rgba(255,255,255,0.2);
             box-shadow: var(--shadow-xl);
             z-index: 201;
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -205,7 +207,7 @@
             gap: 16px;
             margin-bottom: 32px;
             padding-bottom: 20px;
-            border-bottom: 1px solid var(--ios-gray2);
+            border-bottom: 1px solid rgba(255,255,255,0.3);
         }
 
         .sidebar-avatar {
@@ -229,6 +231,7 @@
         .sidebar-user .name {
             font-weight: 600;
             font-size: 18px;
+            color: #1c1c1e;
         }
 
         .sidebar-user .role {
@@ -252,10 +255,15 @@
             font-size: 15px;
             cursor: pointer;
             transition: 0.2s;
+            border: 1px solid transparent; /* base border */
+            background: transparent;
+            font-weight: 500;
         }
 
         .sidebar-item:hover {
-            background: var(--ios-gray1);
+            background: rgba(255,255,255,0.5);
+            border: 1px solid rgba(255,255,255,0.8);
+            box-shadow: var(--shadow-sm);
             transform: translateX(-4px);
         }
 
@@ -2371,6 +2379,7 @@
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE
         // with advanced loan details: collateral images, witness, signed agreement
         // MODIFICATIONS: added promotion history, ban reason with prompt, contact details in settings, loan rejection reason display, ban reason display in user modals
+        // ALSO: Enhanced payment confirmation to update repayment schedule, handle partial payments, and recalculate totals accurately.
         // =========================================================================
         
         // Firebase configuration
@@ -2462,9 +2471,8 @@
                         principal: principalPortion,
                         interest,
                         totalDue: payment,
-                        status: 'pending',
-                        paidAmount: 0,
-                        paidDate: null
+                        paidAmount: 0,          // track partial payments
+                        status: 'pending'        // pending, partial, paid
                     });
                 }
                 return schedule;
@@ -3833,22 +3841,28 @@
                 </div>
             ` : '<p class="text-muted">No witness recorded</p>';
             
+            // Build repayment schedule table with paid status
             const scheduleHtml = loan.repaymentSchedule ? `
                 <table class="repayment-table">
                     <thead>
-                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Total</th><th>Status</th></tr>
+                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Total</th><th>Paid</th><th>Status</th></tr>
                     </thead>
                     <tbody>
-                        ${loan.repaymentSchedule.map((inst, i) => `
+                        ${loan.repaymentSchedule.map((inst, i) => {
+                            const paid = inst.paidAmount || 0;
+                            const statusClass = paid >= inst.totalDue ? 'approved' : (paid > 0 ? 'pending' : 'pending');
+                            const statusText = paid >= inst.totalDue ? 'Paid' : (paid > 0 ? `Partial (${Utils.formatCurrency(paid)})` : 'Pending');
+                            return `
                             <tr>
                                 <td>${i+1}</td>
                                 <td>${Utils.formatDate(inst.dueDate)}</td>
                                 <td>${Utils.formatCurrency(inst.principal)}</td>
                                 <td>${Utils.formatCurrency(inst.interest)}</td>
                                 <td>${Utils.formatCurrency(inst.totalDue)}</td>
-                                <td><span class="status-badge ${inst.status === 'paid' ? 'approved' : 'pending'}">${inst.status}</span></td>
+                                <td>${Utils.formatCurrency(paid)}</td>
+                                <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                             </tr>
-                        `).join('')}
+                        `}).join('')}
                     </tbody>
                 </table>
             ` : '<p>No schedule available</p>';
@@ -4555,6 +4569,7 @@
             Utils.hideLoading();
         }
 
+        // Enhanced confirmPayment: updates repayment schedule, handles partial payments, recalculates totals
         async function confirmPayment(paymentId) {
             if (!confirm('Confirm this payment?')) return;
             
@@ -4563,28 +4578,60 @@
             
             Utils.showLoading('Verifying payment...');
             try {
-                await db.ref('payments/' + paymentId).update({
-                    status: 'confirmed',
-                    verifiedAt: Date.now(),
-                    verifiedBy: currentUser?.uid
-                });
-                
-                // Update loan totals
+                // Fetch loan and current schedule
                 const loanRef = db.ref('loans/' + payment.loanId);
                 const loanSnap = await loanRef.once('value');
                 const loan = loanSnap.val();
                 
-                const newTotalPaid = (loan.totalPaid || 0) + payment.amount;
-                let newInterestPaid = loan.interestPaid || 0;
-                
-                const remainingInterest = (loan.totalInterest || 0) - newInterestPaid;
-                if (payment.amount <= remainingInterest) {
-                    newInterestPaid += payment.amount;
-                } else {
-                    newInterestPaid = loan.totalInterest;
+                if (!loan) {
+                    Utils.showToast('Error', 'Loan not found', 'error');
+                    return;
                 }
                 
-                const updates = { 
+                // Initialize or copy schedule
+                let schedule = loan.repaymentSchedule || [];
+                if (schedule.length === 0) {
+                    Utils.showToast('Error', 'No repayment schedule for this loan', 'error');
+                    return;
+                }
+                
+                // Apply payment to pending installments in order
+                let remainingAmount = payment.amount;
+                let totalPrincipalPaid = 0;
+                let totalInterestPaid = 0;
+                
+                for (let i = 0; i < schedule.length; i++) {
+                    const inst = schedule[i];
+                    if (inst.status === 'paid') continue;
+                    
+                    const due = inst.totalDue - (inst.paidAmount || 0);
+                    if (due <= 0) continue;
+                    
+                    const paidThisInst = Math.min(remainingAmount, due);
+                    inst.paidAmount = (inst.paidAmount || 0) + paidThisInst;
+                    inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+                    
+                    // Allocate payment to principal and interest based on original proportions
+                    const principalFraction = inst.principal / inst.totalDue;
+                    const interestFraction = inst.interest / inst.totalDue;
+                    
+                    totalPrincipalPaid += paidThisInst * principalFraction;
+                    totalInterestPaid += paidThisInst * interestFraction;
+                    
+                    remainingAmount -= paidThisInst;
+                    if (remainingAmount <= 0) break;
+                }
+                
+                // Recalculate loan totals
+                const newTotalPaid = schedule.reduce((sum, inst) => sum + (inst.paidAmount || 0), 0);
+                const newInterestPaid = schedule.reduce((sum, inst) => {
+                    const paid = inst.paidAmount || 0;
+                    const interestPart = (paid / inst.totalDue) * inst.interest;
+                    return sum + (isNaN(interestPart) ? 0 : interestPart);
+                }, 0);
+                
+                const updates = {
+                    repaymentSchedule: schedule,
                     totalPaid: newTotalPaid,
                     interestPaid: newInterestPaid
                 };
@@ -4595,28 +4642,29 @@
                     updates.completedAt = Date.now();
                 }
                 
+                // Update payment record
+                updates[`payments/${paymentId}/status`] = 'confirmed';
+                updates[`payments/${paymentId}/verifiedAt`] = Date.now();
+                updates[`payments/${paymentId}/verifiedBy`] = currentUser?.uid;
+                
                 await loanRef.update(updates);
                 
-                // Create commission entry for interest portion
-                if (payment.amount > 0 && loan.agentId) {
-                    const interestPortion = Math.min(payment.amount, remainingInterest);
-                    const commissionAmount = interestPortion * 0.15;
-                    
-                    if (commissionAmount > 0) {
-                        await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
-                            agentId: loan.agentId,
-                            customerId: payment.customerId,
-                            loanId: payment.loanId,
-                            customerName: payment.customerName,
-                            amount: commissionAmount,
-                            paidAt: null,
-                            paidBy: null,
-                            status: 'pending'
-                        });
-                    }
+                // Create commission entry for the interest portion of this payment
+                if (totalInterestPaid > 0 && loan.agentId) {
+                    const commissionAmount = totalInterestPaid * 0.15;
+                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
+                        agentId: loan.agentId,
+                        customerId: payment.customerId,
+                        loanId: payment.loanId,
+                        customerName: payment.customerName,
+                        amount: commissionAmount,
+                        paidAt: null,
+                        paidBy: null,
+                        status: 'pending'
+                    });
                 }
                 
-                // NEW: Send notifications
+                // Send notifications
                 await Utils.sendNotification(payment.customerId, `Your payment of ${Utils.formatCurrency(payment.amount)} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
                 if (loan.agentId) {
                     await Utils.sendNotification(loan.agentId, `Payment of ${Utils.formatCurrency(payment.amount)} from customer ${payment.customerName} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
