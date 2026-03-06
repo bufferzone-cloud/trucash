@@ -400,6 +400,110 @@
             box-shadow: 0 6px 18px rgba(0,0,0,0.02);
             border: 1px solid #edf2f7;
         }
+        /* commission section enhancements */
+        .commission-totals {
+            display: flex;
+            gap: 12px;
+            margin-bottom: 24px;
+            flex-wrap: wrap;
+        }
+        .commission-total-card {
+            flex: 1 1 140px;
+            background: linear-gradient(135deg, #ffffff, #f8fafc);
+            border-radius: 20px;
+            padding: 16px 12px;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
+            border: 1px solid #e9ecf0;
+            text-align: center;
+        }
+        .commission-total-card .commission-label {
+            font-size: 12px;
+            color: #617388;
+            margin-bottom: 6px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+        }
+        .commission-total-card .commission-number {
+            font-size: 20px;
+            font-weight: 700;
+        }
+        .commission-total-card.earned .commission-number { color: #28a745; }
+        .commission-total-card.pending .commission-number { color: #ff9500; }
+        .commission-total-card.future .commission-number { color: #007aff; }
+        /* commission breakdown */
+        .commission-breakdown {
+            background: #f2f7ff;
+            border-radius: 20px;
+            padding: 16px;
+            margin: 16px 0;
+            border-left: 4px solid #007aff;
+        }
+        .commission-row {
+            display: flex;
+            justify-content: space-between;
+            padding: 8px 0;
+            border-bottom: 1px dashed #d0ddee;
+        }
+        .commission-row:last-child {
+            border-bottom: none;
+        }
+        .commission-row.total-row {
+            font-weight: 700;
+            margin-top: 8px;
+            padding-top: 8px;
+            border-top: 2px solid #b0c7e0;
+        }
+        /* about page enhancements */
+        .about-page {
+            padding: 8px 0;
+        }
+        .about-page h4 {
+            font-size: 20px;
+            margin: 30px 0 15px;
+            color: #007aff;
+            font-weight: 600;
+            border-left: 4px solid #007aff;
+            padding-left: 12px;
+        }
+        .about-page p {
+            margin-bottom: 20px;
+            color: #2d3a4a;
+            line-height: 1.6;
+            font-size: 15px;
+        }
+        .about-page ul {
+            padding-left: 28px;
+            margin-bottom: 25px;
+            list-style-type: none;
+        }
+        .about-page li {
+            margin-bottom: 12px;
+            color: #3e4e5e;
+            position: relative;
+            font-size: 15px;
+        }
+        .about-page li:before {
+            content: "✓";
+            color: #007aff;
+            font-weight: bold;
+            position: absolute;
+            left: -20px;
+        }
+        .about-page .contact-info {
+            background: #eef5ff;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+            border: 1px solid #cddff5;
+        }
+        .about-page .contact-info i {
+            width: 24px;
+            color: #007aff;
+        }
+        .about-page .contact-info p {
+            margin-bottom: 10px;
+        }
+        /* commission item list */
         .commission-item {
             display: flex;
             justify-content: space-between;
@@ -455,26 +559,6 @@
         }
         .loan-summary-card:active {
             background: #e6edf6;
-        }
-        .about-page {
-            padding: 8px 0;
-        }
-        .about-page h4 {
-            font-size: 20px;
-            margin: 20px 0 10px;
-            color: #007aff;
-        }
-        .about-page p {
-            margin-bottom: 16px;
-            color: #2d3a4a;
-        }
-        .about-page ul {
-            padding-left: 24px;
-            margin-bottom: 20px;
-        }
-        .about-page li {
-            margin-bottom: 8px;
-            color: #3e4e5e;
         }
         .commission-breakdown {
             background: #f2f7ff;
@@ -562,13 +646,22 @@
             <div class="customer-grid" id="customersWithLoansList"></div>
         </div>
 
-        <!-- Commission section -->
+        <!-- Commission section (enhanced) -->
         <div id="commissionSection" class="section d-none">
             <div class="section-title"><i class="fas fa-coins" style="margin-right: 8px; color: #007aff;"></i> Commission Overview</div>
-            <div class="section-card">
-                <div class="commission-item"><span>Total earned</span> <span class="fw-600" id="totalCommissionEarned">K0.00</span></div>
-                <div class="commission-item"><span>Pending (of interest)</span> <span class="fw-600" id="pendingCommission">K0.00</span></div>
-                <div class="commission-item"><span>To be earned (active loans)</span> <span class="fw-600" id="futureCommission">K0.00</span></div>
+            <div class="commission-totals">
+                <div class="commission-total-card earned">
+                    <div class="commission-label">Earned</div>
+                    <div class="commission-number" id="totalCommissionEarned">K0.00</div>
+                </div>
+                <div class="commission-total-card pending">
+                    <div class="commission-label">Pending</div>
+                    <div class="commission-number" id="pendingCommission">K0.00</div>
+                </div>
+                <div class="commission-total-card future">
+                    <div class="commission-label">Future</div>
+                    <div class="commission-number" id="futureCommission">K0.00</div>
+                </div>
             </div>
             <div class="section-title" style="margin-top: 24px;">Customers</div>
             <div class="customer-grid" id="customersCommissionList"></div>
@@ -599,7 +692,7 @@
             </div>
         </div>
 
-        <!-- About section -->
+        <!-- About section (enhanced) -->
         <div id="aboutSection" class="section d-none">
             <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
             <div class="section-card about-page" id="aboutContent">
@@ -651,7 +744,7 @@
         </div>
     </div>
 
-    <!-- Modal for commission math -->
+    <!-- Modal for commission math (now uses enhanced styling) -->
     <div class="modal-overlay" id="commissionMathModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -1108,9 +1201,11 @@
                     </ul>
                     
                     <h4>📞 Contact Us</h4>
-                    <p><i class="fas fa-phone"></i> +260 123 456 789<br>
-                    <i class="fas fa-envelope"></i> agents@trucash.zm<br>
-                    <i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+                    <div class="contact-info">
+                        <p><i class="fas fa-phone"></i> +260 123 456 789</p>
+                        <p><i class="fas fa-envelope"></i> agents@trucash.zm</p>
+                        <p><i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+                    </div>
 
                     <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
                 `;
@@ -1310,15 +1405,15 @@
                 }).join('');
 
                 const content = `
-                    <h4>${customer.fullName}</h4>
+                    <h4 style="margin-bottom:12px;">${customer.fullName}</h4>
                     <div class="commission-breakdown">
                         ${breakdownHtml || '<p>No loans</p>'}
                     </div>
-                    <div class="commission-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
+                    <div class="commission-row total-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
                     <div class="commission-row"><span>Total possible commission (${Math.round(commissionRate*100)}%)</span> <span>${Utils.formatCurrency(totalCommissionPossible)}</span></div>
                     <div class="commission-row"><span>Already earned</span> <span class="text-success">${Utils.formatCurrency(earned)}</span></div>
-                    <div class="commission-row"><span>Pending (awaiting payment)</span> <span>${Utils.formatCurrency(pending)}</span></div>
-                    <div class="commission-row"><span>Future (active loans)</span> <span>${Utils.formatCurrency(future)}</span></div>
+                    <div class="commission-row"><span>Pending (awaiting payment)</span> <span style="color:#ff9500;">${Utils.formatCurrency(pending)}</span></div>
+                    <div class="commission-row"><span>Future (active loans)</span> <span style="color:#007aff;">${Utils.formatCurrency(future)}</span></div>
                     <p style="margin-top:16px; font-size:14px; color:#617388;">Commission is credited when the customer pays interest. ${Math.round(commissionRate*100)}% of each interest payment.</p>
                 `;
                 document.getElementById('commissionMathContent').innerHTML = content;
