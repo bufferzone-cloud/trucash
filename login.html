@@ -1714,6 +1714,32 @@
             background: var(--ios-yellow);
             animation: pulse 1.5s infinite;
         }
+
+        /* ===== Banned User Modal ===== */
+        .banned-modal .modal-content {
+            border-left: 4px solid var(--ios-red);
+        }
+        .banned-icon {
+            font-size: 48px;
+            color: var(--ios-red);
+            text-align: center;
+            margin-bottom: 16px;
+        }
+        .banned-details {
+            background: rgba(255, 59, 48, 0.05);
+            padding: 16px;
+            border-radius: var(--ios-border-radius);
+            margin: 16px 0;
+        }
+        .banned-reason {
+            font-weight: 600;
+            color: var(--ios-red);
+        }
+        .contact-info {
+            margin-top: 16px;
+            padding-top: 16px;
+            border-top: 1px solid var(--ios-gray-2);
+        }
     </style>
 </head>
 <body>
@@ -1802,7 +1828,7 @@
                     </div>
                     <div class="quick-action-text">Dashboard</div>
                 </a>
-                <!-- NEW: Admin Approval Button (hidden by default) -->
+                <!-- Admin Approval Button (hidden by default) -->
                 <a href="#" class="quick-action-btn" id="adminApprovalBtn" style="display: none;">
                     <div class="quick-action-icon">
                         <i class="fas fa-clipboard-list"></i>
@@ -2132,7 +2158,34 @@
         </div>
     </div>
 
-    <!-- JavaScript Implementation (MODIFIED to show admin button) -->
+    <!-- NEW: Banned User Modal -->
+    <div class="modal banned-modal" id="bannedModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Account Banned</h3>
+                <button class="modal-close" onclick="document.getElementById('bannedModal').classList.remove('active');">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div class="banned-icon">
+                    <i class="fas fa-ban"></i>
+                </div>
+                <p class="text-center" style="font-weight: 500; margin-bottom: 16px;">Your account has been suspended by the administrator.</p>
+                <div class="banned-details" id="bannedDetails">
+                    <!-- Dynamically filled -->
+                </div>
+                <div class="contact-info" id="contactInfo">
+                    <!-- Dynamically filled from system settings -->
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-primary" onclick="document.getElementById('bannedModal').classList.remove('active');">Close</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- JavaScript Implementation (MODIFIED to detect banned users) -->
     <script>
         // ===== Firebase Configuration =====
         const firebaseConfig = {
@@ -2219,7 +2272,8 @@
             selectedApplication: null,
             adminMode: false,
             currentEmail: null,
-            userGreeting: null
+            userGreeting: null,
+            systemSettings: {} // NEW: store system settings (contact info)
         };
 
         // ===== Utility Functions =====
@@ -2503,14 +2557,42 @@
                 AppState.userGreeting = null;
             },
             
-            // NEW: Sanitize email for use as Firebase key (replace '.' with ',')
+            // Sanitize email for use as Firebase key (replace '.' with ',')
             sanitizeEmail: (email) => {
                 return email.replace(/\./g, ',');
+            },
+
+            // NEW: Show banned modal
+            showBannedModal: (userName, reason, contact) => {
+                const modal = document.getElementById('bannedModal');
+                const detailsDiv = document.getElementById('bannedDetails');
+                const contactDiv = document.getElementById('contactInfo');
+                detailsDiv.innerHTML = `
+                    <p><strong>User:</strong> ${userName}</p>
+                    <p><strong>Reason:</strong> <span class="banned-reason">${reason}</span></p>
+                `;
+                contactDiv.innerHTML = `
+                    <h4 style="margin-bottom: 8px;">Contact Support</h4>
+                    <p><i class="fas fa-phone"></i> ${contact.phone || '+1-800-TRU-CASH'}</p>
+                    <p><i class="fas fa-envelope"></i> ${contact.email || 'support@trucash.com'}</p>
+                    <p><i class="fas fa-globe"></i> ${contact.website || 'https://trucash.com'}</p>
+                `;
+                modal.classList.add('active');
             }
         };
 
-        // ===== Firebase Service (using email mapping instead of queries) =====
+        // ===== Firebase Service (modified to check banned status) =====
         const FirebaseService = {
+            async getSystemSettings() {
+                try {
+                    const snapshot = await db.ref('systemSettings').once('value');
+                    return snapshot.val() || {};
+                } catch (error) {
+                    console.error('Error loading system settings:', error);
+                    return {};
+                }
+            },
+
             async checkEmailExists(email) {
                 try {
                     // Special case for sudo
@@ -2564,10 +2646,47 @@
                 try {
                     console.log("Attempting to sign in with email:", email);
                     const userCredential = await auth.signInWithEmailAndPassword(email, password);
+                    
+                    // After successful auth, check if user is banned
+                    const uid = userCredential.user.uid;
+                    
+                    // Look up user data in database
+                    let userData = null;
+                    let userType = null;
+                    
+                    if (email.toLowerCase() === 'sudo@gmail.com') {
+                        userType = 'sudo';
+                    } else {
+                        const userSnapshot = await db.ref('users/' + uid).once('value');
+                        if (userSnapshot.exists()) {
+                            userData = userSnapshot.val();
+                            userType = userData.userType;
+                        } else {
+                            const agentSnapshot = await db.ref('agents/' + uid).once('value');
+                            if (agentSnapshot.exists()) {
+                                userData = agentSnapshot.val();
+                                userType = 'agent';
+                            }
+                        }
+                    }
+                    
+                    // Check if user is banned (non-admin/sudo)
+                    if (userData && userData.status === 'banned' && userType !== 'sudo' && userType !== 'admin') {
+                        // Sign out the user immediately
+                        await auth.signOut();
+                        return { 
+                            success: false, 
+                            banned: true,
+                            userName: userData.fullName || 'User',
+                            reason: userData.banReason || 'No reason provided',
+                            contact: AppState.systemSettings
+                        };
+                    }
+                    
+                    // If not banned, proceed
                     AppState.currentUser = userCredential.user;
                     AppState.isAuthenticated = true;
                     
-                    // Handle sudo admin specially
                     if (email.toLowerCase() === 'sudo@gmail.com') {
                         console.log("Sudo admin login detected");
                         AppState.userType = 'sudo';
@@ -2579,24 +2698,10 @@
                         };
                     }
                     
-                    // Get user data from Realtime Database using uid
-                    const uid = userCredential.user.uid;
-                    const userRef = db.ref('users/' + uid);
-                    const snapshot = await userRef.once('value');
-                    
-                    if (snapshot.exists()) {
-                        const userData = snapshot.val();
+                    if (userData) {
                         AppState.userType = userData.userType;
                         AppState.userData = userData;
                         console.log("User data retrieved:", userData);
-                    } else {
-                        // Try agents collection
-                        const agentRef = db.ref('agents/' + uid);
-                        const agentSnapshot = await agentRef.once('value');
-                        if (agentSnapshot.exists()) {
-                            AppState.userType = 'agent';
-                            AppState.userData = agentSnapshot.val();
-                        }
                     }
                     
                     return { 
@@ -3673,7 +3778,7 @@
             }
         };
 
-        // ===== DOM Manager (with minor adjustments) =====
+        // ===== DOM Manager (with modifications to load settings and handle banned login) =====
         const DOMManager = {
             init() {
                 this.cacheElements();
@@ -3684,6 +3789,12 @@
                 this.testFirebaseConnection();
                 this.setupTimeUpdater();
                 this.setupEmailCheck();
+                this.loadSystemSettings(); // NEW: load system settings on startup
+            },
+            
+            async loadSystemSettings() {
+                AppState.systemSettings = await FirebaseService.getSystemSettings();
+                console.log('System settings loaded:', AppState.systemSettings);
             },
             
             cacheElements() {
@@ -3751,7 +3862,7 @@
                 this.supportBtn = document.getElementById('supportBtn');
                 this.docsBtn = document.getElementById('docsBtn');
                 
-                // NEW: Admin approval button
+                // Admin approval button
                 this.adminApprovalBtn = document.getElementById('adminApprovalBtn');
                 
                 // User greeting
@@ -4048,6 +4159,11 @@
                             window.location.href = redirectPage;
                         }, 1500);
                         
+                    } else if (result.banned) {
+                        // NEW: Show banned modal
+                        Utils.hideProgress('loginProgress');
+                        this.resetLoginButton();
+                        Utils.showBannedModal(result.userName, result.reason, result.contact);
                     } else {
                         throw new Error(result.error);
                     }
@@ -4551,10 +4667,10 @@
             console.log('User Greeting:', AppState.userGreeting);
             console.log('Current User:', AppState.currentUser ? AppState.currentUser.email : 'None');
             console.log('User Data:', AppState.userData);
+            console.log('System Settings:', AppState.systemSettings);
             console.log('=====================');
         };
 
     </script>
 </body>
 </html>
-
