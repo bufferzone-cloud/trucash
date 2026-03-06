@@ -400,6 +400,137 @@
             box-shadow: 0 6px 18px rgba(0,0,0,0.02);
             border: 1px solid #edf2f7;
         }
+        /* Enhanced Commission Overview Cards */
+        .commission-overview-card {
+            background: linear-gradient(135deg, #ffffff 0%, #f8fcff 100%);
+            border-radius: 28px;
+            padding: 24px 20px;
+            margin-bottom: 24px;
+            box-shadow: 0 10px 25px rgba(0,122,255,0.08), 0 2px 5px rgba(0,0,0,0.02);
+            border: 1px solid rgba(0,122,255,0.1);
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(130px, 1fr));
+            gap: 16px;
+        }
+        .commission-stat {
+            text-align: center;
+            padding: 8px 4px;
+        }
+        .commission-stat .stat-icon {
+            font-size: 28px;
+            color: #007aff;
+            margin-bottom: 8px;
+            background: rgba(0,122,255,0.1);
+            width: 48px;
+            height: 48px;
+            line-height: 48px;
+            border-radius: 24px;
+            display: inline-block;
+        }
+        .commission-stat .stat-label {
+            font-size: 14px;
+            color: #5b6f82;
+            margin-bottom: 4px;
+            font-weight: 500;
+        }
+        .commission-stat .stat-value {
+            font-size: 24px;
+            font-weight: 700;
+            color: #1c1e24;
+        }
+        .commission-stat .stat-sub {
+            font-size: 12px;
+            color: #8a9aa8;
+            margin-top: 4px;
+        }
+        /* About page styling */
+        .about-page {
+            padding: 8px 0;
+        }
+        .about-page h4 {
+            font-size: 20px;
+            margin: 28px 0 16px;
+            color: #007aff;
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .about-page h4 i {
+            font-size: 24px;
+            color: #007aff;
+            background: rgba(0,122,255,0.1);
+            padding: 8px;
+            border-radius: 12px;
+        }
+        .about-page p {
+            margin-bottom: 16px;
+            color: #2d3a4a;
+            line-height: 1.6;
+        }
+        .benefits-grid {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+        .benefit-card {
+            background: #f8fafd;
+            border-radius: 20px;
+            padding: 18px;
+            border: 1px solid #edf2f7;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            gap: 16px;
+        }
+        .benefit-card:hover {
+            background: white;
+            box-shadow: 0 8px 20px rgba(0,0,0,0.04);
+        }
+        .benefit-icon {
+            font-size: 28px;
+            color: #007aff;
+            background: white;
+            width: 52px;
+            height: 52px;
+            border-radius: 26px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            box-shadow: 0 6px 12px rgba(0,122,255,0.12);
+        }
+        .benefit-content {
+            flex: 1;
+        }
+        .benefit-title {
+            font-weight: 600;
+            font-size: 16px;
+            margin-bottom: 4px;
+            color: #1e293b;
+        }
+        .benefit-desc {
+            font-size: 14px;
+            color: #617388;
+        }
+        .contact-info {
+            background: #f0f7ff;
+            border-radius: 24px;
+            padding: 20px;
+            margin: 20px 0;
+            border-left: 4px solid #007aff;
+        }
+        .contact-info p {
+            margin: 8px 0;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .contact-info i {
+            width: 24px;
+            color: #007aff;
+        }
+        /* other utility */
         .commission-item {
             display: flex;
             justify-content: space-between;
@@ -455,26 +586,6 @@
         }
         .loan-summary-card:active {
             background: #e6edf6;
-        }
-        .about-page {
-            padding: 8px 0;
-        }
-        .about-page h4 {
-            font-size: 20px;
-            margin: 20px 0 10px;
-            color: #007aff;
-        }
-        .about-page p {
-            margin-bottom: 16px;
-            color: #2d3a4a;
-        }
-        .about-page ul {
-            padding-left: 24px;
-            margin-bottom: 20px;
-        }
-        .about-page li {
-            margin-bottom: 8px;
-            color: #3e4e5e;
         }
         .commission-breakdown {
             background: #f2f7ff;
@@ -562,13 +673,29 @@
             <div class="customer-grid" id="customersWithLoansList"></div>
         </div>
 
-        <!-- Commission section -->
+        <!-- Commission section (enhanced) -->
         <div id="commissionSection" class="section d-none">
             <div class="section-title"><i class="fas fa-coins" style="margin-right: 8px; color: #007aff;"></i> Commission Overview</div>
-            <div class="section-card">
-                <div class="commission-item"><span>Total earned</span> <span class="fw-600" id="totalCommissionEarned">K0.00</span></div>
-                <div class="commission-item"><span>Pending (15% of interest)</span> <span class="fw-600" id="pendingCommission">K0.00</span></div>
-                <div class="commission-item"><span>To be earned (active loans)</span> <span class="fw-600" id="futureCommission">K0.00</span></div>
+            <!-- New commission cards with icons -->
+            <div class="commission-overview-card">
+                <div class="commission-stat">
+                    <div class="stat-icon"><i class="fas fa-wallet"></i></div>
+                    <div class="stat-label">Total Earned</div>
+                    <div class="stat-value" id="totalCommissionEarned">K0.00</div>
+                    <div class="stat-sub">paid commissions</div>
+                </div>
+                <div class="commission-stat">
+                    <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                    <div class="stat-label" id="pendingCommissionLabel">Pending</div>
+                    <div class="stat-value" id="pendingCommission">K0.00</div>
+                    <div class="stat-sub">awaiting payment</div>
+                </div>
+                <div class="commission-stat">
+                    <div class="stat-icon"><i class="fas fa-chart-line"></i></div>
+                    <div class="stat-label">Future Earnings</div>
+                    <div class="stat-value" id="futureCommission">K0.00</div>
+                    <div class="stat-sub">from active loans</div>
+                </div>
             </div>
             <div class="section-title" style="margin-top: 24px;">Customers</div>
             <div class="customer-grid" id="customersCommissionList"></div>
@@ -599,26 +726,58 @@
             </div>
         </div>
 
-        <!-- About section -->
+        <!-- About section (enhanced) -->
         <div id="aboutSection" class="section d-none">
             <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
             <div class="section-card about-page">
-                <h4>📌 What is TruCash?</h4>
+                <h4><i class="fas fa-bullseye"></i> What is TruCash?</h4>
                 <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
                 
-                <h4>🤝 Benefits of Being an Agent</h4>
-                <ul>
-                    <li><strong>Earn 15% commission</strong> on every interest payment from customers you refer.</li>
-                    <li><strong>Recurring income</strong> – as long as your customers repay, you earn.</li>
-                    <li><strong>No capital required</strong> – you simply connect borrowers with TruCash.</li>
-                    <li><strong>Full support</strong> – marketing materials, training, and a dedicated agent dashboard.</li>
-                    <li><strong>Transparent tracking</strong> – see exactly how much you’ve earned and what’s pending.</li>
-                </ul>
+                <h4><i class="fas fa-gift"></i> Benefits of Being an Agent</h4>
+                <div class="benefits-grid">
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-percent"></i></div>
+                        <div class="benefit-content">
+                            <div class="benefit-title" id="commissionBenefitTitle">Earn 15% commission</div>
+                            <div class="benefit-desc">on every interest payment from customers you refer.</div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-sync-alt"></i></div>
+                        <div class="benefit-content">
+                            <div class="benefit-title">Recurring income</div>
+                            <div class="benefit-desc">as long as your customers repay, you earn.</div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-hand-holding-usd"></i></div>
+                        <div class="benefit-content">
+                            <div class="benefit-title">No capital required</div>
+                            <div class="benefit-desc">you simply connect borrowers with TruCash.</div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-headset"></i></div>
+                        <div class="benefit-content">
+                            <div class="benefit-title">Full support</div>
+                            <div class="benefit-desc">marketing materials, training, and a dedicated agent dashboard.</div>
+                        </div>
+                    </div>
+                    <div class="benefit-card">
+                        <div class="benefit-icon"><i class="fas fa-chart-pie"></i></div>
+                        <div class="benefit-content">
+                            <div class="benefit-title">Transparent tracking</div>
+                            <div class="benefit-desc">see exactly how much you’ve earned and what’s pending.</div>
+                        </div>
+                    </div>
+                </div>
                 
-                <h4>📞 Contact Us</h4>
-                <p><i class="fas fa-phone"></i> +260 123 456 789<br>
-                <i class="fas fa-envelope"></i> agents@trucash.zm<br>
-                <i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+                <h4><i class="fas fa-address-card"></i> Contact Us</h4>
+                <div class="contact-info">
+                    <p><i class="fas fa-phone"></i> +260 123 456 789</p>
+                    <p><i class="fas fa-envelope"></i> agents@trucash.zm</p>
+                    <p><i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+                </div>
 
                 <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
             </div>
@@ -722,7 +881,7 @@
         </div>
     </div>
 
-    <!-- Promotion Modal (NEW) -->
+    <!-- Promotion Modal -->
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -776,8 +935,8 @@
             notifications: [],
             promotions: [],
             currentPromotionIndex: 0,
-            seenPromotions: new Set(),          // NEW: store seen promotion IDs
-            systemSettings: {}                    // NEW: store system settings
+            seenPromotions: new Set(),
+            systemSettings: {}
         };
 
         // ==================== UTILS ====================
@@ -796,7 +955,6 @@
                 document.getElementById('toastContainer').appendChild(toast);
                 setTimeout(()=>toast.remove(), 4000);
             },
-            // Load seen promotions from localStorage
             loadSeenPromotions() {
                 try {
                     const seen = localStorage.getItem('trucash_agent_seen_promotions');
@@ -808,7 +966,6 @@
                     console.warn('Failed to load seen promotions', e);
                 }
             },
-            // Save seen promotions to localStorage
             saveSeenPromotions() {
                 try {
                     const ids = Array.from(AppState.seenPromotions);
@@ -849,9 +1006,9 @@
                             await this.loadCommissions();
                             await this.loadNotifications();
                             this.listenForNotifications();
-                            Utils.loadSeenPromotions();           // NEW
-                            await this.loadPromotions();          // NEW
-                            this.listenForPromotions();           // NEW
+                            Utils.loadSeenPromotions();
+                            await this.loadPromotions();
+                            this.listenForPromotions();
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
                     });
@@ -890,7 +1047,6 @@
                     AppState.commissions.push(c);
                 });
             },
-            // Load notifications (messages)
             async loadNotifications() {
                 const snap = await db.ref('messages')
                     .orderByChild('recipientId')
@@ -927,7 +1083,6 @@
                     }
                 });
             },
-            // NEW: load promotions
             async loadPromotions() {
                 const snap = await db.ref('promotions').once('value');
                 const allPromos = snap.val() || {};
@@ -938,7 +1093,6 @@
                     }
                 });
                 AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                // Show first unseen promotion
                 const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
                 if (unseen.length > 0) {
                     AppState.currentPromotionIndex = 0;
@@ -952,7 +1106,6 @@
                         if (!AppState.promotions.find(p => p.id === snap.key)) {
                             AppState.promotions.unshift({ id: snap.key, ...promo });
                             AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                            // If this promotion is unseen and no modal active, show it
                             if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('promotionModal').classList.contains('active')) {
                                 UIManager.showPromotion({ id: snap.key, ...promo });
                             }
@@ -964,9 +1117,7 @@
                     const index = AppState.promotions.findIndex(p => p.id === snap.key);
                     if (index !== -1) {
                         if (!promo.active || (promo.recipients !== 'all_agents' && promo.recipients !== 'both')) {
-                            // Remove from list
                             AppState.promotions.splice(index, 1);
-                            // If currently showing this one, close and maybe show next
                             if (document.getElementById('promotionModal').classList.contains('active') && AppState.promotions[AppState.currentPromotionIndex]?.id === snap.key) {
                                 UIManager.closePromotion();
                             }
@@ -1038,6 +1189,9 @@
                 this.totalCommissionEarned = document.getElementById('totalCommissionEarned');
                 this.pendingCommission = document.getElementById('pendingCommission');
                 this.futureCommission = document.getElementById('futureCommission');
+                // Dynamic labels for commission percentage
+                this.pendingCommissionLabel = document.getElementById('pendingCommissionLabel');
+                this.commissionBenefitTitle = document.getElementById('commissionBenefitTitle');
                 // notification elements
                 this.notificationBell = document.getElementById('notificationBell');
                 this.unreadBadge = document.getElementById('unreadCount');
@@ -1097,6 +1251,16 @@
                 if (section === 'loans') this.renderCustomersWithLoans();
                 if (section === 'commission') this.renderCommission();
             },
+            // Update texts that depend on commission rate
+            updateCommissionRateTexts() {
+                const rate = AppState.systemSettings.commissionRate || 15;
+                if (this.pendingCommissionLabel) {
+                    this.pendingCommissionLabel.textContent = `Pending (${rate}% of interest)`;
+                }
+                if (this.commissionBenefitTitle) {
+                    this.commissionBenefitTitle.textContent = `Earn ${rate}% commission`;
+                }
+            },
             async loadAgentData() {
                 await FirebaseService.checkAuth();
                 const agent = AppState.agentData;
@@ -1109,6 +1273,8 @@
                 this.agentCodeDisplay.textContent = agent.agentId || AppState.agentId;
                 this.settingsBranch.textContent = agent.branch || 'Main';
                 this.settingsRegDate.textContent = agent.createdAt ? Utils.formatDate(agent.createdAt) : 'N/A';
+                // Update dynamic percentage texts
+                this.updateCommissionRateTexts();
                 this.renderCustomers();
                 this.renderCustomersWithLoans();
                 this.renderCommission();
@@ -1354,12 +1520,9 @@
                 `;
                 this.certificateModal.classList.add('active');
             },
-            // Promotion functions
             showPromotion(promo) {
                 if (!promo) return;
-                // Do not show if already seen
                 if (AppState.seenPromotions.has(promo.id)) {
-                    // Skip to next unseen
                     const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
                     if (unseen.length > 0) {
                         this.showPromotion(unseen[0]);
@@ -1377,14 +1540,12 @@
                 this.promotionModal.classList.add('active');
             },
             closePromotion() {
-                // Mark current promotion as seen
                 const currentPromo = AppState.promotions[AppState.currentPromotionIndex];
                 if (currentPromo) {
                     AppState.seenPromotions.add(currentPromo.id);
                     Utils.saveSeenPromotions();
                 }
                 this.promotionModal.classList.remove('active');
-                // Check for next unseen promotion
                 const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
                 if (unseen.length > 0) {
                     AppState.currentPromotionIndex = 0;
