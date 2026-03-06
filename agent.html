@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -13,7 +12,7 @@
     <!-- Cloudinary -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* === iOS‑inspired Mobile Theme (extended with richer design) === */
+        /* === Enhanced iOS‑inspired Mobile Theme === */
         * {
             margin: 0;
             padding: 0;
@@ -22,9 +21,9 @@
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
         body {
-            background: #f8f9fc;
+            background: #f5f7fa;
             color: #1c1e24;
-            line-height: 1.4;
+            line-height: 1.5;
             padding-bottom: 80px;
             min-height: 100vh;
             display: flex;
@@ -54,17 +53,17 @@
         }
         /* header with profile pic, title and notification bell */
         .agent-header {
-            background: white;
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             padding: 12px 20px;
-            border-bottom: 1px solid #e9ecf0;
+            border-bottom: 1px solid rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
             justify-content: space-between;
             position: sticky;
             top: 0;
-            z-index: 10;
-            backdrop-filter: blur(10px);
-            background: rgba(255,255,255,0.9);
+            z-index: 100;
             box-shadow: 0 2px 12px rgba(0,0,0,0.02);
         }
         .header-left {
@@ -219,6 +218,7 @@
             width: 100%;
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-around;
@@ -545,7 +545,6 @@
                 <i class="fas fa-bell"></i>
                 <span class="unread-badge d-none" id="unreadCount">0</span>
             </div>
-            
         </div>
     </div>
 
@@ -626,7 +625,7 @@
         </div>
     </div>
 
-    <!-- Bottom navigation (unchanged) -->
+    <!-- Bottom navigation -->
     <div class="bottom-nav">
         <div class="nav-item active" data-section="home"><i class="fas fa-home"></i><span>Home</span></div>
         <div class="nav-item" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
@@ -774,10 +773,11 @@
             customers: [],
             loans: [],
             commissions: [],
-            notifications: [],          // messages
-            promotions: [],              // NEW: active promotions
-            currentPromotionIndex: 0,    // NEW
-            systemSettings: {}            // NEW
+            notifications: [],
+            promotions: [],
+            currentPromotionIndex: 0,
+            seenPromotions: new Set(),          // NEW: store seen promotion IDs
+            systemSettings: {}                    // NEW: store system settings
         };
 
         // ==================== UTILS ====================
@@ -795,6 +795,27 @@
                 toast.innerHTML = `<strong>${title}</strong> ${msg}`;
                 document.getElementById('toastContainer').appendChild(toast);
                 setTimeout(()=>toast.remove(), 4000);
+            },
+            // Load seen promotions from localStorage
+            loadSeenPromotions() {
+                try {
+                    const seen = localStorage.getItem('trucash_agent_seen_promotions');
+                    if (seen) {
+                        const ids = JSON.parse(seen);
+                        AppState.seenPromotions = new Set(ids);
+                    }
+                } catch (e) {
+                    console.warn('Failed to load seen promotions', e);
+                }
+            },
+            // Save seen promotions to localStorage
+            saveSeenPromotions() {
+                try {
+                    const ids = Array.from(AppState.seenPromotions);
+                    localStorage.setItem('trucash_agent_seen_promotions', JSON.stringify(ids));
+                } catch (e) {
+                    console.warn('Failed to save seen promotions', e);
+                }
             }
         };
 
@@ -814,12 +835,11 @@
                             AppState.agentData = snap.val();
                             AppState.agentId = user.uid;
 
-                            // Load system settings to check app enable status
+                            // Load system settings
                             await this.loadSystemSettings();
                             // Check if agent app is enabled
                             if (AppState.systemSettings.enableAgentApp === false) {
                                 document.getElementById('maintenanceOverlay').style.display = 'flex';
-                                // Optionally disable all interactions (just show overlay)
                             } else {
                                 document.getElementById('maintenanceOverlay').style.display = 'none';
                             }
@@ -829,8 +849,9 @@
                             await this.loadCommissions();
                             await this.loadNotifications();
                             this.listenForNotifications();
-                            await this.loadPromotions();       // NEW
-                            this.listenForPromotions();         // NEW
+                            Utils.loadSeenPromotions();           // NEW
+                            await this.loadPromotions();          // NEW
+                            this.listenForPromotions();           // NEW
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
                     });
@@ -838,7 +859,7 @@
             },
             async loadSystemSettings() {
                 const snap = await db.ref('systemSettings').once('value');
-                AppState.systemSettings = snap.val() || {};
+                AppState.systemSettings = snap.val() || { commissionRate: 15, monthlyInterestRate: 35, weeklyInterestRate: 10 };
             },
             async loadCustomers() {
                 const snap = await db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).once('value');
@@ -917,10 +938,11 @@
                     }
                 });
                 AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                // Show first promotion if any
-                if (AppState.promotions.length > 0) {
+                // Show first unseen promotion
+                const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
+                if (unseen.length > 0) {
                     AppState.currentPromotionIndex = 0;
-                    UIManager.showPromotion(AppState.promotions[0]);
+                    UIManager.showPromotion(unseen[0]);
                 }
             },
             listenForPromotions() {
@@ -930,10 +952,9 @@
                         if (!AppState.promotions.find(p => p.id === snap.key)) {
                             AppState.promotions.unshift({ id: snap.key, ...promo });
                             AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                            // If no promotion currently showing, show this new one
-                            if (!document.getElementById('promotionModal').classList.contains('active')) {
-                                AppState.currentPromotionIndex = 0;
-                                UIManager.showPromotion(AppState.promotions[0]);
+                            // If this promotion is unseen and no modal active, show it
+                            if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('promotionModal').classList.contains('active')) {
+                                UIManager.showPromotion({ id: snap.key, ...promo });
                             }
                         }
                     }
@@ -945,15 +966,9 @@
                         if (!promo.active || (promo.recipients !== 'all_agents' && promo.recipients !== 'both')) {
                             // Remove from list
                             AppState.promotions.splice(index, 1);
-                            // If currently showing this one, close modal and show next if any
-                            if (document.getElementById('promotionModal').classList.contains('active') && AppState.currentPromotionIndex === index) {
+                            // If currently showing this one, close and maybe show next
+                            if (document.getElementById('promotionModal').classList.contains('active') && AppState.promotions[AppState.currentPromotionIndex]?.id === snap.key) {
                                 UIManager.closePromotion();
-                                if (AppState.promotions.length > 0) {
-                                    AppState.currentPromotionIndex = 0;
-                                    UIManager.showPromotion(AppState.promotions[0]);
-                                }
-                            } else if (index < AppState.currentPromotionIndex) {
-                                AppState.currentPromotionIndex--;
                             }
                         } else {
                             AppState.promotions[index] = { id: snap.key, ...promo };
@@ -1085,7 +1100,8 @@
             async loadAgentData() {
                 await FirebaseService.checkAuth();
                 const agent = AppState.agentData;
-                this.agentFullName.innerHTML = `${agent.fullName || 'Agent'} <small>ID: ${agent.agentId || AppState.agentId.substring(0,8)}</small>`;
+                const commissionRate = AppState.systemSettings.commissionRate || 15;
+                this.agentFullName.innerHTML = `${agent.fullName || 'Agent'} <small>ID: ${agent.agentId || AppState.agentId.substring(0,8)} | Comm: ${commissionRate}%</small>`;
                 this.headerAvatar.src = agent.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent.fullName||'A')+'&background=007AFF&color=fff';
                 this.settingsName.textContent = agent.fullName || '';
                 this.settingsEmail.textContent = AppState.currentUser?.email || '';
@@ -1246,10 +1262,11 @@
             },
             renderCommission() {
                 const commissions = AppState.commissions;
+                const commissionRate = (AppState.systemSettings.commissionRate || 15) / 100;
                 const totalEarned = commissions.filter(c => c.status === 'paid').reduce((s,c)=> s + (c.amount||0),0);
                 const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=> s + (c.amount||0),0);
                 const activeLoans = AppState.loans.filter(l => l.status === 'active');
-                const future = activeLoans.reduce((s,loan)=> s + (loan.totalInterest * 0.15 || 0), 0);
+                const future = activeLoans.reduce((s,loan)=> s + (loan.totalInterest * commissionRate || 0), 0);
                 this.totalCommissionEarned.textContent = Utils.formatCurrency(totalEarned);
                 this.pendingCommission.textContent = Utils.formatCurrency(pending);
                 this.futureCommission.textContent = Utils.formatCurrency(future);
@@ -1272,21 +1289,22 @@
                 const customer = AppState.customers.find(c => c.id === customerId);
                 const loans = AppState.loans.filter(l => l.customerId === customerId);
                 const commissions = AppState.commissions.filter(c => c.customerId === customerId);
+                const commissionRate = (AppState.systemSettings.commissionRate || 15) / 100;
                 
                 let totalInterest = 0;
                 loans.forEach(loan => { totalInterest += loan.totalInterest || 0; });
-                const totalCommissionPossible = totalInterest * 0.15;
+                const totalCommissionPossible = totalInterest * commissionRate;
                 const earned = commissions.filter(c => c.status === 'paid').reduce((s,c)=>s+c.amount,0);
                 const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=>s+c.amount,0);
                 const future = totalCommissionPossible - earned - pending;
 
                 const breakdownHtml = loans.map(loan => {
                     const interest = loan.totalInterest || 0;
-                    const commission = interest * 0.15;
+                    const commission = interest * commissionRate;
                     return `
                         <div class="commission-row">
                             <span>Loan ${loan.id.substring(0,6)} (${Utils.formatCurrency(loan.amount)})</span>
-                            <span>Interest: ${Utils.formatCurrency(interest)} → 15% = ${Utils.formatCurrency(commission)}</span>
+                            <span>Interest: ${Utils.formatCurrency(interest)} → ${Math.round(commissionRate*100)}% = ${Utils.formatCurrency(commission)}</span>
                         </div>
                     `;
                 }).join('');
@@ -1297,11 +1315,11 @@
                         ${breakdownHtml || '<p>No loans</p>'}
                     </div>
                     <div class="commission-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
-                    <div class="commission-row"><span>Total possible commission (15%)</span> <span>${Utils.formatCurrency(totalCommissionPossible)}</span></div>
+                    <div class="commission-row"><span>Total possible commission (${Math.round(commissionRate*100)}%)</span> <span>${Utils.formatCurrency(totalCommissionPossible)}</span></div>
                     <div class="commission-row"><span>Already earned</span> <span class="text-success">${Utils.formatCurrency(earned)}</span></div>
                     <div class="commission-row"><span>Pending (awaiting payment)</span> <span>${Utils.formatCurrency(pending)}</span></div>
                     <div class="commission-row"><span>Future (active loans)</span> <span>${Utils.formatCurrency(future)}</span></div>
-                    <p style="margin-top:16px; font-size:14px; color:#617388;">Commission is credited when the customer pays interest. 15% of each interest payment.</p>
+                    <p style="margin-top:16px; font-size:14px; color:#617388;">Commission is credited when the customer pays interest. ${Math.round(commissionRate*100)}% of each interest payment.</p>
                 `;
                 document.getElementById('commissionMathContent').innerHTML = content;
                 this.commissionMathModal.classList.add('active');
@@ -1339,6 +1357,15 @@
             // Promotion functions
             showPromotion(promo) {
                 if (!promo) return;
+                // Do not show if already seen
+                if (AppState.seenPromotions.has(promo.id)) {
+                    // Skip to next unseen
+                    const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
+                    if (unseen.length > 0) {
+                        this.showPromotion(unseen[0]);
+                    }
+                    return;
+                }
                 this.promotionTitle.textContent = promo.title || 'Promotion';
                 this.promotionMessage.textContent = promo.message || '';
                 if (promo.imageUrl) {
@@ -1350,13 +1377,20 @@
                 this.promotionModal.classList.add('active');
             },
             closePromotion() {
+                // Mark current promotion as seen
+                const currentPromo = AppState.promotions[AppState.currentPromotionIndex];
+                if (currentPromo) {
+                    AppState.seenPromotions.add(currentPromo.id);
+                    Utils.saveSeenPromotions();
+                }
                 this.promotionModal.classList.remove('active');
-                // Move to next promotion if any
-                if (AppState.currentPromotionIndex < AppState.promotions.length - 1) {
-                    AppState.currentPromotionIndex++;
-                    this.showPromotion(AppState.promotions[AppState.currentPromotionIndex]);
+                // Check for next unseen promotion
+                const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
+                if (unseen.length > 0) {
+                    AppState.currentPromotionIndex = 0;
+                    this.showPromotion(unseen[0]);
                 } else {
-                    AppState.currentPromotionIndex = 0; // reset
+                    AppState.currentPromotionIndex = 0;
                 }
             }
         };
