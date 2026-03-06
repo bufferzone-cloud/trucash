@@ -2717,7 +2717,8 @@
                                 amount: inst.totalDue,
                                 installment: inst.installment,
                                 paidAmount: inst.paidAmount || 0,
-                                status: inst.status
+                                status: inst.status,
+                                loan: loan // store full loan object for extra details
                             });
                         }
                     });
@@ -2744,7 +2745,8 @@
                                 amount: inst.totalDue,
                                 installment: inst.installment,
                                 paidAmount: inst.paidAmount || 0,
-                                status: inst.status
+                                status: inst.status,
+                                loan: loan
                             });
                         }
                     });
@@ -3593,6 +3595,11 @@
                     const badgeText = p.type === 'overdue' ? `${Math.abs(daysLeft)} day${Math.abs(daysLeft)!==1?'s':''} overdue` : `${daysLeft} day${daysLeft!==1?'s':''} left`;
                     const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
                     
+                    // Get full loan details
+                    const loan = p.loan || allLoans.find(l => l.id === p.loanId);
+                    const customer = allCustomers.find(c => c.id === p.customerId);
+                    const agent = allAgents.find(a => a.id === p.agentId);
+                    
                     return `
                     <div class="notification-item ${statusClass}">
                         <div class="d-flex justify-between align-center">
@@ -3606,7 +3613,11 @@
                             Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
                         </div>
                         <div class="profile-meta">
-                            Agent: ${p.agentName || 'None'} · Customer: ${p.customerName}
+                            Agent: ${p.agentName || 'None'} · Customer Phone: ${customer?.phone || ''}
+                        </div>
+                        <div class="profile-meta">
+                            Loan Amount: ${Utils.formatCurrency(loan?.amount)} · 
+                            Remaining Balance: ${Utils.formatCurrency((loan?.totalPayable || 0) - (loan?.totalPaid || 0))}
                         </div>
                         <div class="profile-meta">
                             <button class="btn btn-primary btn-small" onclick="openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId || ''}')">
@@ -3631,7 +3642,8 @@
             if (loan && inst) {
                 const dueDate = Utils.formatDate(inst.dueDate);
                 const amount = Utils.formatCurrency(inst.totalDue);
-                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} is due on ${dueDate}. Please pay promptly to avoid penalties.`;
+                const paid = Utils.formatCurrency(inst.paidAmount || 0);
+                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} is due on ${dueDate}. Paid so far: ${paid}. Please pay promptly to avoid penalties.`;
                 document.getElementById('reminderMessage').value = message;
             }
             
