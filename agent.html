@@ -567,7 +567,7 @@
             <div class="section-title"><i class="fas fa-coins" style="margin-right: 8px; color: #007aff;"></i> Commission Overview</div>
             <div class="section-card">
                 <div class="commission-item"><span>Total earned</span> <span class="fw-600" id="totalCommissionEarned">K0.00</span></div>
-                <div class="commission-item"><span>Pending commission</span> <span class="fw-600" id="pendingCommission">K0.00</span></div>
+                <div class="commission-item"><span>Pending (of interest)</span> <span class="fw-600" id="pendingCommission">K0.00</span></div>
                 <div class="commission-item"><span>To be earned (active loans)</span> <span class="fw-600" id="futureCommission">K0.00</span></div>
             </div>
             <div class="section-title" style="margin-top: 24px;">Customers</div>
@@ -602,25 +602,8 @@
         <!-- About section -->
         <div id="aboutSection" class="section d-none">
             <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
-            <div class="section-card about-page">
-                <h4>📌 What is TruCash?</h4>
-                <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
-                
-                <h4>🤝 Benefits of Being an Agent</h4>
-                <ul>
-                    <li><strong>Earn 15% commission</strong> on every interest payment from customers you refer.</li>
-                    <li><strong>Recurring income</strong> – as long as your customers repay, you earn.</li>
-                    <li><strong>No capital required</strong> – you simply connect borrowers with TruCash.</li>
-                    <li><strong>Full support</strong> – marketing materials, training, and a dedicated agent dashboard.</li>
-                    <li><strong>Transparent tracking</strong> – see exactly how much you’ve earned and what’s pending.</li>
-                </ul>
-                
-                <h4>📞 Contact Us</h4>
-                <p><i class="fas fa-phone"></i> +260 123 456 789<br>
-                <i class="fas fa-envelope"></i> agents@trucash.zm<br>
-                <i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
-
-                <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
+            <div class="section-card about-page" id="aboutContent">
+                <!-- Dynamic content based on commission rate -->
             </div>
         </div>
     </div>
@@ -722,7 +705,7 @@
         </div>
     </div>
 
-    <!-- Promotion Modal (NEW) -->
+    <!-- Promotion Modal -->
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -776,14 +759,12 @@
             notifications: [],
             promotions: [],
             currentPromotionIndex: 0,
-            seenPromotions: new Set(),          // NEW: store seen promotion IDs
-            systemSettings: {}                    // NEW: store system settings
+            seenPromotions: new Set(),
+            systemSettings: { commissionRate: 15 } // default fallback
         };
 
         // ==================== UTILS ====================
         const Utils = {
-            showLoading(msg) {},
-            hideLoading() {},
             formatCurrency(amount) { return 'K' + (amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); },
             formatDate(ts) { return ts ? new Date(ts).toLocaleDateString() : 'N/A'; },
             formatDateTime(ts) { return ts ? new Date(ts).toLocaleString() : 'N/A'; },
@@ -796,7 +777,6 @@
                 document.getElementById('toastContainer').appendChild(toast);
                 setTimeout(()=>toast.remove(), 4000);
             },
-            // Load seen promotions from localStorage
             loadSeenPromotions() {
                 try {
                     const seen = localStorage.getItem('trucash_agent_seen_promotions');
@@ -804,22 +784,17 @@
                         const ids = JSON.parse(seen);
                         AppState.seenPromotions = new Set(ids);
                     }
-                } catch (e) {
-                    console.warn('Failed to load seen promotions', e);
-                }
+                } catch (e) { console.warn('Failed to load seen promotions', e); }
             },
-            // Save seen promotions to localStorage
             saveSeenPromotions() {
                 try {
                     const ids = Array.from(AppState.seenPromotions);
                     localStorage.setItem('trucash_agent_seen_promotions', JSON.stringify(ids));
-                } catch (e) {
-                    console.warn('Failed to save seen promotions', e);
-                }
+                } catch (e) { console.warn('Failed to save seen promotions', e); }
             }
         };
 
-        // ==================== FIREBASE SERVICE (extended) ====================
+        // ==================== FIREBASE SERVICE ====================
         const FirebaseService = {
             async checkAuth() {
                 return new Promise((resolve) => {
@@ -835,7 +810,6 @@
                             AppState.agentData = snap.val();
                             AppState.agentId = user.uid;
 
-                            // Load system settings
                             await this.loadSystemSettings();
                             // Check if agent app is enabled
                             if (AppState.systemSettings.enableAgentApp === false) {
@@ -849,9 +823,9 @@
                             await this.loadCommissions();
                             await this.loadNotifications();
                             this.listenForNotifications();
-                            Utils.loadSeenPromotions();           // NEW
-                            await this.loadPromotions();          // NEW
-                            this.listenForPromotions();           // NEW
+                            Utils.loadSeenPromotions();
+                            await this.loadPromotions();
+                            this.listenForPromotions();
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
                     });
@@ -890,11 +864,8 @@
                     AppState.commissions.push(c);
                 });
             },
-            // Load notifications (messages)
             async loadNotifications() {
-                const snap = await db.ref('messages')
-                    .orderByChild('recipientId')
-                    .once('value');
+                const snap = await db.ref('messages').orderByChild('recipientId').once('value');
                 const allMessages = snap.val() || {};
                 AppState.notifications = [];
                 Object.entries(allMessages).forEach(([id, msg]) => {
@@ -927,7 +898,6 @@
                     }
                 });
             },
-            // NEW: load promotions
             async loadPromotions() {
                 const snap = await db.ref('promotions').once('value');
                 const allPromos = snap.val() || {};
@@ -952,7 +922,7 @@
                         if (!AppState.promotions.find(p => p.id === snap.key)) {
                             AppState.promotions.unshift({ id: snap.key, ...promo });
                             AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                            // If this promotion is unseen and no modal active, show it
+                            // If unseen and no modal active, show it
                             if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('promotionModal').classList.contains('active')) {
                                 UIManager.showPromotion({ id: snap.key, ...promo });
                             }
@@ -964,9 +934,7 @@
                     const index = AppState.promotions.findIndex(p => p.id === snap.key);
                     if (index !== -1) {
                         if (!promo.active || (promo.recipients !== 'all_agents' && promo.recipients !== 'both')) {
-                            // Remove from list
                             AppState.promotions.splice(index, 1);
-                            // If currently showing this one, close and maybe show next
                             if (document.getElementById('promotionModal').classList.contains('active') && AppState.promotions[AppState.currentPromotionIndex]?.id === snap.key) {
                                 UIManager.closePromotion();
                             }
@@ -1008,7 +976,7 @@
             async signOut() { await auth.signOut(); window.location.href='login.html'; }
         };
 
-        // ==================== UI MANAGER (extended) ====================
+        // ==================== UI MANAGER ====================
         const UIManager = {
             init() {
                 this.cacheElements();
@@ -1038,12 +1006,15 @@
                 this.totalCommissionEarned = document.getElementById('totalCommissionEarned');
                 this.pendingCommission = document.getElementById('pendingCommission');
                 this.futureCommission = document.getElementById('futureCommission');
+                this.aboutContent = document.getElementById('aboutContent');
+
                 // notification elements
                 this.notificationBell = document.getElementById('notificationBell');
                 this.unreadBadge = document.getElementById('unreadCount');
                 this.notificationsModal = document.getElementById('notificationsModal');
                 this.notificationsList = document.getElementById('notificationsList');
                 this.markAllReadBtn = document.getElementById('markAllReadBtn');
+
                 // promotion elements
                 this.promotionModal = document.getElementById('promotionModal');
                 this.promotionTitle = document.getElementById('promotionTitle');
@@ -1051,6 +1022,7 @@
                 this.promotionImage = document.getElementById('promotionImage');
                 this.closePromotionModal = document.getElementById('closePromotionModal');
                 this.dismissPromotionBtn = document.getElementById('dismissPromotion');
+
                 // modals
                 this.customerModal = document.getElementById('customerModal');
                 this.loanModal = document.getElementById('loanModal');
@@ -1058,6 +1030,7 @@
                 this.commissionMathModal = document.getElementById('commissionMathModal');
                 this.passwordModal = document.getElementById('passwordModal');
                 this.certificateModal = document.getElementById('certificateModal');
+
                 // close buttons
                 document.getElementById('closeCustomerModal').onclick = ()=> this.customerModal.classList.remove('active');
                 document.getElementById('closeLoanModal').onclick = ()=> this.loanModal.classList.remove('active');
@@ -1066,9 +1039,11 @@
                 document.getElementById('closePasswordModal').onclick = ()=> this.passwordModal.classList.remove('active');
                 document.getElementById('closeCertificateModal').onclick = ()=> this.certificateModal.classList.remove('active');
                 document.getElementById('closeNotificationsModal').onclick = ()=> this.notificationsModal.classList.remove('active');
+
                 // promotion close
                 this.closePromotionModal.onclick = ()=> this.closePromotion();
                 this.dismissPromotionBtn.onclick = ()=> this.closePromotion();
+
                 // settings buttons
                 document.getElementById('copyAgentCode').onclick = ()=> this.copyAgentCode();
                 document.getElementById('changePasswordBtn').onclick = ()=> this.passwordModal.classList.add('active');
@@ -1076,7 +1051,8 @@
                 document.getElementById('logoutBtn').onclick = ()=> FirebaseService.signOut();
                 document.getElementById('deleteAccountBtn').onclick = ()=> this.deleteAccount();
                 document.getElementById('showCertificateBtn').onclick = ()=> this.showCertificate();
-                // notification bell click
+
+                // notification bell
                 this.notificationBell.addEventListener('click', ()=> this.openNotificationsModal());
                 this.markAllReadBtn.addEventListener('click', ()=> FirebaseService.markAllAsRead());
             },
@@ -1096,6 +1072,7 @@
                 if (section === 'home') this.renderCustomers();
                 if (section === 'loans') this.renderCustomersWithLoans();
                 if (section === 'commission') this.renderCommission();
+                if (section === 'about') this.renderAbout();
             },
             async loadAgentData() {
                 await FirebaseService.checkAuth();
@@ -1112,7 +1089,33 @@
                 this.renderCustomers();
                 this.renderCustomersWithLoans();
                 this.renderCommission();
+                this.renderAbout();
                 this.updateNotificationBadge();
+            },
+            renderAbout() {
+                const rate = AppState.systemSettings.commissionRate || 15;
+                this.aboutContent.innerHTML = `
+                    <h4>📌 What is TruCash?</h4>
+                    <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
+                    
+                    <h4>🤝 Benefits of Being an Agent</h4>
+                    <ul>
+                        <li><strong>Earn ${rate}% commission</strong> on every interest payment from customers you refer.</li>
+                        <li><strong>Recurring income</strong> – as long as your customers repay, you earn.</li>
+                        <li><strong>No capital required</strong> – you simply connect borrowers with TruCash.</li>
+                        <li><strong>Full support</strong> – marketing materials, training, and a dedicated agent dashboard.</li>
+                        <li><strong>Transparent tracking</strong> – see exactly how much you’ve earned and what’s pending.</li>
+                    </ul>
+                    
+                    <h4>📞 Contact Us</h4>
+                    <p><i class="fas fa-phone"></i> +260 123 456 789<br>
+                    <i class="fas fa-envelope"></i> agents@trucash.zm<br>
+                    <i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+
+                    <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
+                `;
+                // Reattach event because button was recreated
+                document.getElementById('showCertificateBtn').onclick = ()=> this.showCertificate();
             },
             updateNotificationBadge() {
                 const unread = AppState.notifications.filter(n => !n.read).length;
@@ -1216,10 +1219,7 @@
             showLoanModal(loanId) {
                 const loan = AppState.loans.find(l => l.id === loanId);
                 if (!loan) return;
-                const customer = AppState.customers.find(c => c.id === loan.customerId);
                 const payments = loan.repaymentSchedule || [];
-                const paidPayments = payments.filter(p => p.status === 'paid');
-                const pendingPayments = payments.filter(p => p.status === 'pending');
                 const content = `
                     <div style="margin-bottom:20px;">
                         <span class="badge" style="background:#007aff; color:white;">${loan.status}</span>
@@ -1354,7 +1354,6 @@
                 `;
                 this.certificateModal.classList.add('active');
             },
-            // Promotion functions
             showPromotion(promo) {
                 if (!promo) return;
                 // Do not show if already seen
@@ -1395,10 +1394,8 @@
             }
         };
 
-        // Attach UIManager to window for inline onclick handlers
         window.UIManager = UIManager;
 
-        // Start app
         document.addEventListener('DOMContentLoaded', () => UIManager.init());
     </script>
 </body>
