@@ -54,6 +54,8 @@
             --radius: 20px;
             --radius-sm: 12px;
             --radius-lg: 28px;
+            --glass-bg: rgba(255,255,255,0.7);
+            --glass-border: 1px solid rgba(255,255,255,0.2);
         }
 
         body {
@@ -84,10 +86,10 @@
         .app-header {
             position: sticky;
             top: 0;
-            background: rgba(255,255,255,0.9);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid rgba(0,0,0,0.05);
+            border-bottom: var(--glass-border);
             padding: 12px 24px;
             display: flex;
             align-items: center;
@@ -186,10 +188,10 @@
             right: -360px;
             width: 360px;
             height: 100%;
-            background: rgba(255, 255, 255, 0.7); /* semi-transparent white */
+            background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
-            border-left: 1px solid rgba(255,255,255,0.2);
+            border-left: var(--glass-border);
             box-shadow: var(--shadow-xl);
             z-index: 201;
             transition: right 0.3s cubic-bezier(0.4, 0, 0.2, 1);
@@ -207,7 +209,7 @@
             gap: 16px;
             margin-bottom: 32px;
             padding-bottom: 20px;
-            border-bottom: 1px solid rgba(255,255,255,0.3);
+            border-bottom: var(--glass-border);
         }
 
         .sidebar-avatar {
@@ -255,14 +257,15 @@
             font-size: 15px;
             cursor: pointer;
             transition: 0.2s;
-            border: 1px solid transparent; /* base border */
+            border: 1px solid transparent;
             background: transparent;
             font-weight: 500;
+            position: relative;
         }
 
         .sidebar-item:hover {
-            background: rgba(255,255,255,0.5);
-            border: 1px solid rgba(255,255,255,0.8);
+            background: var(--glass-bg);
+            border: var(--glass-border);
             box-shadow: var(--shadow-sm);
             transform: translateX(-4px);
         }
@@ -282,16 +285,35 @@
             color: var(--ios-red);
         }
 
+        /* Sidebar badge for notifications */
+        .sidebar-badge {
+            position: absolute;
+            right: 16px;
+            background: var(--ios-red);
+            color: white;
+            font-size: 11px;
+            font-weight: 600;
+            min-width: 20px;
+            height: 20px;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 0 6px;
+            box-shadow: 0 2px 4px rgba(255,59,48,0.3);
+            border: 1px solid white;
+        }
+
         /* ===== Bottom Navigation with Badges ===== */
         .bottom-nav {
             position: fixed;
             bottom: 0;
             left: 0;
             width: 100%;
-            background: rgba(255,255,255,0.95);
+            background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
-            border-top: 1px solid rgba(0,0,0,0.05);
+            border-top: var(--glass-border);
             display: flex;
             justify-content: space-around;
             padding: 10px 16px;
@@ -691,6 +713,11 @@
             background: linear-gradient(135deg, rgba(0,122,255,0.1), rgba(88,86,214,0.2)); 
             color: #1a4d8c; 
         }
+        .status-badge.overdue {
+            background: linear-gradient(135deg, rgba(255,59,48,0.2), rgba(255,59,48,0.3));
+            color: #b31f1f;
+            font-weight: 600;
+        }
 
         /* ===== Document Grid ===== */
         .doc-grid {
@@ -767,7 +794,7 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* ===== Modal System ===== */
+        /* ===== Modal System - Enhanced with glassmorphism ===== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -786,7 +813,10 @@
         }
 
         .modal-container {
-            background: white;
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: var(--glass-border);
             border-radius: 28px;
             max-width: 800px;
             width: 100%;
@@ -817,7 +847,7 @@
 
         .modal-header {
             padding: 18px 24px;
-            border-bottom: 1px solid var(--ios-gray2);
+            border-bottom: 1px solid rgba(0,0,0,0.1);
             display: flex;
             justify-content: space-between;
             align-items: center;
@@ -825,7 +855,7 @@
             font-size: 18px;
             position: sticky;
             top: 0;
-            background: white;
+            background: inherit;
             z-index: 10;
             border-radius: 28px 28px 0 0;
         }
@@ -834,7 +864,7 @@
             font-size: 18px;
             color: var(--ios-gray5);
             cursor: pointer;
-            background: var(--ios-gray1);
+            background: rgba(0,0,0,0.05);
             width: 36px;
             height: 36px;
             border-radius: 50%;
@@ -845,7 +875,7 @@
         }
 
         .modal-close:hover {
-            background: var(--ios-gray2);
+            background: rgba(0,0,0,0.1);
             transform: rotate(90deg);
         }
 
@@ -855,7 +885,7 @@
 
         .modal-footer {
             padding: 18px 24px;
-            border-top: 1px solid var(--ios-gray2);
+            border-top: 1px solid rgba(0,0,0,0.1);
             display: flex;
             justify-content: flex-end;
             gap: 12px;
@@ -1378,9 +1408,25 @@
             padding: 16px;
             margin-bottom: 12px;
             border: 1px solid var(--ios-gray2);
+            transition: 0.2s;
+        }
+        .notification-item.overdue {
+            border-left: 4px solid var(--ios-red);
+            background: linear-gradient(to right, rgba(255,59,48,0.05), white);
+        }
+        .notification-item.upcoming {
+            border-left: 4px solid var(--ios-orange);
         }
         .reminder-badge {
             background: var(--ios-orange);
+            color: white;
+            border-radius: 20px;
+            padding: 2px 10px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+        .overdue-badge {
+            background: var(--ios-red);
             color: white;
             border-radius: 20px;
             padding: 2px 10px;
@@ -1432,7 +1478,10 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
-            <div class="sidebar-item" data-section="notifications"><i class="fas fa-bell"></i> Notifications</div>
+            <div class="sidebar-item" data-section="notifications">
+                <i class="fas fa-bell"></i> Notifications
+                <span class="sidebar-badge" id="sidebarNotificationsBadge" style="display: none;">0</span>
+            </div>
             <!-- NEW: Signed Agreements button -->
             <div class="sidebar-item" id="signedAgreementsBtn"><i class="fas fa-file-signature"></i> Signed Agreements</div>
             <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
@@ -2248,6 +2297,7 @@
                 <button class="btn btn-danger btn-small" id="rejectLoanBtn">Reject</button>
                 <button class="btn btn-warning btn-small" id="markDefaultedBtn">Default</button>
                 <button class="btn btn-primary btn-small" id="editLoanBtn">Edit</button>
+                <button class="btn btn-primary btn-small" id="recordPaymentBtn">Record Payment</button>
             </div>
         </div>
     </div>
@@ -2291,6 +2341,76 @@
                 <span class="modal-close" onclick="closeModal('commissionMathModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="commissionMathContent"></div>
+        </div>
+    </div>
+
+    <!-- NEW: Send Reminder Modal -->
+    <div class="modal-overlay" id="sendReminderModal">
+        <div class="modal-container compact">
+            <div class="modal-header">
+                <span>Send Reminder</span>
+                <span class="modal-close" onclick="closeModal('sendReminderModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="reminderLoanId">
+                <input type="hidden" id="reminderInstallment">
+                <input type="hidden" id="reminderCustomerId">
+                <input type="hidden" id="reminderAgentId">
+                <div class="form-group">
+                    <label class="form-label">Send to</label>
+                    <select id="reminderRecipient" class="form-select">
+                        <option value="customer">Customer only</option>
+                        <option value="agent">Agent only</option>
+                        <option value="both">Both Customer and Agent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reminder Message</label>
+                    <textarea id="reminderMessage" class="form-textarea" rows="4">Your payment is due soon. Please pay promptly to avoid penalties.</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('sendReminderModal')">Cancel</button>
+                <button class="btn btn-primary" id="sendReminderBtn">Send Reminder</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW: Record Payment Modal -->
+    <div class="modal-overlay" id="recordPaymentModal">
+        <div class="modal-container compact">
+            <div class="modal-header">
+                <span>Record Payment</span>
+                <span class="modal-close" onclick="closeModal('recordPaymentModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="recordLoanId">
+                <div class="form-group">
+                    <label class="form-label">Installment Number</label>
+                    <select id="recordInstallment" class="form-select"></select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Amount Paid (K)</label>
+                    <input type="number" id="recordAmount" class="form-input" step="0.01" min="0">
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Payment Method</label>
+                    <select id="recordMethod" class="form-select">
+                        <option value="Cash">Cash</option>
+                        <option value="Bank Transfer">Bank Transfer</option>
+                        <option value="Mobile Money">Mobile Money</option>
+                        <option value="Cheque">Cheque</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reference (optional)</label>
+                    <input type="text" id="recordReference" class="form-input">
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('recordPaymentModal')">Cancel</button>
+                <button class="btn btn-success" id="confirmRecordPayment">Record Payment</button>
+            </div>
         </div>
     </div>
 
@@ -2380,6 +2500,7 @@
         // with advanced loan details: collateral images, witness, signed agreement
         // MODIFICATIONS: added promotion history, ban reason with prompt, contact details in settings, loan rejection reason display, ban reason display in user modals
         // ALSO: Enhanced payment confirmation to update repayment schedule, handle partial payments, and recalculate totals accurately.
+        // NEW FEATURES: Upcoming/Overdue reminders with badge, send reminder modal, record payment modal.
         // =========================================================================
         
         // Firebase configuration
@@ -2495,7 +2616,7 @@
                 await db.ref('notifications/' + Utils.generateId('NOTIF')).set({
                     recipientId,
                     message,
-                    type, // 'loan_approved', 'loan_rejected', 'commission_paid', 'payment_confirmed'
+                    type, // 'loan_approved', 'loan_rejected', 'commission_paid', 'payment_confirmed', 'reminder'
                     relatedId,
                     timestamp: Date.now(),
                     read: false
@@ -2561,6 +2682,75 @@
                     badgePayments.style.display = 'none';
                 }
             }
+
+            // Update sidebar notifications badge with total upcoming+overdue
+            const upcoming = getUpcomingPayments();
+            const overdue = getOverduePayments();
+            const totalReminders = upcoming.length + overdue.length;
+            const sidebarBadge = document.getElementById('sidebarNotificationsBadge');
+            if (sidebarBadge) {
+                if (totalReminders > 0) {
+                    sidebarBadge.style.display = 'flex';
+                    sidebarBadge.innerText = totalReminders > 99 ? '99+' : totalReminders;
+                } else {
+                    sidebarBadge.style.display = 'none';
+                }
+            }
+        }
+
+        // Helper to get upcoming payments (due within next 7 days)
+        function getUpcomingPayments() {
+            const now = Date.now();
+            const sevenDays = 7 * 24 * 60 * 60 * 1000;
+            const upcoming = [];
+            allLoans.filter(l => l.status === 'active').forEach(loan => {
+                if (loan.repaymentSchedule) {
+                    loan.repaymentSchedule.forEach(inst => {
+                        if (inst.status === 'pending' && inst.dueDate > now && inst.dueDate < now + sevenDays) {
+                            upcoming.push({
+                                loanId: loan.id,
+                                customerId: loan.customerId,
+                                customerName: loan.customerName,
+                                agentId: loan.agentId,
+                                agentName: loan.agentName,
+                                dueDate: inst.dueDate,
+                                amount: inst.totalDue,
+                                installment: inst.installment,
+                                paidAmount: inst.paidAmount || 0,
+                                status: inst.status
+                            });
+                        }
+                    });
+                }
+            });
+            return upcoming;
+        }
+
+        // Helper to get overdue payments (past due and not fully paid)
+        function getOverduePayments() {
+            const now = Date.now();
+            const overdue = [];
+            allLoans.filter(l => l.status === 'active').forEach(loan => {
+                if (loan.repaymentSchedule) {
+                    loan.repaymentSchedule.forEach(inst => {
+                        if (inst.status !== 'paid' && inst.dueDate < now) {
+                            overdue.push({
+                                loanId: loan.id,
+                                customerId: loan.customerId,
+                                customerName: loan.customerName,
+                                agentId: loan.agentId,
+                                agentName: loan.agentName,
+                                dueDate: inst.dueDate,
+                                amount: inst.totalDue,
+                                installment: inst.installment,
+                                paidAmount: inst.paidAmount || 0,
+                                status: inst.status
+                            });
+                        }
+                    });
+                }
+            });
+            return overdue;
         }
 
         // ========== CSV EXPORT ==========
@@ -3381,84 +3571,243 @@
 
         // ===== NOTIFICATIONS & MESSAGES =====
         function renderNotifications() {
-            // Upcoming payments: active loans with pending installments due within next 7 days
+            const upcoming = getUpcomingPayments();
+            const overdue = getOverduePayments();
+            
             const now = Date.now();
             const sevenDays = 7 * 24 * 60 * 60 * 1000;
-            const upcoming = [];
             
-            allLoans.filter(l => l.status === 'active').forEach(loan => {
-                if (loan.repaymentSchedule) {
-                    loan.repaymentSchedule.forEach(inst => {
-                        if (inst.status === 'pending' && inst.dueDate > now && inst.dueDate < now + sevenDays) {
-                            upcoming.push({
-                                loanId: loan.id,
-                                customerId: loan.customerId,
-                                customerName: loan.customerName,
-                                agentId: loan.agentId,
-                                agentName: loan.agentName,
-                                dueDate: inst.dueDate,
-                                amount: inst.totalDue,
-                                installment: inst.installment
-                            });
-                        }
-                    });
-                }
-            });
-            
-            upcoming.sort((a,b) => a.dueDate - b.dueDate);
+            // Combine and sort by due date (closest first)
+            const allReminders = [...overdue.map(p => ({...p, type: 'overdue'})), ...upcoming.map(p => ({...p, type: 'upcoming'}))];
+            allReminders.sort((a,b) => a.dueDate - b.dueDate);
             
             const container = document.getElementById('upcomingPaymentsList');
             if (!container) return;
             
-            if (upcoming.length === 0) {
-                container.innerHTML = '<p class="text-muted">No upcoming payments in the next 7 days.</p>';
+            if (allReminders.length === 0) {
+                container.innerHTML = '<p class="text-muted">No upcoming or overdue payments.</p>';
             } else {
-                container.innerHTML = upcoming.map(p => {
+                container.innerHTML = allReminders.map(p => {
                     const daysLeft = Math.ceil((p.dueDate - now) / (1000*60*60*24));
+                    const statusClass = p.type === 'overdue' ? 'overdue' : 'upcoming';
+                    const badgeText = p.type === 'overdue' ? `${Math.abs(daysLeft)} day${Math.abs(daysLeft)!==1?'s':''} overdue` : `${daysLeft} day${daysLeft!==1?'s':''} left`;
+                    const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
+                    
                     return `
-                    <div class="notification-item">
+                    <div class="notification-item ${statusClass}">
                         <div class="d-flex justify-between align-center">
                             <div>
                                 <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
                             </div>
-                            <span class="reminder-badge">${daysLeft} day${daysLeft>1?'s':''}</span>
+                            <span class="${badgeClass}">${badgeText}</span>
                         </div>
-                        <div class="profile-meta">Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · Amount: ${Utils.formatCurrency(p.amount)}</div>
-                        <div class="profile-meta">Agent: ${p.agentName || 'None'}</div>
-                        <div class="action-row mt-2">
-                            <button class="btn btn-primary btn-small" onclick="sendReminder('${p.customerId}', '${p.loanId}', ${p.installment})"><i class="fas fa-bell"></i> Remind Customer</button>
-                            <button class="btn btn-outline btn-small" onclick="sendReminder('${p.agentId}', '${p.loanId}', ${p.installment})"><i class="fas fa-bell"></i> Remind Agent</button>
+                        <div class="profile-meta">
+                            Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
+                            Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
+                        </div>
+                        <div class="profile-meta">
+                            Agent: ${p.agentName || 'None'} · Customer: ${p.customerName}
+                        </div>
+                        <div class="profile-meta">
+                            <button class="btn btn-primary btn-small" onclick="openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId || ''}')">
+                                <i class="fas fa-bell"></i> Send Reminder
+                            </button>
                         </div>
                     </div>
                 `}).join('');
             }
         }
 
-        // NEW: Send reminder (stores a message for the user)
-        window.sendReminder = async (recipientId, loanId, installment) => {
-            const loan = allLoans.find(l => l.id === loanId);
-            if (!loan) return;
-            const message = `Reminder: Payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${Utils.formatCurrency(loan.repaymentSchedule[installment-1].totalDue)} is due on ${Utils.formatDate(loan.repaymentSchedule[installment-1].dueDate)}. Please pay promptly.`;
+        // NEW: Send reminder modal
+        window.openSendReminderModal = (loanId, installment, customerId, agentId) => {
+            document.getElementById('reminderLoanId').value = loanId;
+            document.getElementById('reminderInstallment').value = installment;
+            document.getElementById('reminderCustomerId').value = customerId;
+            document.getElementById('reminderAgentId').value = agentId;
             
+            // Pre-fill message with loan details
+            const loan = allLoans.find(l => l.id === loanId);
+            const inst = loan?.repaymentSchedule?.[installment-1];
+            if (loan && inst) {
+                const dueDate = Utils.formatDate(inst.dueDate);
+                const amount = Utils.formatCurrency(inst.totalDue);
+                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} is due on ${dueDate}. Please pay promptly to avoid penalties.`;
+                document.getElementById('reminderMessage').value = message;
+            }
+            
+            openModal('sendReminderModal');
+        };
+
+        document.getElementById('sendReminderBtn').addEventListener('click', async () => {
+            const loanId = document.getElementById('reminderLoanId').value;
+            const installment = document.getElementById('reminderInstallment').value;
+            const customerId = document.getElementById('reminderCustomerId').value;
+            const agentId = document.getElementById('reminderAgentId').value;
+            const recipient = document.getElementById('reminderRecipient').value;
+            const message = document.getElementById('reminderMessage').value.trim();
+
+            if (!message) {
+                Utils.showToast('Error', 'Message cannot be empty', 'error');
+                return;
+            }
+
             Utils.showLoading('Sending reminder...');
             try {
-                await db.ref('messages/' + Utils.generateId('MSG')).set({
-                    recipientId: recipientId,
+                const loan = allLoans.find(l => l.id === loanId);
+                if (!loan) throw new Error('Loan not found');
+
+                if (recipient === 'customer' || recipient === 'both') {
+                    await Utils.sendNotification(customerId, message, 'reminder', loanId);
+                }
+                if ((recipient === 'agent' || recipient === 'both') && agentId) {
+                    await Utils.sendNotification(agentId, message, 'reminder', loanId);
+                }
+
+                // Also store in messages
+                const msgId = Utils.generateId('MSG');
+                await db.ref('messages/' + msgId).set({
+                    recipientId: recipient === 'both' ? 'both' : (recipient === 'customer' ? customerId : agentId),
                     message: message,
                     timestamp: Date.now(),
                     senderId: currentUser.uid,
                     senderName: adminData?.fullName,
                     read: false,
-                    type: 'reminder'
+                    type: 'reminder',
+                    relatedLoan: loanId
                 });
-                Utils.showToast('Reminder sent', 'Message saved', 'success');
+
+                Utils.showToast('Success', 'Reminder sent', 'success');
+                closeModal('sendReminderModal');
             } catch (e) {
                 Utils.showToast('Error', e.message, 'error');
             }
             Utils.hideLoading();
-        };
+        });
 
-        // NEW: Send custom message
+        // NEW: Record payment modal (in loan details)
+        document.getElementById('recordPaymentBtn').addEventListener('click', () => {
+            const loanId = document.getElementById('loanDetailsContent')?.getAttribute('data-loan-id');
+            if (!loanId) return;
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan || !loan.repaymentSchedule) return;
+
+            const select = document.getElementById('recordInstallment');
+            select.innerHTML = '';
+            loan.repaymentSchedule.forEach((inst, index) => {
+                if (inst.status !== 'paid') {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    option.textContent = `Installment #${inst.installment} - Due: ${Utils.formatDate(inst.dueDate)} - Amount: ${Utils.formatCurrency(inst.totalDue)} (Paid: ${Utils.formatCurrency(inst.paidAmount || 0)})`;
+                    select.appendChild(option);
+                }
+            });
+
+            document.getElementById('recordLoanId').value = loanId;
+            document.getElementById('recordAmount').value = '';
+            document.getElementById('recordMethod').value = 'Cash';
+            document.getElementById('recordReference').value = '';
+            openModal('recordPaymentModal');
+        });
+
+        document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
+            const loanId = document.getElementById('recordLoanId').value;
+            const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
+            const amount = parseFloat(document.getElementById('recordAmount').value);
+            const method = document.getElementById('recordMethod').value;
+            const reference = document.getElementById('recordReference').value;
+
+            if (isNaN(amount) || amount <= 0) {
+                Utils.showToast('Error', 'Enter a valid amount', 'error');
+                return;
+            }
+
+            Utils.showLoading('Recording payment...');
+            try {
+                const loanRef = db.ref('loans/' + loanId);
+                const loanSnap = await loanRef.once('value');
+                const loan = loanSnap.val();
+                if (!loan) throw new Error('Loan not found');
+
+                let schedule = loan.repaymentSchedule || [];
+                if (schedule.length === 0) throw new Error('No repayment schedule');
+
+                const inst = schedule[installmentIndex];
+                const due = inst.totalDue - (inst.paidAmount || 0);
+                if (amount > due) {
+                    Utils.showToast('Error', 'Amount exceeds remaining due for this installment', 'error');
+                    return;
+                }
+
+                // Update installment
+                inst.paidAmount = (inst.paidAmount || 0) + amount;
+                inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+
+                // Recalculate totals
+                let totalPaid = 0, interestPaid = 0;
+                schedule.forEach(i => {
+                    totalPaid += i.paidAmount || 0;
+                    const paid = i.paidAmount || 0;
+                    const interestPart = (paid / i.totalDue) * i.interest;
+                    interestPaid += isNaN(interestPart) ? 0 : interestPart;
+                });
+
+                const updates = {
+                    repaymentSchedule: schedule,
+                    totalPaid: totalPaid,
+                    interestPaid: interestPaid
+                };
+
+                if (totalPaid >= (loan.totalPayable || loan.amount)) {
+                    updates.status = 'completed';
+                    updates.completedAt = Date.now();
+                }
+
+                await loanRef.update(updates);
+
+                // Create a payment record
+                const paymentId = Utils.generateId('PAY');
+                await db.ref('payments/' + paymentId).set({
+                    id: paymentId,
+                    loanId: loanId,
+                    customerId: loan.customerId,
+                    customerName: loan.customerName,
+                    amount: amount,
+                    method: method,
+                    reference: reference,
+                    status: 'confirmed',
+                    timestamp: Date.now(),
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser.uid,
+                    notes: 'Manual payment recorded by admin'
+                });
+
+                // Create commission if interest portion
+                const interestPortion = (amount / inst.totalDue) * inst.interest;
+                if (interestPortion > 0 && loan.agentId) {
+                    const commissionAmount = interestPortion * 0.15;
+                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
+                        agentId: loan.agentId,
+                        customerId: loan.customerId,
+                        loanId: loanId,
+                        customerName: loan.customerName,
+                        amount: commissionAmount,
+                        paidAt: null,
+                        paidBy: null,
+                        status: 'pending'
+                    });
+                }
+
+                await Utils.logAudit('RECORD_PAYMENT', { loanId, amount, method, installment: installmentIndex+1 });
+                Utils.showToast('Success', 'Payment recorded', 'success');
+                closeModal('recordPaymentModal');
+                closeModal('loanDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        // ===== Send Message (existing) =====
         document.getElementById('sendMessageBtn')?.addEventListener('click', async () => {
             const recipientType = document.getElementById('msgRecipientType').value;
             const message = document.getElementById('msgText').value.trim();
@@ -3815,6 +4164,9 @@
             const loan = allLoans.find(l => l.id === id);
             if (!loan) return;
             
+            // Store loan id in content for record payment
+            document.getElementById('loanDetailsContent').setAttribute('data-loan-id', id);
+            
             const customer = allCustomers.find(c => c.id === loan.customerId);
             const agent = allAgents.find(a => a.id === loan.agentId);
             const payments = allPayments.filter(p => p.loanId === id && p.status === 'confirmed');
@@ -4001,6 +4353,7 @@
             document.getElementById('rejectLoanBtn').style.display = loan.status === 'pending' ? 'inline-flex' : 'none';
             document.getElementById('markDefaultedBtn').style.display = loan.status === 'active' ? 'inline-flex' : 'none';
             document.getElementById('editLoanBtn').style.display = 'inline-flex'; // always show edit
+            document.getElementById('recordPaymentBtn').style.display = loan.status === 'active' || loan.status === 'approved' ? 'inline-flex' : 'none';
             
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
             document.getElementById('rejectLoanBtn').onclick = () => rejectLoan(loan.id);
