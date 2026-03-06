@@ -400,110 +400,6 @@
             box-shadow: 0 6px 18px rgba(0,0,0,0.02);
             border: 1px solid #edf2f7;
         }
-        /* commission section enhancements */
-        .commission-totals {
-            display: flex;
-            gap: 12px;
-            margin-bottom: 24px;
-            flex-wrap: wrap;
-        }
-        .commission-total-card {
-            flex: 1 1 140px;
-            background: linear-gradient(135deg, #ffffff, #f8fafc);
-            border-radius: 20px;
-            padding: 16px 12px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.02);
-            border: 1px solid #e9ecf0;
-            text-align: center;
-        }
-        .commission-total-card .commission-label {
-            font-size: 12px;
-            color: #617388;
-            margin-bottom: 6px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-        }
-        .commission-total-card .commission-number {
-            font-size: 20px;
-            font-weight: 700;
-        }
-        .commission-total-card.earned .commission-number { color: #28a745; }
-        .commission-total-card.pending .commission-number { color: #ff9500; }
-        .commission-total-card.future .commission-number { color: #007aff; }
-        /* commission breakdown */
-        .commission-breakdown {
-            background: #f2f7ff;
-            border-radius: 20px;
-            padding: 16px;
-            margin: 16px 0;
-            border-left: 4px solid #007aff;
-        }
-        .commission-row {
-            display: flex;
-            justify-content: space-between;
-            padding: 8px 0;
-            border-bottom: 1px dashed #d0ddee;
-        }
-        .commission-row:last-child {
-            border-bottom: none;
-        }
-        .commission-row.total-row {
-            font-weight: 700;
-            margin-top: 8px;
-            padding-top: 8px;
-            border-top: 2px solid #b0c7e0;
-        }
-        /* about page enhancements */
-        .about-page {
-            padding: 8px 0;
-        }
-        .about-page h4 {
-            font-size: 20px;
-            margin: 30px 0 15px;
-            color: #007aff;
-            font-weight: 600;
-            border-left: 4px solid #007aff;
-            padding-left: 12px;
-        }
-        .about-page p {
-            margin-bottom: 20px;
-            color: #2d3a4a;
-            line-height: 1.6;
-            font-size: 15px;
-        }
-        .about-page ul {
-            padding-left: 28px;
-            margin-bottom: 25px;
-            list-style-type: none;
-        }
-        .about-page li {
-            margin-bottom: 12px;
-            color: #3e4e5e;
-            position: relative;
-            font-size: 15px;
-        }
-        .about-page li:before {
-            content: "✓";
-            color: #007aff;
-            font-weight: bold;
-            position: absolute;
-            left: -20px;
-        }
-        .about-page .contact-info {
-            background: #eef5ff;
-            border-radius: 20px;
-            padding: 20px;
-            margin-top: 20px;
-            border: 1px solid #cddff5;
-        }
-        .about-page .contact-info i {
-            width: 24px;
-            color: #007aff;
-        }
-        .about-page .contact-info p {
-            margin-bottom: 10px;
-        }
-        /* commission item list */
         .commission-item {
             display: flex;
             justify-content: space-between;
@@ -559,6 +455,26 @@
         }
         .loan-summary-card:active {
             background: #e6edf6;
+        }
+        .about-page {
+            padding: 8px 0;
+        }
+        .about-page h4 {
+            font-size: 20px;
+            margin: 20px 0 10px;
+            color: #007aff;
+        }
+        .about-page p {
+            margin-bottom: 16px;
+            color: #2d3a4a;
+        }
+        .about-page ul {
+            padding-left: 24px;
+            margin-bottom: 20px;
+        }
+        .about-page li {
+            margin-bottom: 8px;
+            color: #3e4e5e;
         }
         .commission-breakdown {
             background: #f2f7ff;
@@ -646,22 +562,13 @@
             <div class="customer-grid" id="customersWithLoansList"></div>
         </div>
 
-        <!-- Commission section (enhanced) -->
+        <!-- Commission section -->
         <div id="commissionSection" class="section d-none">
             <div class="section-title"><i class="fas fa-coins" style="margin-right: 8px; color: #007aff;"></i> Commission Overview</div>
-            <div class="commission-totals">
-                <div class="commission-total-card earned">
-                    <div class="commission-label">Earned</div>
-                    <div class="commission-number" id="totalCommissionEarned">K0.00</div>
-                </div>
-                <div class="commission-total-card pending">
-                    <div class="commission-label">Pending</div>
-                    <div class="commission-number" id="pendingCommission">K0.00</div>
-                </div>
-                <div class="commission-total-card future">
-                    <div class="commission-label">Future</div>
-                    <div class="commission-number" id="futureCommission">K0.00</div>
-                </div>
+            <div class="section-card">
+                <div class="commission-item"><span>Total earned</span> <span class="fw-600" id="totalCommissionEarned">K0.00</span></div>
+                <div class="commission-item"><span>Pending (15% of interest)</span> <span class="fw-600" id="pendingCommission">K0.00</span></div>
+                <div class="commission-item"><span>To be earned (active loans)</span> <span class="fw-600" id="futureCommission">K0.00</span></div>
             </div>
             <div class="section-title" style="margin-top: 24px;">Customers</div>
             <div class="customer-grid" id="customersCommissionList"></div>
@@ -692,11 +599,28 @@
             </div>
         </div>
 
-        <!-- About section (enhanced) -->
+        <!-- About section -->
         <div id="aboutSection" class="section d-none">
             <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
-            <div class="section-card about-page" id="aboutContent">
-                <!-- Dynamic content based on commission rate -->
+            <div class="section-card about-page">
+                <h4>📌 What is TruCash?</h4>
+                <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
+                
+                <h4>🤝 Benefits of Being an Agent</h4>
+                <ul>
+                    <li><strong>Earn 15% commission</strong> on every interest payment from customers you refer.</li>
+                    <li><strong>Recurring income</strong> – as long as your customers repay, you earn.</li>
+                    <li><strong>No capital required</strong> – you simply connect borrowers with TruCash.</li>
+                    <li><strong>Full support</strong> – marketing materials, training, and a dedicated agent dashboard.</li>
+                    <li><strong>Transparent tracking</strong> – see exactly how much you’ve earned and what’s pending.</li>
+                </ul>
+                
+                <h4>📞 Contact Us</h4>
+                <p><i class="fas fa-phone"></i> +260 123 456 789<br>
+                <i class="fas fa-envelope"></i> agents@trucash.zm<br>
+                <i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+
+                <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
             </div>
         </div>
     </div>
@@ -744,7 +668,7 @@
         </div>
     </div>
 
-    <!-- Modal for commission math (now uses enhanced styling) -->
+    <!-- Modal for commission math -->
     <div class="modal-overlay" id="commissionMathModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -798,7 +722,7 @@
         </div>
     </div>
 
-    <!-- Promotion Modal -->
+    <!-- Promotion Modal (NEW) -->
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-card">
             <div class="modal-header">
@@ -852,12 +776,14 @@
             notifications: [],
             promotions: [],
             currentPromotionIndex: 0,
-            seenPromotions: new Set(),
-            systemSettings: { commissionRate: 15 } // default fallback
+            seenPromotions: new Set(),          // NEW: store seen promotion IDs
+            systemSettings: {}                    // NEW: store system settings
         };
 
         // ==================== UTILS ====================
         const Utils = {
+            showLoading(msg) {},
+            hideLoading() {},
             formatCurrency(amount) { return 'K' + (amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); },
             formatDate(ts) { return ts ? new Date(ts).toLocaleDateString() : 'N/A'; },
             formatDateTime(ts) { return ts ? new Date(ts).toLocaleString() : 'N/A'; },
@@ -870,6 +796,7 @@
                 document.getElementById('toastContainer').appendChild(toast);
                 setTimeout(()=>toast.remove(), 4000);
             },
+            // Load seen promotions from localStorage
             loadSeenPromotions() {
                 try {
                     const seen = localStorage.getItem('trucash_agent_seen_promotions');
@@ -877,17 +804,22 @@
                         const ids = JSON.parse(seen);
                         AppState.seenPromotions = new Set(ids);
                     }
-                } catch (e) { console.warn('Failed to load seen promotions', e); }
+                } catch (e) {
+                    console.warn('Failed to load seen promotions', e);
+                }
             },
+            // Save seen promotions to localStorage
             saveSeenPromotions() {
                 try {
                     const ids = Array.from(AppState.seenPromotions);
                     localStorage.setItem('trucash_agent_seen_promotions', JSON.stringify(ids));
-                } catch (e) { console.warn('Failed to save seen promotions', e); }
+                } catch (e) {
+                    console.warn('Failed to save seen promotions', e);
+                }
             }
         };
 
-        // ==================== FIREBASE SERVICE ====================
+        // ==================== FIREBASE SERVICE (extended) ====================
         const FirebaseService = {
             async checkAuth() {
                 return new Promise((resolve) => {
@@ -903,6 +835,7 @@
                             AppState.agentData = snap.val();
                             AppState.agentId = user.uid;
 
+                            // Load system settings
                             await this.loadSystemSettings();
                             // Check if agent app is enabled
                             if (AppState.systemSettings.enableAgentApp === false) {
@@ -916,9 +849,9 @@
                             await this.loadCommissions();
                             await this.loadNotifications();
                             this.listenForNotifications();
-                            Utils.loadSeenPromotions();
-                            await this.loadPromotions();
-                            this.listenForPromotions();
+                            Utils.loadSeenPromotions();           // NEW
+                            await this.loadPromotions();          // NEW
+                            this.listenForPromotions();           // NEW
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
                     });
@@ -957,8 +890,11 @@
                     AppState.commissions.push(c);
                 });
             },
+            // Load notifications (messages)
             async loadNotifications() {
-                const snap = await db.ref('messages').orderByChild('recipientId').once('value');
+                const snap = await db.ref('messages')
+                    .orderByChild('recipientId')
+                    .once('value');
                 const allMessages = snap.val() || {};
                 AppState.notifications = [];
                 Object.entries(allMessages).forEach(([id, msg]) => {
@@ -991,6 +927,7 @@
                     }
                 });
             },
+            // NEW: load promotions
             async loadPromotions() {
                 const snap = await db.ref('promotions').once('value');
                 const allPromos = snap.val() || {};
@@ -1015,7 +952,7 @@
                         if (!AppState.promotions.find(p => p.id === snap.key)) {
                             AppState.promotions.unshift({ id: snap.key, ...promo });
                             AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
-                            // If unseen and no modal active, show it
+                            // If this promotion is unseen and no modal active, show it
                             if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('promotionModal').classList.contains('active')) {
                                 UIManager.showPromotion({ id: snap.key, ...promo });
                             }
@@ -1027,7 +964,9 @@
                     const index = AppState.promotions.findIndex(p => p.id === snap.key);
                     if (index !== -1) {
                         if (!promo.active || (promo.recipients !== 'all_agents' && promo.recipients !== 'both')) {
+                            // Remove from list
                             AppState.promotions.splice(index, 1);
+                            // If currently showing this one, close and maybe show next
                             if (document.getElementById('promotionModal').classList.contains('active') && AppState.promotions[AppState.currentPromotionIndex]?.id === snap.key) {
                                 UIManager.closePromotion();
                             }
@@ -1069,7 +1008,7 @@
             async signOut() { await auth.signOut(); window.location.href='login.html'; }
         };
 
-        // ==================== UI MANAGER ====================
+        // ==================== UI MANAGER (extended) ====================
         const UIManager = {
             init() {
                 this.cacheElements();
@@ -1099,15 +1038,12 @@
                 this.totalCommissionEarned = document.getElementById('totalCommissionEarned');
                 this.pendingCommission = document.getElementById('pendingCommission');
                 this.futureCommission = document.getElementById('futureCommission');
-                this.aboutContent = document.getElementById('aboutContent');
-
                 // notification elements
                 this.notificationBell = document.getElementById('notificationBell');
                 this.unreadBadge = document.getElementById('unreadCount');
                 this.notificationsModal = document.getElementById('notificationsModal');
                 this.notificationsList = document.getElementById('notificationsList');
                 this.markAllReadBtn = document.getElementById('markAllReadBtn');
-
                 // promotion elements
                 this.promotionModal = document.getElementById('promotionModal');
                 this.promotionTitle = document.getElementById('promotionTitle');
@@ -1115,7 +1051,6 @@
                 this.promotionImage = document.getElementById('promotionImage');
                 this.closePromotionModal = document.getElementById('closePromotionModal');
                 this.dismissPromotionBtn = document.getElementById('dismissPromotion');
-
                 // modals
                 this.customerModal = document.getElementById('customerModal');
                 this.loanModal = document.getElementById('loanModal');
@@ -1123,7 +1058,6 @@
                 this.commissionMathModal = document.getElementById('commissionMathModal');
                 this.passwordModal = document.getElementById('passwordModal');
                 this.certificateModal = document.getElementById('certificateModal');
-
                 // close buttons
                 document.getElementById('closeCustomerModal').onclick = ()=> this.customerModal.classList.remove('active');
                 document.getElementById('closeLoanModal').onclick = ()=> this.loanModal.classList.remove('active');
@@ -1132,11 +1066,9 @@
                 document.getElementById('closePasswordModal').onclick = ()=> this.passwordModal.classList.remove('active');
                 document.getElementById('closeCertificateModal').onclick = ()=> this.certificateModal.classList.remove('active');
                 document.getElementById('closeNotificationsModal').onclick = ()=> this.notificationsModal.classList.remove('active');
-
                 // promotion close
                 this.closePromotionModal.onclick = ()=> this.closePromotion();
                 this.dismissPromotionBtn.onclick = ()=> this.closePromotion();
-
                 // settings buttons
                 document.getElementById('copyAgentCode').onclick = ()=> this.copyAgentCode();
                 document.getElementById('changePasswordBtn').onclick = ()=> this.passwordModal.classList.add('active');
@@ -1144,8 +1076,7 @@
                 document.getElementById('logoutBtn').onclick = ()=> FirebaseService.signOut();
                 document.getElementById('deleteAccountBtn').onclick = ()=> this.deleteAccount();
                 document.getElementById('showCertificateBtn').onclick = ()=> this.showCertificate();
-
-                // notification bell
+                // notification bell click
                 this.notificationBell.addEventListener('click', ()=> this.openNotificationsModal());
                 this.markAllReadBtn.addEventListener('click', ()=> FirebaseService.markAllAsRead());
             },
@@ -1165,7 +1096,6 @@
                 if (section === 'home') this.renderCustomers();
                 if (section === 'loans') this.renderCustomersWithLoans();
                 if (section === 'commission') this.renderCommission();
-                if (section === 'about') this.renderAbout();
             },
             async loadAgentData() {
                 await FirebaseService.checkAuth();
@@ -1182,35 +1112,7 @@
                 this.renderCustomers();
                 this.renderCustomersWithLoans();
                 this.renderCommission();
-                this.renderAbout();
                 this.updateNotificationBadge();
-            },
-            renderAbout() {
-                const rate = AppState.systemSettings.commissionRate || 15;
-                this.aboutContent.innerHTML = `
-                    <h4>📌 What is TruCash?</h4>
-                    <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
-                    
-                    <h4>🤝 Benefits of Being an Agent</h4>
-                    <ul>
-                        <li><strong>Earn ${rate}% commission</strong> on every interest payment from customers you refer.</li>
-                        <li><strong>Recurring income</strong> – as long as your customers repay, you earn.</li>
-                        <li><strong>No capital required</strong> – you simply connect borrowers with TruCash.</li>
-                        <li><strong>Full support</strong> – marketing materials, training, and a dedicated agent dashboard.</li>
-                        <li><strong>Transparent tracking</strong> – see exactly how much you’ve earned and what’s pending.</li>
-                    </ul>
-                    
-                    <h4>📞 Contact Us</h4>
-                    <div class="contact-info">
-                        <p><i class="fas fa-phone"></i> +260 123 456 789</p>
-                        <p><i class="fas fa-envelope"></i> agents@trucash.zm</p>
-                        <p><i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
-                    </div>
-
-                    <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
-                `;
-                // Reattach event because button was recreated
-                document.getElementById('showCertificateBtn').onclick = ()=> this.showCertificate();
             },
             updateNotificationBadge() {
                 const unread = AppState.notifications.filter(n => !n.read).length;
@@ -1314,7 +1216,10 @@
             showLoanModal(loanId) {
                 const loan = AppState.loans.find(l => l.id === loanId);
                 if (!loan) return;
+                const customer = AppState.customers.find(c => c.id === loan.customerId);
                 const payments = loan.repaymentSchedule || [];
+                const paidPayments = payments.filter(p => p.status === 'paid');
+                const pendingPayments = payments.filter(p => p.status === 'pending');
                 const content = `
                     <div style="margin-bottom:20px;">
                         <span class="badge" style="background:#007aff; color:white;">${loan.status}</span>
@@ -1405,15 +1310,15 @@
                 }).join('');
 
                 const content = `
-                    <h4 style="margin-bottom:12px;">${customer.fullName}</h4>
+                    <h4>${customer.fullName}</h4>
                     <div class="commission-breakdown">
                         ${breakdownHtml || '<p>No loans</p>'}
                     </div>
-                    <div class="commission-row total-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
+                    <div class="commission-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
                     <div class="commission-row"><span>Total possible commission (${Math.round(commissionRate*100)}%)</span> <span>${Utils.formatCurrency(totalCommissionPossible)}</span></div>
                     <div class="commission-row"><span>Already earned</span> <span class="text-success">${Utils.formatCurrency(earned)}</span></div>
-                    <div class="commission-row"><span>Pending (awaiting payment)</span> <span style="color:#ff9500;">${Utils.formatCurrency(pending)}</span></div>
-                    <div class="commission-row"><span>Future (active loans)</span> <span style="color:#007aff;">${Utils.formatCurrency(future)}</span></div>
+                    <div class="commission-row"><span>Pending (awaiting payment)</span> <span>${Utils.formatCurrency(pending)}</span></div>
+                    <div class="commission-row"><span>Future (active loans)</span> <span>${Utils.formatCurrency(future)}</span></div>
                     <p style="margin-top:16px; font-size:14px; color:#617388;">Commission is credited when the customer pays interest. ${Math.round(commissionRate*100)}% of each interest payment.</p>
                 `;
                 document.getElementById('commissionMathContent').innerHTML = content;
@@ -1449,6 +1354,7 @@
                 `;
                 this.certificateModal.classList.add('active');
             },
+            // Promotion functions
             showPromotion(promo) {
                 if (!promo) return;
                 // Do not show if already seen
@@ -1489,8 +1395,10 @@
             }
         };
 
+        // Attach UIManager to window for inline onclick handlers
         window.UIManager = UIManager;
 
+        // Start app
         document.addEventListener('DOMContentLoaded', () => UIManager.init());
     </script>
 </body>
