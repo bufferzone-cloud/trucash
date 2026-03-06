@@ -159,10 +159,42 @@
             align-items: center;
             gap: 16px;
             cursor: pointer;
+            position: relative;
         }
         .customer-card:active {
             background: #f2f6fc;
             transform: scale(0.99);
+        }
+        /* Overdue styling */
+        .customer-card.overdue .customer-avatar {
+            border: 3px solid #ff3b30 !important;
+        }
+        .customer-card.overdue .customer-name {
+            color: #ff3b30 !important;
+            font-weight: 700;
+        }
+        .call-button {
+            background: #28a745;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 14px;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(40,167,69,0.3);
+            margin-left: auto;
+            transition: 0.2s;
+            z-index: 10;
+        }
+        .call-button:hover {
+            background: #218838;
+            transform: scale(1.05);
+        }
+        .call-button i {
+            font-size: 16px;
         }
         .customer-avatar {
             width: 56px;
@@ -973,6 +1005,26 @@
                 } catch (e) {
                     console.warn('Failed to save seen promotions', e);
                 }
+            },
+            // Check if a customer has any overdue payment (pending payment with due date before today)
+            hasOverduePayment(customerId) {
+                const customerLoans = AppState.loans.filter(l => l.customerId === customerId);
+                const today = new Date();
+                today.setHours(0, 0, 0, 0); // start of today
+                for (let loan of customerLoans) {
+                    if (loan.repaymentSchedule && Array.isArray(loan.repaymentSchedule)) {
+                        for (let payment of loan.repaymentSchedule) {
+                            if (payment.status === 'pending') {
+                                const dueDate = new Date(payment.dueDate);
+                                dueDate.setHours(0, 0, 0, 0);
+                                if (dueDate < today) {
+                                    return true;
+                                }
+                            }
+                        }
+                    }
+                }
+                return false;
             }
         };
 
@@ -1336,15 +1388,26 @@
                     this.customersWithLoansList.innerHTML = '<div class="customer-card">No customers with loans.</div>';
                     return;
                 }
-                this.customersWithLoansList.innerHTML = customersWithLoans.map(c => `
-                    <div class="customer-card" data-id="${c.id}" onclick="UIManager.showCustomerLoansList('${c.id}')">
-                        <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
-                        <div class="customer-info">
-                            <div class="customer-name">${c.fullName}</div>
-                            <div class="customer-meta"><i class="fas fa-file-invoice"></i> ${AppState.loans.filter(l=>l.customerId===c.id).length} loans</div>
+                this.customersWithLoansList.innerHTML = customersWithLoans.map(c => {
+                    const isOverdue = Utils.hasOverduePayment(c.id);
+                    const overdueClass = isOverdue ? 'overdue' : '';
+                    // Create call button with tel: link, stop propagation so card click doesn't trigger
+                    const callButton = c.phone ? `
+                        <button class="call-button" onclick="event.stopPropagation(); window.location.href='tel:${c.phone}';">
+                            <i class="fas fa-phone-alt"></i> Call
+                        </button>
+                    ` : '';
+                    return `
+                        <div class="customer-card ${overdueClass}" data-id="${c.id}" onclick="UIManager.showCustomerLoansList('${c.id}')">
+                            <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
+                            <div class="customer-info">
+                                <div class="customer-name">${c.fullName}</div>
+                                <div class="customer-meta"><i class="fas fa-file-invoice"></i> ${AppState.loans.filter(l=>l.customerId===c.id).length} loans</div>
+                            </div>
+                            ${callButton}
                         </div>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
             },
             showCustomerLoansList(customerId) {
                 const customer = AppState.customers.find(c => c.id === customerId);
