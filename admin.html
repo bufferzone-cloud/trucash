@@ -22,8 +22,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <!-- JSZip for zip exports -->
     <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
-    <style>
-        /* ========== ENHANCED iOS DESIGN SYSTEM ========== */
+    <style>/* ========== ENHANCED iOS DESIGN SYSTEM ========== */
         * {
             margin: 0;
             padding: 0;
@@ -1411,6 +1410,10 @@
             transition: 0.2s;
             cursor: pointer;
         }
+        .notification-item:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
+        }
         .notification-item.overdue {
             border-left: 4px solid var(--ios-red);
             background: linear-gradient(to right, rgba(255,59,48,0.05), white);
@@ -1607,7 +1610,7 @@
             <div id="customersList"></div>
         </section>
 
-        <!-- AGENTS SECTION (modified: tabs removed, filters in quick actions) -->
+        <!-- AGENTS SECTION (modified tabs and quick actions) -->
         <section class="content-section" id="agentsSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('agents')"><i class="fas fa-download"></i> Export Agents CSV</button>
@@ -1619,16 +1622,20 @@
                 <button class="btn btn-small btn-outline" id="clearAgentSearch"><i class="fas fa-times"></i></button>
             </div>
             
-            <!-- Quick Actions Dropdown (contains all filters) -->
+            <!-- Tabs: Active, Pending, Banned (removed applications tabs) -->
+            <div class="tab-bar">
+                <span class="tab active" data-status="active">Active</span>
+                <span class="tab" data-status="pending">Pending</span>
+                <span class="tab" data-status="banned">Banned</span>
+            </div>
+            
+            <!-- Quick Actions Dropdown with Pending Applications and Rejected Applications -->
             <div class="action-row">
                 <div class="quick-actions-dropdown">
                     <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
                     <div class="quick-actions-menu">
-                        <button class="dropdown-item" data-agent-filter="active"><i class="fas fa-user-check"></i> Active</button>
-                        <button class="dropdown-item" data-agent-filter="pending"><i class="fas fa-clock"></i> Pending</button>
-                        <button class="dropdown-item" data-agent-filter="banned"><i class="fas fa-ban"></i> Banned</button>
-                        <button class="dropdown-item" data-agent-filter="applications"><i class="fas fa-file-signature"></i> Pending Applications</button>
-                        <button class="dropdown-item" data-agent-filter="rejected"><i class="fas fa-times-circle"></i> Rejected Applications</button>
+                        <button class="dropdown-item" id="filterPendingApplications"><i class="fas fa-clock"></i> Pending Applications</button>
+                        <button class="dropdown-item" id="filterRejectedApplications"><i class="fas fa-times-circle"></i> Rejected Applications</button>
                         <button class="dropdown-item" id="createAgentBtn"><i class="fas fa-plus-circle"></i> Create Agent</button>
                     </div>
                 </div>
@@ -1639,7 +1646,7 @@
             <div id="rejectedApplicationsList" style="display: none;"></div>
         </section>
 
-        <!-- LOANS SECTION (modified: pending tab outside, others in quick actions) -->
+        <!-- LOANS SECTION (modified tabs and quick actions) -->
         <section class="content-section" id="loansSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('loans')"><i class="fas fa-download"></i> Export Loans CSV</button>
@@ -1651,19 +1658,20 @@
                 <button class="btn btn-small btn-outline" id="clearLoanSearch"><i class="fas fa-times"></i></button>
             </div>
             
-            <!-- Action row: Quick Actions + Pending button -->
+            <!-- Quick Actions Dropdown for Loans (All, Approved, Defaulted, Completed, Rejected) -->
             <div class="action-row">
                 <div class="quick-actions-dropdown">
                     <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
                     <div class="quick-actions-menu">
-                        <button class="dropdown-item" data-loan-filter="all"><i class="fas fa-list"></i> All Loans</button>
-                        <button class="dropdown-item" data-loan-filter="approved"><i class="fas fa-check-circle"></i> Approved</button>
-                        <button class="dropdown-item" data-loan-filter="defaulted"><i class="fas fa-exclamation-triangle"></i> Defaulted</button>
-                        <button class="dropdown-item" data-loan-filter="completed"><i class="fas fa-check-double"></i> Completed</button>
-                        <button class="dropdown-item" data-loan-filter="rejected"><i class="fas fa-ban"></i> Rejected</button>
+                        <button class="dropdown-item" id="filterLoansAll"><i class="fas fa-list"></i> All Loans</button>
+                        <button class="dropdown-item" id="filterLoansApproved"><i class="fas fa-check-circle"></i> Approved</button>
+                        <button class="dropdown-item" id="filterLoansDefaulted"><i class="fas fa-exclamation-triangle"></i> Defaulted</button>
+                        <button class="dropdown-item" id="filterLoansCompleted"><i class="fas fa-check-double"></i> Completed</button>
+                        <button class="dropdown-item" id="filterLoansRejected"><i class="fas fa-ban"></i> Rejected</button>
                     </div>
                 </div>
-                <button class="tab active" id="pendingLoanTab" data-loan-filter="pending">Pending</button>
+                <!-- Pending tab outside quick actions -->
+                <span class="tab active" id="pendingLoanTab" data-status="pending">Pending</span>
             </div>
             
             <div id="loansList"></div>
@@ -2191,7 +2199,7 @@
         </div>
     </div>
 
-    <!-- Agent Application Details Modal -->
+    <!-- Agent Application Details Modal (updated to show rejection reason and approve for rejected) -->
     <div class="modal-overlay" id="agentApplicationModal">
         <div class="modal-container large">
             <div class="modal-header">
@@ -2201,8 +2209,10 @@
             <div class="modal-body" id="agentApplicationContent"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('agentApplicationModal')">Close</button>
-                <button class="btn btn-primary" id="manualApproveAgent">Approve & Create</button>
-                <button class="btn btn-danger" id="rejectAgentApplication">Reject</button>
+                <button class="btn btn-primary" id="manualApproveAgent" style="display:none;">Approve & Create</button>
+                <button class="btn btn-danger" id="rejectAgentApplication" style="display:none;">Reject</button>
+                <!-- Approve button for rejected applications -->
+                <button class="btn btn-primary" id="approveRejectedAgentBtn" style="display:none;">Approve (Re-open)</button>
             </div>
         </div>
     </div>
@@ -2286,12 +2296,13 @@
                 <button class="btn btn-warning btn-small" id="markDefaultedBtn">Default</button>
                 <button class="btn btn-primary btn-small" id="editLoanBtn">Edit</button>
                 <button class="btn btn-primary btn-small" id="recordPaymentBtn">Record Payment</button>
-                <button class="btn btn-info btn-small" id="sendReminderFromLoanBtn">Send Reminder</button>
+                <!-- Approve button for rejected loans -->
+                <button class="btn btn-success btn-small" id="approveRejectedLoanBtn" style="display:none;">Approve (Re-open)</button>
             </div>
         </div>
     </div>
 
-    <!-- Payment Details Modal -->
+    <!-- Payment Details Modal (updated to hide buttons based on status) -->
     <div class="modal-overlay" id="paymentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
@@ -2333,11 +2344,11 @@
         </div>
     </div>
 
-    <!-- NEW: Send Reminder Modal -->
+    <!-- Send Reminder Modal (enhanced with details) -->
     <div class="modal-overlay" id="sendReminderModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span>Send Reminder</span>
+                <span>Send Payment Reminder</span>
                 <span class="modal-close" onclick="closeModal('sendReminderModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2345,6 +2356,7 @@
                 <input type="hidden" id="reminderInstallment">
                 <input type="hidden" id="reminderCustomerId">
                 <input type="hidden" id="reminderAgentId">
+                <div id="reminderDetails" class="mb-4"></div>
                 <div class="form-group">
                     <label class="form-label">Send to</label>
                     <select id="reminderRecipient" class="form-select">
@@ -2365,7 +2377,7 @@
         </div>
     </div>
 
-    <!-- NEW: Record Payment Modal (with proof upload) -->
+    <!-- Record Payment Modal (with proof upload) -->
     <div class="modal-overlay" id="recordPaymentModal">
         <div class="modal-container compact">
             <div class="modal-header">
@@ -2392,11 +2404,11 @@
                     </select>
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Reference / Transaction ID</label>
+                    <label class="form-label">Reference (Transaction ID)</label>
                     <input type="text" id="recordReference" class="form-input">
                 </div>
                 <div class="form-group">
-                    <label class="form-label">Payment Proof (screenshot)</label>
+                    <label class="form-label">Payment Proof (screenshot/picture)</label>
                     <div class="upload-box" data-type="payment-proof" onclick="openCloudinaryUpload('payment-proof')">
                         <i class="fas fa-camera"></i>
                         <span>Click to upload proof</span>
@@ -2412,7 +2424,7 @@
         </div>
     </div>
 
-    <!-- NEW: Signed Agreements Modal -->
+    <!-- Signed Agreements Modal -->
     <div class="modal-overlay" id="signedAgreementsModal">
         <div class="modal-container large">
             <div class="modal-header">
@@ -2428,7 +2440,7 @@
         </div>
     </div>
 
-    <!-- NEW: Promotion Modal -->
+    <!-- Promotion Modal -->
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-container compact">
             <div class="modal-header">
@@ -2495,10 +2507,14 @@
     <script>
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE
-        // with advanced loan details: collateral images, witness, signed agreement
-        // MODIFICATIONS: added promotion history, ban reason with prompt, contact details in settings, loan rejection reason display, ban reason display in user modals
-        // ALSO: Enhanced payment confirmation to update repayment schedule, handle partial payments, and recalculate totals accurately.
-        // NEW FEATURES: Upcoming/Overdue reminders with badge, send reminder modal, record payment modal.
+        // MODIFICATIONS: 
+        // - Record payment with proof, updates loan schedule.
+        // - Upcoming reminders clickable, show details and send notification.
+        // - Rejection reasons shown, rejected loans/apps can be approved.
+        // - Confirmed payments update installment status.
+        // - Tabs reorganized: Agents (Active,Pending,Banned) with quick actions for pending/rejected apps.
+        // - Loans: only Pending tab, other filters in quick actions.
+        // - Payment details modal hides buttons based on status.
         // =========================================================================
         
         // Firebase configuration
@@ -2827,7 +2843,8 @@
                         Reference: p.reference || 'N/A',
                         Status: p.status,
                         Date: Utils.formatDateTime(p.timestamp),
-                        Verified: p.verifiedAt ? Utils.formatDateTime(p.verifiedAt) : 'N/A'
+                        Verified: p.verifiedAt ? Utils.formatDateTime(p.verifiedAt) : 'N/A',
+                        Proof: p.proofUrl || 'N/A'
                     }));
                     filename = 'payments.csv';
                     break;
@@ -2844,7 +2861,7 @@
                             'Loan ID': c.loanId,
                             Customer: c.customerName || 'Unknown'
                         };
-                    }));
+                    });
                     filename = 'commission.csv';
                     break;
                     
@@ -2953,7 +2970,8 @@
                 Reference: p.reference || 'N/A',
                 Status: p.status,
                 Date: Utils.formatDateTime(p.timestamp),
-                Verified: p.verifiedAt ? Utils.formatDateTime(p.verifiedAt) : 'N/A'
+                Verified: p.verifiedAt ? Utils.formatDateTime(p.verifiedAt) : 'N/A',
+                Proof: p.proofUrl || 'N/A'
             }));
             zip.file("payments.csv", Papa.unparse(paymentsData));
             
@@ -2979,7 +2997,8 @@
                 NRC: app.nrc,
                 Residence: app.residence,
                 Status: app.status,
-                Submitted: Utils.formatDateTime(app.submittedAt)
+                Submitted: Utils.formatDateTime(app.submittedAt),
+                RejectionReason: app.rejectionReason || ''
             }));
             zip.file("applications.csv", Papa.unparse(appsData));
             
@@ -3168,7 +3187,7 @@
             `}).join('');
         }
 
-        // ===== AGENT RENDERING (modified filters) =====
+        // ===== AGENT RENDERING (modified to handle quick actions filter) =====
         function renderAgents() {
             const agentsListEl = document.getElementById('agentsList');
             const pendingAppsEl = document.getElementById('pendingApplicationsList');
@@ -3270,6 +3289,7 @@
                             <i class="fas fa-phone"></i> ${app.phone} · 
                             <i class="fas fa-id-card"></i> ${app.nrc} · 
                             <i class="fas fa-calendar"></i> ${Utils.formatDate(app.submittedAt)}
+                            ${app.rejectionReason ? `<br><span class="text-red">Reason: ${app.rejectionReason}</span>` : ''}
                         </div>
                     </div>
                     <div class="status-badge rejected">Rejected</div>
@@ -3593,7 +3613,7 @@
                     const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
                     
                     return `
-                    <div class="notification-item ${statusClass}" onclick="showLoanDetails('${p.loanId}')">
+                    <div class="notification-item ${statusClass}" onclick="openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId || ''}')">
                         <div class="d-flex justify-between align-center">
                             <div>
                                 <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
@@ -3607,17 +3627,12 @@
                         <div class="profile-meta">
                             Agent: ${p.agentName || 'None'}
                         </div>
-                        <div class="profile-meta">
-                            <button class="btn btn-primary btn-small" onclick="event.stopPropagation(); openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId || ''}')">
-                                <i class="fas fa-bell"></i> Send Reminder
-                            </button>
-                        </div>
                     </div>
                 `}).join('');
             }
         }
 
-        // NEW: Send reminder modal
+        // NEW: Send reminder modal with details
         window.openSendReminderModal = (loanId, installment, customerId, agentId) => {
             document.getElementById('reminderLoanId').value = loanId;
             document.getElementById('reminderInstallment').value = installment;
@@ -3627,12 +3642,28 @@
             // Pre-fill message with loan details
             const loan = allLoans.find(l => l.id === loanId);
             const inst = loan?.repaymentSchedule?.[installment-1];
-            if (loan && inst) {
-                const dueDate = Utils.formatDate(inst.dueDate);
-                const amount = Utils.formatCurrency(inst.totalDue);
-                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} is due on ${dueDate}. Please pay promptly to avoid penalties.`;
-                document.getElementById('reminderMessage').value = message;
-            }
+            const customer = allCustomers.find(c => c.id === customerId);
+            const agent = allAgents.find(a => a.id === agentId);
+            
+            const dueDate = inst ? Utils.formatDate(inst.dueDate) : 'N/A';
+            const amount = inst ? Utils.formatCurrency(inst.totalDue) : 'N/A';
+            const paid = inst ? Utils.formatCurrency(inst.paidAmount || 0) : 'N/A';
+            
+            const detailsHtml = `
+                <div class="detail-card">
+                    <div><strong>Customer:</strong> ${customer?.fullName || 'Unknown'}</div>
+                    <div><strong>Agent:</strong> ${agent?.fullName || 'None'}</div>
+                    <div><strong>Loan ID:</strong> ${loanId.substring(0,8)}</div>
+                    <div><strong>Installment #${installment}</strong></div>
+                    <div><strong>Due Date:</strong> ${dueDate}</div>
+                    <div><strong>Amount Due:</strong> ${amount}</div>
+                    <div><strong>Already Paid:</strong> ${paid}</div>
+                </div>
+            `;
+            document.getElementById('reminderDetails').innerHTML = detailsHtml;
+            
+            const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} is due on ${dueDate}. Please pay promptly to avoid penalties.`;
+            document.getElementById('reminderMessage').value = message;
             
             openModal('sendReminderModal');
         };
@@ -3683,7 +3714,7 @@
             Utils.hideLoading();
         });
 
-        // NEW: Record payment modal (in loan details)
+        // NEW: Record payment modal (in loan details) with proof
         document.getElementById('recordPaymentBtn').addEventListener('click', () => {
             const loanId = document.getElementById('loanDetailsContent')?.getAttribute('data-loan-id');
             if (!loanId) return;
@@ -3696,7 +3727,7 @@
                 if (inst.status !== 'paid') {
                     const option = document.createElement('option');
                     option.value = index;
-                    const remaining = inst.totalDue - (inst.paidAmount || 0);
+                    const remaining = (inst.totalDue - (inst.paidAmount || 0)).toFixed(2);
                     option.textContent = `Installment #${inst.installment} - Due: ${Utils.formatDate(inst.dueDate)} - Amount: ${Utils.formatCurrency(inst.totalDue)} (Remaining: ${Utils.formatCurrency(remaining)})`;
                     select.appendChild(option);
                 }
@@ -3707,6 +3738,7 @@
             document.getElementById('recordMethod').value = 'Cash';
             document.getElementById('recordReference').value = '';
             document.getElementById('paymentProofUrl').value = '';
+            // Clear preview
             const preview = document.getElementById('paymentProofPreview');
             if (preview) preview.style.backgroundImage = '';
             openModal('recordPaymentModal');
@@ -3738,7 +3770,7 @@
                 const inst = schedule[installmentIndex];
                 const due = inst.totalDue - (inst.paidAmount || 0);
                 if (amount > due) {
-                    Utils.showToast('Error', 'Amount exceeds remaining due for this installment', 'error');
+                    Utils.showToast('Error', `Amount exceeds remaining due (${Utils.formatCurrency(due)})`, 'error');
                     return;
                 }
 
@@ -4354,27 +4386,19 @@
             document.getElementById('loanDetailsContent').innerHTML = content;
             
             // Conditionally show buttons based on loan status
-            // Allow approve for rejected as well (to re-approve)
-            document.getElementById('approveLoanBtn').style.display = (loan.status === 'pending' || loan.status === 'rejected') ? 'inline-flex' : 'none';
-            document.getElementById('rejectLoanBtn').style.display = (loan.status === 'pending' || loan.status === 'approved') ? 'inline-flex' : 'none'; // hide reject for rejected
+            document.getElementById('approveLoanBtn').style.display = loan.status === 'pending' ? 'inline-flex' : 'none';
+            document.getElementById('rejectLoanBtn').style.display = loan.status === 'pending' ? 'inline-flex' : 'none';
             document.getElementById('markDefaultedBtn').style.display = loan.status === 'active' ? 'inline-flex' : 'none';
             document.getElementById('editLoanBtn').style.display = 'inline-flex'; // always show edit
-            document.getElementById('recordPaymentBtn').style.display = (loan.status === 'active' || loan.status === 'approved') ? 'inline-flex' : 'none';
-            document.getElementById('sendReminderFromLoanBtn').style.display = (loan.status === 'active' || loan.status === 'approved') ? 'inline-flex' : 'none';
+            document.getElementById('recordPaymentBtn').style.display = loan.status === 'active' || loan.status === 'approved' ? 'inline-flex' : 'none';
+            // Approve button for rejected loans
+            document.getElementById('approveRejectedLoanBtn').style.display = loan.status === 'rejected' ? 'inline-flex' : 'none';
             
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
             document.getElementById('rejectLoanBtn').onclick = () => rejectLoan(loan.id);
             document.getElementById('markDefaultedBtn').onclick = () => markAsDefaulted(loan.id);
             document.getElementById('editLoanBtn').onclick = () => editLoan(loan.id);
-            document.getElementById('sendReminderFromLoanBtn').onclick = () => {
-                // Find next pending installment
-                const nextInst = loan.repaymentSchedule?.find(i => i.status !== 'paid');
-                if (nextInst) {
-                    openSendReminderModal(loan.id, nextInst.installment, loan.customerId, loan.agentId);
-                } else {
-                    Utils.showToast('Info', 'No pending installments', 'info');
-                }
-            };
+            document.getElementById('approveRejectedLoanBtn').onclick = () => approveLoan(loan.id); // reuse approveLoan for rejected
             
             openModal('loanDetailsModal');
         };
@@ -4417,14 +4441,7 @@
                         <div class="detail-card">
                             <div class="detail-label">Reference</div>
                             <div class="detail-value">${payment.reference}</div>
-                        </div>
-                        ` : ''}
-                        ${payment.verifiedAt ? `
-                        <div class="detail-card">
-                            <div class="detail-label">Verified</div>
-                            <div class="detail-value">${Utils.formatDateTime(payment.verifiedAt)}</div>
-                        </div>
-                        ` : ''}
+                        </div>` : ''}
                     </div>
                 </div>
                 
@@ -4438,15 +4455,18 @@
             
             document.getElementById('paymentDetailsContent').innerHTML = content;
             
-            // Hide confirm/reject if already processed
-            if (payment.status === 'confirmed' || payment.status === 'rejected') {
-                document.getElementById('confirmPaymentBtn').style.display = 'none';
-                document.getElementById('rejectPaymentBtn').style.display = 'none';
-            } else {
+            // Conditionally show buttons based on status
+            if (payment.status === 'pending') {
                 document.getElementById('confirmPaymentBtn').style.display = 'inline-flex';
                 document.getElementById('rejectPaymentBtn').style.display = 'inline-flex';
                 document.getElementById('confirmPaymentBtn').onclick = () => confirmPayment(payment.id);
                 document.getElementById('rejectPaymentBtn').onclick = () => rejectPayment(payment.id);
+            } else if (payment.status === 'confirmed') {
+                document.getElementById('confirmPaymentBtn').style.display = 'none';
+                document.getElementById('rejectPaymentBtn').style.display = 'none';
+            } else if (payment.status === 'rejected') {
+                document.getElementById('confirmPaymentBtn').style.display = 'none';
+                document.getElementById('rejectPaymentBtn').style.display = 'none';
             }
             
             openModal('paymentDetailsModal');
@@ -4456,25 +4476,14 @@
             const app = allAgentApplications.find(a => a.id === appId);
             if (!app) return;
             
-            const rejectionHtml = app.status === 'rejected' && app.reviewedAt ? `
-                <div class="detail-section">
-                    <h3 class="detail-title text-red">Rejection Details</h3>
-                    <div class="detail-card">
-                        <div class="detail-label">Rejected On</div>
-                        <div class="detail-value">${Utils.formatDateTime(app.reviewedAt)}</div>
-                        <div class="detail-label">Rejected By</div>
-                        <div class="detail-value">${app.reviewedBy || 'Unknown'}</div>
-                    </div>
-                </div>
-            ` : '';
-            
-            const content = `
+            let content = `
                 <div class="profile-row mb-4">
                     <img src="${app.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(app.fullName)}" class="profile-img" style="width:80px;height:80px;">
                     <div>
                         <h2>${app.fullName}</h2>
                         <p class="text-muted">Application ID: ${app.id.substring(0,8)}...</p>
                         <p><span class="status-badge ${app.status}">${app.status}</span></p>
+                        ${app.rejectionReason ? `<p class="text-red">Rejection Reason: ${app.rejectionReason}</p>` : ''}
                     </div>
                 </div>
                 
@@ -4517,45 +4526,52 @@
                         </div>
                     </div>
                 </div>
-                
-                ${rejectionHtml}
-                
-                ${app.status === 'pending' ? `
-                <div class="detail-section">
-                    <h3 class="detail-title">Account Credentials</h3>
-                    <div class="grid-2">
-                        <div class="form-group">
-                            <label class="form-label">Agent Email *</label>
-                            <input type="email" id="appAgentEmail" class="form-input" placeholder="agent@trucash.com">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Agent ID *</label>
-                            <input type="text" id="appAgentId" class="form-input" placeholder="e.g., AG001">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Password *</label>
-                            <input type="password" id="appAgentPassword" class="form-input">
-                        </div>
-                        <div class="form-group">
-                            <label class="form-label">Confirm *</label>
-                            <input type="password" id="appAgentConfirmPassword" class="form-input">
+            `;
+            
+            if (app.status === 'pending' || app.status === 'rejected') {
+                content += `
+                    <div class="detail-section">
+                        <h3 class="detail-title">Account Credentials (to approve)</h3>
+                        <div class="grid-2">
+                            <div class="form-group">
+                                <label class="form-label">Agent Email *</label>
+                                <input type="email" id="appAgentEmail" class="form-input" placeholder="agent@trucash.com" value="${app.email || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Agent ID *</label>
+                                <input type="text" id="appAgentId" class="form-input" placeholder="e.g., AG001" value="${app.agentId || ''}">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Password *</label>
+                                <input type="password" id="appAgentPassword" class="form-input">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">Confirm *</label>
+                                <input type="password" id="appAgentConfirmPassword" class="form-input">
+                            </div>
                         </div>
                     </div>
-                </div>
-                ` : ''}
-            `;
+                `;
+            }
             
             document.getElementById('agentApplicationContent').innerHTML = content;
             
-            // Show approve button for pending and rejected (to allow re-approval)
-            if (app.status === 'pending' || app.status === 'rejected') {
+            // Adjust buttons based on status
+            if (app.status === 'pending') {
                 document.getElementById('manualApproveAgent').style.display = 'inline-flex';
-                document.getElementById('rejectAgentApplication').style.display = app.status === 'pending' ? 'inline-flex' : 'none'; // hide reject for rejected
+                document.getElementById('rejectAgentApplication').style.display = 'inline-flex';
+                document.getElementById('approveRejectedAgentBtn').style.display = 'none';
                 document.getElementById('manualApproveAgent').onclick = () => approveAgentApplicationManually(appId);
                 document.getElementById('rejectAgentApplication').onclick = () => rejectAgentApplication(appId);
+            } else if (app.status === 'rejected') {
+                document.getElementById('manualApproveAgent').style.display = 'none';
+                document.getElementById('rejectAgentApplication').style.display = 'none';
+                document.getElementById('approveRejectedAgentBtn').style.display = 'inline-flex';
+                document.getElementById('approveRejectedAgentBtn').onclick = () => approveAgentApplicationManually(appId);
             } else {
                 document.getElementById('manualApproveAgent').style.display = 'none';
                 document.getElementById('rejectAgentApplication').style.display = 'none';
+                document.getElementById('approveRejectedAgentBtn').style.display = 'none';
             }
             
             openModal('agentApplicationModal');
@@ -5176,16 +5192,18 @@
         }
 
         async function rejectAgentApplication(appId) {
-            if (!confirm('Reject this application?')) return;
+            const reason = prompt('Enter reason for rejection:');
+            if (reason === null) return;
             
             Utils.showLoading('Rejecting application...');
             try {
                 await db.ref('agentApplications/' + appId).update({ 
-                    status: 'rejected', 
+                    status: 'rejected',
+                    rejectionReason: reason,
                     reviewedAt: Date.now(),
                     reviewedBy: currentUser?.email
                 });
-                await Utils.logAudit('REJECT_AGENT', { appId });
+                await Utils.logAudit('REJECT_AGENT', { appId, reason });
                 Utils.showToast('Info', 'Application rejected', 'info');
                 closeModal('agentApplicationModal');
             } catch (e) {
@@ -5531,12 +5549,23 @@
         });
 
         // ========== FILTERS ==========
-        // Agents: attach click to dropdown items with data-agent-filter
-        document.querySelectorAll('#agentsSection .quick-actions-menu [data-agent-filter]').forEach(item => {
-            item.addEventListener('click', () => {
-                agentFilter = item.dataset.agentFilter;
+        document.querySelectorAll('#agentsSection .tab').forEach(tab => {
+            tab.addEventListener('click', () => {
+                document.querySelectorAll('#agentsSection .tab').forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+                agentFilter = tab.dataset.status;
                 renderAgents();
             });
+        });
+
+        // Quick actions for agents: pending applications and rejected applications
+        document.getElementById('filterPendingApplications')?.addEventListener('click', () => {
+            agentFilter = 'applications';
+            renderAgents();
+        });
+        document.getElementById('filterRejectedApplications')?.addEventListener('click', () => {
+            agentFilter = 'rejected';
+            renderAgents();
         });
 
         document.getElementById('filterAllCustomers')?.addEventListener('click', () => {
@@ -5566,21 +5595,30 @@
             renderCustomers();
         });
 
-        // Loans: pending tab
+        // Loans: pending tab active by default, quick actions for other filters
         document.getElementById('pendingLoanTab').addEventListener('click', () => {
             currentLoanFilter = 'pending';
-            document.getElementById('pendingLoanTab').classList.add('active');
-            // remove active from any other? only pending is outside.
             renderLoans();
         });
-
-        // Loans: dropdown filters
-        document.querySelectorAll('#loansSection .quick-actions-menu [data-loan-filter]').forEach(item => {
-            item.addEventListener('click', () => {
-                currentLoanFilter = item.dataset.loanFilter;
-                document.getElementById('pendingLoanTab').classList.remove('active');
-                renderLoans();
-            });
+        document.getElementById('filterLoansAll')?.addEventListener('click', () => {
+            currentLoanFilter = 'all';
+            renderLoans();
+        });
+        document.getElementById('filterLoansApproved')?.addEventListener('click', () => {
+            currentLoanFilter = 'approved';
+            renderLoans();
+        });
+        document.getElementById('filterLoansDefaulted')?.addEventListener('click', () => {
+            currentLoanFilter = 'defaulted';
+            renderLoans();
+        });
+        document.getElementById('filterLoansCompleted')?.addEventListener('click', () => {
+            currentLoanFilter = 'completed';
+            renderLoans();
+        });
+        document.getElementById('filterLoansRejected')?.addEventListener('click', () => {
+            currentLoanFilter = 'rejected';
+            renderLoans();
         });
 
         document.getElementById('loanSearch').addEventListener('input', renderLoans);
@@ -5803,7 +5841,6 @@
             // Set default loan filter to pending when loans section is opened
             if (sectionId === 'loans') {
                 currentLoanFilter = 'pending';
-                document.getElementById('pendingLoanTab').classList.add('active');
                 renderLoans();
             }
         }
@@ -5990,8 +6027,8 @@
                         else if (type === 'agent-nrc-back' || type === 'edit-agent-nrc-back') hiddenId = type.startsWith('edit') ? 'editAgentNrcBackUrl' : 'agentNrcBackUrl';
                         else if (type === 'agent-profile' || type === 'edit-agent-profile') hiddenId = type.startsWith('edit') ? 'editAgentProfileUrl' : 'agentProfileUrl';
                         else if (type === 'agent-additional') hiddenId = 'agentAdditionalUrl';
-                        else if (type === 'promo-image') hiddenId = 'promoImageUrl';
-                        else if (type === 'payment-proof') hiddenId = 'paymentProofUrl'; // NEW
+                        else if (type === 'promo-image') hiddenId = 'promoImageUrl'; // NEW
+                        else if (type === 'payment-proof') hiddenId = 'paymentProofUrl';
                         
                         if (hiddenId) document.getElementById(hiddenId).value = info.secure_url;
                         
