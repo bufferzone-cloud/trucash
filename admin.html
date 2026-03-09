@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -1497,11 +1496,6 @@
                 <i class="fas fa-bell"></i> Notifications
                 <span class="sidebar-badge" id="sidebarNotificationsBadge" style="display: none;">0</span>
             </div>
-            <!-- New Overdue item in red -->
-            <div class="sidebar-item" id="sidebarOverdueItem" style="color: var(--ios-red);" data-section="notifications" data-filter="overdue">
-                <i class="fas fa-exclamation-triangle" style="color: var(--ios-red);"></i> Overdue Payments
-                <span class="sidebar-badge" id="sidebarOverdueBadge" style="background: var(--ios-red); display: none;">0</span>
-            </div>
             <div class="sidebar-item" id="signedAgreementsBtn"><i class="fas fa-file-signature"></i> Signed Agreements</div>
             <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
             <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
@@ -1890,12 +1884,8 @@
         <!-- NOTIFICATIONS SECTION (enhanced) -->
         <section class="content-section" id="notificationsSection">
             <div class="floating-card">
-                <h3 class="mb-4">Upcoming Payments (next 60 days)</h3>
+                <h3 class="mb-4">Upcoming Payments & Reminders</h3>
                 <div id="upcomingPaymentsList"></div>
-            </div>
-            <div class="floating-card">
-                <h3 class="mb-4">Overdue Payments</h3>
-                <div id="overduePaymentsList"></div>
             </div>
             <div class="floating-card">
                 <h3 class="mb-4">Send Message</h3>
@@ -2539,12 +2529,11 @@
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
         // INCLUDES ALL REQUESTED MODIFICATIONS:
-        // - Reminder buttons on notifications
-        // - Resend buttons on messages & promotions
-        // - Separate contact details for customer & agent apps in settings
-        // - Reports dropdown
-        // - Detailed profit report
-        // - Profile pictures in assignments
+        // - Upcoming payments window extended to 60 days (was 7 days)
+        // - Overdue and upcoming now include loans with status 'approved' as well as 'active'
+        // - Days counter displayed on each notification item (already present)
+        // - Sidebar badge counts all overdue + upcoming (60 days) installments
+        // - Advanced reminder system with notification on send (already present)
         // =========================================================================
         
         // Firebase configuration
@@ -2738,27 +2727,19 @@
                     sidebarBadge.style.display = 'none';
                 }
             }
-            
-            // New overdue badge
-            const overdueBadge = document.getElementById('sidebarOverdueBadge');
-            if (overdueBadge) {
-                if (overdue.length > 0) {
-                    overdueBadge.style.display = 'flex';
-                    overdueBadge.innerText = overdue.length > 99 ? '99+' : overdue.length;
-                } else {
-                    overdueBadge.style.display = 'none';
-                }
-            }
         }
 
+        // ========== UPDATED: getUpcomingPayments (60 days, include approved loans) ==========
         function getUpcomingPayments() {
             const now = Date.now();
             const sixtyDays = 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
             const upcoming = [];
-            allLoans.filter(l => l.status === 'active').forEach(loan => {
+            // Include loans with status 'active' OR 'approved' (approved loans also have repayment schedules)
+            allLoans.filter(l => l.status === 'active' || l.status === 'approved').forEach(loan => {
                 if (loan.repaymentSchedule) {
                     loan.repaymentSchedule.forEach(inst => {
-                        if (inst.status === 'pending' && inst.dueDate > now && inst.dueDate < now + sixtyDays) {
+                        // Only pending installments (not fully paid)
+                        if (inst.status !== 'paid' && inst.dueDate > now && inst.dueDate < now + sixtyDays) {
                             upcoming.push({
                                 loanId: loan.id,
                                 customerId: loan.customerId,
@@ -2778,10 +2759,12 @@
             return upcoming;
         }
 
+        // ========== UPDATED: getOverduePayments (include approved loans) ==========
         function getOverduePayments() {
             const now = Date.now();
             const overdue = [];
-            allLoans.filter(l => l.status === 'active').forEach(loan => {
+            // Include loans with status 'active' OR 'approved' (approved loans also have repayment schedules)
+            allLoans.filter(l => l.status === 'active' || l.status === 'approved').forEach(loan => {
                 if (loan.repaymentSchedule) {
                     loan.repaymentSchedule.forEach(inst => {
                         if (inst.status !== 'paid' && inst.dueDate < now) {
@@ -3617,55 +3600,28 @@
             
             const now = Date.now();
             
-            // Render upcoming
-            const upcomingContainer = document.getElementById('upcomingPaymentsList');
-            if (!upcomingContainer) return;
+            const allReminders = [...overdue.map(p => ({...p, type: 'overdue'})), ...upcoming.map(p => ({...p, type: 'upcoming'}))];
+            allReminders.sort((a,b) => a.dueDate - b.dueDate);
             
-            if (upcoming.length === 0) {
-                upcomingContainer.innerHTML = '<p class="text-muted">No upcoming payments in the next 60 days.</p>';
+            const container = document.getElementById('upcomingPaymentsList');
+            if (!container) return;
+            
+            if (allReminders.length === 0) {
+                container.innerHTML = '<p class="text-muted">No upcoming or overdue payments.</p>';
             } else {
-                upcomingContainer.innerHTML = upcoming.map(p => {
+                container.innerHTML = allReminders.map(p => {
                     const daysLeft = Math.ceil((p.dueDate - now) / (1000*60*60*24));
+                    const statusClass = p.type === 'overdue' ? 'overdue' : 'upcoming';
+                    const badgeText = p.type === 'overdue' ? `${Math.abs(daysLeft)} day${Math.abs(daysLeft)!==1?'s':''} overdue` : `${daysLeft} day${daysLeft!==1?'s':''} left`;
+                    const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
+                    
                     return `
-                    <div class="notification-item upcoming" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
+                    <div class="notification-item ${statusClass}" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
                         <div class="d-flex justify-between align-center">
                             <div>
                                 <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
                             </div>
-                            <span class="reminder-badge">${daysLeft} day${daysLeft!==1?'s':''} left</span>
-                        </div>
-                        <div class="profile-meta">
-                            Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
-                            Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
-                        </div>
-                        <div class="profile-meta">
-                            Agent: ${p.agentName || 'None'}
-                        </div>
-                        <div class="mt-2">
-                            <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId}')">
-                                <i class="fas fa-bell"></i> Send Reminder
-                            </button>
-                        </div>
-                    </div>
-                `}).join('');
-            }
-            
-            // Render overdue in a separate container (new)
-            const overdueContainer = document.getElementById('overduePaymentsList');
-            if (!overdueContainer) return;
-            
-            if (overdue.length === 0) {
-                overdueContainer.innerHTML = '<p class="text-muted">No overdue payments.</p>';
-            } else {
-                overdueContainer.innerHTML = overdue.map(p => {
-                    const daysOverdue = Math.ceil((now - p.dueDate) / (1000*60*60*24));
-                    return `
-                    <div class="notification-item overdue" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
-                        <div class="d-flex justify-between align-center">
-                            <div>
-                                <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
-                            </div>
-                            <span class="overdue-badge">${daysOverdue} day${daysOverdue!==1?'s':''} overdue</span>
+                            <span class="${badgeClass}">${badgeText}</span>
                         </div>
                         <div class="profile-meta">
                             Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
@@ -6015,18 +5971,6 @@
                 document.getElementById('sidebar').classList.remove('active');
                 document.getElementById('sidebarOverlay').classList.remove('active');
             });
-        });
-
-        // New handler for overdue sidebar item
-        document.getElementById('sidebarOverdueItem').addEventListener('click', () => {
-            showSection('notifications');
-            // Optionally scroll to overdue section
-            setTimeout(() => {
-                const overdueEl = document.getElementById('overduePaymentsList');
-                if (overdueEl) overdueEl.scrollIntoView({ behavior: 'smooth' });
-            }, 200);
-            document.getElementById('sidebar').classList.remove('active');
-            document.getElementById('sidebarOverlay').classList.remove('active');
         });
 
         document.getElementById('signedAgreementsBtn').addEventListener('click', () => {
