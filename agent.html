@@ -1,3 +1,4 @@
+
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -688,6 +689,31 @@
             border-radius: 12px;
             margin: 15px 0;
         }
+        /* new filter dropdown */
+        .filter-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+        }
+        .filter-select {
+            background: white;
+            border: 1px solid #dde3e9;
+            border-radius: 30px;
+            padding: 8px 16px;
+            font-size: 14px;
+            color: #1c1e24;
+            outline: none;
+            cursor: pointer;
+        }
+        .rejection-reason {
+            background: #ffebee;
+            color: #c62828;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            margin-top: 6px;
+        }
     </style>
 </head>
 <body>
@@ -721,10 +747,22 @@
             <div class="customer-grid" id="customersList"></div>
         </div>
 
-        <!-- Loans section (customers with loans) -->
+        <!-- Loans section (all loans with filter) -->
         <div id="loansSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-file-invoice" style="margin-right: 8px; color: #007aff;"></i> Customers with Loans</div>
-            <div class="customer-grid" id="customersWithLoansList"></div>
+            <div class="section-title"><i class="fas fa-file-invoice" style="margin-right: 8px; color: #007aff;"></i> All Loans</div>
+            <div class="filter-bar">
+                <span>Filter by status:</span>
+                <select id="loanFilterSelect" class="filter-select">
+                    <option value="all">All</option>
+                    <option value="pending">Pending</option>
+                    <option value="approved">Approved</option>
+                    <option value="active">Active</option>
+                    <option value="completed">Completed</option>
+                    <option value="rejected">Rejected</option>
+                    <option value="defaulted">Defaulted</option>
+                </select>
+            </div>
+            <div class="customer-grid" id="loansList"></div>
         </div>
 
         <!-- Commission section (enhanced) -->
@@ -780,7 +818,7 @@
             </div>
         </div>
 
-        <!-- About section (enhanced) -->
+        <!-- About section (enhanced, with dynamic contact) -->
         <div id="aboutSection" class="section d-none">
             <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 8px; color: #007aff;"></i> About TruCash</div>
             <div class="section-card about-page">
@@ -827,10 +865,10 @@
                 </div>
                 
                 <h4><i class="fas fa-address-card"></i> Contact Us</h4>
-                <div class="contact-info">
-                    <p><i class="fas fa-phone"></i> +260 123 456 789</p>
-                    <p><i class="fas fa-envelope"></i> agents@trucash.zm</p>
-                    <p><i class="fas fa-map-marker-alt"></i> Plot 123, Cairo Road, Lusaka</p>
+                <div class="contact-info" id="contactInfo">
+                    <p><i class="fas fa-phone"></i> <span id="contactPhone">+260 123 456 789</span></p>
+                    <p><i class="fas fa-envelope"></i> <span id="contactEmail">agents@trucash.zm</span></p>
+                    <p><i class="fas fa-map-marker-alt"></i> <span id="contactAddress">Plot 123, Cairo Road, Lusaka</span></p>
                 </div>
 
                 <button class="btn btn-outline btn-small" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> View Certificate</button>
@@ -863,7 +901,7 @@
     <div class="modal-overlay" id="loanModal">
         <div class="modal-card">
             <div class="modal-header">
-                <h3>Loan Application</h3>
+                <h3>Loan Details</h3>
                 <button class="modal-close" id="closeLoanModal">&times;</button>
             </div>
             <div id="loanModalContent"></div>
@@ -1077,8 +1115,10 @@
                             AppState.agentData = snap.val();
                             AppState.agentId = user.uid;
 
-                            // Load system settings
+                            // Load system settings and listen
                             await this.loadSystemSettings();
+                            this.listenForSystemSettings(); // real-time updates
+
                             // Check if agent app is enabled
                             if (AppState.systemSettings.enableAgentApp === false) {
                                 document.getElementById('maintenanceOverlay').style.display = 'flex';
@@ -1087,14 +1127,21 @@
                             }
 
                             await this.loadCustomers();
+                            this.listenForCustomers(); // real-time
+
                             await this.loadLoans();
+                            this.listenForLoans(); // real-time
+
                             await this.loadCommissions();
+                            this.listenForCommissions(); // real-time
+
                             await this.loadNotifications();
                             this.listenForNotifications();
-                            this.listenForLoans(); // NEW: listen for loan changes
+
                             Utils.loadSeenPromotions();
                             await this.loadPromotions();
                             this.listenForPromotions();
+
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
                     });
@@ -1103,6 +1150,13 @@
             async loadSystemSettings() {
                 const snap = await db.ref('systemSettings').once('value');
                 AppState.systemSettings = snap.val() || { commissionRate: 15, monthlyInterestRate: 35, weeklyInterestRate: 10 };
+            },
+            listenForSystemSettings() {
+                db.ref('systemSettings').on('value', (snap) => {
+                    AppState.systemSettings = snap.val() || { commissionRate: 15 };
+                    UIManager.updateCommissionRateTexts();
+                    UIManager.updateContactInfo();
+                });
             },
             async loadCustomers() {
                 const snap = await db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).once('value');
@@ -1115,6 +1169,21 @@
                     }
                 });
             },
+            listenForCustomers() {
+                db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).on('value', (snap) => {
+                    AppState.customers = [];
+                    snap.forEach(child => {
+                        const c = child.val();
+                        if (c.userType === 'customer') {
+                            c.id = child.key;
+                            AppState.customers.push(c);
+                        }
+                    });
+                    UIManager.renderCustomers();
+                    UIManager.renderCustomersWithLoans(); // updates loans section
+                    UIManager.renderCommissionCustomers(); // updates commission customer list
+                });
+            },
             async loadLoans() {
                 const snap = await db.ref('loans').orderByChild('agentId').equalTo(AppState.agentId).once('value');
                 AppState.loans = [];
@@ -1124,13 +1193,11 @@
                     AppState.loans.push(l);
                 });
             },
-            // NEW: listen for real-time loan updates
             listenForLoans() {
                 const loansRef = db.ref('loans').orderByChild('agentId').equalTo(AppState.agentId);
                 loansRef.on('child_added', (snap) => {
                     const loan = snap.val();
                     loan.id = snap.key;
-                    // avoid duplicates
                     const existing = AppState.loans.findIndex(l => l.id === snap.key);
                     if (existing === -1) {
                         AppState.loans.push(loan);
@@ -1165,6 +1232,17 @@
                     const c = child.val();
                     c.id = child.key;
                     AppState.commissions.push(c);
+                });
+            },
+            listenForCommissions() {
+                db.ref('commissionHistory').orderByChild('agentId').equalTo(AppState.agentId).on('value', (snap) => {
+                    AppState.commissions = [];
+                    snap.forEach(child => {
+                        const c = child.val();
+                        c.id = child.key;
+                        AppState.commissions.push(c);
+                    });
+                    UIManager.renderCommission(); // update commission section
                 });
             },
             async loadNotifications() {
@@ -1296,7 +1374,8 @@
                 };
                 this.navItems = document.querySelectorAll('.nav-item');
                 this.customersList = document.getElementById('customersList');
-                this.customersWithLoansList = document.getElementById('customersWithLoansList');
+                this.loansList = document.getElementById('loansList');
+                this.loanFilterSelect = document.getElementById('loanFilterSelect');
                 this.customersCommissionList = document.getElementById('customersCommissionList');
                 this.agentFullName = document.getElementById('agentFullName');
                 this.headerAvatar = document.getElementById('headerAvatar');
@@ -1309,7 +1388,6 @@
                 this.totalCommissionEarned = document.getElementById('totalCommissionEarned');
                 this.pendingCommission = document.getElementById('pendingCommission');
                 this.futureCommission = document.getElementById('futureCommission');
-                // Dynamic labels for commission percentage
                 this.pendingCommissionLabel = document.getElementById('pendingCommissionLabel');
                 this.commissionBenefitTitle = document.getElementById('commissionBenefitTitle');
                 // notification elements
@@ -1353,6 +1431,8 @@
                 // notification bell click
                 this.notificationBell.addEventListener('click', ()=> this.openNotificationsModal());
                 this.markAllReadBtn.addEventListener('click', ()=> FirebaseService.markAllAsRead());
+                // loan filter change
+                this.loanFilterSelect.addEventListener('change', ()=> this.renderLoans());
             },
             bindEvents() {
                 this.navItems.forEach(item => {
@@ -1368,7 +1448,7 @@
                 Object.values(this.sections).forEach(s => s.classList.add('d-none'));
                 this.sections[section]?.classList.remove('d-none');
                 if (section === 'home') this.renderCustomers();
-                if (section === 'loans') this.renderCustomersWithLoans();
+                if (section === 'loans') this.renderLoans();
                 if (section === 'commission') this.renderCommission();
             },
             // Update texts that depend on commission rate
@@ -1380,6 +1460,13 @@
                 if (this.commissionBenefitTitle) {
                     this.commissionBenefitTitle.textContent = `Earn ${rate}% commission`;
                 }
+            },
+            // Update contact info in about section from systemSettings
+            updateContactInfo() {
+                const settings = AppState.systemSettings;
+                document.getElementById('contactPhone').textContent = settings.agentContactPhone || '+260 123 456 789';
+                document.getElementById('contactEmail').textContent = settings.agentContactEmail || 'agents@trucash.zm';
+                document.getElementById('contactAddress').textContent = settings.agentContactAddress || 'Plot 123, Cairo Road, Lusaka';
             },
             async loadAgentData() {
                 await FirebaseService.checkAuth();
@@ -1393,17 +1480,16 @@
                 this.agentCodeDisplay.textContent = agent.agentId || AppState.agentId;
                 this.settingsBranch.textContent = agent.branch || 'Main';
                 this.settingsRegDate.textContent = agent.createdAt ? Utils.formatDate(agent.createdAt) : 'N/A';
-                // Update dynamic percentage texts
                 this.updateCommissionRateTexts();
+                this.updateContactInfo();
                 this.renderCustomers();
-                this.renderCustomersWithLoans();
+                this.renderLoans();
                 this.renderCommission();
                 this.updateNotificationBadge();
             },
-            // NEW: update loan-related sections when loans change
             updateLoanSections() {
                 if (!this.sections.loans.classList.contains('d-none')) {
-                    this.renderCustomersWithLoans();
+                    this.renderLoans();
                 }
                 if (!this.sections.commission.classList.contains('d-none')) {
                     this.renderCommission();
@@ -1457,43 +1543,49 @@
                     </div>
                 `}).join('');
             },
-            renderCustomersWithLoans() {
-                const customersWithLoans = AppState.customers.filter(c => 
-                    AppState.loans.some(l => l.customerId === c.id)
-                );
-                if (!customersWithLoans.length) {
-                    this.customersWithLoansList.innerHTML = '<div class="customer-card">No customers with loans.</div>';
+            renderLoans() {
+                const filter = this.loanFilterSelect.value;
+                let filteredLoans = [...AppState.loans];
+                if (filter !== 'all') {
+                    filteredLoans = filteredLoans.filter(l => l.status === filter);
+                }
+                // Sort by creation date descending
+                filteredLoans.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+
+                if (!filteredLoans.length) {
+                    this.loansList.innerHTML = '<div class="customer-card">No loans found.</div>';
                     return;
                 }
-                this.customersWithLoansList.innerHTML = customersWithLoans.map(c => {
-                    const isOverdue = Utils.hasOverduePayment(c.id);
+                this.loansList.innerHTML = filteredLoans.map(loan => {
+                    const customer = AppState.customers.find(c => c.id === loan.customerId) || { fullName: 'Unknown', phone: '' };
+                    const isOverdue = Utils.hasOverduePayment(customer.id);
                     const overdueClass = isOverdue ? 'overdue' : '';
-                    // Get overdue details if any
-                    const overdueDetails = isOverdue ? Utils.getOverduePaymentDetails(c.id) : null;
-                    // Create call button with tel: link, stop propagation so card click doesn't trigger
-                    const callButton = c.phone ? `
-                        <button class="call-button" onclick="event.stopPropagation(); window.location.href='tel:${c.phone}';">
-                            <i class="fas fa-phone-alt"></i> Call
-                        </button>
-                    ` : '';
-                    // Overdue message
+                    const overdueDetails = Utils.getOverduePaymentDetails(customer.id);
                     const overdueMessage = overdueDetails ? `
                         <div class="overdue-message" onclick="event.stopPropagation()">
                             <i class="fas fa-exclamation-triangle"></i>
                             <span>Payment for ${Utils.formatCurrency(overdueDetails.amount)} (due ${Utils.formatDate(overdueDetails.dueDate)}) is overdue. 
-                                <a href="tel:${c.phone}" class="call-link" onclick="event.stopPropagation();">Call now</a>
+                                <a href="tel:${customer.phone}" class="call-link" onclick="event.stopPropagation();">Call now</a>
                             </span>
                         </div>
                     ` : '';
+                    const rejectionReason = loan.status === 'rejected' && loan.rejectionReason ? 
+                        `<div class="rejection-reason"><i class="fas fa-times-circle"></i> Reason: ${loan.rejectionReason}</div>` : '';
                     return `
-                        <div class="customer-card ${overdueClass}" data-id="${c.id}" onclick="UIManager.showCustomerLoansList('${c.id}')">
-                            <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
+                        <div class="customer-card ${overdueClass}" onclick="UIManager.showLoanModal('${loan.id}')">
+                            <img src="${customer.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(customer.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
                             <div class="customer-info">
-                                <div class="customer-name">${c.fullName}</div>
-                                <div class="customer-meta"><i class="fas fa-file-invoice"></i> ${AppState.loans.filter(l=>l.customerId===c.id).length} loans</div>
+                                <div class="customer-name">${customer.fullName} (${loan.id.substring(0,6)})</div>
+                                <div class="customer-meta">
+                                    <i class="fas fa-dollar-sign"></i> ${Utils.formatCurrency(loan.amount)} · 
+                                    <span class="badge" style="background:${loan.status==='active'?'#d4edda':loan.status==='pending'?'#fff3cd':loan.status==='rejected'?'#f8d7da':'#eef3f8'}">
+                                        ${loan.status}
+                                    </span>
+                                </div>
                                 ${overdueMessage}
+                                ${rejectionReason}
                             </div>
-                            ${callButton}
+                            ${customer.phone ? `<button class="call-button" onclick="event.stopPropagation(); window.location.href='tel:${customer.phone}';"><i class="fas fa-phone-alt"></i> Call</button>` : ''}
                         </div>
                     `;
                 }).join('');
@@ -1534,14 +1626,20 @@
             showLoanModal(loanId) {
                 const loan = AppState.loans.find(l => l.id === loanId);
                 if (!loan) return;
-                const customer = AppState.customers.find(c => c.id === loan.customerId);
+                const customer = AppState.customers.find(c => c.id === loan.customerId) || { fullName: 'Unknown', phone: '' };
                 const payments = loan.repaymentSchedule || [];
                 const paidPayments = payments.filter(p => p.status === 'paid');
                 const pendingPayments = payments.filter(p => p.status === 'pending');
+                const rejectionHtml = loan.status === 'rejected' && loan.rejectionReason ? 
+                    `<div class="rejection-reason" style="margin-bottom:16px;"><i class="fas fa-times-circle"></i> Rejection reason: ${loan.rejectionReason}</div>` : '';
                 const content = `
+                    ${rejectionHtml}
                     <div style="margin-bottom:20px;">
-                        <span class="badge" style="background:#007aff; color:white;">${loan.status}</span>
+                        <span class="badge" style="background:${loan.status==='active'?'#d4edda':loan.status==='pending'?'#fff3cd':loan.status==='rejected'?'#f8d7da':'#eef3f8'}; color:${loan.status==='active'?'#155724':loan.status==='pending'?'#856404':loan.status==='rejected'?'#721c24':'#2d3a4a'};">
+                            ${loan.status}
+                        </span>
                     </div>
+                    <div class="detail-row"><span class="detail-label">Customer</span><span class="detail-value">${customer.fullName}</span></div>
                     <div class="detail-row"><span class="detail-label">Amount</span><span class="detail-value">${Utils.formatCurrency(loan.amount)}</span></div>
                     <div class="detail-row"><span class="detail-label">Purpose</span><span class="detail-value">${loan.purpose}</span></div>
                     <div class="detail-row"><span class="detail-label">Duration</span><span class="detail-value">${loan.duration} ${loan.durationUnit||'months'}</span></div>
@@ -1583,6 +1681,7 @@
                 const commissionRate = (AppState.systemSettings.commissionRate || 15) / 100;
                 const totalEarned = commissions.filter(c => c.status === 'paid').reduce((s,c)=> s + (c.amount||0),0);
                 const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=> s + (c.amount||0),0);
+                // For future earnings, only consider active loans that are not rejected
                 const activeLoans = AppState.loans.filter(l => l.status === 'active');
                 const future = activeLoans.reduce((s,loan)=> s + (loan.totalInterest * commissionRate || 0), 0);
                 this.totalCommissionEarned.textContent = Utils.formatCurrency(totalEarned);
@@ -1603,12 +1702,17 @@
                     `;
                 }).join('');
             },
+            renderCommissionCustomers() {
+                // called when customers change (listener)
+                this.renderCommission();
+            },
             showCommissionMath(customerId) {
                 const customer = AppState.customers.find(c => c.id === customerId);
                 const loans = AppState.loans.filter(l => l.customerId === customerId);
                 const commissions = AppState.commissions.filter(c => c.customerId === customerId);
                 const commissionRate = (AppState.systemSettings.commissionRate || 15) / 100;
                 
+                // Only include loans that are not rejected for future calculations (but include all for interest history)
                 let totalInterest = 0;
                 loans.forEach(loan => { totalInterest += loan.totalInterest || 0; });
                 const totalCommissionPossible = totalInterest * commissionRate;
@@ -1617,11 +1721,13 @@
                 const future = totalCommissionPossible - earned - pending;
 
                 const breakdownHtml = loans.map(loan => {
+                    // Don't show commission for rejected loans (they have no interest paid anyway, but just to be safe)
+                    if (loan.status === 'rejected') return ''; // skip rejected loans
                     const interest = loan.totalInterest || 0;
                     const commission = interest * commissionRate;
                     return `
                         <div class="commission-row">
-                            <span>Loan ${loan.id.substring(0,6)} (${Utils.formatCurrency(loan.amount)})</span>
+                            <span>Loan ${loan.id.substring(0,6)} (${Utils.formatCurrency(loan.amount)}) - ${loan.status}</span>
                             <span>Interest: ${Utils.formatCurrency(interest)} → ${Math.round(commissionRate*100)}% = ${Utils.formatCurrency(commission)}</span>
                         </div>
                     `;
@@ -1630,7 +1736,7 @@
                 const content = `
                     <h4>${customer.fullName}</h4>
                     <div class="commission-breakdown">
-                        ${breakdownHtml || '<p>No loans</p>'}
+                        ${breakdownHtml || '<p>No active loans with interest</p>'}
                     </div>
                     <div class="commission-row"><span>Total interest from all loans</span> <span>${Utils.formatCurrency(totalInterest)}</span></div>
                     <div class="commission-row"><span>Total possible commission (${Math.round(commissionRate*100)}%)</span> <span>${Utils.formatCurrency(totalCommissionPossible)}</span></div>
