@@ -716,6 +716,12 @@
             color: #b31f1f;
             font-weight: 600;
         }
+        /* New penalty badge */
+        .status-badge.penalty {
+            background: linear-gradient(135deg, rgba(255,59,48,0.3), rgba(255,59,48,0.4));
+            color: #b31f1f;
+            font-weight: 600;
+        }
 
         /* ===== Document Grid ===== */
         .doc-grid {
@@ -1492,6 +1498,7 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
+            <div class="sidebar-item" data-section="upcomingPayments"><i class="fas fa-calendar-alt"></i> Upcoming Payments</div> <!-- NEW -->
             <div class="sidebar-item" data-section="notifications">
                 <i class="fas fa-bell"></i> Notifications
                 <span class="sidebar-badge" id="sidebarNotificationsBadge" style="display: none;">0</span>
@@ -1881,6 +1888,18 @@
             </div>
         </section>
 
+        <!-- NEW: UPCOMING PAYMENTS SECTION -->
+        <section class="content-section" id="upcomingPaymentsSection">
+            <div class="floating-card">
+                <h3 class="mb-4">Upcoming Payments & Reminders</h3>
+                <div id="upcomingPaymentsListFull"></div>
+            </div>
+            <div class="floating-card">
+                <h3 class="mb-4">Overdue Payments with Penalties</h3>
+                <div id="overduePaymentsListFull"></div>
+            </div>
+        </section>
+
         <!-- NOTIFICATIONS SECTION (enhanced) -->
         <section class="content-section" id="notificationsSection">
             <div class="floating-card">
@@ -1943,6 +1962,12 @@
                     <div class="form-group">
                         <label class="form-label">Min Loan Amount (K)</label>
                         <input type="number" id="minLoanAmount" class="form-input" value="100">
+                    </div>
+                    <!-- NEW: Penalty Rate -->
+                    <div class="form-group">
+                        <label class="form-label">Daily Penalty Rate (% of total loan)</label>
+                        <input type="number" id="penaltyRate" class="form-input" value="2" step="0.1">
+                        <small class="text-muted">Applied after 5-day grace period</small>
                     </div>
                     <!-- App enable toggles -->
                     <div class="form-group">
@@ -2529,11 +2554,9 @@
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
         // INCLUDES ALL REQUESTED MODIFICATIONS:
-        // - Upcoming payments window extended to 60 days (was 7 days)
-        // - Overdue and upcoming now include loans with status 'approved' as well as 'active'
-        // - Days counter displayed on each notification item (already present)
-        // - Sidebar badge counts all overdue + upcoming (60 days) installments
-        // - Advanced reminder system with notification on send (already present)
+        // - New sidebar item and section for Upcoming Payments
+        // - Daily penalty of 2% after 5-day grace period on overdue installments
+        // - Automatic notifications for penalty increments
         // =========================================================================
         
         // Firebase configuration
@@ -2626,6 +2649,7 @@
                         interest,
                         totalDue: payment,
                         paidAmount: 0,
+                        penalty: 0, // NEW: penalty per installment
                         status: 'pending'
                     });
                 }
@@ -2729,16 +2753,14 @@
             }
         }
 
-        // ========== UPDATED: getUpcomingPayments (60 days, include approved loans) ==========
+        // ========== getUpcomingPayments (60 days, include approved loans) ==========
         function getUpcomingPayments() {
             const now = Date.now();
-            const sixtyDays = 60 * 24 * 60 * 60 * 1000; // 60 days in milliseconds
+            const sixtyDays = 60 * 24 * 60 * 60 * 1000;
             const upcoming = [];
-            // Include loans with status 'active' OR 'approved' (approved loans also have repayment schedules)
             allLoans.filter(l => l.status === 'active' || l.status === 'approved').forEach(loan => {
                 if (loan.repaymentSchedule) {
                     loan.repaymentSchedule.forEach(inst => {
-                        // Only pending installments (not fully paid)
                         if (inst.status !== 'paid' && inst.dueDate > now && inst.dueDate < now + sixtyDays) {
                             upcoming.push({
                                 loanId: loan.id,
@@ -2748,6 +2770,8 @@
                                 agentName: loan.agentName,
                                 dueDate: inst.dueDate,
                                 amount: inst.totalDue,
+                                penalty: inst.penalty || 0,
+                                totalDueWithPenalty: inst.totalDue + (inst.penalty || 0),
                                 installment: inst.installment,
                                 paidAmount: inst.paidAmount || 0,
                                 status: inst.status
@@ -2759,11 +2783,10 @@
             return upcoming;
         }
 
-        // ========== UPDATED: getOverduePayments (include approved loans) ==========
+        // ========== getOverduePayments (include approved loans) ==========
         function getOverduePayments() {
             const now = Date.now();
             const overdue = [];
-            // Include loans with status 'active' OR 'approved' (approved loans also have repayment schedules)
             allLoans.filter(l => l.status === 'active' || l.status === 'approved').forEach(loan => {
                 if (loan.repaymentSchedule) {
                     loan.repaymentSchedule.forEach(inst => {
@@ -2776,6 +2799,8 @@
                                 agentName: loan.agentName,
                                 dueDate: inst.dueDate,
                                 amount: inst.totalDue,
+                                penalty: inst.penalty || 0,
+                                totalDueWithPenalty: inst.totalDue + (inst.penalty || 0),
                                 installment: inst.installment,
                                 paidAmount: inst.paidAmount || 0,
                                 status: inst.status
@@ -2785,6 +2810,76 @@
                 }
             });
             return overdue;
+        }
+
+        // ========== NEW: Apply Late Penalties ==========
+        // This function checks all active/approved loans and applies daily penalty
+        // after a 5-day grace period. Penalty is 2% of total loan amount (totalPayable) per day.
+        async function applyLatePenalties() {
+            const now = Date.now();
+            const gracePeriod = 5 * 24 * 60 * 60 * 1000; // 5 days in ms
+            const penaltyRate = (parseFloat(systemSettings.penaltyRate) || 2) / 100; // default 2%
+
+            for (const loan of allLoans) {
+                if (loan.status !== 'active' && loan.status !== 'approved') continue;
+                if (!loan.repaymentSchedule) continue;
+
+                let loanUpdated = false;
+                const updates = {};
+                const totalLoanAmount = loan.totalPayable || loan.amount; // principal + total interest
+
+                for (let i = 0; i < loan.repaymentSchedule.length; i++) {
+                    const inst = loan.repaymentSchedule[i];
+                    if (inst.status === 'paid') continue;
+
+                    const dueDate = inst.dueDate;
+                    if (now <= dueDate + gracePeriod) continue; // within grace period
+
+                    // Calculate days overdue beyond grace period
+                    const overdueStart = dueDate + gracePeriod;
+                    const daysOverdue = Math.floor((now - overdueStart) / (24 * 60 * 60 * 1000));
+                    if (daysOverdue <= 0) continue;
+
+                    // Calculate penalty for this installment (only once per day)
+                    // We store last penalty calculation timestamp per installment to avoid multiple additions
+                    const lastPenaltyCalc = inst.lastPenaltyCalc || dueDate + gracePeriod;
+                    const daysSinceLastCalc = Math.floor((now - lastPenaltyCalc) / (24 * 60 * 60 * 1000));
+                    if (daysSinceLastCalc <= 0) continue;
+
+                    // Daily penalty amount = totalLoanAmount * penaltyRate
+                    const dailyPenalty = totalLoanAmount * penaltyRate;
+                    const newPenalty = daysSinceLastCalc * dailyPenalty;
+
+                    // Update installment
+                    inst.penalty = (inst.penalty || 0) + newPenalty;
+                    inst.lastPenaltyCalc = now;
+
+                    // Record penalty increment in loan history (optional)
+                    if (!loan.penaltyHistory) loan.penaltyHistory = [];
+                    loan.penaltyHistory.push({
+                        date: now,
+                        installment: i+1,
+                        amount: newPenalty,
+                        days: daysSinceLastCalc
+                    });
+
+                    // Send notification to customer and agent
+                    const penaltyMsg = `A late penalty of ${Utils.formatCurrency(newPenalty)} has been added to your loan (installment #${i+1}) due to overdue payment.`;
+                    await Utils.sendNotification(loan.customerId, penaltyMsg, 'penalty', loan.id);
+                    if (loan.agentId) {
+                        await Utils.sendNotification(loan.agentId, `Penalty added for customer ${loan.customerName} on loan ${loan.id.substring(0,8)}: ${Utils.formatCurrency(newPenalty)}`, 'penalty', loan.id);
+                    }
+
+                    loanUpdated = true;
+                }
+
+                if (loanUpdated) {
+                    updates[`loans/${loan.id}/repaymentSchedule`] = loan.repaymentSchedule;
+                    if (loan.penaltyHistory) updates[`loans/${loan.id}/penaltyHistory`] = loan.penaltyHistory;
+                    await db.ref().update(updates);
+                    await Utils.logAudit('APPLY_PENALTIES', { loanId: loan.id });
+                }
+            }
         }
 
         // ========== CSV EXPORT ==========
@@ -2839,6 +2934,7 @@
                         'Total Interest': Utils.formatCurrency(l.totalInterest || 0),
                         'Total Payable': Utils.formatCurrency(l.totalPayable || l.amount),
                         'Total Paid': Utils.formatCurrency(l.totalPaid || 0),
+                        'Total Penalty': Utils.formatCurrency(l.repaymentSchedule?.reduce((s,inst) => s + (inst.penalty || 0), 0) || 0),
                         Status: l.status,
                         Purpose: l.purpose,
                         Created: Utils.formatDate(l.createdAt),
@@ -2966,6 +3062,7 @@
                 'Total Interest': Utils.formatCurrency(l.totalInterest || 0),
                 'Total Payable': Utils.formatCurrency(l.totalPayable || l.amount),
                 'Total Paid': Utils.formatCurrency(l.totalPaid || 0),
+                'Total Penalty': Utils.formatCurrency(l.repaymentSchedule?.reduce((s,inst) => s + (inst.penalty || 0), 0) || 0),
                 Status: l.status,
                 Purpose: l.purpose,
                 Created: Utils.formatDate(l.createdAt),
@@ -3095,6 +3192,7 @@
                 allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
 
                 populateSettingsForm();
+                await applyLatePenalties(); // Apply penalties on load
                 updateUI();
                 Utils.hideLoading();
             } catch (error) {
@@ -3109,6 +3207,7 @@
             document.getElementById('weeklyInterest').value = systemSettings.weeklyInterestRate || 10;
             document.getElementById('maxLoanAmount').value = systemSettings.maxLoanAmount || 50000;
             document.getElementById('minLoanAmount').value = systemSettings.minLoanAmount || 100;
+            document.getElementById('penaltyRate').value = systemSettings.penaltyRate || 2;
             document.getElementById('enableCustomerApp').checked = systemSettings.enableCustomerApp !== false;
             document.getElementById('enableAgentApp').checked = systemSettings.enableAgentApp !== false;
             document.getElementById('customerContactPhone').value = systemSettings.customerContactPhone || '';
@@ -3136,7 +3235,72 @@
             renderNotifications(); 
             renderMessages(); 
             renderPromotionHistory();
+            renderUpcomingPayments(); // NEW
             updateBadges();
+        }
+
+        // NEW: Render upcoming payments page
+        function renderUpcomingPayments() {
+            const upcoming = getUpcomingPayments();
+            const overdue = getOverduePayments();
+            const now = Date.now();
+
+            const upcomingContainer = document.getElementById('upcomingPaymentsListFull');
+            const overdueContainer = document.getElementById('overduePaymentsListFull');
+
+            if (upcomingContainer) {
+                if (upcoming.length === 0) {
+                    upcomingContainer.innerHTML = '<p class="text-muted">No upcoming payments.</p>';
+                } else {
+                    upcomingContainer.innerHTML = upcoming.map(p => {
+                        const daysLeft = Math.ceil((p.dueDate - now) / (1000*60*60*24));
+                        return `
+                        <div class="notification-item upcoming" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
+                            <div class="d-flex justify-between align-center">
+                                <div>
+                                    <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
+                                </div>
+                                <span class="reminder-badge">${daysLeft} days left</span>
+                            </div>
+                            <div class="profile-meta">
+                                Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
+                                Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
+                                ${p.penalty > 0 ? ` · Penalty: ${Utils.formatCurrency(p.penalty)}` : ''}
+                            </div>
+                            <div class="profile-meta">
+                                Agent: ${p.agentName || 'None'}
+                            </div>
+                        </div>
+                    `}).join('');
+                }
+            }
+
+            if (overdueContainer) {
+                if (overdue.length === 0) {
+                    overdueContainer.innerHTML = '<p class="text-muted">No overdue payments.</p>';
+                } else {
+                    overdueContainer.innerHTML = overdue.map(p => {
+                        const daysOverdue = Math.ceil((now - p.dueDate) / (1000*60*60*24));
+                        return `
+                        <div class="notification-item overdue" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
+                            <div class="d-flex justify-between align-center">
+                                <div>
+                                    <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
+                                </div>
+                                <span class="overdue-badge">${daysOverdue} days overdue</span>
+                            </div>
+                            <div class="profile-meta">
+                                Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
+                                Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
+                                ${p.penalty > 0 ? ` · Penalty: ${Utils.formatCurrency(p.penalty)}` : ''}
+                            </div>
+                            <div class="profile-meta">
+                                Agent: ${p.agentName || 'None'}
+                            </div>
+                        </div>
+                    `}).join('');
+                }
+            }
         }
 
         function updateDashboardStats() {
@@ -3331,7 +3495,9 @@
                 const customer = allCustomers.find(c => c.id === l.customerId);
                 const agent = allAgents.find(a => a.id === l.agentId);
                 const totalPaid = l.totalPaid || 0;
-                const progress = (totalPaid / (l.totalPayable || l.amount)) * 100;
+                const totalPenalty = l.repaymentSchedule?.reduce((s,inst) => s + (inst.penalty || 0), 0) || 0;
+                const totalPayableWithPenalty = (l.totalPayable || l.amount) + totalPenalty;
+                const progress = (totalPaid / totalPayableWithPenalty) * 100;
                 
                 return `
                 <div class="floating-card" onclick="showLoanDetails('${l.id}')">
@@ -3372,7 +3538,7 @@
                     <div class="mt-2">
                         <div class="d-flex justify-between small">
                             <span>Paid: ${Utils.formatCurrency(totalPaid)}</span>
-                            <span>Total: ${Utils.formatCurrency(l.totalPayable || l.amount)}</span>
+                            <span>Total + Penalty: ${Utils.formatCurrency(totalPayableWithPenalty)}</span>
                         </div>
                         <div class="progress-bar mt-1" style="height:6px; background:var(--ios-gray2); border-radius:3px;">
                             <div class="progress-fill" style="width: ${progress}%; height:6px; background:var(--ios-blue); border-radius:3px;"></div>
@@ -3383,7 +3549,7 @@
                         ${l.collateral?.images ? `<span class="status-badge"><i class="fas fa-image"></i> ${l.collateral.images.length} img</span>` : ''}
                         ${l.witness ? `<span class="status-badge"><i class="fas fa-user"></i> Witness</span>` : ''}
                         ${l.signedAgreementUrl ? `<span class="status-badge"><i class="fas fa-file-signature"></i> Signed</span>` : ''}
-                        ${l.status === 'rejected' && l.rejectionReason ? `<span class="status-badge rejected">Rejected</span>` : ''}
+                        ${totalPenalty > 0 ? `<span class="status-badge penalty"><i class="fas fa-exclamation-triangle"></i> Penalty: ${Utils.formatCurrency(totalPenalty)}</span>` : ''}
                     </div>
                 </div>
             `}).join('');
@@ -3626,6 +3792,7 @@
                         <div class="profile-meta">
                             Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
                             Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
+                            ${p.penalty > 0 ? ` · Penalty: ${Utils.formatCurrency(p.penalty)}` : ''}
                         </div>
                         <div class="profile-meta">
                             Agent: ${p.agentName || 'None'}
@@ -3711,12 +3878,20 @@
                             <div class="detail-value">${Utils.formatCurrency(inst.totalDue)}</div>
                         </div>
                         <div class="detail-card">
+                            <div class="detail-label">Penalty</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.penalty || 0)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Total Due + Penalty</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.totalDue + (inst.penalty || 0))}</div>
+                        </div>
+                        <div class="detail-card">
                             <div class="detail-label">Paid So Far</div>
                             <div class="detail-value">${Utils.formatCurrency(inst.paidAmount || 0)}</div>
                         </div>
                         <div class="detail-card">
                             <div class="detail-label">Remaining</div>
-                            <div class="detail-value">${Utils.formatCurrency(inst.totalDue - (inst.paidAmount || 0))}</div>
+                            <div class="detail-value">${Utils.formatCurrency((inst.totalDue + (inst.penalty || 0)) - (inst.paidAmount || 0))}</div>
                         </div>
                     </div>
                 </div>
@@ -3739,8 +3914,8 @@
             const inst = loan?.repaymentSchedule?.[installment-1];
             if (loan && inst) {
                 const dueDate = Utils.formatDate(inst.dueDate);
-                const amount = Utils.formatCurrency(inst.totalDue);
-                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} is due on ${dueDate}. Please pay promptly to avoid penalties.`;
+                const amount = Utils.formatCurrency(inst.totalDue + (inst.penalty || 0));
+                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} (including penalty) is due on ${dueDate}. Please pay promptly to avoid further penalties.`;
                 document.getElementById('reminderMessage').value = message;
             }
             
@@ -3804,8 +3979,8 @@
                 if (inst.status !== 'paid') {
                     const option = document.createElement('option');
                     option.value = index;
-                    const remaining = inst.totalDue - (inst.paidAmount || 0);
-                    option.textContent = `#${inst.installment} - Due: ${Utils.formatDate(inst.dueDate)} - Amount: ${Utils.formatCurrency(inst.totalDue)} (Paid: ${Utils.formatCurrency(inst.paidAmount || 0)} - Remaining: ${Utils.formatCurrency(remaining)})`;
+                    const remaining = (inst.totalDue + (inst.penalty || 0)) - (inst.paidAmount || 0);
+                    option.textContent = `#${inst.installment} - Due: ${Utils.formatDate(inst.dueDate)} - Amount: ${Utils.formatCurrency(inst.totalDue)} Penalty: ${Utils.formatCurrency(inst.penalty || 0)} (Paid: ${Utils.formatCurrency(inst.paidAmount || 0)} - Remaining: ${Utils.formatCurrency(remaining)})`;
                     option.dataset.remaining = remaining;
                     select.appendChild(option);
                 }
@@ -3814,7 +3989,7 @@
             select.addEventListener('change', (e) => {
                 const selectedOption = e.target.options[e.target.selectedIndex];
                 const remaining = selectedOption.dataset.remaining;
-                document.getElementById('installmentRemaining').innerText = `Remaining for this installment: ${Utils.formatCurrency(remaining || 0)}`;
+                document.getElementById('installmentRemaining').innerText = `Remaining for this installment (including penalty): ${Utils.formatCurrency(remaining || 0)}`;
                 document.getElementById('recordAmount').max = remaining;
             });
             if (select.options.length > 0) {
@@ -3855,30 +4030,53 @@
                 if (schedule.length === 0) throw new Error('No repayment schedule');
 
                 const inst = schedule[installmentIndex];
-                const due = inst.totalDue - (inst.paidAmount || 0);
-                if (amount > due) {
-                    Utils.showToast('Error', 'Amount exceeds remaining due for this installment', 'error');
+                const dueWithPenalty = inst.totalDue + (inst.penalty || 0);
+                const paidSoFar = inst.paidAmount || 0;
+                const remaining = dueWithPenalty - paidSoFar;
+                if (amount > remaining) {
+                    Utils.showToast('Error', 'Amount exceeds remaining due for this installment (including penalty)', 'error');
                     return;
                 }
 
-                inst.paidAmount = (inst.paidAmount || 0) + amount;
-                inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+                // Apply payment: first to penalty, then to interest, then to principal
+                let remainingAmount = amount;
+                let penaltyPaid = 0;
+                let interestPaid = 0;
+                let principalPaid = 0;
 
-                let totalPaid = 0, interestPaid = 0;
+                if (inst.penalty) {
+                    penaltyPaid = Math.min(remainingAmount, inst.penalty);
+                    remainingAmount -= penaltyPaid;
+                }
+                if (remainingAmount > 0) {
+                    // interest portion of remaining due (excluding penalty)
+                    const interestRatio = inst.interest / inst.totalDue;
+                    interestPaid = Math.min(remainingAmount * interestRatio, inst.interest);
+                    remainingAmount -= interestPaid;
+                }
+                if (remainingAmount > 0) {
+                    principalPaid = remainingAmount;
+                }
+
+                // Update installment
+                inst.paidAmount = (inst.paidAmount || 0) + amount;
+                inst.penalty = Math.max(0, (inst.penalty || 0) - penaltyPaid); // reduce penalty by amount paid
+                inst.status = (inst.paidAmount >= (inst.totalDue + (inst.penalty || 0))) ? 'paid' : 'partial';
+
+                let totalPaid = 0, totalInterestPaid = 0, totalPenaltyPaid = 0;
                 schedule.forEach(i => {
                     totalPaid += i.paidAmount || 0;
-                    const paid = i.paidAmount || 0;
-                    const interestPart = (paid / i.totalDue) * i.interest;
-                    interestPaid += isNaN(interestPart) ? 0 : interestPart;
+                    totalInterestPaid += (i.paidAmount || 0) * (i.interest / i.totalDue) || 0;
+                    totalPenaltyPaid += (i.penalty || 0) > 0 ? 0 : (i.paidAmount || 0) * ( (i.penalty || 0) / (i.totalDue + i.penalty) ) || 0; // simplistic
                 });
 
                 const updates = {
                     repaymentSchedule: schedule,
                     totalPaid: totalPaid,
-                    interestPaid: interestPaid
+                    interestPaid: totalInterestPaid
                 };
 
-                if (totalPaid >= (loan.totalPayable || loan.amount)) {
+                if (totalPaid >= (loan.totalPayable || loan.amount) + schedule.reduce((s,i) => s + (i.penalty || 0), 0)) {
                     updates.status = 'completed';
                     updates.completedAt = Date.now();
                 }
@@ -3899,12 +4097,13 @@
                     timestamp: Date.now(),
                     verifiedAt: Date.now(),
                     verifiedBy: currentUser.uid,
-                    notes: 'Manual payment recorded by admin'
+                    notes: 'Manual payment recorded by admin',
+                    penaltyPaid: penaltyPaid
                 });
 
-                const interestPortion = (amount / inst.totalDue) * inst.interest;
-                if (interestPortion > 0 && loan.agentId) {
-                    const commissionAmount = interestPortion * 0.15;
+                // Commission on interest paid portion (excluding penalty)
+                if (interestPaid > 0 && loan.agentId) {
+                    const commissionAmount = interestPaid * 0.15;
                     await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
                         agentId: loan.agentId,
                         customerId: loan.customerId,
@@ -3917,7 +4116,7 @@
                     });
                 }
 
-                await Utils.logAudit('RECORD_PAYMENT', { loanId, amount, method, installment: installmentIndex+1 });
+                await Utils.logAudit('RECORD_PAYMENT', { loanId, amount, method, installment: installmentIndex+1, penaltyPaid });
                 Utils.showToast('Success', 'Payment recorded', 'success');
                 closeModal('recordPaymentModal');
                 closeModal('loanDetailsModal');
@@ -4360,20 +4559,22 @@
             const scheduleHtml = loan.repaymentSchedule ? `
                 <table class="repayment-table">
                     <thead>
-                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Total</th><th>Paid</th><th>Status</th></tr>
+                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total+Penalty</th><th>Paid</th><th>Status</th></tr>
                     </thead>
                     <tbody>
                         ${loan.repaymentSchedule.map((inst, i) => {
                             const paid = inst.paidAmount || 0;
-                            const statusClass = paid >= inst.totalDue ? 'approved' : (paid > 0 ? 'pending' : 'pending');
-                            const statusText = paid >= inst.totalDue ? 'Paid' : (paid > 0 ? `Partial (${Utils.formatCurrency(paid)})` : 'Pending');
+                            const totalWithPenalty = inst.totalDue + (inst.penalty || 0);
+                            const statusClass = paid >= totalWithPenalty ? 'approved' : (paid > 0 ? 'pending' : 'pending');
+                            const statusText = paid >= totalWithPenalty ? 'Paid' : (paid > 0 ? `Partial (${Utils.formatCurrency(paid)})` : 'Pending');
                             return `
                             <tr>
                                 <td>${i+1}</td>
                                 <td>${Utils.formatDate(inst.dueDate)}</td>
                                 <td>${Utils.formatCurrency(inst.principal)}</td>
                                 <td>${Utils.formatCurrency(inst.interest)}</td>
-                                <td>${Utils.formatCurrency(inst.totalDue)}</td>
+                                <td>${Utils.formatCurrency(inst.penalty || 0)}</td>
+                                <td>${Utils.formatCurrency(totalWithPenalty)}</td>
                                 <td>${Utils.formatCurrency(paid)}</td>
                                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
                             </tr>
@@ -4452,12 +4653,16 @@
                             <div class="detail-value">${Utils.formatCurrency(loan.totalPayable || loan.amount)}</div>
                         </div>
                         <div class="detail-card">
+                            <div class="detail-label">Total Penalty</div>
+                            <div class="detail-value">${Utils.formatCurrency(loan.repaymentSchedule?.reduce((s,inst) => s + (inst.penalty || 0), 0) || 0)}</div>
+                        </div>
+                        <div class="detail-card">
                             <div class="detail-label">Paid So Far</div>
                             <div class="detail-value">${Utils.formatCurrency(totalPaid)}</div>
                         </div>
                         <div class="detail-card">
                             <div class="detail-label">Remaining</div>
-                            <div class="detail-value">${Utils.formatCurrency((loan.totalPayable || loan.amount) - totalPaid)}</div>
+                            <div class="detail-value">${Utils.formatCurrency((loan.totalPayable || loan.amount) + (loan.repaymentSchedule?.reduce((s,inst) => s + (inst.penalty || 0), 0) || 0) - totalPaid)}</div>
                         </div>
                     </div>
                 </div>
@@ -5111,34 +5316,52 @@
                 let remainingAmount = payment.amount;
                 let totalPrincipalPaid = 0;
                 let totalInterestPaid = 0;
+                let totalPenaltyPaid = 0;
                 
                 for (let i = 0; i < schedule.length; i++) {
                     const inst = schedule[i];
                     if (inst.status === 'paid') continue;
                     
-                    const due = inst.totalDue - (inst.paidAmount || 0);
-                    if (due <= 0) continue;
+                    const dueWithPenalty = inst.totalDue + (inst.penalty || 0);
+                    const paidSoFar = inst.paidAmount || 0;
+                    const remainingInst = dueWithPenalty - paidSoFar;
+                    if (remainingInst <= 0) continue;
                     
-                    const paidThisInst = Math.min(remainingAmount, due);
+                    const paidThisInst = Math.min(remainingAmount, remainingInst);
+                    
+                    // Allocate: first to penalty, then to interest, then to principal
+                    let penaltyPortion = 0;
+                    let interestPortion = 0;
+                    let principalPortion = 0;
+                    
+                    if (inst.penalty) {
+                        penaltyPortion = Math.min(paidThisInst, inst.penalty);
+                        inst.penalty -= penaltyPortion;
+                    }
+                    if (paidThisInst > penaltyPortion) {
+                        const remainingForInterest = paidThisInst - penaltyPortion;
+                        const interestRatio = inst.interest / inst.totalDue;
+                        interestPortion = Math.min(remainingForInterest * interestRatio, inst.interest);
+                        inst.interest -= interestPortion;
+                    }
+                    if (paidThisInst > penaltyPortion + interestPortion) {
+                        principalPortion = paidThisInst - penaltyPortion - interestPortion;
+                        inst.principal -= principalPortion;
+                    }
+                    
                     inst.paidAmount = (inst.paidAmount || 0) + paidThisInst;
-                    inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+                    inst.status = (inst.paidAmount >= (inst.totalDue + (inst.penalty || 0))) ? 'paid' : 'partial';
                     
-                    const principalFraction = inst.principal / inst.totalDue;
-                    const interestFraction = inst.interest / inst.totalDue;
-                    
-                    totalPrincipalPaid += paidThisInst * principalFraction;
-                    totalInterestPaid += paidThisInst * interestFraction;
+                    totalPenaltyPaid += penaltyPortion;
+                    totalInterestPaid += interestPortion;
+                    totalPrincipalPaid += principalPortion;
                     
                     remainingAmount -= paidThisInst;
                     if (remainingAmount <= 0) break;
                 }
                 
                 const newTotalPaid = schedule.reduce((sum, inst) => sum + (inst.paidAmount || 0), 0);
-                const newInterestPaid = schedule.reduce((sum, inst) => {
-                    const paid = inst.paidAmount || 0;
-                    const interestPart = (paid / inst.totalDue) * inst.interest;
-                    return sum + (isNaN(interestPart) ? 0 : interestPart);
-                }, 0);
+                const newInterestPaid = loan.interestPaid + totalInterestPaid;
                 
                 const updates = {
                     repaymentSchedule: schedule,
@@ -5146,7 +5369,7 @@
                     interestPaid: newInterestPaid
                 };
                 
-                if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
+                if (newTotalPaid >= (loan.totalPayable || loan.amount) + schedule.reduce((s,i) => s + (i.penalty || 0), 0)) {
                     updates.status = 'completed';
                     updates.completedAt = Date.now();
                 }
@@ -5594,6 +5817,7 @@
                 weeklyInterestRate: parseFloat(document.getElementById('weeklyInterest').value),
                 maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value),
                 minLoanAmount: parseFloat(document.getElementById('minLoanAmount').value),
+                penaltyRate: parseFloat(document.getElementById('penaltyRate').value),
                 enableCustomerApp: document.getElementById('enableCustomerApp').checked,
                 enableAgentApp: document.getElementById('enableAgentApp').checked,
                 customerContactPhone: document.getElementById('customerContactPhone').value,
@@ -5929,6 +6153,7 @@
                 assignment: 'assignmentSection',
                 audit: 'auditSection',
                 applications: 'applicationsSection',
+                upcomingPayments: 'upcomingPaymentsSection', // NEW
                 notifications: 'notificationsSection',
                 settings: 'settingsSection'
             };
@@ -5945,6 +6170,7 @@
             if (sectionId === 'audit') renderAuditLogs();
             if (sectionId === 'analytics') renderAnalytics();
             if (sectionId === 'applications') renderPendingApplications();
+            if (sectionId === 'upcomingPayments') renderUpcomingPayments(); // NEW
             if (sectionId === 'notifications') {
                 renderNotifications();
                 renderMessages();
@@ -6177,6 +6403,9 @@
 
             await loadAllData();
             setupRealtimeListeners();
+
+            // Run penalty check every hour
+            setInterval(applyLatePenalties, 60 * 60 * 1000);
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
@@ -6191,6 +6420,7 @@
             
             db.ref('loans').on('value', (snap) => {
                 allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
+                applyLatePenalties(); // apply penalties when loans change
                 updateUI();
             });
             
