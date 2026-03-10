@@ -106,20 +106,18 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
+            background: white;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 20px;
-            box-shadow: 0 4px 8px rgba(0,122,255,0.2);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
         }
-        /* Logo image */
-        .logo-img {
-            height: 40px;
-            width: auto;
-            border-radius: 8px;
+
+        .logo-icon img {
+            width: 36px;
+            height: 36px;
+            object-fit: contain;
         }
 
         .logo-text {
@@ -222,24 +220,18 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
-            color: white;
+            background: white;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
-            font-weight: 500;
-            box-shadow: 0 4px 12px rgba(0,122,255,0.2);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
         }
-        .sidebar-logo {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
-        .sidebar-logo img {
-            height: 40px;
-            width: auto;
+
+        .sidebar-avatar img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: contain;
         }
 
         .sidebar-user {
@@ -299,6 +291,20 @@
 
         .sidebar-item.logout i {
             color: var(--ios-red);
+        }
+
+        .sidebar-item.upcoming-payments {
+            background-color: var(--ios-red);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(255,59,48,0.3);
+        }
+        .sidebar-item.upcoming-payments i {
+            color: white;
+        }
+        .sidebar-item.upcoming-payments:hover {
+            background-color: #e02b20;
+            transform: translateX(-4px);
         }
 
         .sidebar-badge {
@@ -648,57 +654,64 @@
             color: var(--ios-gray5);
         }
 
-        /* ===== Split Profile Card ===== */
-        .split-profile-card {
+        /* ===== Split Profile Card (compact loan card) ===== */
+        .loan-compact-card {
             background: var(--ios-card);
             border-radius: var(--radius-sm);
-            overflow: hidden;
-            display: flex;
-            height: 100px;
-            box-shadow: var(--shadow-sm);
+            padding: 12px;
             margin-bottom: 12px;
-        }
-
-        .split-profile-left, .split-profile-right {
-            flex: 1;
+            box-shadow: var(--shadow-sm);
             display: flex;
             align-items: center;
-            padding: 12px;
-            gap: 10px;
-            background: linear-gradient(135deg, rgba(0,122,255,0.02), rgba(88,86,214,0.02));
+            gap: 12px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-
-        .split-profile-left {
-            border-right: 1px dashed var(--ios-gray3);
+        .loan-compact-card:hover {
+            box-shadow: var(--shadow-md);
+            transform: translateY(-2px);
         }
-
-        .split-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 14px;
+        .loan-compact-left, .loan-compact-right {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+        }
+        .loan-compact-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
             object-fit: cover;
+            border: 2px solid white;
             box-shadow: var(--shadow-sm);
         }
-
-        .split-info {
+        .loan-compact-center {
             flex: 1;
         }
-
-        .split-name {
+        .loan-compact-name {
             font-weight: 600;
+            font-size: 15px;
+        }
+        .loan-compact-amount {
             font-size: 14px;
-            margin-bottom: 2px;
-        }
-
-        .split-label {
-            font-size: 11px;
-            color: var(--ios-gray5);
-            margin-bottom: 2px;
-        }
-
-        .split-value {
+            color: var(--ios-blue);
             font-weight: 500;
-            font-size: 12px;
+        }
+        .loan-compact-badges {
+            display: flex;
+            gap: 6px;
+            margin-top: 4px;
+            flex-wrap: wrap;
+        }
+        .loan-badge {
+            background: var(--ios-gray1);
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 10px;
+            font-weight: 500;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         /* ===== Badges ===== */
@@ -808,7 +821,7 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* ===== Modal System (Enhanced) ===== */
+        /* ===== Modal System ===== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -873,8 +886,9 @@
             z-index: 10;
             border-radius: 28px 28px 0 0;
         }
+
         .modal-header img {
-            height: 30px;
+            height: 28px;
             width: auto;
             margin-right: 10px;
         }
@@ -1408,16 +1422,6 @@
             .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
-            
-            .split-profile-card {
-                flex-direction: column;
-                height: auto;
-            }
-            
-            .split-profile-left {
-                border-right: none;
-                border-bottom: 1px dashed var(--ios-gray3);
-            }
         }
 
         /* ===== Notifications specific ===== */
@@ -1468,68 +1472,6 @@
             background: var(--ios-blue);
             color: white;
         }
-
-        /* Compact Loan Card */
-        .loan-compact-card {
-            background: var(--ios-card);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .loan-compact-card:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-        .loan-compact-left, .loan-compact-right {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            width: 60px;
-        }
-        .loan-compact-left img, .loan-compact-right img {
-            width: 50px;
-            height: 50px;
-            border-radius: 50%;
-            object-fit: cover;
-            border: 2px solid white;
-            box-shadow: var(--shadow-sm);
-        }
-        .loan-compact-center {
-            flex: 1;
-            min-width: 0;
-        }
-        .loan-compact-name {
-            font-weight: 600;
-            font-size: 15px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .loan-compact-amount {
-            font-size: 14px;
-            color: var(--ios-blue);
-            font-weight: 500;
-        }
-        .loan-compact-icons {
-            display: flex;
-            gap: 8px;
-            margin-top: 4px;
-        }
-        .loan-compact-icons span {
-            background: var(--ios-gray1);
-            padding: 2px 8px;
-            border-radius: 20px;
-            font-size: 11px;
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
-        }
     </style>
 </head>
 <body>
@@ -1545,8 +1487,7 @@
     <!-- Header -->
     <div class="app-header">
         <div class="logo-area">
-            <!-- Logo image -->
-            <img src="logo.png" alt="TruCash" class="logo-img">
+            <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
             <span class="logo-text">TruCash Enterprise</span>
         </div>
         <div class="admin-name" id="adminNameDisplay">Admin</div>
@@ -1556,12 +1497,8 @@
     <!-- Sidebar -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
-        <div class="sidebar-logo">
-            <img src="logo.png" alt="TruCash">
-            <span class="logo-text">TruCash</span>
-        </div>
         <div class="sidebar-header">
-            <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+            <div class="sidebar-avatar"><img src="logo.png" alt="TruCash"></div>
             <div class="sidebar-user">
                 <div class="name" id="sidebarName">Admin User</div>
                 <div class="role">Administrator</div>
@@ -1580,7 +1517,15 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
-            <div class="sidebar-item" data-section="notifications"><i class="fas fa-bell"></i> Notifications</div>
+            <!-- New red button for upcoming payments -->
+            <div class="sidebar-item upcoming-payments" data-section="upcomingPayments">
+                <i class="fas fa-exclamation-triangle"></i> Upcoming Payments
+                <span class="sidebar-badge" id="sidebarUpcomingBadge" style="display: none;">0</span>
+            </div>
+            <div class="sidebar-item" data-section="notifications">
+                <i class="fas fa-bell"></i> Notifications
+                <span class="sidebar-badge" id="sidebarNotificationsBadge" style="display: none;">0</span>
+            </div>
             <div class="sidebar-item" id="signedAgreementsBtn"><i class="fas fa-file-signature"></i> Signed Agreements</div>
             <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
             <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
@@ -1966,7 +1911,15 @@
             </div>
         </section>
 
-        <!-- NOTIFICATIONS SECTION (enhanced) -->
+        <!-- NEW: UPCOMING PAYMENTS SECTION (separate page) -->
+        <section class="content-section" id="upcomingPaymentsSection">
+            <div class="floating-card">
+                <h3 class="mb-4">Upcoming & Overdue Payments</h3>
+                <div id="upcomingPaymentsList"></div>
+            </div>
+        </section>
+
+        <!-- NOTIFICATIONS SECTION (now only promotions & messages) -->
         <section class="content-section" id="notificationsSection">
             <div class="floating-card">
                 <h3 class="mb-4">Send Message</h3>
@@ -2085,7 +2038,7 @@
         </section>
     </div>
 
-    <!-- ========== MODALS (unchanged, but with logo added) ========== -->
+    <!-- ========== MODALS (unchanged) ========== -->
     <!-- Create Customer Modal -->
     <div class="modal-overlay" id="createCustomerModal">
         <div class="modal-container compact">
@@ -2463,7 +2416,7 @@
         </div>
     </div>
 
-    <!-- Record Payment Modal (Enhanced) -->
+    <!-- Record Payment Modal -->
     <div class="modal-overlay" id="recordPaymentModal">
         <div class="modal-container compact">
             <div class="modal-header">
@@ -2606,17 +2559,37 @@
         </div>
     </div>
 
+    <!-- Custom Rejection Reason Modal -->
+    <div class="modal-overlay" id="rejectionReasonModal">
+        <div class="modal-container compact">
+            <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px;"> Rejection Reason
+                <span class="modal-close" onclick="closeModal('rejectionReasonModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <div class="form-group">
+                    <label class="form-label">Reason</label>
+                    <textarea id="rejectionReasonText" class="form-textarea" rows="4" placeholder="Enter reason for rejection..."></textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('rejectionReasonModal')">Cancel</button>
+                <button class="btn btn-danger" id="submitRejectionReason">Confirm</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
         // MODIFICATIONS:
-        // - Dropdowns retract after click.
-        // - Enhanced modal styling, rejection reason, record payment modal.
-        // - Compact loan cards (profile left/right, name, amount, icons).
-        // - Fixed payment confirmation (now moves to confirmed).
-        // - Real-time notifications (once per new item).
-        // - Advanced commission payment (bulk pay with method).
-        // - Logo added everywhere.
+        // 1. Dropdowns close after item click.
+        // 2. Improved CSS for all modals (rejection reason, record payment, etc.).
+        // 3. Compact loan cards with mini badges.
+        // 4. Fixed confirm payment bug (updates payment node separately).
+        // 5. Real-time notifications for new pending items (once per item).
+        // 6. Advanced commission payment (improved modal with per-loan breakdown).
+        // 7. Logo added to header, sidebar, and all modal headers.
         // =========================================================================
         
         // Firebase configuration
@@ -2661,8 +2634,11 @@
         let customerFilter = 'all';
         let cloudinaryWidget = null;
 
-        // For one-time notifications
-        const shownNotifications = new Set();
+        // For real‑time notifications (track last seen IDs)
+        let lastSeenLoanIds = new Set();
+        let lastSeenPaymentIds = new Set();
+        let lastSeenAppIds = new Set();
+        let lastSeenCustomerIds = new Set();
 
         // ========== UTILITIES ==========
         const Utils = {
@@ -2709,10 +2685,11 @@
                         installment: i,
                         dueDate,
                         principal: principalPortion,
-                        interest,
+                        interest: interest,
                         totalDue: payment,
                         paidAmount: 0,
-                        status: 'pending'
+                        status: 'pending',
+                        penalty: 0
                     });
                 }
                 return schedule;
@@ -2741,6 +2718,80 @@
                 });
             }
         };
+
+        // ========== PENALTY SYSTEM ==========
+        const GRACE_DAYS = 5;
+        const PENALTY_RATE = 0.02;
+
+        async function applyPenaltiesToAllLoans() {
+            const now = Date.now();
+            for (const loan of allLoans) {
+                if (loan.status !== 'active' && loan.status !== 'approved') continue;
+                await applyPenaltiesToLoan(loan, now);
+            }
+        }
+
+        async function applyPenaltiesToLoan(loan, now = Date.now()) {
+            if (!loan.repaymentSchedule) return;
+            let lastPenaltyDate = loan.lastPenaltyDate || 0;
+            let totalPenalty = loan.totalPenalty || 0;
+            const totalPayable = loan.totalPayable || loan.amount || 0;
+            let schedule = [...loan.repaymentSchedule];
+            let updated = false;
+
+            for (let i = 0; i < schedule.length; i++) {
+                const inst = schedule[i];
+                if (inst.status === 'paid') continue;
+                const dueDate = inst.dueDate;
+                const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
+                if (now <= graceEnd) continue;
+
+                const overdueMs = now - graceEnd;
+                const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
+                if (overdueDays <= 0) continue;
+
+                let startDay = 1;
+                if (lastPenaltyDate > graceEnd) {
+                    const alreadyPenalizedMs = lastPenaltyDate - graceEnd;
+                    startDay = Math.floor(alreadyPenalizedMs / (24 * 60 * 60 * 1000)) + 1;
+                }
+                if (startDay > overdueDays) continue;
+
+                const penaltyPerDay = totalPayable * PENALTY_RATE;
+                const daysToApply = overdueDays - startDay + 1;
+                const penaltyAmount = penaltyPerDay * daysToApply;
+
+                inst.penalty = (inst.penalty || 0) + penaltyAmount;
+                inst.totalDue = inst.principal + inst.interest + inst.penalty;
+                inst.status = 'pending';
+
+                totalPenalty += penaltyAmount;
+                updated = true;
+            }
+
+            if (updated) {
+                loan.repaymentSchedule = schedule;
+                loan.totalPenalty = totalPenalty;
+                loan.totalPayable = (loan.totalPayable || loan.amount) + totalPenalty;
+                loan.lastPenaltyDate = now;
+
+                await db.ref('loans/' + loan.id).update({
+                    repaymentSchedule: schedule,
+                    totalPenalty: totalPenalty,
+                    totalPayable: loan.totalPayable,
+                    lastPenaltyDate: now
+                });
+
+                if (!loan.lastPenaltyNotif || now - loan.lastPenaltyNotif > 24 * 60 * 60 * 1000) {
+                    const customer = allCustomers.find(c => c.id === loan.customerId);
+                    if (customer) {
+                        const message = `Penalty of ${Utils.formatCurrency(penaltyAmount)} has been applied to your loan (${loan.id.substring(0,8)}) due to late payment. Please pay immediately to avoid further penalties.`;
+                        await Utils.sendNotification(customer.id, message, 'penalty', loan.id);
+                    }
+                    await db.ref('loans/' + loan.id).update({ lastPenaltyNotif: now });
+                }
+            }
+        }
 
         // ========== UPDATE BADGE NUMBERS ==========
         function updateBadges() {
@@ -2800,38 +2851,346 @@
                     badgePayments.style.display = 'none';
                 }
             }
+
+            const upcoming = getUpcomingPayments();
+            const overdue = getOverduePayments();
+            const totalReminders = upcoming.length + overdue.length;
+            const sidebarUpcomingBadge = document.getElementById('sidebarUpcomingBadge');
+            if (sidebarUpcomingBadge) {
+                if (totalReminders > 0) {
+                    sidebarUpcomingBadge.style.display = 'flex';
+                    sidebarUpcomingBadge.innerText = totalReminders > 99 ? '99+' : totalReminders;
+                } else {
+                    sidebarUpcomingBadge.style.display = 'none';
+                }
+            }
         }
 
-        // ========== REAL-TIME NOTIFICATIONS (once per session) ==========
-        function checkForNewItems() {
-            // New pending loans
-            allLoans.forEach(loan => {
-                if (loan.status === 'pending' && !shownNotifications.has(`loan_${loan.id}`)) {
-                    shownNotifications.add(`loan_${loan.id}`);
-                    Utils.showToast('New Loan Application', `Loan from ${loan.customerName} for ${Utils.formatCurrency(loan.amount)}`, 'info');
+        function getUpcomingPayments() {
+            const now = Date.now();
+            const sixtyDays = 60 * 24 * 60 * 60 * 1000;
+            const upcoming = [];
+            allLoans.filter(l => l.status === 'active' || l.status === 'approved').forEach(loan => {
+                if (loan.repaymentSchedule) {
+                    loan.repaymentSchedule.forEach(inst => {
+                        if (inst.status !== 'paid' && inst.dueDate > now && inst.dueDate < now + sixtyDays) {
+                            upcoming.push({
+                                loanId: loan.id,
+                                customerId: loan.customerId,
+                                customerName: loan.customerName,
+                                agentId: loan.agentId,
+                                agentName: loan.agentName,
+                                dueDate: inst.dueDate,
+                                amount: inst.totalDue,
+                                installment: inst.installment,
+                                paidAmount: inst.paidAmount || 0,
+                                status: inst.status,
+                                penalty: inst.penalty || 0
+                            });
+                        }
+                    });
                 }
             });
-            // New pending agent applications
-            allAgentApplications.forEach(app => {
-                if (app.status === 'pending' && !shownNotifications.has(`app_${app.id}`)) {
-                    shownNotifications.add(`app_${app.id}`);
-                    Utils.showToast('New Agent Application', `${app.fullName} applied to become an agent`, 'info');
+            return upcoming;
+        }
+
+        function getOverduePayments() {
+            const now = Date.now();
+            const overdue = [];
+            allLoans.filter(l => l.status === 'active' || l.status === 'approved').forEach(loan => {
+                if (loan.repaymentSchedule) {
+                    loan.repaymentSchedule.forEach(inst => {
+                        if (inst.status !== 'paid' && inst.dueDate < now) {
+                            overdue.push({
+                                loanId: loan.id,
+                                customerId: loan.customerId,
+                                customerName: loan.customerName,
+                                agentId: loan.agentId,
+                                agentName: loan.agentName,
+                                dueDate: inst.dueDate,
+                                amount: inst.totalDue,
+                                installment: inst.installment,
+                                paidAmount: inst.paidAmount || 0,
+                                status: inst.status,
+                                penalty: inst.penalty || 0
+                            });
+                        }
+                    });
                 }
             });
-            // New pending payments
-            allPayments.forEach(pay => {
-                if (pay.status === 'pending' && !shownNotifications.has(`pay_${pay.id}`)) {
-                    shownNotifications.add(`pay_${pay.id}`);
-                    Utils.showToast('New Payment', `Payment of ${Utils.formatCurrency(pay.amount)} from ${pay.customerName} awaiting verification`, 'info');
-                }
+            return overdue;
+        }
+
+        // ========== CSV EXPORT ==========
+        function exportData(type) {
+            let data = [];
+            let filename = '';
+            
+            switch(type) {
+                case 'customers':
+                    data = allCustomers.map(c => ({
+                        Name: c.fullName,
+                        Email: c.email,
+                        Phone: c.phone,
+                        NRC: c.nrc,
+                        Address: c.residence,
+                        Status: c.status,
+                        Agent: c.agentName || 'None',
+                        'Loans Count': allLoans.filter(l => l.customerId === c.id).length,
+                        'Total Borrowed': Utils.formatCurrency(allLoans.filter(l => l.customerId === c.id).reduce((s,l) => s + (l.amount || 0), 0)),
+                        Created: Utils.formatDate(c.createdAt),
+                        BanReason: c.banReason || ''
+                    }));
+                    filename = 'customers.csv';
+                    break;
+                    
+                case 'agents':
+                    data = allAgents.map(a => ({
+                        Name: a.fullName,
+                        Email: a.email,
+                        Phone: a.phone,
+                        'Agent ID': a.agentId,
+                        Branch: a.branch || 'Main',
+                        Status: a.status,
+                        'Customers Count': a.totalCustomers || 0,
+                        'Loans Count': allLoans.filter(l => l.agentId === a.id).length,
+                        'Commission Earned': Utils.formatCurrency(allCommissionHistory.filter(c => c.agentId === a.id && c.status === 'paid').reduce((s,c) => s + c.amount, 0)),
+                        Created: Utils.formatDate(a.createdAt),
+                        BanReason: a.banReason || ''
+                    }));
+                    filename = 'agents.csv';
+                    break;
+                    
+                case 'loans':
+                    data = allLoans.map(l => ({
+                        'Loan ID': l.id,
+                        Customer: l.customerName,
+                        Agent: l.agentName || 'None',
+                        Amount: Utils.formatCurrency(l.amount),
+                        'Approved Amount': Utils.formatCurrency(l.approvedAmount || l.amount),
+                        Duration: `${l.duration} ${l.durationUnit || 'months'}`,
+                        'Interest Rate': l.interestRate + '%',
+                        'Total Interest': Utils.formatCurrency(l.totalInterest || 0),
+                        'Total Payable': Utils.formatCurrency(l.totalPayable || l.amount),
+                        'Total Paid': Utils.formatCurrency(l.totalPaid || 0),
+                        Status: l.status,
+                        Purpose: l.purpose,
+                        Created: Utils.formatDate(l.createdAt),
+                        Approved: l.approvedAt ? Utils.formatDate(l.approvedAt) : 'N/A',
+                        'Collateral Type': l.collateral?.category || 'N/A',
+                        'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0),
+                        'Witness Name': l.witness?.name || 'N/A',
+                        'Witness NRC': l.witness?.nrc || 'N/A',
+                        'Signed Agreement': l.signedAgreementUrl || 'N/A',
+                        RejectionReason: l.rejectionReason || '',
+                        'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0)
+                    }));
+                    filename = 'loans.csv';
+                    break;
+                    
+                case 'payments':
+                    data = allPayments.map(p => ({
+                        'Payment ID': p.id,
+                        'Loan ID': p.loanId,
+                        Customer: p.customerName,
+                        Amount: Utils.formatCurrency(p.amount),
+                        Method: p.method,
+                        Reference: p.reference || 'N/A',
+                        Status: p.status,
+                        Date: Utils.formatDateTime(p.timestamp),
+                        Verified: p.verifiedAt ? Utils.formatDateTime(p.verifiedAt) : 'N/A'
+                    }));
+                    filename = 'payments.csv';
+                    break;
+                    
+                case 'commission':
+                    data = allCommissionHistory.map(c => {
+                        const agent = allAgents.find(a => a.id === c.agentId);
+                        return {
+                            Agent: agent?.fullName || 'Unknown',
+                            'Agent ID': agent?.agentId || c.agentId,
+                            Amount: Utils.formatCurrency(c.amount),
+                            Status: c.status,
+                            'Paid Date': c.paidAt ? Utils.formatDateTime(c.paidAt) : 'N/A',
+                            'Loan ID': c.loanId,
+                            Customer: c.customerName || 'Unknown'
+                        };
+                    });
+                    filename = 'commission.csv';
+                    break;
+                    
+                case 'audit':
+                    data = allAuditLogs.map(log => ({
+                        Action: log.action,
+                        Admin: log.adminEmail,
+                        Details: log.details,
+                        Timestamp: Utils.formatDateTime(log.timestamp)
+                    }));
+                    filename = 'audit.csv';
+                    break;
+                    
+                case 'applications':
+                    data = allAgentApplications.filter(app => app.status === 'pending').map(app => ({
+                        Name: app.fullName,
+                        Phone: app.phone,
+                        NRC: app.nrc,
+                        Residence: app.residence,
+                        Submitted: Utils.formatDateTime(app.submittedAt)
+                    }));
+                    filename = 'applications.csv';
+                    break;
+                    
+                default:
+                    return;
+            }
+            
+            const csv = Papa.unparse(data);
+            const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(blob);
+            link.download = filename;
+            link.click();
+        }
+
+        // ========== EXPORT ALL DATA AS ZIP ==========
+        async function exportAllData() {
+            Utils.showLoading('Generating ZIP...');
+            const zip = new JSZip();
+            
+            // Customers
+            const customersData = allCustomers.map(c => ({
+                Name: c.fullName,
+                Email: c.email,
+                Phone: c.phone,
+                NRC: c.nrc,
+                Address: c.residence,
+                Status: c.status,
+                Agent: c.agentName || 'None',
+                'Loans Count': allLoans.filter(l => l.customerId === c.id).length,
+                'Total Borrowed': Utils.formatCurrency(allLoans.filter(l => l.customerId === c.id).reduce((s,l) => s + (l.amount || 0), 0)),
+                Created: Utils.formatDate(c.createdAt),
+                BanReason: c.banReason || ''
+            }));
+            zip.file("customers.csv", Papa.unparse(customersData));
+            
+            // Agents
+            const agentsData = allAgents.map(a => ({
+                Name: a.fullName,
+                Email: a.email,
+                Phone: a.phone,
+                'Agent ID': a.agentId,
+                Branch: a.branch || 'Main',
+                Status: a.status,
+                'Customers Count': a.totalCustomers || 0,
+                'Loans Count': allLoans.filter(l => l.agentId === a.id).length,
+                'Commission Earned': Utils.formatCurrency(allCommissionHistory.filter(c => c.agentId === a.id && c.status === 'paid').reduce((s,c) => s + c.amount, 0)),
+                Created: Utils.formatDate(a.createdAt),
+                BanReason: a.banReason || ''
+            }));
+            zip.file("agents.csv", Papa.unparse(agentsData));
+            
+            // Loans
+            const loansData = allLoans.map(l => ({
+                'Loan ID': l.id,
+                Customer: l.customerName,
+                Agent: l.agentName || 'None',
+                Amount: Utils.formatCurrency(l.amount),
+                'Approved Amount': Utils.formatCurrency(l.approvedAmount || l.amount),
+                Duration: `${l.duration} ${l.durationUnit || 'months'}`,
+                'Interest Rate': l.interestRate + '%',
+                'Total Interest': Utils.formatCurrency(l.totalInterest || 0),
+                'Total Payable': Utils.formatCurrency(l.totalPayable || l.amount),
+                'Total Paid': Utils.formatCurrency(l.totalPaid || 0),
+                Status: l.status,
+                Purpose: l.purpose,
+                Created: Utils.formatDate(l.createdAt),
+                Approved: l.approvedAt ? Utils.formatDate(l.approvedAt) : 'N/A',
+                'Collateral Type': l.collateral?.category || 'N/A',
+                'Collateral Value': Utils.formatCurrency(l.collateral?.value || 0),
+                'Witness Name': l.witness?.name || 'N/A',
+                'Witness NRC': l.witness?.nrc || 'N/A',
+                'Signed Agreement': l.signedAgreementUrl || 'N/A',
+                RejectionReason: l.rejectionReason || '',
+                'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0)
+            }));
+            zip.file("loans.csv", Papa.unparse(loansData));
+            
+            // Payments
+            const paymentsData = allPayments.map(p => ({
+                'Payment ID': p.id,
+                'Loan ID': p.loanId,
+                Customer: p.customerName,
+                Amount: Utils.formatCurrency(p.amount),
+                Method: p.method,
+                Reference: p.reference || 'N/A',
+                Status: p.status,
+                Date: Utils.formatDateTime(p.timestamp),
+                Verified: p.verifiedAt ? Utils.formatDateTime(p.verifiedAt) : 'N/A'
+            }));
+            zip.file("payments.csv", Papa.unparse(paymentsData));
+            
+            // Commission History
+            const commissionData = allCommissionHistory.map(c => {
+                const agent = allAgents.find(a => a.id === c.agentId);
+                return {
+                    Agent: agent?.fullName || 'Unknown',
+                    'Agent ID': agent?.agentId || c.agentId,
+                    Amount: Utils.formatCurrency(c.amount),
+                    Status: c.status,
+                    'Paid Date': c.paidAt ? Utils.formatDateTime(c.paidAt) : 'N/A',
+                    'Loan ID': c.loanId,
+                    Customer: c.customerName || 'Unknown'
+                };
             });
-            // New customer registrations (check if customer created recently, e.g., within last minute)
-            allCustomers.forEach(cust => {
-                if (cust.createdAt && Date.now() - cust.createdAt < 60000 && !shownNotifications.has(`cust_${cust.id}`)) {
-                    shownNotifications.add(`cust_${cust.id}`);
-                    Utils.showToast('New Customer Registered', `${cust.fullName} just signed up`, 'info');
-                }
-            });
+            zip.file("commission.csv", Papa.unparse(commissionData));
+            
+            // Agent Applications (all)
+            const appsData = allAgentApplications.map(app => ({
+                Name: app.fullName,
+                Phone: app.phone,
+                NRC: app.nrc,
+                Residence: app.residence,
+                Status: app.status,
+                Submitted: Utils.formatDateTime(app.submittedAt)
+            }));
+            zip.file("applications.csv", Papa.unparse(appsData));
+            
+            // Audit Logs
+            const auditData = allAuditLogs.map(log => ({
+                Action: log.action,
+                Admin: log.adminEmail,
+                Details: log.details,
+                Timestamp: Utils.formatDateTime(log.timestamp)
+            }));
+            zip.file("audit.csv", Papa.unparse(auditData));
+            
+            // Messages
+            const messagesData = allMessages.map(m => ({
+                Recipient: m.recipientId,
+                Message: m.message,
+                Sent: Utils.formatDateTime(m.timestamp)
+            }));
+            zip.file("messages.csv", Papa.unparse(messagesData));
+
+            // Promotions
+            const promotionsData = allPromotions.map(p => ({
+                Title: p.title,
+                Message: p.message,
+                Recipients: p.recipients,
+                Image: p.imageUrl || '',
+                Created: Utils.formatDateTime(p.createdAt)
+            }));
+            zip.file("promotions.csv", Papa.unparse(promotionsData));
+            
+            // Generate zip
+            const content = await zip.generateAsync({ type: "blob" });
+            const link = document.createElement('a');
+            link.href = URL.createObjectURL(content);
+            link.download = `trucash_full_export_${moment().format('YYYYMMDD_HHmmss')}.zip`;
+            link.click();
+            
+            Utils.hideLoading();
+            Utils.showToast('Success', 'Full data export generated', 'success');
         }
 
         // ========== LOAD ALL DATA ==========
@@ -2871,9 +3230,16 @@
                 const promoSnap = await db.ref('promotions').once('value');
                 allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
 
+                // Initialize last seen sets
+                allLoans.forEach(l => lastSeenLoanIds.add(l.id));
+                allPayments.forEach(p => lastSeenPaymentIds.add(p.id));
+                allAgentApplications.forEach(a => lastSeenAppIds.add(a.id));
+                allCustomers.forEach(c => lastSeenCustomerIds.add(c.id));
+
+                await applyPenaltiesToAllLoans();
+
                 populateSettingsForm();
                 updateUI();
-                checkForNewItems(); // initial check
                 Utils.hideLoading();
             } catch (error) {
                 Utils.showToast('Error', 'Failed to load data: ' + error.message, 'error');
@@ -2911,6 +3277,7 @@
             renderAuditLogs();
             renderPendingApplications();
             renderRejectedApplications();
+            renderUpcomingPayments();
             renderMessages(); 
             renderPromotionHistory();
             updateBadges();
@@ -3088,7 +3455,7 @@
             `).join('');
         }
 
-        // ========== COMPACT LOAN CARD RENDERING ==========
+        // Compact loan card render
         function renderLoans() {
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
@@ -3108,25 +3475,26 @@
             container.innerHTML = filtered.map(l => {
                 const customer = allCustomers.find(c => c.id === l.customerId);
                 const agent = allAgents.find(a => a.id === l.agentId);
-                const totalPaid = l.totalPaid || 0;
-                const progress = (totalPaid / (l.totalPayable || l.amount)) * 100;
+                const hasCollateral = l.collateral?.images && l.collateral.images.length > 0;
+                const hasWitness = l.witness != null;
+                const hasSigned = l.signedAgreementUrl != null;
                 
                 return `
                 <div class="loan-compact-card" onclick="showLoanDetails('${l.id}')">
                     <div class="loan-compact-left">
-                        <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')+'&background=007AFF&color=fff'}" alt="customer">
+                        <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')+'&background=007AFF&color=fff'}" class="loan-compact-avatar">
                     </div>
                     <div class="loan-compact-center">
                         <div class="loan-compact-name">${l.customerName}</div>
                         <div class="loan-compact-amount">${Utils.formatCurrency(l.amount)}</div>
-                        <div class="loan-compact-icons">
-                            ${l.collateral?.images ? `<span><i class="fas fa-image"></i> ${l.collateral.images.length}</span>` : ''}
-                            ${l.witness ? `<span><i class="fas fa-user"></i> Wit</span>` : ''}
-                            ${l.signedAgreementUrl ? `<span><i class="fas fa-file-signature"></i> Signed</span>` : ''}
+                        <div class="loan-compact-badges">
+                            ${hasCollateral ? '<span class="loan-badge"><i class="fas fa-image"></i> Collateral</span>' : ''}
+                            ${hasWitness ? '<span class="loan-badge"><i class="fas fa-user"></i> Witness</span>' : ''}
+                            ${hasSigned ? '<span class="loan-badge"><i class="fas fa-file-signature"></i> Signed</span>' : ''}
                         </div>
                     </div>
                     <div class="loan-compact-right">
-                        <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')+'&background=5856d6&color=fff'}" alt="agent">
+                        <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')+'&background=5856d6&color=fff'}" class="loan-compact-avatar">
                     </div>
                 </div>
             `}).join('');
@@ -3189,8 +3557,6 @@
                 </div>
             `).join('');
         }
-
-        function renderRejectedApplications() {}
 
         function renderAnalytics() {
             const totalLent = allLoans.filter(l => ['approved','active'].includes(l.status)).reduce((s,l) => s + (l.approvedAmount || l.amount), 0);
@@ -3336,12 +3702,347 @@
             `).join('');
         }
 
-        // ===== NOTIFICATIONS (with send reminder button) =====
-        function renderNotifications() {
-            // Not used, but kept for compatibility
+        // ===== UPCOMING PAYMENTS (new page) =====
+        function renderUpcomingPayments() {
+            const upcoming = getUpcomingPayments();
+            const overdue = getOverduePayments();
+            
+            const now = Date.now();
+            
+            const allReminders = [...overdue.map(p => ({...p, type: 'overdue'})), ...upcoming.map(p => ({...p, type: 'upcoming'}))];
+            allReminders.sort((a,b) => a.dueDate - b.dueDate);
+            
+            const container = document.getElementById('upcomingPaymentsList');
+            if (!container) return;
+            
+            if (allReminders.length === 0) {
+                container.innerHTML = '<p class="text-muted">No upcoming or overdue payments.</p>';
+            } else {
+                container.innerHTML = allReminders.map(p => {
+                    const daysLeft = Math.ceil((p.dueDate - now) / (1000*60*60*24));
+                    const statusClass = p.type === 'overdue' ? 'overdue' : 'upcoming';
+                    const badgeText = p.type === 'overdue' ? `${Math.abs(daysLeft)} day${Math.abs(daysLeft)!==1?'s':''} overdue` : `${daysLeft} day${daysLeft!==1?'s':''} left`;
+                    const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
+                    
+                    return `
+                    <div class="notification-item ${statusClass}" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
+                            </div>
+                            <span class="${badgeClass}">${badgeText}</span>
+                        </div>
+                        <div class="profile-meta">
+                            Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
+                            Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
+                        </div>
+                        <div class="profile-meta">
+                            Penalty: ${Utils.formatCurrency(p.penalty || 0)} · Agent: ${p.agentName || 'None'}
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId}')">
+                                <i class="fas fa-bell"></i> Send Reminder
+                            </button>
+                        </div>
+                    </div>
+                `}).join('');
+            }
         }
 
-        // Send Message
+        window.showReminderDetails = (loanId, installment) => {
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan) return;
+            const inst = loan.repaymentSchedule?.[installment-1];
+            if (!inst) return;
+            
+            const customer = allCustomers.find(c => c.id === loan.customerId);
+            const agent = allAgents.find(a => a.id === loan.agentId);
+            
+            const now = Date.now();
+            const daysLeft = Math.ceil((inst.dueDate - now) / (1000*60*60*24));
+            const statusText = daysLeft < 0 ? `Overdue by ${Math.abs(daysLeft)} days` : `${daysLeft} days remaining`;
+            
+            const content = `
+                <div class="split-profile-card mb-4">
+                    <div class="split-profile-left" onclick="showCustomerDetails('${customer?.id}')" style="cursor:pointer;">
+                        <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(loan.customerName)}" class="split-avatar">
+                        <div class="split-info">
+                            <div class="split-label">Customer</div>
+                            <div class="split-name">${loan.customerName}</div>
+                            <div class="split-label">${customer?.phone || ''}</div>
+                        </div>
+                    </div>
+                    <div class="split-profile-right" onclick="showAgentDetails('${agent?.id}')" style="cursor:pointer;">
+                        <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')}" class="split-avatar">
+                        <div class="split-info">
+                            <div class="split-label">Agent</div>
+                            <div class="split-name">${agent?.fullName || 'Not Assigned'}</div>
+                            <div class="split-label">${agent?.agentId || ''}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3 class="detail-title">Loan Summary</h3>
+                    <div class="grid-3">
+                        <div class="detail-card">
+                            <div class="detail-label">Loan ID</div>
+                            <div class="detail-value">${loan.id.substring(0,8)}...</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Amount</div>
+                            <div class="detail-value">${Utils.formatCurrency(loan.amount)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value"><span class="status-badge ${loan.status}">${loan.status}</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3 class="detail-title">Next Payment Details</h3>
+                    <div class="grid-3">
+                        <div class="detail-card">
+                            <div class="detail-label">Installment #</div>
+                            <div class="detail-value">${inst.installment}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Due Date</div>
+                            <div class="detail-value">${Utils.formatDate(inst.dueDate)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Days</div>
+                            <div class="detail-value">${statusText}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Amount Due</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.totalDue)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Paid So Far</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.paidAmount || 0)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Remaining</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.totalDue - (inst.paidAmount || 0))}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Penalty</div>
+                            <div class="detail-value text-red">${Utils.formatCurrency(inst.penalty || 0)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('reminderDetailsContent').innerHTML = content;
+            document.getElementById('reminderDetailsSendBtn').onclick = () => {
+                openSendReminderModal(loanId, installment, loan.customerId, loan.agentId);
+            };
+            openModal('reminderDetailsModal');
+        };
+
+        window.openSendReminderModal = (loanId, installment, customerId, agentId) => {
+            document.getElementById('reminderLoanId').value = loanId;
+            document.getElementById('reminderInstallment').value = installment;
+            document.getElementById('reminderCustomerId').value = customerId;
+            document.getElementById('reminderAgentId').value = agentId;
+            
+            const loan = allLoans.find(l => l.id === loanId);
+            const inst = loan?.repaymentSchedule?.[installment-1];
+            if (loan && inst) {
+                const dueDate = Utils.formatDate(inst.dueDate);
+                const amount = Utils.formatCurrency(inst.totalDue);
+                const penalty = Utils.formatCurrency(inst.penalty || 0);
+                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} (including penalty: ${penalty}) is due on ${dueDate}. Please pay promptly to avoid further penalties.`;
+                document.getElementById('reminderMessage').value = message;
+            }
+            
+            openModal('sendReminderModal');
+        };
+
+        document.getElementById('sendReminderBtn').addEventListener('click', async () => {
+            const loanId = document.getElementById('reminderLoanId').value;
+            const installment = document.getElementById('reminderInstallment').value;
+            const customerId = document.getElementById('reminderCustomerId').value;
+            const agentId = document.getElementById('reminderAgentId').value;
+            const recipient = document.getElementById('reminderRecipient').value;
+            const message = document.getElementById('reminderMessage').value.trim();
+
+            if (!message) {
+                Utils.showToast('Error', 'Message cannot be empty', 'error');
+                return;
+            }
+
+            Utils.showLoading('Sending reminder...');
+            try {
+                const loan = allLoans.find(l => l.id === loanId);
+                if (!loan) throw new Error('Loan not found');
+
+                if (recipient === 'customer' || recipient === 'both') {
+                    await Utils.sendNotification(customerId, message, 'reminder', loanId);
+                }
+                if ((recipient === 'agent' || recipient === 'both') && agentId) {
+                    await Utils.sendNotification(agentId, message, 'reminder', loanId);
+                }
+
+                const msgId = Utils.generateId('MSG');
+                await db.ref('messages/' + msgId).set({
+                    recipientId: recipient === 'both' ? 'both' : (recipient === 'customer' ? customerId : agentId),
+                    message: message,
+                    timestamp: Date.now(),
+                    senderId: currentUser.uid,
+                    senderName: adminData?.fullName,
+                    read: false,
+                    type: 'reminder',
+                    relatedLoan: loanId
+                });
+
+                Utils.showToast('Success', 'Reminder sent', 'success');
+                closeModal('sendReminderModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        // ========== RECORD PAYMENT (fixed) ==========
+        document.getElementById('recordPaymentBtn').addEventListener('click', () => {
+            const loanId = document.getElementById('loanDetailsContent')?.getAttribute('data-loan-id');
+            if (!loanId) return;
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan || !loan.repaymentSchedule) return;
+
+            const select = document.getElementById('recordInstallment');
+            select.innerHTML = '';
+            loan.repaymentSchedule.forEach((inst, index) => {
+                if (inst.status !== 'paid') {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    const remaining = inst.totalDue - (inst.paidAmount || 0);
+                    option.textContent = `#${inst.installment} - Due: ${Utils.formatDate(inst.dueDate)} - Amount: ${Utils.formatCurrency(inst.totalDue)} (Paid: ${Utils.formatCurrency(inst.paidAmount || 0)} - Remaining: ${Utils.formatCurrency(remaining)})`;
+                    option.dataset.remaining = remaining;
+                    select.appendChild(option);
+                }
+            });
+
+            select.addEventListener('change', (e) => {
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                const remaining = selectedOption.dataset.remaining;
+                document.getElementById('installmentRemaining').innerText = `Remaining for this installment: ${Utils.formatCurrency(remaining || 0)}`;
+                document.getElementById('recordAmount').max = remaining;
+            });
+            if (select.options.length > 0) {
+                const event = new Event('change');
+                select.dispatchEvent(event);
+            }
+
+            document.getElementById('recordLoanId').value = loanId;
+            document.getElementById('recordAmount').value = '';
+            document.getElementById('recordMethod').value = 'Cash';
+            document.getElementById('recordReference').value = '';
+            document.getElementById('paymentProofUrl').value = '';
+            document.getElementById('paymentProofPreview').innerHTML = '';
+            openModal('recordPaymentModal');
+        });
+
+        document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
+            const loanId = document.getElementById('recordLoanId').value;
+            const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
+            const amount = parseFloat(document.getElementById('recordAmount').value);
+            const method = document.getElementById('recordMethod').value;
+            const reference = document.getElementById('recordReference').value;
+            const proofUrl = document.getElementById('paymentProofUrl').value;
+
+            if (isNaN(amount) || amount <= 0) {
+                Utils.showToast('Error', 'Enter a valid amount', 'error');
+                return;
+            }
+
+            Utils.showLoading('Recording payment...');
+            try {
+                const loanRef = db.ref('loans/' + loanId);
+                const loanSnap = await loanRef.once('value');
+                const loan = loanSnap.val();
+                if (!loan) throw new Error('Loan not found');
+
+                let schedule = loan.repaymentSchedule || [];
+                if (schedule.length === 0) throw new Error('No repayment schedule');
+
+                const inst = schedule[installmentIndex];
+                const due = inst.totalDue - (inst.paidAmount || 0);
+                if (amount > due) {
+                    Utils.showToast('Error', 'Amount exceeds remaining due for this installment', 'error');
+                    return;
+                }
+
+                inst.paidAmount = (inst.paidAmount || 0) + amount;
+                inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+
+                let totalPaid = 0, interestPaid = 0;
+                schedule.forEach(i => {
+                    totalPaid += i.paidAmount || 0;
+                    const paid = i.paidAmount || 0;
+                    const interestPart = (paid / i.totalDue) * i.interest;
+                    interestPaid += isNaN(interestPart) ? 0 : interestPart;
+                });
+
+                const updates = {
+                    repaymentSchedule: schedule,
+                    totalPaid: totalPaid,
+                    interestPaid: interestPaid
+                };
+
+                if (totalPaid >= (loan.totalPayable || loan.amount)) {
+                    updates.status = 'completed';
+                    updates.completedAt = Date.now();
+                }
+
+                await loanRef.update(updates);
+
+                const paymentId = Utils.generateId('PAY');
+                await db.ref('payments/' + paymentId).set({
+                    id: paymentId,
+                    loanId: loanId,
+                    customerId: loan.customerId,
+                    customerName: loan.customerName,
+                    amount: amount,
+                    method: method,
+                    reference: reference,
+                    proofUrl: proofUrl || null,
+                    status: 'confirmed',
+                    timestamp: Date.now(),
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser.uid,
+                    notes: 'Manual payment recorded by admin'
+                });
+
+                const interestPortion = (amount / inst.totalDue) * inst.interest;
+                if (interestPortion > 0 && loan.agentId) {
+                    const commissionAmount = interestPortion * 0.15;
+                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
+                        agentId: loan.agentId,
+                        customerId: loan.customerId,
+                        loanId: loanId,
+                        customerName: loan.customerName,
+                        amount: commissionAmount,
+                        paidAt: null,
+                        paidBy: null,
+                        status: 'pending'
+                    });
+                }
+
+                await Utils.logAudit('RECORD_PAYMENT', { loanId, amount, method, installment: installmentIndex+1 });
+                Utils.showToast('Success', 'Payment recorded', 'success');
+                closeModal('recordPaymentModal');
+                closeModal('loanDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        // ========== SEND MESSAGE ==========
         document.getElementById('sendMessageBtn')?.addEventListener('click', async () => {
             const recipientType = document.getElementById('msgRecipientType').value;
             const message = document.getElementById('msgText').value.trim();
@@ -3774,7 +4475,7 @@
             const scheduleHtml = loan.repaymentSchedule ? `
                 <table class="repayment-table">
                     <thead>
-                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Total</th><th>Paid</th><th>Status</th></tr>
+                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>
                     </thead>
                     <tbody>
                         ${loan.repaymentSchedule.map((inst, i) => {
@@ -3787,6 +4488,7 @@
                                 <td>${Utils.formatDate(inst.dueDate)}</td>
                                 <td>${Utils.formatCurrency(inst.principal)}</td>
                                 <td>${Utils.formatCurrency(inst.interest)}</td>
+                                <td>${Utils.formatCurrency(inst.penalty || 0)}</td>
                                 <td>${Utils.formatCurrency(inst.totalDue)}</td>
                                 <td>${Utils.formatCurrency(paid)}</td>
                                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -3862,6 +4564,10 @@
                             <div class="detail-value">${Utils.formatCurrency(loan.totalInterest || 0)}</div>
                         </div>
                         <div class="detail-card">
+                            <div class="detail-label">Total Penalty</div>
+                            <div class="detail-value text-red">${Utils.formatCurrency(loan.totalPenalty || 0)}</div>
+                        </div>
+                        <div class="detail-card">
                             <div class="detail-label">Total Payable</div>
                             <div class="detail-value">${Utils.formatCurrency(loan.totalPayable || loan.amount)}</div>
                         </div>
@@ -3932,7 +4638,7 @@
             document.getElementById('recordPaymentBtn').style.display = loan.status === 'active' || loan.status === 'approved' ? 'inline-flex' : 'none';
             
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
-            document.getElementById('rejectLoanBtn').onclick = () => rejectLoan(loan.id);
+            document.getElementById('rejectLoanBtn').onclick = () => openRejectionModal(loan.id);
             document.getElementById('markDefaultedBtn').onclick = () => markAsDefaulted(loan.id);
             document.getElementById('editLoanBtn').onclick = () => editLoan(loan.id);
             
@@ -4351,6 +5057,8 @@
                 `).join('');
             }
             
+            const totalPending = pendingEntries.reduce((s,e) => s + e.amount, 0);
+            
             const content = `
                 <div class="profile-row mb-4">
                     <img src="${agent.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent.fullName)}" class="profile-img" style="width:60px;height:60px;">
@@ -4361,7 +5069,7 @@
                 </div>
                 
                 <div class="detail-section">
-                    <h4 class="detail-title">Pending Commission</h4>
+                    <h4 class="detail-title">Pending Commission (Total: ${Utils.formatCurrency(totalPending)})</h4>
                     ${loansHtml}
                 </div>
                 
@@ -4406,7 +5114,7 @@
                         );
                     }
                     
-                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: pendingEntries.reduce((s,e) => s + e.amount, 0), method });
+                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: totalPending, method });
                     Utils.showToast('Success', 'Commission paid', 'success');
                     closeModal('payCommissionModal');
                 } catch (e) {
@@ -4447,37 +5155,49 @@
             Utils.hideLoading();
         }
 
-        async function rejectLoan(loanId) {
-            const reason = prompt('Enter reason for rejection:');
-            if (reason === null) return;
+        // Rejection with custom modal
+        let currentRejectLoanId = null;
+        function openRejectionModal(loanId) {
+            currentRejectLoanId = loanId;
+            document.getElementById('rejectionReasonText').value = '';
+            openModal('rejectionReasonModal');
+        }
+
+        document.getElementById('submitRejectionReason').addEventListener('click', async () => {
+            const reason = document.getElementById('rejectionReasonText').value.trim();
+            if (!reason) {
+                Utils.showToast('Error', 'Reason cannot be empty', 'error');
+                return;
+            }
+            closeModal('rejectionReasonModal');
             
             Utils.showLoading('Rejecting loan...');
             try {
-                await db.ref('loans/' + loanId).update({
+                await db.ref('loans/' + currentRejectLoanId).update({
                     status: 'rejected',
                     rejectedAt: Date.now(),
                     rejectedBy: currentUser?.uid,
                     rejectionReason: reason
                 });
                 
-                const loan = allLoans.find(l => l.id === loanId);
+                const loan = allLoans.find(l => l.id === currentRejectLoanId);
                 if (loan) {
                     if (loan.customerId) {
-                        await Utils.sendNotification(loan.customerId, `Your loan application (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
+                        await Utils.sendNotification(loan.customerId, `Your loan application (${currentRejectLoanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', currentRejectLoanId);
                     }
                     if (loan.agentId) {
-                        await Utils.sendNotification(loan.agentId, `Loan for customer ${loan.customerName} (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
+                        await Utils.sendNotification(loan.agentId, `Loan for customer ${loan.customerName} (${currentRejectLoanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', currentRejectLoanId);
                     }
                 }
                 
-                await Utils.logAudit('REJECT_LOAN', { loanId, reason });
+                await Utils.logAudit('REJECT_LOAN', { loanId: currentRejectLoanId, reason });
                 Utils.showToast('Success', 'Loan rejected', 'info');
                 closeModal('loanDetailsModal');
             } catch (e) {
                 Utils.showToast('Error', e.message, 'error');
             }
             Utils.hideLoading();
-        }
+        });
 
         async function markAsDefaulted(loanId) {
             if (!confirm('Mark this loan as defaulted?')) return;
@@ -4499,6 +5219,7 @@
             Utils.hideLoading();
         }
 
+        // FIXED confirmPayment: updates payment node separately
         async function confirmPayment(paymentId) {
             if (!confirm('Confirm this payment?')) return;
             
@@ -4554,25 +5275,25 @@
                     return sum + (isNaN(interestPart) ? 0 : interestPart);
                 }, 0);
                 
-                const updates = {
+                const loanUpdates = {
                     repaymentSchedule: schedule,
                     totalPaid: newTotalPaid,
                     interestPaid: newInterestPaid
                 };
                 
                 if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
-                    updates.status = 'completed';
-                    updates.completedAt = Date.now();
+                    loanUpdates.status = 'completed';
+                    loanUpdates.completedAt = Date.now();
                 }
                 
-                // Update payment status to confirmed
+                await loanRef.update(loanUpdates);
+                
+                // Update payment status separately
                 await db.ref('payments/' + paymentId).update({
                     status: 'confirmed',
                     verifiedAt: Date.now(),
                     verifiedBy: currentUser?.uid
                 });
-                
-                await loanRef.update(updates);
                 
                 if (totalInterestPaid > 0 && loan.agentId) {
                     const commissionAmount = totalInterestPaid * 0.15;
@@ -5075,42 +5796,42 @@
 
         // ========== FILTERS ==========
         document.querySelectorAll('[data-agent-filter]').forEach(item => {
-            item.addEventListener('click', function() {
-                agentFilter = this.dataset.agentFilter;
+            item.addEventListener('click', () => {
+                agentFilter = item.dataset.agentFilter;
                 renderAgents();
-                // Close dropdown
-                const menu = this.closest('.quick-actions-menu');
+                // close dropdown
+                const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
 
         document.querySelectorAll('[data-loan-filter]').forEach(item => {
-            item.addEventListener('click', function() {
-                currentLoanFilter = this.dataset.loanFilter;
+            item.addEventListener('click', () => {
+                currentLoanFilter = item.dataset.loanFilter;
                 renderLoans();
-                const menu = this.closest('.quick-actions-menu');
+                const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
 
-        document.getElementById('filterAllCustomers')?.addEventListener('click', function() {
+        document.getElementById('filterAllCustomers')?.addEventListener('click', () => {
             customerFilter = 'all';
             renderCustomers();
-            const menu = this.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
         
-        document.getElementById('filterActiveCustomers')?.addEventListener('click', function() {
+        document.getElementById('filterActiveCustomers')?.addEventListener('click', () => {
             customerFilter = 'active';
             renderCustomers();
-            const menu = this.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
         
-        document.getElementById('filterBannedCustomers')?.addEventListener('click', function() {
+        document.getElementById('filterBannedCustomers')?.addEventListener('click', () => {
             customerFilter = 'banned';
             renderCustomers();
-            const menu = this.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
 
@@ -5142,28 +5863,28 @@
             });
         });
 
-        document.getElementById('filterPaymentsPending')?.addEventListener('click', function() {
+        document.getElementById('filterPaymentsPending')?.addEventListener('click', () => {
             currentPaymentFilter = 'pending';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
             renderPayments();
-            const menu = this.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
-        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', function() {
+        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', () => {
             currentPaymentFilter = 'confirmed';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
             renderPayments();
-            const menu = this.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
-        document.getElementById('filterPaymentsRejected')?.addEventListener('click', function() {
+        document.getElementById('filterPaymentsRejected')?.addEventListener('click', () => {
             currentPaymentFilter = 'rejected';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
             renderPayments();
-            const menu = this.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
 
@@ -5177,8 +5898,8 @@
 
         // ========== REPORTS (dropdown) ==========
         document.querySelectorAll('[data-report]').forEach(item => {
-            item.addEventListener('click', function() {
-                const reportType = this.dataset.report;
+            item.addEventListener('click', () => {
+                const reportType = item.dataset.report;
                 let report = '';
                 
                 if (reportType === 'agents') {
@@ -5255,7 +5976,7 @@
                 }
                 
                 document.getElementById('reportOutput').innerHTML = report;
-                const menu = this.closest('.quick-actions-menu');
+                const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
@@ -5365,6 +6086,7 @@
                 assignment: 'assignmentSection',
                 audit: 'auditSection',
                 applications: 'applicationsSection',
+                upcomingPayments: 'upcomingPaymentsSection',
                 notifications: 'notificationsSection',
                 settings: 'settingsSection'
             };
@@ -5381,6 +6103,7 @@
             if (sectionId === 'audit') renderAuditLogs();
             if (sectionId === 'analytics') renderAnalytics();
             if (sectionId === 'applications') renderPendingApplications();
+            if (sectionId === 'upcomingPayments') renderUpcomingPayments();
             if (sectionId === 'notifications') {
                 renderMessages();
                 renderPromotionHistory();
@@ -5524,142 +6247,6 @@
             Utils.hideLoading();
         });
 
-        // ========== RECORD PAYMENT (FIXED) ==========
-        document.getElementById('recordPaymentBtn').addEventListener('click', () => {
-            const loanId = document.getElementById('loanDetailsContent')?.getAttribute('data-loan-id');
-            if (!loanId) return;
-            const loan = allLoans.find(l => l.id === loanId);
-            if (!loan || !loan.repaymentSchedule) return;
-
-            const select = document.getElementById('recordInstallment');
-            select.innerHTML = '';
-            loan.repaymentSchedule.forEach((inst, index) => {
-                if (inst.status !== 'paid') {
-                    const option = document.createElement('option');
-                    option.value = index;
-                    const remaining = inst.totalDue - (inst.paidAmount || 0);
-                    option.textContent = `#${inst.installment} - Due: ${Utils.formatDate(inst.dueDate)} - Amount: ${Utils.formatCurrency(inst.totalDue)} (Paid: ${Utils.formatCurrency(inst.paidAmount || 0)} - Remaining: ${Utils.formatCurrency(remaining)})`;
-                    option.dataset.remaining = remaining;
-                    select.appendChild(option);
-                }
-            });
-
-            select.addEventListener('change', (e) => {
-                const selectedOption = e.target.options[e.target.selectedIndex];
-                const remaining = selectedOption.dataset.remaining;
-                document.getElementById('installmentRemaining').innerText = `Remaining for this installment: ${Utils.formatCurrency(remaining || 0)}`;
-                document.getElementById('recordAmount').max = remaining;
-            });
-            if (select.options.length > 0) {
-                const event = new Event('change');
-                select.dispatchEvent(event);
-            }
-
-            document.getElementById('recordLoanId').value = loanId;
-            document.getElementById('recordAmount').value = '';
-            document.getElementById('recordMethod').value = 'Cash';
-            document.getElementById('recordReference').value = '';
-            document.getElementById('paymentProofUrl').value = '';
-            document.getElementById('paymentProofPreview').innerHTML = '';
-            openModal('recordPaymentModal');
-        });
-
-        document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
-            const loanId = document.getElementById('recordLoanId').value;
-            const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
-            const amount = parseFloat(document.getElementById('recordAmount').value);
-            const method = document.getElementById('recordMethod').value;
-            const reference = document.getElementById('recordReference').value;
-            const proofUrl = document.getElementById('paymentProofUrl').value;
-
-            if (isNaN(amount) || amount <= 0) {
-                Utils.showToast('Error', 'Enter a valid amount', 'error');
-                return;
-            }
-
-            Utils.showLoading('Recording payment...');
-            try {
-                const loanRef = db.ref('loans/' + loanId);
-                const loanSnap = await loanRef.once('value');
-                const loan = loanSnap.val();
-                if (!loan) throw new Error('Loan not found');
-
-                let schedule = loan.repaymentSchedule || [];
-                if (schedule.length === 0) throw new Error('No repayment schedule');
-
-                const inst = schedule[installmentIndex];
-                const due = inst.totalDue - (inst.paidAmount || 0);
-                if (amount > due) {
-                    Utils.showToast('Error', 'Amount exceeds remaining due for this installment', 'error');
-                    return;
-                }
-
-                inst.paidAmount = (inst.paidAmount || 0) + amount;
-                inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
-
-                let totalPaid = 0, interestPaid = 0;
-                schedule.forEach(i => {
-                    totalPaid += i.paidAmount || 0;
-                    const paid = i.paidAmount || 0;
-                    const interestPart = (paid / i.totalDue) * i.interest;
-                    interestPaid += isNaN(interestPart) ? 0 : interestPart;
-                });
-
-                const updates = {
-                    repaymentSchedule: schedule,
-                    totalPaid: totalPaid,
-                    interestPaid: interestPaid
-                };
-
-                if (totalPaid >= (loan.totalPayable || loan.amount)) {
-                    updates.status = 'completed';
-                    updates.completedAt = Date.now();
-                }
-
-                await loanRef.update(updates);
-
-                const paymentId = Utils.generateId('PAY');
-                await db.ref('payments/' + paymentId).set({
-                    id: paymentId,
-                    loanId: loanId,
-                    customerId: loan.customerId,
-                    customerName: loan.customerName,
-                    amount: amount,
-                    method: method,
-                    reference: reference,
-                    proofUrl: proofUrl || null,
-                    status: 'confirmed',  // immediately confirmed
-                    timestamp: Date.now(),
-                    verifiedAt: Date.now(),
-                    verifiedBy: currentUser.uid,
-                    notes: 'Manual payment recorded by admin'
-                });
-
-                const interestPortion = (amount / inst.totalDue) * inst.interest;
-                if (interestPortion > 0 && loan.agentId) {
-                    const commissionAmount = interestPortion * 0.15;
-                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
-                        agentId: loan.agentId,
-                        customerId: loan.customerId,
-                        loanId: loanId,
-                        customerName: loan.customerName,
-                        amount: commissionAmount,
-                        paidAt: null,
-                        paidBy: null,
-                        status: 'pending'
-                    });
-                }
-
-                await Utils.logAudit('RECORD_PAYMENT', { loanId, amount, method, installment: installmentIndex+1 });
-                Utils.showToast('Success', 'Payment recorded', 'success');
-                closeModal('recordPaymentModal');
-                closeModal('loanDetailsModal');
-            } catch (e) {
-                Utils.showToast('Error', e.message, 'error');
-            }
-            Utils.hideLoading();
-        });
-
         window.openModal = (id) => document.getElementById(id).classList.add('active');
         window.closeModal = (id) => document.getElementById(id).classList.remove('active');
 
@@ -5744,7 +6331,7 @@
             
             document.getElementById('adminNameDisplay').innerText = adminData?.fullName || 'Admin';
             document.getElementById('sidebarName').innerText = adminData?.fullName || 'Admin User';
-            document.getElementById('sidebarAvatar').innerText = (adminData?.fullName || 'A')[0];
+            document.getElementById('sidebarAvatar').innerHTML = `<img src="logo.png" alt="TruCash">`;
 
             await loadAllData();
             setupRealtimeListeners();
@@ -5752,25 +6339,55 @@
 
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
+        // Real-time listeners with toast notifications for new items
         function setupRealtimeListeners() {
             db.ref('users').on('value', (snap) => {
                 const users = snap.val() || {};
-                allAgents = Object.entries(users).filter(([_,u]) => u.userType === 'agent').map(([id,u]) => ({...u, id}));
+                const oldCustomerCount = allCustomers.length;
                 allCustomers = Object.entries(users).filter(([_,u]) => u.userType === 'customer').map(([id,u]) => ({...u, id}));
+                // Detect new customers
+                if (oldCustomerCount > 0) {
+                    const newCustomers = allCustomers.filter(c => !lastSeenCustomerIds.has(c.id));
+                    newCustomers.forEach(c => {
+                        Utils.showToast('New Customer', `${c.fullName} registered`, 'info');
+                        lastSeenCustomerIds.add(c.id);
+                    });
+                } else {
+                    allCustomers.forEach(c => lastSeenCustomerIds.add(c.id));
+                }
                 updateUI();
-                checkForNewItems();
             });
             
             db.ref('loans').on('value', (snap) => {
+                const oldLoanCount = allLoans.length;
                 allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
+                // Detect new pending loans
+                if (oldLoanCount > 0) {
+                    const newLoans = allLoans.filter(l => !lastSeenLoanIds.has(l.id) && l.status === 'pending');
+                    newLoans.forEach(l => {
+                        Utils.showToast('New Loan Application', `Loan request from ${l.customerName} for ${Utils.formatCurrency(l.amount)}`, 'warning');
+                        lastSeenLoanIds.add(l.id);
+                    });
+                } else {
+                    allLoans.forEach(l => lastSeenLoanIds.add(l.id));
+                }
+                applyPenaltiesToAllLoans();
                 updateUI();
-                checkForNewItems();
             });
             
             db.ref('payments').on('value', (snap) => {
+                const oldPaymentCount = allPayments.length;
                 allPayments = Object.entries(snap.val() || {}).map(([id,p]) => ({...p, id}));
+                if (oldPaymentCount > 0) {
+                    const newPayments = allPayments.filter(p => !lastSeenPaymentIds.has(p.id) && p.status === 'pending');
+                    newPayments.forEach(p => {
+                        Utils.showToast('New Payment', `Payment of ${Utils.formatCurrency(p.amount)} from ${p.customerName} awaiting confirmation`, 'info');
+                        lastSeenPaymentIds.add(p.id);
+                    });
+                } else {
+                    allPayments.forEach(p => lastSeenPaymentIds.add(p.id));
+                }
                 updateUI();
-                checkForNewItems();
             });
             
             db.ref('commissionHistory').on('value', (snap) => {
@@ -5779,9 +6396,18 @@
             });
             
             db.ref('agentApplications').on('value', (snap) => {
+                const oldAppCount = allAgentApplications.length;
                 allAgentApplications = Object.entries(snap.val() || {}).map(([id,a]) => ({...a, id}));
+                if (oldAppCount > 0) {
+                    const newApps = allAgentApplications.filter(a => !lastSeenAppIds.has(a.id) && a.status === 'pending');
+                    newApps.forEach(a => {
+                        Utils.showToast('New Agent Application', `${a.fullName} applied to become an agent`, 'warning');
+                        lastSeenAppIds.add(a.id);
+                    });
+                } else {
+                    allAgentApplications.forEach(a => lastSeenAppIds.add(a.id));
+                }
                 updateUI();
-                checkForNewItems();
             });
             
             db.ref('auditLogs').on('value', (snap) => {
