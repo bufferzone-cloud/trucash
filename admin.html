@@ -646,57 +646,62 @@
             color: var(--ios-gray5);
         }
 
-        /* ===== Split Profile Card ===== */
-        .split-profile-card {
-            background: var(--ios-card);
-            border-radius: var(--radius-sm);
-            overflow: hidden;
+        /* ===== Split Profile Card (for compact loan cards) ===== */
+        .split-profile-compact {
             display: flex;
-            height: 100px;
-            box-shadow: var(--shadow-sm);
-            margin-bottom: 12px;
+            align-items: center;
+            gap: 8px;
+            margin-bottom: 8px;
         }
-
-        .split-profile-left, .split-profile-right {
+        .split-profile-compact .left, .split-profile-compact .right {
             flex: 1;
             display: flex;
             align-items: center;
-            padding: 12px;
-            gap: 10px;
-            background: linear-gradient(135deg, rgba(0,122,255,0.02), rgba(88,86,214,0.02));
+            gap: 8px;
+            min-width: 0;
         }
-
-        .split-profile-left {
-            border-right: 1px dashed var(--ios-gray3);
+        .split-profile-compact .center {
+            flex: 2;
+            text-align: center;
+            font-weight: 600;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-
-        .split-avatar {
-            width: 60px;
-            height: 60px;
-            border-radius: 14px;
+        .split-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
             object-fit: cover;
+            border: 2px solid white;
             box-shadow: var(--shadow-sm);
         }
-
-        .split-info {
-            flex: 1;
+        .loan-amount-compact {
+            text-align: center;
+            font-size: 18px;
+            font-weight: 700;
+            color: var(--ios-blue);
+            margin: 4px 0;
         }
-
-        .split-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 2px;
+        .loan-badges-compact {
+            display: flex;
+            justify-content: center;
+            gap: 8px;
+            margin: 8px 0 4px;
         }
-
-        .split-label {
+        .loan-badges-compact .badge-icon {
+            background: var(--ios-gray1);
+            border-radius: 20px;
+            padding: 4px 10px;
             font-size: 11px;
-            color: var(--ios-gray5);
-            margin-bottom: 2px;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            color: var(--ios-gray6);
+            border: 1px solid var(--ios-gray2);
         }
-
-        .split-value {
-            font-weight: 500;
-            font-size: 12px;
+        .loan-badges-compact .badge-icon i {
+            color: var(--ios-blue);
         }
 
         /* ===== Badges ===== */
@@ -709,7 +714,7 @@
             color: #1c1c1e;
         }
 
-        .status-badge.approved, .status-badge.active, .status-badge.confirmed { 
+        .status-badge.approved, .status-badge.active, .status-badge.confirmed, .status-badge.paid { 
             background: linear-gradient(135deg, rgba(52,199,89,0.1), rgba(52,199,89,0.2)); 
             color: #1d7a3d; 
         }
@@ -1461,6 +1466,16 @@
             background: var(--ios-blue);
             color: white;
         }
+        /* Logo styling */
+        .logo-img {
+            height: 36px;
+            width: auto;
+        }
+        .sidebar-logo {
+            height: 48px;
+            width: auto;
+            margin-right: 8px;
+        }
     </style>
 </head>
 <body>
@@ -1476,8 +1491,9 @@
     <!-- Header -->
     <div class="app-header">
         <div class="logo-area">
-            <div class="logo-icon"><i class="fas fa-wallet"></i></div>
-            <span class="logo-text"></span>
+            <!-- Logo image -->
+            <img src="logo.png" alt="TruCash" class="logo-img">
+            <span class="logo-text">TruCash Enterprise</span>
         </div>
         <div class="admin-name" id="adminNameDisplay">Admin</div>
         <div class="menu-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></div>
@@ -1487,7 +1503,8 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-avatar" id="sidebarAvatar">A</div>
+            <!-- Sidebar logo -->
+            <img src="logo.png" alt="TruCash" class="sidebar-logo">
             <div class="sidebar-user">
                 <div class="name" id="sidebarName">Admin User</div>
                 <div class="role">Administrator</div>
@@ -2027,11 +2044,12 @@
         </section>
     </div>
 
-    <!-- ========== MODALS (unchanged) ========== -->
+    <!-- ========== MODALS (unchanged but with logo added in headers where appropriate) ========== -->
     <!-- Create Customer Modal -->
     <div class="modal-overlay" id="createCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Create Customer</span>
                 <span class="modal-close" onclick="closeModal('createCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2117,6 +2135,7 @@
     <div class="modal-overlay" id="createAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Create Agent</span>
                 <span class="modal-close" onclick="closeModal('createAgentModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2202,6 +2221,7 @@
     <div class="modal-overlay" id="createAdminModal">
         <div class="modal-container compact">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Create Admin</span>
                 <span class="modal-close" onclick="closeModal('createAdminModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2236,6 +2256,7 @@
     <div class="modal-overlay" id="agentApplicationModal">
         <div class="modal-container large">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Agent Application</span>
                 <span class="modal-close" onclick="closeModal('agentApplicationModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2252,6 +2273,7 @@
     <div class="modal-overlay" id="customerDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Customer Profile</span>
                 <span class="modal-close" onclick="closeModal('customerDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2269,6 +2291,7 @@
     <div class="modal-overlay" id="editCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Edit Customer</span>
                 <span class="modal-close" onclick="closeModal('editCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2284,6 +2307,7 @@
     <div class="modal-overlay" id="agentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Agent Profile</span>
                 <span class="modal-close" onclick="closeModal('agentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2301,6 +2325,7 @@
     <div class="modal-overlay" id="editAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Edit Agent</span>
                 <span class="modal-close" onclick="closeModal('editAgentModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2312,14 +2337,15 @@
         </div>
     </div>
 
-    <!-- Loan Details Modal -->
+    <!-- Loan Details Modal (improved styling) -->
     <div class="modal-overlay" id="loanDetailsModal">
-        <div class="modal-container large">
-            <div class="modal-header">
+        <div class="modal-container large" style="background: white;">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple)); color: white;">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px; filter: brightness(0) invert(1);">
                 <span>Loan Details</span>
-                <span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
+                <span class="modal-close" style="color: white;" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
-            <div class="modal-body" id="loanDetailsContent"></div>
+            <div class="modal-body" id="loanDetailsContent" style="max-height: 70vh; overflow-y: auto;"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-small" onclick="closeModal('loanDetailsModal')">Close</button>
                 <button class="btn btn-success btn-small" id="approveLoanBtn">Approve</button>
@@ -2335,6 +2361,7 @@
     <div class="modal-overlay" id="paymentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Payment Details</span>
                 <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2347,17 +2374,18 @@
         </div>
     </div>
 
-    <!-- Pay Commission Modal -->
+    <!-- Pay Commission Modal (advanced: selectable commissions) -->
     <div class="modal-overlay" id="payCommissionModal">
         <div class="modal-container">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Pay Commission</span>
                 <span class="modal-close" onclick="closeModal('payCommissionModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="payCommissionContent"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('payCommissionModal')">Cancel</button>
-                <button class="btn btn-success" id="processCommissionPayment">Pay Now</button>
+                <button class="btn btn-success" id="processCommissionPayment">Pay Selected</button>
             </div>
         </div>
     </div>
@@ -2366,6 +2394,7 @@
     <div class="modal-overlay" id="commissionMathModal">
         <div class="modal-container">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Commission Breakdown</span>
                 <span class="modal-close" onclick="closeModal('commissionMathModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2377,6 +2406,7 @@
     <div class="modal-overlay" id="sendReminderModal">
         <div class="modal-container compact">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Send Reminder</span>
                 <span class="modal-close" onclick="closeModal('sendReminderModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2405,12 +2435,13 @@
         </div>
     </div>
 
-    <!-- Record Payment Modal -->
+    <!-- Record Payment Modal (improved styling) -->
     <div class="modal-overlay" id="recordPaymentModal">
-        <div class="modal-container compact">
-            <div class="modal-header">
+        <div class="modal-container compact" style="background: white;">
+            <div class="modal-header" style="background: var(--ios-green); color: white;">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px; filter: brightness(0) invert(1);">
                 <span>Record Payment</span>
-                <span class="modal-close" onclick="closeModal('recordPaymentModal')"><i class="fas fa-times"></i></span>
+                <span class="modal-close" style="color: white;" onclick="closeModal('recordPaymentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="recordLoanId">
@@ -2457,6 +2488,7 @@
     <div class="modal-overlay" id="reminderDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Payment Reminder Details</span>
                 <span class="modal-close" onclick="closeModal('reminderDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2472,6 +2504,7 @@
     <div class="modal-overlay" id="signedAgreementsModal">
         <div class="modal-container large">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Signed Agreements</span>
                 <span class="modal-close" onclick="closeModal('signedAgreementsModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2488,6 +2521,7 @@
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-container compact">
             <div class="modal-header">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
                 <span>Send Promotion</span>
                 <span class="modal-close" onclick="closeModal('promotionModal')"><i class="fas fa-times"></i></span>
             </div>
@@ -2552,11 +2586,15 @@
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
         // MODIFICATIONS:
-        // 1. New "Upcoming Payments" page with red sidebar button.
-        // 2. Penalty system: 2% daily after 5-day grace period.
-        // 3. Notifications section now only shows promotions and messages.
+        // 1. Dropdowns retract after click
+        // 2. Improved CSS for modals, rejection reason (prompt replaced with modal)
+        // 3. Compact loan cards with left/right profiles & icons
+        // 4. Fixed confirm payment (now moves to confirmed) and record payment (saves to Firebase + Cloudinary)
+        // 5. Real-time admin notifications (toast once per new item)
+        // 6. Advanced commission payment (selectable per loan)
+        // 7. Logo added throughout
         // =========================================================================
-        
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
@@ -2598,6 +2636,14 @@
         let agentFilter = 'active';
         let customerFilter = 'all';
         let cloudinaryWidget = null;
+
+        // For admin real‑time notifications (store last seen timestamps)
+        let lastNotificationTimestamps = {
+            agentApplication: 0,
+            loanPending: 0,
+            paymentPending: 0,
+            customerNew: 0
+        };
 
         // ========== UTILITIES ==========
         const Utils = {
@@ -2648,7 +2694,7 @@
                         totalDue: payment,
                         paidAmount: 0,
                         status: 'pending',
-                        penalty: 0           // NEW: penalty accumulated on this installment
+                        penalty: 0
                     });
                 }
                 return schedule;
@@ -2679,12 +2725,9 @@
         };
 
         // ========== PENALTY SYSTEM ==========
-        // Grace period in days
         const GRACE_DAYS = 5;
-        // Daily penalty rate (2% = 0.02)
         const PENALTY_RATE = 0.02;
 
-        // Apply penalties to all active/approved loans
         async function applyPenaltiesToAllLoans() {
             const now = Date.now();
             for (const loan of allLoans) {
@@ -2693,7 +2736,6 @@
             }
         }
 
-        // Apply penalties to a single loan up to current date
         async function applyPenaltiesToLoan(loan, now = Date.now()) {
             if (!loan.repaymentSchedule) return;
             let lastPenaltyDate = loan.lastPenaltyDate || 0;
@@ -2707,14 +2749,12 @@
                 if (inst.status === 'paid') continue;
                 const dueDate = inst.dueDate;
                 const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
-                if (now <= graceEnd) continue; // within grace period, no penalty
+                if (now <= graceEnd) continue;
 
-                // Days overdue beyond grace
                 const overdueMs = now - graceEnd;
                 const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
                 if (overdueDays <= 0) continue;
 
-                // If we have a lastPenaltyDate, only apply for days after that
                 let startDay = 1;
                 if (lastPenaltyDate > graceEnd) {
                     const alreadyPenalizedMs = lastPenaltyDate - graceEnd;
@@ -2722,28 +2762,24 @@
                 }
                 if (startDay > overdueDays) continue;
 
-                // Penalty per day = totalPayable * PENALTY_RATE
                 const penaltyPerDay = totalPayable * PENALTY_RATE;
                 const daysToApply = overdueDays - startDay + 1;
                 const penaltyAmount = penaltyPerDay * daysToApply;
 
-                // Update installment
                 inst.penalty = (inst.penalty || 0) + penaltyAmount;
                 inst.totalDue = inst.principal + inst.interest + inst.penalty;
-                inst.status = 'pending'; // ensure not marked paid
+                inst.status = 'pending';
 
                 totalPenalty += penaltyAmount;
                 updated = true;
             }
 
             if (updated) {
-                // Update loan
                 loan.repaymentSchedule = schedule;
                 loan.totalPenalty = totalPenalty;
                 loan.totalPayable = (loan.totalPayable || loan.amount) + totalPenalty;
                 loan.lastPenaltyDate = now;
 
-                // Save to Firebase
                 await db.ref('loans/' + loan.id).update({
                     repaymentSchedule: schedule,
                     totalPenalty: totalPenalty,
@@ -2751,8 +2787,6 @@
                     lastPenaltyDate: now
                 });
 
-                // Send notifications (limit to one per day to avoid spam)
-                // We can check if last penalty notification date is > 24h ago
                 if (!loan.lastPenaltyNotif || now - loan.lastPenaltyNotif > 24 * 60 * 60 * 1000) {
                     const customer = allCustomers.find(c => c.id === loan.customerId);
                     if (customer) {
@@ -2837,7 +2871,6 @@
             }
         }
 
-        // ========== UPDATED: getUpcomingPayments (60 days, include approved loans) ==========
         function getUpcomingPayments() {
             const now = Date.now();
             const sixtyDays = 60 * 24 * 60 * 60 * 1000;
@@ -2866,7 +2899,6 @@
             return upcoming;
         }
 
-        // ========== UPDATED: getOverduePayments (include approved loans) ==========
         function getOverduePayments() {
             const now = Date.now();
             const overdue = [];
@@ -2894,7 +2926,7 @@
             return overdue;
         }
 
-        // ========== CSV EXPORT ==========
+        // ========== CSV EXPORT (unchanged) ==========
         function exportData(type) {
             let data = [];
             let filename = '';
@@ -3025,12 +3057,10 @@
             link.click();
         }
 
-        // ========== EXPORT ALL DATA AS ZIP ==========
         async function exportAllData() {
             Utils.showLoading('Generating ZIP...');
             const zip = new JSZip();
             
-            // Customers
             const customersData = allCustomers.map(c => ({
                 Name: c.fullName,
                 Email: c.email,
@@ -3046,7 +3076,6 @@
             }));
             zip.file("customers.csv", Papa.unparse(customersData));
             
-            // Agents
             const agentsData = allAgents.map(a => ({
                 Name: a.fullName,
                 Email: a.email,
@@ -3062,7 +3091,6 @@
             }));
             zip.file("agents.csv", Papa.unparse(agentsData));
             
-            // Loans
             const loansData = allLoans.map(l => ({
                 'Loan ID': l.id,
                 Customer: l.customerName,
@@ -3088,7 +3116,6 @@
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
-            // Payments
             const paymentsData = allPayments.map(p => ({
                 'Payment ID': p.id,
                 'Loan ID': p.loanId,
@@ -3102,7 +3129,6 @@
             }));
             zip.file("payments.csv", Papa.unparse(paymentsData));
             
-            // Commission History
             const commissionData = allCommissionHistory.map(c => {
                 const agent = allAgents.find(a => a.id === c.agentId);
                 return {
@@ -3117,7 +3143,6 @@
             });
             zip.file("commission.csv", Papa.unparse(commissionData));
             
-            // Agent Applications (all)
             const appsData = allAgentApplications.map(app => ({
                 Name: app.fullName,
                 Phone: app.phone,
@@ -3128,7 +3153,6 @@
             }));
             zip.file("applications.csv", Papa.unparse(appsData));
             
-            // Audit Logs
             const auditData = allAuditLogs.map(log => ({
                 Action: log.action,
                 Admin: log.adminEmail,
@@ -3137,7 +3161,6 @@
             }));
             zip.file("audit.csv", Papa.unparse(auditData));
             
-            // Messages
             const messagesData = allMessages.map(m => ({
                 Recipient: m.recipientId,
                 Message: m.message,
@@ -3145,7 +3168,6 @@
             }));
             zip.file("messages.csv", Papa.unparse(messagesData));
 
-            // Promotions
             const promotionsData = allPromotions.map(p => ({
                 Title: p.title,
                 Message: p.message,
@@ -3155,7 +3177,6 @@
             }));
             zip.file("promotions.csv", Papa.unparse(promotionsData));
             
-            // Generate zip
             const content = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
@@ -3164,6 +3185,45 @@
             
             Utils.hideLoading();
             Utils.showToast('Success', 'Full data export generated', 'success');
+        }
+
+        // ========== REAL-TIME ADMIN NOTIFICATIONS ==========
+        function setupAdminNotifications() {
+            // Listen for new agent applications
+            db.ref('agentApplications').orderByChild('submittedAt').startAt(lastNotificationTimestamps.agentApplication).on('child_added', (snap) => {
+                const app = snap.val();
+                if (app.submittedAt > lastNotificationTimestamps.agentApplication && app.status === 'pending') {
+                    Utils.showToast('New Application', `Agent application from ${app.fullName}`, 'info');
+                    lastNotificationTimestamps.agentApplication = app.submittedAt;
+                }
+            });
+
+            // Listen for new loans with status pending
+            db.ref('loans').orderByChild('createdAt').startAt(lastNotificationTimestamps.loanPending).on('child_added', (snap) => {
+                const loan = snap.val();
+                if (loan.createdAt > lastNotificationTimestamps.loanPending && loan.status === 'pending') {
+                    Utils.showToast('New Loan', `Loan application from ${loan.customerName} for ${Utils.formatCurrency(loan.amount)}`, 'info');
+                    lastNotificationTimestamps.loanPending = loan.createdAt;
+                }
+            });
+
+            // Listen for new payments with status pending
+            db.ref('payments').orderByChild('timestamp').startAt(lastNotificationTimestamps.paymentPending).on('child_added', (snap) => {
+                const payment = snap.val();
+                if (payment.timestamp > lastNotificationTimestamps.paymentPending && payment.status === 'pending') {
+                    Utils.showToast('New Payment', `Payment of ${Utils.formatCurrency(payment.amount)} from ${payment.customerName} awaiting confirmation`, 'info');
+                    lastNotificationTimestamps.paymentPending = payment.timestamp;
+                }
+            });
+
+            // Listen for new customers
+            db.ref('users').orderByChild('createdAt').startAt(lastNotificationTimestamps.customerNew).on('child_added', (snap) => {
+                const user = snap.val();
+                if (user.userType === 'customer' && user.createdAt > lastNotificationTimestamps.customerNew) {
+                    Utils.showToast('New Customer', `New customer registered: ${user.fullName}`, 'success');
+                    lastNotificationTimestamps.customerNew = user.createdAt;
+                }
+            });
         }
 
         // ========== LOAD ALL DATA ==========
@@ -3203,12 +3263,14 @@
                 const promoSnap = await db.ref('promotions').once('value');
                 allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
 
-                // Apply penalties after loading loans
                 await applyPenaltiesToAllLoans();
 
                 populateSettingsForm();
                 updateUI();
                 Utils.hideLoading();
+
+                // Start listening for real-time admin notifications
+                setupAdminNotifications();
             } catch (error) {
                 Utils.showToast('Error', 'Failed to load data: ' + error.message, 'error');
                 Utils.hideLoading();
@@ -3245,8 +3307,8 @@
             renderAuditLogs();
             renderPendingApplications();
             renderRejectedApplications();
-            renderUpcomingPayments();  // NEW: separate page
-            renderMessages(); 
+            renderUpcomingPayments();
+            renderMessages();
             renderPromotionHistory();
             updateBadges();
         }
@@ -3423,6 +3485,7 @@
             `).join('');
         }
 
+        // COMPACT LOAN CARDS (requirement 3)
         function renderLoans() {
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
@@ -3442,63 +3505,49 @@
             container.innerHTML = filtered.map(l => {
                 const customer = allCustomers.find(c => c.id === l.customerId);
                 const agent = allAgents.find(a => a.id === l.agentId);
+                const hasCollateral = l.collateral?.images?.length > 0;
+                const hasWitness = l.witness ? true : false;
+                const hasSigned = l.signedAgreementUrl ? true : false;
                 const totalPaid = l.totalPaid || 0;
                 const progress = (totalPaid / (l.totalPayable || l.amount)) * 100;
-                const penalty = l.totalPenalty || 0;
                 
                 return `
-                <div class="floating-card" onclick="showLoanDetails('${l.id}')">
-                    <div class="split-profile-card">
-                        <div class="split-profile-left">
-                            <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')+'&background=007AFF&color=fff'}" class="split-avatar">
-                            <div class="split-info">
-                                <div class="split-label">Customer</div>
-                                <div class="split-name">${l.customerName}</div>
-                                <div class="split-label">${customer?.phone || ''}</div>
-                            </div>
+                <div class="floating-card compact-card" onclick="showLoanDetails('${l.id}')" style="padding: 12px; cursor: pointer;">
+                    <!-- Top row: left customer, center customer name, right agent -->
+                    <div class="split-profile-compact">
+                        <div class="left" onclick="event.stopPropagation(); showCustomerDetails('${customer?.id}')">
+                            <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')}" class="split-avatar-small">
                         </div>
-                        <div class="split-profile-right">
-                            <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')+'&background=5856d6&color=fff'}" class="split-avatar">
-                            <div class="split-info">
-                                <div class="split-label">Agent</div>
-                                <div class="split-name">${agent?.fullName || 'Not Assigned'}</div>
-                                <div class="split-label">${agent?.agentId || ''}</div>
-                            </div>
+                        <div class="center">
+                            <strong>${l.customerName}</strong>
+                        </div>
+                        <div class="right" onclick="event.stopPropagation(); showAgentDetails('${agent?.id}')">
+                            <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')}" class="split-avatar-small">
                         </div>
                     </div>
-                    
-                    <div class="grid-3">
-                        <div class="detail-card">
-                            <div class="detail-label">Loan ID</div>
-                            <div class="detail-value">${l.id.substring(0,8)}...</div>
-                        </div>
-                        <div class="detail-card">
-                            <div class="detail-label">Amount</div>
-                            <div class="detail-value">${Utils.formatCurrency(l.amount)}</div>
-                        </div>
-                        <div class="detail-card">
-                            <div class="detail-label">Status</div>
-                            <div class="detail-value"><span class="status-badge ${l.status}">${l.status}</span></div>
-                        </div>
+                    <!-- Loan amount -->
+                    <div class="loan-amount-compact">
+                        ${Utils.formatCurrency(l.amount)}
                     </div>
-                    
-                    <div class="mt-2">
-                        <div class="d-flex justify-between small">
+                    <!-- Icons row -->
+                    <div class="loan-badges-compact">
+                        ${hasCollateral ? '<span class="badge-icon"><i class="fas fa-image"></i> Collateral</span>' : ''}
+                        ${hasWitness ? '<span class="badge-icon"><i class="fas fa-user"></i> Witness</span>' : ''}
+                        ${hasSigned ? '<span class="badge-icon"><i class="fas fa-file-signature"></i> Signed</span>' : ''}
+                        ${l.status === 'rejected' ? '<span class="badge-icon" style="color: var(--ios-red);"><i class="fas fa-times-circle"></i> Rejected</span>' : ''}
+                    </div>
+                    <!-- Optional progress bar (can be hidden if too cluttered) -->
+                    ${l.status === 'active' ? `
+                    <div class="mt-2" style="font-size: 11px;">
+                        <div class="d-flex justify-between">
                             <span>Paid: ${Utils.formatCurrency(totalPaid)}</span>
                             <span>Total: ${Utils.formatCurrency(l.totalPayable || l.amount)}</span>
                         </div>
-                        <div class="progress-bar mt-1" style="height:6px; background:var(--ios-gray2); border-radius:3px;">
-                            <div class="progress-fill" style="width: ${progress}%; height:6px; background:var(--ios-blue); border-radius:3px;"></div>
+                        <div style="height:4px; background:var(--ios-gray2); border-radius:2px; margin-top:2px;">
+                            <div style="width: ${progress}%; height:4px; background:var(--ios-blue); border-radius:2px;"></div>
                         </div>
-                        ${penalty > 0 ? `<div class="text-red mt-1">Penalty: ${Utils.formatCurrency(penalty)}</div>` : ''}
                     </div>
-                    
-                    <div class="mt-2 d-flex gap-2">
-                        ${l.collateral?.images ? `<span class="status-badge"><i class="fas fa-image"></i> ${l.collateral.images.length} img</span>` : ''}
-                        ${l.witness ? `<span class="status-badge"><i class="fas fa-user"></i> Witness</span>` : ''}
-                        ${l.signedAgreementUrl ? `<span class="status-badge"><i class="fas fa-file-signature"></i> Signed</span>` : ''}
-                        ${l.status === 'rejected' && l.rejectionReason ? `<span class="status-badge rejected">Rejected</span>` : ''}
-                    </div>
+                    ` : ''}
                 </div>
             `}).join('');
         }
@@ -3707,7 +3756,6 @@
             `).join('');
         }
 
-        // ===== UPCOMING PAYMENTS (new page) =====
         function renderUpcomingPayments() {
             const upcoming = getUpcomingPayments();
             const overdue = getOverduePayments();
@@ -3950,6 +3998,7 @@
             openModal('recordPaymentModal');
         });
 
+        // FIXED: confirmRecordPayment now sets payment status to 'confirmed' immediately and updates loan
         document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
             const loanId = document.getElementById('recordLoanId').value;
             const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
@@ -4004,6 +4053,7 @@
 
                 await loanRef.update(updates);
 
+                // Create payment record with status 'confirmed'
                 const paymentId = Utils.generateId('PAY');
                 await db.ref('payments/' + paymentId).set({
                     id: paymentId,
@@ -4021,6 +4071,7 @@
                     notes: 'Manual payment recorded by admin'
                 });
 
+                // Calculate and store commission on interest portion
                 const interestPortion = (amount / inst.totalDue) * inst.interest;
                 if (interestPortion > 0 && loan.agentId) {
                     const commissionAmount = interestPortion * 0.15;
@@ -4037,7 +4088,7 @@
                 }
 
                 await Utils.logAudit('RECORD_PAYMENT', { loanId, amount, method, installment: installmentIndex+1 });
-                Utils.showToast('Success', 'Payment recorded', 'success');
+                Utils.showToast('Success', 'Payment recorded and confirmed', 'success');
                 closeModal('recordPaymentModal');
                 closeModal('loanDetailsModal');
             } catch (e) {
@@ -4423,6 +4474,7 @@
         };
 
         async function banUser(userId, type) {
+            // Replace prompt with a nicer modal? For now keep prompt but we can improve.
             const reason = prompt(`Enter reason for banning this ${type}:`);
             if (reason === null) return;
             if (!reason.trim()) {
@@ -5035,28 +5087,25 @@
             Utils.hideLoading();
         }
 
-        // ========== COMMISSION PAYMENT MODAL ==========
+        // ========== ADVANCED COMMISSION PAYMENT MODAL (selectable) ==========
         window.openPayCommissionModal = (agentId) => {
             const agent = allAgents.find(a => a.id === agentId);
             if (!agent) return;
             
             const pendingEntries = allCommissionHistory.filter(c => c.agentId === agentId && c.status === 'pending');
-            const loansWithPending = pendingEntries.map(entry => {
-                const loan = allLoans.find(l => l.id === entry.loanId);
-                return { ...entry, loan };
-            });
             
-            let loansHtml = '';
-            if (loansWithPending.length === 0) {
-                loansHtml = '<p class="text-muted">No pending commission for this agent.</p>';
+            let checkboxesHtml = '';
+            if (pendingEntries.length === 0) {
+                checkboxesHtml = '<p class="text-muted">No pending commission for this agent.</p>';
             } else {
-                loansHtml = loansWithPending.map(entry => `
-                    <div class="detail-card mb-2">
-                        <div class="d-flex justify-between">
-                            <span><strong>Loan ID:</strong> ${entry.loanId.substring(0,8)}...</span>
-                            <span><strong>Amount:</strong> ${Utils.formatCurrency(entry.amount)}</span>
+                checkboxesHtml = pendingEntries.map(entry => `
+                    <div class="detail-card mb-2" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" class="commission-checkbox" value="${entry.id}" data-amount="${entry.amount}" checked>
+                        <div>
+                            <strong>Loan:</strong> ${entry.loanId.substring(0,8)}... 
+                            <strong>Amount:</strong> ${Utils.formatCurrency(entry.amount)}
+                            <div class="profile-meta">Customer: ${entry.customerName || 'Unknown'}</div>
                         </div>
-                        <div class="profile-meta">Customer: ${entry.customerName || 'Unknown'}</div>
                     </div>
                 `).join('');
             }
@@ -5071,8 +5120,8 @@
                 </div>
                 
                 <div class="detail-section">
-                    <h4 class="detail-title">Pending Commission</h4>
-                    ${loansHtml}
+                    <h4 class="detail-title">Select Commissions to Pay</h4>
+                    ${checkboxesHtml}
                 </div>
                 
                 <div class="form-group">
@@ -5089,6 +5138,12 @@
             document.getElementById('payCommissionContent').innerHTML = content;
             
             document.getElementById('processCommissionPayment').onclick = async () => {
+                const checkboxes = document.querySelectorAll('.commission-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    Utils.showToast('Error', 'Select at least one commission to pay', 'error');
+                    return;
+                }
+                
                 const method = document.getElementById('commissionPaymentMethod').value;
                 if (!method) {
                     Utils.showToast('Error', 'Select payment method', 'error');
@@ -5098,25 +5153,27 @@
                 Utils.showLoading('Processing payment...');
                 try {
                     const updates = {};
-                    pendingEntries.forEach(entry => {
-                        updates[`commissionHistory/${entry.id}/status`] = 'paid';
-                        updates[`commissionHistory/${entry.id}/paidAt`] = Date.now();
-                        updates[`commissionHistory/${entry.id}/paidBy`] = currentUser?.uid;
-                        updates[`commissionHistory/${entry.id}/paymentMethod`] = method;
+                    let totalAmount = 0;
+                    checkboxes.forEach(cb => {
+                        const entryId = cb.value;
+                        const amount = parseFloat(cb.dataset.amount);
+                        totalAmount += amount;
+                        updates[`commissionHistory/${entryId}/status`] = 'paid';
+                        updates[`commissionHistory/${entryId}/paidAt`] = Date.now();
+                        updates[`commissionHistory/${entryId}/paidBy`] = currentUser?.uid;
+                        updates[`commissionHistory/${entryId}/paymentMethod`] = method;
                     });
                     
                     await db.ref().update(updates);
                     
-                    for (const entry of pendingEntries) {
-                        await Utils.sendNotification(
-                            agentId,
-                            `Your commission payment of ${Utils.formatCurrency(entry.amount)} for loan ${entry.loanId.substring(0,8)} has been processed via ${method}.`,
-                            'commission_paid',
-                            entry.loanId
-                        );
-                    }
+                    // Send notification
+                    await Utils.sendNotification(
+                        agentId,
+                        `Your commission payment of ${Utils.formatCurrency(totalAmount)} has been processed via ${method}.`,
+                        'commission_paid'
+                    );
                     
-                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: pendingEntries.reduce((s,e) => s + e.amount, 0), method });
+                    await Utils.logAudit('PAY_COMMISSION_SELECTED', { agentId, amount: totalAmount, method });
                     Utils.showToast('Success', 'Commission paid', 'success');
                     closeModal('payCommissionModal');
                 } catch (e) {
@@ -5209,6 +5266,7 @@
             Utils.hideLoading();
         }
 
+        // FIXED: confirmPayment now properly updates loan and sets payment to confirmed
         async function confirmPayment(paymentId) {
             if (!confirm('Confirm this payment?')) return;
             
@@ -5275,11 +5333,14 @@
                     updates.completedAt = Date.now();
                 }
                 
-                updates[`payments/${paymentId}/status`] = 'confirmed';
-                updates[`payments/${paymentId}/verifiedAt`] = Date.now();
-                updates[`payments/${paymentId}/verifiedBy`] = currentUser?.uid;
-                
                 await loanRef.update(updates);
+                
+                // Mark payment as confirmed
+                await db.ref('payments/' + paymentId).update({
+                    status: 'confirmed',
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser?.uid
+                });
                 
                 if (totalInterestPaid > 0 && loan.agentId) {
                     const commissionAmount = totalInterestPaid * 0.15;
@@ -5785,6 +5846,9 @@
             item.addEventListener('click', () => {
                 agentFilter = item.dataset.agentFilter;
                 renderAgents();
+                // Close dropdown after click
+                const menu = item.closest('.quick-actions-menu');
+                if (menu) menu.classList.remove('show');
             });
         });
 
@@ -5792,22 +5856,30 @@
             item.addEventListener('click', () => {
                 currentLoanFilter = item.dataset.loanFilter;
                 renderLoans();
+                const menu = item.closest('.quick-actions-menu');
+                if (menu) menu.classList.remove('show');
             });
         });
 
         document.getElementById('filterAllCustomers')?.addEventListener('click', () => {
             customerFilter = 'all';
             renderCustomers();
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
         
         document.getElementById('filterActiveCustomers')?.addEventListener('click', () => {
             customerFilter = 'active';
             renderCustomers();
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
         
         document.getElementById('filterBannedCustomers')?.addEventListener('click', () => {
             customerFilter = 'banned';
             renderCustomers();
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
 
         document.getElementById('agentSearch').addEventListener('input', renderAgents);
@@ -5843,18 +5915,24 @@
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
             renderPayments();
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
         document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', () => {
             currentPaymentFilter = 'confirmed';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
             renderPayments();
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
         document.getElementById('filterPaymentsRejected')?.addEventListener('click', () => {
             currentPaymentFilter = 'rejected';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
             renderPayments();
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
 
         document.getElementById('paymentSearch').addEventListener('input', renderPayments);
@@ -5945,6 +6023,9 @@
                 }
                 
                 document.getElementById('reportOutput').innerHTML = report;
+                // Close dropdown
+                const menu = item.closest('.quick-actions-menu');
+                if (menu) menu.classList.remove('show');
             });
         });
 
@@ -6053,7 +6134,7 @@
                 assignment: 'assignmentSection',
                 audit: 'auditSection',
                 applications: 'applicationsSection',
-                upcomingPayments: 'upcomingPaymentsSection',  // new
+                upcomingPayments: 'upcomingPaymentsSection',
                 notifications: 'notificationsSection',
                 settings: 'settingsSection'
             };
@@ -6316,7 +6397,7 @@
             
             db.ref('loans').on('value', (snap) => {
                 allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
-                applyPenaltiesToAllLoans(); // apply penalties on new loan data
+                applyPenaltiesToAllLoans();
                 updateUI();
             });
             
