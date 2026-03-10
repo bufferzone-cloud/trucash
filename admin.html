@@ -82,7 +82,7 @@
             z-index: -1;
         }
 
-        /* ===== Header ===== */
+        /* ===== Header with logo ===== */
         .app-header {
             position: sticky;
             top: 0;
@@ -106,18 +106,18 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: transparent;
+            background: white;
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 8px rgba(0,122,255,0.2);
+            overflow: hidden;
         }
         .logo-icon img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            border-radius: 8px;
+            object-fit: cover;
         }
 
         .logo-text {
@@ -225,12 +225,12 @@
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 12px rgba(0,122,255,0.2);
+            overflow: hidden;
         }
         .sidebar-avatar img {
             width: 100%;
             height: 100%;
-            object-fit: contain;
-            border-radius: 50%;
+            object-fit: cover;
         }
 
         .sidebar-user {
@@ -653,81 +653,88 @@
             color: var(--ios-gray5);
         }
 
-        /* ===== Compact Loan Card ===== */
-        .loan-compact-card {
+        /* ===== Loan Card Redesign ===== */
+        .loan-card {
             background: var(--ios-card);
             border-radius: var(--radius-sm);
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            box-shadow: var(--shadow-sm);
+            padding: 12px 16px;
             margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
+            display: flex;
+            align-items: center;
+            gap: 12px;
             cursor: pointer;
-            transition: 0.3s;
+            transition: 0.2s;
             border: 1px solid rgba(0,0,0,0.03);
         }
-        .loan-compact-card:hover {
+        .loan-card:hover {
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
         }
-        .loan-compact-header {
+        .loan-card-left {
             display: flex;
+            flex-direction: column;
             align-items: center;
-            justify-content: space-between;
         }
-        .loan-compact-left, .loan-compact-right {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            flex: 1;
-        }
-        .loan-compact-avatar {
-            width: 40px;
-            height: 40px;
-            border-radius: 50%;
+        .loan-card-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
             object-fit: cover;
             border: 2px solid white;
             box-shadow: var(--shadow-sm);
         }
-        .loan-compact-name {
+        .loan-card-avatar.small {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+        }
+        .loan-card-center {
+            flex: 1;
+            min-width: 0;
+        }
+        .loan-card-customer {
             font-weight: 600;
             font-size: 14px;
             white-space: nowrap;
             overflow: hidden;
             text-overflow: ellipsis;
-            max-width: 100px;
         }
-        .loan-compact-middle {
-            text-align: center;
-            flex: 1;
-        }
-        .loan-compact-customer-name {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 2px;
-        }
-        .loan-compact-amount {
-            font-size: 16px;
+        .loan-card-amount {
             font-weight: 700;
+            font-size: 16px;
             color: var(--ios-blue);
+            margin: 2px 0;
         }
-        .loan-compact-icons {
+        .loan-card-icons {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
-            align-items: center;
-            justify-content: center;
-            margin-top: 4px;
+            gap: 10px;
+            font-size: 12px;
+            color: var(--ios-gray5);
         }
-        .loan-icon {
-            background: var(--ios-gray1);
-            border-radius: 20px;
-            padding: 4px 8px;
-            font-size: 11px;
-            display: inline-flex;
+        .loan-card-icons i {
+            margin-right: 2px;
+        }
+        .loan-card-right {
+            display: flex;
+            flex-direction: column;
             align-items: center;
-            gap: 4px;
+        }
+        .loan-card-agent-avatar {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: var(--shadow-sm);
+        }
+        .loan-card-agent-name {
+            font-size: 11px;
+            text-align: center;
+            max-width: 80px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
 
         /* ===== Badges ===== */
@@ -902,11 +909,10 @@
             z-index: 10;
             border-radius: 28px 28px 0 0;
         }
-        .modal-header .logo-small {
-            width: 30px;
-            height: 30px;
-            margin-right: 8px;
-            vertical-align: middle;
+        .modal-header .logo-icon {
+            width: 32px;
+            height: 32px;
+            margin-right: 10px;
         }
 
         .modal-close {
@@ -1438,6 +1444,16 @@
             .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
+            
+            .split-profile-card {
+                flex-direction: column;
+                height: auto;
+            }
+            
+            .split-profile-left {
+                border-right: none;
+                border-bottom: 1px dashed var(--ios-gray3);
+            }
         }
 
         /* ===== Notifications specific ===== */
@@ -1488,11 +1504,6 @@
             background: var(--ios-blue);
             color: white;
         }
-
-        /* Rejection reason modal textarea */
-        .rejection-reason-input {
-            min-height: 100px;
-        }
     </style>
 </head>
 <body>
@@ -1519,7 +1530,7 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-avatar"><img src="logo.png" alt="TruCash"></div>
+            <div class="sidebar-avatar"><img src="logo.png" alt="Avatar"></div>
             <div class="sidebar-user">
                 <div class="name" id="sidebarName">Admin User</div>
                 <div class="role">Administrator</div>
@@ -1538,6 +1549,7 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
+            <!-- New red button for upcoming payments -->
             <div class="sidebar-item upcoming-payments" data-section="upcomingPayments">
                 <i class="fas fa-exclamation-triangle"></i> Upcoming Payments
                 <span class="sidebar-badge" id="sidebarUpcomingBadge" style="display: none;">0</span>
@@ -1655,8 +1667,8 @@
             
             <div class="action-row">
                 <div class="quick-actions-dropdown">
-                    <button class="quick-actions-btn" id="customerQuickActionsBtn"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
-                    <div class="quick-actions-menu" id="customerQuickMenu">
+                    <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
+                    <div class="quick-actions-menu">
                         <button class="dropdown-item" id="filterAllCustomers"><i class="fas fa-list"></i> All Customers</button>
                         <button class="dropdown-item" id="filterActiveCustomers"><i class="fas fa-check-circle"></i> Active</button>
                         <button class="dropdown-item" id="filterBannedCustomers"><i class="fas fa-ban"></i> Banned</button>
@@ -1682,8 +1694,8 @@
             
             <div class="action-row">
                 <div class="quick-actions-dropdown">
-                    <button class="quick-actions-btn" id="agentQuickActionsBtn"><i class="fas fa-bolt"></i> Filter Agents <i class="fas fa-chevron-down"></i></button>
-                    <div class="quick-actions-menu" id="agentQuickMenu">
+                    <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Filter Agents <i class="fas fa-chevron-down"></i></button>
+                    <div class="quick-actions-menu">
                         <button class="dropdown-item" data-agent-filter="active"><i class="fas fa-check-circle"></i> Active</button>
                         <button class="dropdown-item" data-agent-filter="pending"><i class="fas fa-clock"></i> Pending</button>
                         <button class="dropdown-item" data-agent-filter="banned"><i class="fas fa-ban"></i> Banned</button>
@@ -1699,7 +1711,7 @@
             <div id="rejectedApplicationsList" style="display: none;"></div>
         </section>
 
-        <!-- LOANS SECTION -->
+        <!-- LOANS SECTION (redesigned cards) -->
         <section class="content-section" id="loansSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('loans')"><i class="fas fa-download"></i> Export Loans CSV</button>
@@ -1713,8 +1725,8 @@
             
             <div class="action-row">
                 <div class="quick-actions-dropdown">
-                    <button class="quick-actions-btn" id="loanQuickActionsBtn"><i class="fas fa-bolt"></i> Filter Loans <i class="fas fa-chevron-down"></i></button>
-                    <div class="quick-actions-menu" id="loanQuickMenu">
+                    <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Filter Loans <i class="fas fa-chevron-down"></i></button>
+                    <div class="quick-actions-menu">
                         <button class="dropdown-item" data-loan-filter="all"><i class="fas fa-list"></i> All Loans</button>
                         <button class="dropdown-item" data-loan-filter="approved"><i class="fas fa-check-circle"></i> Approved</button>
                         <button class="dropdown-item" data-loan-filter="defaulted"><i class="fas fa-exclamation-triangle"></i> Defaulted</button>
@@ -1744,8 +1756,8 @@
             
             <div class="action-row">
                 <div class="quick-actions-dropdown">
-                    <button class="quick-actions-btn" id="paymentQuickActionsBtn"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
-                    <div class="quick-actions-menu" id="paymentQuickMenu">
+                    <button class="quick-actions-btn" onclick="toggleQuickActions(this)"><i class="fas fa-bolt"></i> Quick Actions <i class="fas fa-chevron-down"></i></button>
+                    <div class="quick-actions-menu">
                         <button class="dropdown-item" id="filterPaymentsPending"><i class="fas fa-clock"></i> Pending</button>
                         <button class="dropdown-item" id="filterPaymentsConfirmed"><i class="fas fa-check-circle"></i> Confirmed</button>
                         <button class="dropdown-item" id="filterPaymentsRejected"><i class="fas fa-ban"></i> Rejected</button>
@@ -2058,12 +2070,12 @@
         </section>
     </div>
 
-    <!-- ========== MODALS ========== -->
+    <!-- ========== MODALS (unchanged) with logo added in headers ========== -->
     <!-- Create Customer Modal -->
     <div class="modal-overlay" id="createCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Create Customer</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Create Customer</span>
                 <span class="modal-close" onclick="closeModal('createCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2148,7 +2160,7 @@
     <div class="modal-overlay" id="createAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Create Agent</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Create Agent</span>
                 <span class="modal-close" onclick="closeModal('createAgentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2233,7 +2245,7 @@
     <div class="modal-overlay" id="createAdminModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Create Admin</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Create Admin</span>
                 <span class="modal-close" onclick="closeModal('createAdminModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2267,7 +2279,7 @@
     <div class="modal-overlay" id="agentApplicationModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Agent Application</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Agent Application</span>
                 <span class="modal-close" onclick="closeModal('agentApplicationModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="agentApplicationContent"></div>
@@ -2283,7 +2295,7 @@
     <div class="modal-overlay" id="customerDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Customer Profile</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Customer Profile</span>
                 <span class="modal-close" onclick="closeModal('customerDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="customerDetailsContent"></div>
@@ -2300,7 +2312,7 @@
     <div class="modal-overlay" id="editCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Edit Customer</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Edit Customer</span>
                 <span class="modal-close" onclick="closeModal('editCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="editCustomerContent"></div>
@@ -2315,7 +2327,7 @@
     <div class="modal-overlay" id="agentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Agent Profile</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Agent Profile</span>
                 <span class="modal-close" onclick="closeModal('agentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="agentDetailsContent"></div>
@@ -2332,7 +2344,7 @@
     <div class="modal-overlay" id="editAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Edit Agent</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Edit Agent</span>
                 <span class="modal-close" onclick="closeModal('editAgentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="editAgentContent"></div>
@@ -2343,11 +2355,11 @@
         </div>
     </div>
 
-    <!-- Loan Details Modal -->
+    <!-- Loan Details Modal (improved styling) -->
     <div class="modal-overlay" id="loanDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Loan Details</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Loan Details</span>
                 <span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="loanDetailsContent"></div>
@@ -2366,7 +2378,7 @@
     <div class="modal-overlay" id="paymentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Payment Details</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Payment Details</span>
                 <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="paymentDetailsContent"></div>
@@ -2378,11 +2390,11 @@
         </div>
     </div>
 
-    <!-- Pay Commission Modal (Advanced) -->
+    <!-- Pay Commission Modal (advanced) -->
     <div class="modal-overlay" id="payCommissionModal">
         <div class="modal-container">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Pay Commission</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Pay Commission</span>
                 <span class="modal-close" onclick="closeModal('payCommissionModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="payCommissionContent"></div>
@@ -2397,7 +2409,7 @@
     <div class="modal-overlay" id="commissionMathModal">
         <div class="modal-container">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Commission Breakdown</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Commission Breakdown</span>
                 <span class="modal-close" onclick="closeModal('commissionMathModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="commissionMathContent"></div>
@@ -2408,7 +2420,7 @@
     <div class="modal-overlay" id="sendReminderModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Send Reminder</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Send Reminder</span>
                 <span class="modal-close" onclick="closeModal('sendReminderModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2436,11 +2448,11 @@
         </div>
     </div>
 
-    <!-- Record Payment Modal -->
+    <!-- Record Payment Modal (improved) -->
     <div class="modal-overlay" id="recordPaymentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Record Payment</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Record Payment</span>
                 <span class="modal-close" onclick="closeModal('recordPaymentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2488,7 +2500,7 @@
     <div class="modal-overlay" id="reminderDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Payment Reminder Details</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Payment Reminder Details</span>
                 <span class="modal-close" onclick="closeModal('reminderDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="reminderDetailsContent"></div>
@@ -2503,7 +2515,7 @@
     <div class="modal-overlay" id="signedAgreementsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Signed Agreements</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Signed Agreements</span>
                 <span class="modal-close" onclick="closeModal('signedAgreementsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="signedAgreementsContent">
@@ -2519,7 +2531,7 @@
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Send Promotion</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Send Promotion</span>
                 <span class="modal-close" onclick="closeModal('promotionModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2562,7 +2574,7 @@
     <div class="modal-overlay" id="sudoModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span>⚠️ Sudo Reset</span>
+                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> ⚠️ Sudo Reset</span>
                 <span class="modal-close" onclick="closeModal('sudoModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2579,39 +2591,16 @@
         </div>
     </div>
 
-    <!-- Rejection Reason Modal (new) -->
-    <div class="modal-overlay" id="rejectionReasonModal">
-        <div class="modal-container compact">
-            <div class="modal-header">
-                <span><img src="logo.png" class="logo-small" style="width:30px; height:30px; vertical-align:middle;"> Rejection Reason</span>
-                <span class="modal-close" onclick="closeModal('rejectionReasonModal')"><i class="fas fa-times"></i></span>
-            </div>
-            <div class="modal-body">
-                <input type="hidden" id="rejectionTargetId">
-                <input type="hidden" id="rejectionType"> <!-- 'loan' or 'agent' -->
-                <div class="form-group">
-                    <label class="form-label">Reason for rejection *</label>
-                    <textarea id="rejectionReasonText" class="form-textarea rejection-reason-input" rows="4" placeholder="Provide a reason..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('rejectionReasonModal')">Cancel</button>
-                <button class="btn btn-danger" id="submitRejectionReason">Reject</button>
-            </div>
-        </div>
-    </div>
-
     <script>
         // =========================================================================
-        // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (PRODUCTION READY)
+        // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
         // MODIFICATIONS:
-        // 1. Dropdowns close after item click
-        // 2. Improved CSS for rejection reason (modal)
-        // 3. Loan cards compact (left customer, right agent, amount in middle, icons)
-        // 4. Fixed confirm payment (multi-path update)
-        // 5. Real-time notifications (toasts for new items)
-        // 6. Advanced commission payment (bulk with details)
-        // 7. Logo everywhere
+        // 1. Dropdowns close after click.
+        // 2. Loan cards redesigned (compact with customer/agent avatars, icons).
+        // 3. Fixed confirmPayment and recordPayment to correctly update status.
+        // 4. Real-time notifications for new pending items.
+        // 5. Advanced commission payment (bulk pay with method selection).
+        // 6. Logo added throughout UI.
         // =========================================================================
         
         // Firebase configuration
@@ -2656,13 +2645,12 @@
         let customerFilter = 'all';
         let cloudinaryWidget = null;
 
-        // For real-time notifications (store last counts)
-        let lastNotificationCounts = {
-            agentApps: 0,
-            payments: 0,
-            loans: 0,
-            customers: 0,
-            lastCustomerCheck: 0
+        // For real-time notifications (store last seen IDs)
+        let lastNotified = {
+            agentApps: new Set(),
+            payments: new Set(),
+            loans: new Set(),
+            customers: new Set()
         };
 
         // ========== UTILITIES ==========
@@ -2788,6 +2776,7 @@
 
                 inst.penalty = (inst.penalty || 0) + penaltyAmount;
                 inst.totalDue = inst.principal + inst.interest + inst.penalty;
+                inst.status = 'pending';
 
                 totalPenalty += penaltyAmount;
                 updated = true;
@@ -2890,38 +2879,7 @@
             }
         }
 
-        // ========== REAL-TIME NOTIFICATIONS ==========
-        function checkForNewNotifications() {
-            // Agent applications
-            const currentAgentApps = allAgentApplications.filter(a => a.status === 'pending').length;
-            if (currentAgentApps > lastNotificationCounts.agentApps) {
-                Utils.showToast('New Application', `${currentAgentApps - lastNotificationCounts.agentApps} new agent application(s)`, 'info');
-            }
-            lastNotificationCounts.agentApps = currentAgentApps;
-
-            // Pending payments
-            const currentPendingPayments = allPayments.filter(p => p.status === 'pending').length;
-            if (currentPendingPayments > lastNotificationCounts.payments) {
-                Utils.showToast('New Payment', `${currentPendingPayments - lastNotificationCounts.payments} new payment(s) awaiting confirmation`, 'info');
-            }
-            lastNotificationCounts.payments = currentPendingPayments;
-
-            // Pending loans
-            const currentPendingLoans = allLoans.filter(l => l.status === 'pending').length;
-            if (currentPendingLoans > lastNotificationCounts.loans) {
-                Utils.showToast('New Loan', `${currentPendingLoans - lastNotificationCounts.loans} new loan application(s)`, 'info');
-            }
-            lastNotificationCounts.loans = currentPendingLoans;
-
-            // New customers (since last load) - we can track by createdAt
-            const newCustomers = allCustomers.filter(c => c.createdAt > (lastNotificationCounts.lastCustomerCheck || 0)).length;
-            if (newCustomers > 0) {
-                Utils.showToast('New Customer', `${newCustomers} new customer(s) registered`, 'info');
-            }
-            lastNotificationCounts.lastCustomerCheck = Date.now();
-        }
-
-        // ========== UPDATED: getUpcomingPayments ==========
+        // ========== getUpcomingPayments ==========
         function getUpcomingPayments() {
             const now = Date.now();
             const sixtyDays = 60 * 24 * 60 * 60 * 1000;
@@ -2977,7 +2935,7 @@
             return overdue;
         }
 
-        // ========== CSV EXPORT (unchanged) ==========
+        // ========== CSV EXPORT ==========
         function exportData(type) {
             let data = [];
             let filename = '';
@@ -3113,7 +3071,6 @@
             Utils.showLoading('Generating ZIP...');
             const zip = new JSZip();
             
-            // Customers
             const customersData = allCustomers.map(c => ({
                 Name: c.fullName,
                 Email: c.email,
@@ -3129,7 +3086,6 @@
             }));
             zip.file("customers.csv", Papa.unparse(customersData));
             
-            // Agents
             const agentsData = allAgents.map(a => ({
                 Name: a.fullName,
                 Email: a.email,
@@ -3145,7 +3101,6 @@
             }));
             zip.file("agents.csv", Papa.unparse(agentsData));
             
-            // Loans
             const loansData = allLoans.map(l => ({
                 'Loan ID': l.id,
                 Customer: l.customerName,
@@ -3171,7 +3126,6 @@
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
-            // Payments
             const paymentsData = allPayments.map(p => ({
                 'Payment ID': p.id,
                 'Loan ID': p.loanId,
@@ -3185,7 +3139,6 @@
             }));
             zip.file("payments.csv", Papa.unparse(paymentsData));
             
-            // Commission History
             const commissionData = allCommissionHistory.map(c => {
                 const agent = allAgents.find(a => a.id === c.agentId);
                 return {
@@ -3200,7 +3153,6 @@
             });
             zip.file("commission.csv", Papa.unparse(commissionData));
             
-            // Agent Applications (all)
             const appsData = allAgentApplications.map(app => ({
                 Name: app.fullName,
                 Phone: app.phone,
@@ -3211,7 +3163,6 @@
             }));
             zip.file("applications.csv", Papa.unparse(appsData));
             
-            // Audit Logs
             const auditData = allAuditLogs.map(log => ({
                 Action: log.action,
                 Admin: log.adminEmail,
@@ -3220,7 +3171,6 @@
             }));
             zip.file("audit.csv", Papa.unparse(auditData));
             
-            // Messages
             const messagesData = allMessages.map(m => ({
                 Recipient: m.recipientId,
                 Message: m.message,
@@ -3228,7 +3178,6 @@
             }));
             zip.file("messages.csv", Papa.unparse(messagesData));
 
-            // Promotions
             const promotionsData = allPromotions.map(p => ({
                 Title: p.title,
                 Message: p.message,
@@ -3238,7 +3187,6 @@
             }));
             zip.file("promotions.csv", Papa.unparse(promotionsData));
             
-            // Generate zip
             const content = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
@@ -3247,6 +3195,42 @@
             
             Utils.hideLoading();
             Utils.showToast('Success', 'Full data export generated', 'success');
+        }
+
+        // ========== REAL-TIME NOTIFICATIONS ==========
+        function checkNewPendingItems() {
+            // Agent applications
+            allAgentApplications.forEach(app => {
+                if (app.status === 'pending' && !lastNotified.agentApps.has(app.id)) {
+                    Utils.showToast('New Application', `Agent application from ${app.fullName}`, 'info');
+                    lastNotified.agentApps.add(app.id);
+                }
+            });
+
+            // Payments
+            allPayments.forEach(pay => {
+                if (pay.status === 'pending' && !lastNotified.payments.has(pay.id)) {
+                    Utils.showToast('Payment Pending', `Payment of ${Utils.formatCurrency(pay.amount)} from ${pay.customerName}`, 'warning');
+                    lastNotified.payments.add(pay.id);
+                }
+            });
+
+            // Loans
+            allLoans.forEach(loan => {
+                if (loan.status === 'pending' && !lastNotified.loans.has(loan.id)) {
+                    Utils.showToast('Loan Application', `New loan from ${loan.customerName}`, 'info');
+                    lastNotified.loans.add(loan.id);
+                }
+            });
+
+            // New customers (active status with recent createdAt, within last hour)
+            const oneHourAgo = Date.now() - 3600000;
+            allCustomers.forEach(cust => {
+                if (cust.createdAt && cust.createdAt > oneHourAgo && !lastNotified.customers.has(cust.id)) {
+                    Utils.showToast('New Customer', `${cust.fullName} registered`, 'success');
+                    lastNotified.customers.add(cust.id);
+                }
+            });
         }
 
         // ========== LOAD ALL DATA ==========
@@ -3286,11 +3270,11 @@
                 const promoSnap = await db.ref('promotions').once('value');
                 allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
 
-                // Apply penalties
                 await applyPenaltiesToAllLoans();
 
                 populateSettingsForm();
                 updateUI();
+                checkNewPendingItems(); // initial check
                 Utils.hideLoading();
             } catch (error) {
                 Utils.showToast('Error', 'Failed to load data: ' + error.message, 'error');
@@ -3332,7 +3316,6 @@
             renderMessages();
             renderPromotionHistory();
             updateBadges();
-            checkForNewNotifications();
         }
 
         function updateDashboardStats() {
@@ -3507,7 +3490,7 @@
             `).join('');
         }
 
-        // ========== REDESIGNED LOAN CARD (COMPACT) ==========
+        // Redesigned loan cards
         function renderLoans() {
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
@@ -3527,32 +3510,28 @@
             container.innerHTML = filtered.map(l => {
                 const customer = allCustomers.find(c => c.id === l.customerId);
                 const agent = allAgents.find(a => a.id === l.agentId);
-                
-                // Icons for images, witness, signed
-                const icons = [];
-                if (l.collateral?.images && l.collateral.images.length > 0) icons.push('<span class="loan-icon"><i class="fas fa-image"></i> '+l.collateral.images.length+'</span>');
-                if (l.witness) icons.push('<span class="loan-icon"><i class="fas fa-user"></i> Witness</span>');
-                if (l.signedAgreementUrl) icons.push('<span class="loan-icon"><i class="fas fa-file-signature"></i> Signed</span>');
+                const hasCollateral = l.collateral?.images && l.collateral.images.length > 0;
+                const hasWitness = l.witness && l.witness.name;
+                const hasSigned = l.signedAgreementUrl ? true : false;
                 
                 return `
-                <div class="loan-compact-card" onclick="showLoanDetails('${l.id}')">
-                    <div class="loan-compact-header">
-                        <div class="loan-compact-left">
-                            <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')+'&background=007AFF&color=fff'}" class="loan-compact-avatar">
-                            <span class="loan-compact-name">${l.customerName}</span>
-                        </div>
-                        <div class="loan-compact-middle">
-                            <div class="loan-compact-customer-name">${l.customerName}</div>
-                            <div class="loan-compact-amount">${Utils.formatCurrency(l.amount)}</div>
-                        </div>
-                        <div class="loan-compact-right">
-                            <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')+'&background=5856d6&color=fff'}" class="loan-compact-avatar">
-                            <span class="loan-compact-name">${agent?.fullName || 'N/A'}</span>
+                <div class="loan-card" onclick="showLoanDetails('${l.id}')">
+                    <div class="loan-card-left">
+                        <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')+'&background=007AFF&color=fff'}" class="loan-card-avatar">
+                    </div>
+                    <div class="loan-card-center">
+                        <div class="loan-card-customer">${l.customerName}</div>
+                        <div class="loan-card-amount">${Utils.formatCurrency(l.amount)}</div>
+                        <div class="loan-card-icons">
+                            ${hasCollateral ? '<i class="fas fa-image" title="Has collateral"></i>' : ''}
+                            ${hasWitness ? '<i class="fas fa-user" title="Has witness"></i>' : ''}
+                            ${hasSigned ? '<i class="fas fa-file-signature" title="Signed agreement"></i>' : ''}
+                            ${l.totalPenalty ? '<i class="fas fa-exclamation-triangle text-red" title="Penalty applied"></i>' : ''}
                         </div>
                     </div>
-                    <div class="loan-compact-icons">
-                        ${icons.join(' ')}
-                        <span class="status-badge ${l.status}">${l.status}</span>
+                    <div class="loan-card-right">
+                        <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')+'&background=5856d6&color=fff'}" class="loan-card-agent-avatar">
+                        <div class="loan-card-agent-name">${agent?.fullName || 'No Agent'}</div>
                     </div>
                 </div>
             `}).join('');
@@ -3762,7 +3741,6 @@
             `).join('');
         }
 
-        // ===== UPCOMING PAYMENTS =====
         function renderUpcomingPayments() {
             const upcoming = getUpcomingPayments();
             const overdue = getOverduePayments();
@@ -3966,6 +3944,7 @@
             Utils.hideLoading();
         });
 
+        // Fixed record payment button in loan modal
         document.getElementById('recordPaymentBtn').addEventListener('click', () => {
             const loanId = document.getElementById('loanDetailsContent')?.getAttribute('data-loan-id');
             if (!loanId) return;
@@ -4005,6 +3984,7 @@
             openModal('recordPaymentModal');
         });
 
+        // Fixed confirmRecordPayment (sets payment status to confirmed)
         document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
             const loanId = document.getElementById('recordLoanId').value;
             const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
@@ -4069,7 +4049,7 @@
                     method: method,
                     reference: reference,
                     proofUrl: proofUrl || null,
-                    status: 'confirmed',
+                    status: 'confirmed',  // directly confirmed
                     timestamp: Date.now(),
                     verifiedAt: Date.now(),
                     verifiedBy: currentUser.uid,
@@ -4697,36 +4677,12 @@
             document.getElementById('recordPaymentBtn').style.display = loan.status === 'active' || loan.status === 'approved' ? 'inline-flex' : 'none';
             
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
-            document.getElementById('rejectLoanBtn').onclick = () => showRejectionModal(loan.id, 'loan');
+            document.getElementById('rejectLoanBtn').onclick = () => rejectLoan(loan.id);
             document.getElementById('markDefaultedBtn').onclick = () => markAsDefaulted(loan.id);
             document.getElementById('editLoanBtn').onclick = () => editLoan(loan.id);
             
             openModal('loanDetailsModal');
         };
-
-        // Rejection reason modal
-        function showRejectionModal(targetId, type) {
-            document.getElementById('rejectionTargetId').value = targetId;
-            document.getElementById('rejectionType').value = type;
-            document.getElementById('rejectionReasonText').value = '';
-            openModal('rejectionReasonModal');
-        }
-
-        document.getElementById('submitRejectionReason').addEventListener('click', async () => {
-            const targetId = document.getElementById('rejectionTargetId').value;
-            const type = document.getElementById('rejectionType').value;
-            const reason = document.getElementById('rejectionReasonText').value.trim();
-            if (!reason) {
-                Utils.showToast('Error', 'Rejection reason is required', 'error');
-                return;
-            }
-            closeModal('rejectionReasonModal');
-            if (type === 'loan') {
-                await rejectLoan(targetId, reason);
-            } else if (type === 'agent') {
-                await rejectAgentApplication(targetId, reason);
-            }
-        });
 
         window.showPaymentDetails = (id) => {
             const payment = allPayments.find(p => p.id === id);
@@ -4874,7 +4830,7 @@
                 document.getElementById('manualApproveAgent').style.display = 'inline-flex';
                 document.getElementById('rejectAgentApplication').style.display = 'inline-flex';
                 document.getElementById('manualApproveAgent').onclick = () => approveAgentApplicationManually(appId);
-                document.getElementById('rejectAgentApplication').onclick = () => showRejectionModal(appId, 'agent');
+                document.getElementById('rejectAgentApplication').onclick = () => rejectAgentApplication(appId);
             } else {
                 document.getElementById('manualApproveAgent').style.display = 'none';
                 document.getElementById('rejectAgentApplication').style.display = 'none';
@@ -5114,7 +5070,7 @@
             Utils.hideLoading();
         }
 
-        // ========== COMMISSION PAYMENT MODAL (Advanced) ==========
+        // ========== COMMISSION PAYMENT MODAL ==========
         window.openPayCommissionModal = (agentId) => {
             const agent = allAgents.find(a => a.id === agentId);
             if (!agent) return;
@@ -5136,12 +5092,9 @@
                             <span><strong>Amount:</strong> ${Utils.formatCurrency(entry.amount)}</span>
                         </div>
                         <div class="profile-meta">Customer: ${entry.customerName || 'Unknown'}</div>
-                        <div class="profile-meta">Interest portion: ${Utils.formatCurrency(entry.amount / 0.15)}</div>
                     </div>
                 `).join('');
             }
-            
-            const totalPending = pendingEntries.reduce((s, e) => s + e.amount, 0);
             
             const content = `
                 <div class="profile-row mb-4">
@@ -5153,7 +5106,7 @@
                 </div>
                 
                 <div class="detail-section">
-                    <h4 class="detail-title">Pending Commission (Total: ${Utils.formatCurrency(totalPending)})</h4>
+                    <h4 class="detail-title">Pending Commission</h4>
                     ${loansHtml}
                 </div>
                 
@@ -5198,7 +5151,7 @@
                         );
                     }
                     
-                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: totalPending, method });
+                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: pendingEntries.reduce((s,e) => s + e.amount, 0), method });
                     Utils.showToast('Success', 'Commission paid', 'success');
                     closeModal('payCommissionModal');
                 } catch (e) {
@@ -5239,7 +5192,10 @@
             Utils.hideLoading();
         }
 
-        async function rejectLoan(loanId, reason) {
+        async function rejectLoan(loanId) {
+            const reason = prompt('Enter reason for rejection:');
+            if (reason === null) return;
+            
             Utils.showLoading('Rejecting loan...');
             try {
                 await db.ref('loans/' + loanId).update({
@@ -5288,7 +5244,7 @@
             Utils.hideLoading();
         }
 
-        // ========== FIXED CONFIRM PAYMENT (multi-path update) ==========
+        // Fixed confirmPayment (updates loan and payment status)
         async function confirmPayment(paymentId) {
             if (!confirm('Confirm this payment?')) return;
             
@@ -5344,21 +5300,25 @@
                     return sum + (isNaN(interestPart) ? 0 : interestPart);
                 }, 0);
                 
-                const updates = {};
-                updates[`loans/${payment.loanId}/repaymentSchedule`] = schedule;
-                updates[`loans/${payment.loanId}/totalPaid`] = newTotalPaid;
-                updates[`loans/${payment.loanId}/interestPaid`] = newInterestPaid;
+                const updates = {
+                    repaymentSchedule: schedule,
+                    totalPaid: newTotalPaid,
+                    interestPaid: newInterestPaid
+                };
                 
                 if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
-                    updates[`loans/${payment.loanId}/status`] = 'completed';
-                    updates[`loans/${payment.loanId}/completedAt`] = Date.now();
+                    updates.status = 'completed';
+                    updates.completedAt = Date.now();
                 }
                 
-                updates[`payments/${paymentId}/status`] = 'confirmed';
-                updates[`payments/${paymentId}/verifiedAt`] = Date.now();
-                updates[`payments/${paymentId}/verifiedBy`] = currentUser?.uid;
+                // Update payment node
+                await db.ref('payments/' + paymentId).update({
+                    status: 'confirmed',
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser?.uid
+                });
                 
-                await db.ref().update(updates);
+                await loanRef.update(updates);
                 
                 if (totalInterestPaid > 0 && loan.agentId) {
                     const commissionAmount = totalInterestPaid * 0.15;
@@ -5479,16 +5439,17 @@
             Utils.hideLoading();
         }
 
-        async function rejectAgentApplication(appId, reason) {
+        async function rejectAgentApplication(appId) {
+            if (!confirm('Reject this application?')) return;
+            
             Utils.showLoading('Rejecting application...');
             try {
                 await db.ref('agentApplications/' + appId).update({ 
                     status: 'rejected', 
                     reviewedAt: Date.now(),
-                    reviewedBy: currentUser?.email,
-                    rejectionReason: reason
+                    reviewedBy: currentUser?.email
                 });
-                await Utils.logAudit('REJECT_AGENT', { appId, reason });
+                await Utils.logAudit('REJECT_AGENT', { appId });
                 Utils.showToast('Info', 'Application rejected', 'info');
                 closeModal('agentApplicationModal');
             } catch (e) {
@@ -5858,66 +5819,45 @@
             closeModal('sudoModal');
         });
 
-        // ========== FILTERS & DROPDOWNS ==========
-        // Close dropdown after item click
-        function closeDropdowns() {
-            document.querySelectorAll('.quick-actions-menu').forEach(m => m.classList.remove('show'));
-        }
-
+        // ========== FILTERS ==========
         document.querySelectorAll('[data-agent-filter]').forEach(item => {
             item.addEventListener('click', (e) => {
-                agentFilter = e.target.dataset.agentFilter;
+                agentFilter = item.dataset.agentFilter;
                 renderAgents();
-                closeDropdowns();
+                // Close dropdown
+                const menu = e.target.closest('.quick-actions-menu');
+                if (menu) menu.classList.remove('show');
             });
         });
 
         document.querySelectorAll('[data-loan-filter]').forEach(item => {
             item.addEventListener('click', (e) => {
-                currentLoanFilter = e.target.dataset.loanFilter;
+                currentLoanFilter = item.dataset.loanFilter;
                 renderLoans();
-                closeDropdowns();
+                const menu = e.target.closest('.quick-actions-menu');
+                if (menu) menu.classList.remove('show');
             });
         });
 
         document.getElementById('filterAllCustomers')?.addEventListener('click', (e) => {
             customerFilter = 'all';
             renderCustomers();
-            closeDropdowns();
+            const menu = e.target.closest('.quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
         
         document.getElementById('filterActiveCustomers')?.addEventListener('click', (e) => {
             customerFilter = 'active';
             renderCustomers();
-            closeDropdowns();
+            const menu = e.target.closest('.quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
         
         document.getElementById('filterBannedCustomers')?.addEventListener('click', (e) => {
             customerFilter = 'banned';
             renderCustomers();
-            closeDropdowns();
-        });
-
-        document.getElementById('filterPaymentsPending')?.addEventListener('click', (e) => {
-            currentPaymentFilter = 'pending';
-            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
-            renderPayments();
-            closeDropdowns();
-        });
-        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', (e) => {
-            currentPaymentFilter = 'confirmed';
-            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
-            renderPayments();
-            closeDropdowns();
-        });
-        document.getElementById('filterPaymentsRejected')?.addEventListener('click', (e) => {
-            currentPaymentFilter = 'rejected';
-            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
-            document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
-            renderPayments();
-            closeDropdowns();
+            const menu = e.target.closest('.quick-actions-menu');
+            if (menu) menu.classList.remove('show');
         });
 
         document.getElementById('agentSearch').addEventListener('input', renderAgents);
@@ -5948,6 +5888,31 @@
             });
         });
 
+        document.getElementById('filterPaymentsPending')?.addEventListener('click', (e) => {
+            currentPaymentFilter = 'pending';
+            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
+            renderPayments();
+            const menu = e.target.closest('.quick-actions-menu');
+            if (menu) menu.classList.remove('show');
+        });
+        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', (e) => {
+            currentPaymentFilter = 'confirmed';
+            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
+            renderPayments();
+            const menu = e.target.closest('.quick-actions-menu');
+            if (menu) menu.classList.remove('show');
+        });
+        document.getElementById('filterPaymentsRejected')?.addEventListener('click', (e) => {
+            currentPaymentFilter = 'rejected';
+            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+            document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
+            renderPayments();
+            const menu = e.target.closest('.quick-actions-menu');
+            if (menu) menu.classList.remove('show');
+        });
+
         document.getElementById('paymentSearch').addEventListener('input', renderPayments);
         document.getElementById('clearPaymentSearch').addEventListener('click', () => {
             document.getElementById('paymentSearch').value = '';
@@ -5959,7 +5924,7 @@
         // ========== REPORTS (dropdown) ==========
         document.querySelectorAll('[data-report]').forEach(item => {
             item.addEventListener('click', (e) => {
-                const reportType = e.target.dataset.report;
+                const reportType = item.dataset.report;
                 let report = '';
                 
                 if (reportType === 'agents') {
@@ -6036,7 +6001,9 @@
                 }
                 
                 document.getElementById('reportOutput').innerHTML = report;
-                closeDropdowns();
+                // Close dropdown
+                const menu = e.target.closest('.quick-actions-menu');
+                if (menu) menu.classList.remove('show');
             });
         });
 
@@ -6241,8 +6208,6 @@
             setTimeout(() => document.addEventListener('click', closeDropdown), 0);
         };
 
-        // Ensure dropdowns close when any item inside is clicked (already handled by individual listeners)
-
         document.getElementById('quickCreateCustomer')?.addEventListener('click', () => {
             showSection('customers');
             setTimeout(() => {
@@ -6392,7 +6357,7 @@
             
             document.getElementById('adminNameDisplay').innerText = adminData?.fullName || 'Admin';
             document.getElementById('sidebarName').innerText = adminData?.fullName || 'Admin User';
-            document.getElementById('sidebarAvatar').innerHTML = '<img src="logo.png">';
+            document.getElementById('sidebarAvatar').innerHTML = `<img src="logo.png">`;
 
             await loadAllData();
             setupRealtimeListeners();
@@ -6406,17 +6371,20 @@
                 allAgents = Object.entries(users).filter(([_,u]) => u.userType === 'agent').map(([id,u]) => ({...u, id}));
                 allCustomers = Object.entries(users).filter(([_,u]) => u.userType === 'customer').map(([id,u]) => ({...u, id}));
                 updateUI();
+                checkNewPendingItems();
             });
             
             db.ref('loans').on('value', (snap) => {
                 allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
                 applyPenaltiesToAllLoans();
                 updateUI();
+                checkNewPendingItems();
             });
             
             db.ref('payments').on('value', (snap) => {
                 allPayments = Object.entries(snap.val() || {}).map(([id,p]) => ({...p, id}));
                 updateUI();
+                checkNewPendingItems();
             });
             
             db.ref('commissionHistory').on('value', (snap) => {
@@ -6427,6 +6395,7 @@
             db.ref('agentApplications').on('value', (snap) => {
                 allAgentApplications = Object.entries(snap.val() || {}).map(([id,a]) => ({...a, id}));
                 updateUI();
+                checkNewPendingItems();
             });
             
             db.ref('auditLogs').on('value', (snap) => {
