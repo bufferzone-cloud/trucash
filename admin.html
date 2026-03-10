@@ -1,4 +1,4 @@
-rewrite this code entirely reduce the size of everything by 20% and most important fix the it its not collecting system data (<!DOCTYPE html>
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="UTF-8">
@@ -82,7 +82,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             z-index: -1;
         }
 
-        /* ===== Header with logo ===== */
+        /* ===== Header ===== */
         .app-header {
             position: sticky;
             top: 0;
@@ -112,12 +112,13 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             align-items: center;
             justify-content: center;
             box-shadow: 0 4px 8px rgba(0,122,255,0.2);
-            overflow: hidden;
         }
+
         .logo-icon img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            border-radius: 10px;
         }
 
         .logo-text {
@@ -227,6 +228,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             box-shadow: 0 4px 12px rgba(0,122,255,0.2);
             overflow: hidden;
         }
+
         .sidebar-avatar img {
             width: 100%;
             height: 100%;
@@ -653,88 +655,56 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             color: var(--ios-gray5);
         }
 
-        /* ===== Loan Card Redesign ===== */
+        /* ===== Split Profile Card (for loan cards) ===== */
         .loan-card {
-            background: var(--ios-card);
-            border-radius: var(--radius-sm);
-            padding: 12px 16px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
             display: flex;
             align-items: center;
-            gap: 12px;
+            background: var(--ios-card);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 12px;
+            box-shadow: var(--shadow-sm);
             cursor: pointer;
             transition: 0.2s;
-            border: 1px solid rgba(0,0,0,0.03);
+            border: 1px solid var(--ios-gray2);
         }
         .loan-card:hover {
             box-shadow: var(--shadow-md);
             transform: translateY(-2px);
         }
-        .loan-card-left {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .loan-card-avatar {
+        .loan-avatar {
             width: 48px;
             height: 48px;
             border-radius: 12px;
             object-fit: cover;
-            border: 2px solid white;
             box-shadow: var(--shadow-sm);
         }
-        .loan-card-avatar.small {
-            width: 40px;
-            height: 40px;
-            border-radius: 8px;
-        }
-        .loan-card-center {
+        .loan-info {
             flex: 1;
-            min-width: 0;
+            margin: 0 12px;
         }
-        .loan-card-customer {
+        .loan-name {
             font-weight: 600;
+            font-size: 15px;
+        }
+        .loan-amount {
             font-size: 14px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
-        }
-        .loan-card-amount {
-            font-weight: 700;
-            font-size: 16px;
             color: var(--ios-blue);
-            margin: 2px 0;
+            font-weight: 500;
         }
-        .loan-card-icons {
+        .loan-icons {
             display: flex;
-            gap: 10px;
-            font-size: 12px;
-            color: var(--ios-gray5);
+            gap: 8px;
+            margin-top: 4px;
         }
-        .loan-card-icons i {
-            margin-right: 2px;
-        }
-        .loan-card-right {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        .loan-card-agent-avatar {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            object-fit: cover;
-            border: 2px solid white;
-            box-shadow: var(--shadow-sm);
-        }
-        .loan-card-agent-name {
+        .loan-icons span {
+            background: var(--ios-gray1);
+            padding: 4px 8px;
+            border-radius: 20px;
             font-size: 11px;
-            text-align: center;
-            max-width: 80px;
-            white-space: nowrap;
-            overflow: hidden;
-            text-overflow: ellipsis;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
         }
 
         /* ===== Badges ===== */
@@ -909,10 +879,11 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             z-index: 10;
             border-radius: 28px 28px 0 0;
         }
+
         .modal-header .logo-icon {
             width: 32px;
             height: 32px;
-            margin-right: 10px;
+            margin-right: 8px;
         }
 
         .modal-close {
@@ -1504,6 +1475,21 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             background: var(--ios-blue);
             color: white;
         }
+        /* Commission checkboxes */
+        .commission-checkbox-item {
+            background: var(--ios-gray1);
+            border-radius: var(--radius-sm);
+            padding: 12px;
+            margin-bottom: 8px;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .commission-checkbox-item input[type="checkbox"] {
+            width: 20px;
+            height: 20px;
+            accent-color: var(--ios-blue);
+        }
     </style>
 </head>
 <body>
@@ -1530,7 +1516,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-avatar"><img src="logo.png" alt="Avatar"></div>
+            <div class="sidebar-avatar"><img src="logo.png" alt="Logo"></div>
             <div class="sidebar-user">
                 <div class="name" id="sidebarName">Admin User</div>
                 <div class="role">Administrator</div>
@@ -1711,7 +1697,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             <div id="rejectedApplicationsList" style="display: none;"></div>
         </section>
 
-        <!-- LOANS SECTION (redesigned cards) -->
+        <!-- LOANS SECTION -->
         <section class="content-section" id="loansSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('loans')"><i class="fas fa-download"></i> Export Loans CSV</button>
@@ -2070,12 +2056,13 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
         </section>
     </div>
 
-    <!-- ========== MODALS (unchanged) with logo added in headers ========== -->
+    <!-- ========== MODALS ========== -->
     <!-- Create Customer Modal -->
     <div class="modal-overlay" id="createCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Create Customer</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Create Customer</span>
                 <span class="modal-close" onclick="closeModal('createCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2160,7 +2147,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="createAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Create Agent</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Create Agent</span>
                 <span class="modal-close" onclick="closeModal('createAgentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2245,7 +2233,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="createAdminModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Create Admin</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Create Admin</span>
                 <span class="modal-close" onclick="closeModal('createAdminModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2279,7 +2268,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="agentApplicationModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Agent Application</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Agent Application</span>
                 <span class="modal-close" onclick="closeModal('agentApplicationModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="agentApplicationContent"></div>
@@ -2295,7 +2285,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="customerDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Customer Profile</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Customer Profile</span>
                 <span class="modal-close" onclick="closeModal('customerDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="customerDetailsContent"></div>
@@ -2312,7 +2303,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="editCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Edit Customer</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Edit Customer</span>
                 <span class="modal-close" onclick="closeModal('editCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="editCustomerContent"></div>
@@ -2327,7 +2319,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="agentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Agent Profile</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Agent Profile</span>
                 <span class="modal-close" onclick="closeModal('agentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="agentDetailsContent"></div>
@@ -2344,7 +2337,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="editAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Edit Agent</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Edit Agent</span>
                 <span class="modal-close" onclick="closeModal('editAgentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="editAgentContent"></div>
@@ -2359,7 +2353,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="loanDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Loan Details</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Loan Details</span>
                 <span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="loanDetailsContent"></div>
@@ -2378,7 +2373,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="paymentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Payment Details</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Payment Details</span>
                 <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="paymentDetailsContent"></div>
@@ -2390,17 +2386,20 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
         </div>
     </div>
 
-    <!-- Pay Commission Modal (advanced) -->
+    <!-- Pay Commission Modal (Advanced) -->
     <div class="modal-overlay" id="payCommissionModal">
         <div class="modal-container">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Pay Commission</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Pay Commission</span>
                 <span class="modal-close" onclick="closeModal('payCommissionModal')"><i class="fas fa-times"></i></span>
             </div>
-            <div class="modal-body" id="payCommissionContent"></div>
+            <div class="modal-body" id="payCommissionContent">
+                <!-- Dynamic content with checkboxes -->
+            </div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('payCommissionModal')">Cancel</button>
-                <button class="btn btn-success" id="processCommissionPayment">Pay Now</button>
+                <button class="btn btn-success" id="processCommissionPayment">Pay Selected</button>
             </div>
         </div>
     </div>
@@ -2409,7 +2408,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="commissionMathModal">
         <div class="modal-container">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Commission Breakdown</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Commission Breakdown</span>
                 <span class="modal-close" onclick="closeModal('commissionMathModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="commissionMathContent"></div>
@@ -2420,7 +2420,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="sendReminderModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Send Reminder</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Send Reminder</span>
                 <span class="modal-close" onclick="closeModal('sendReminderModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2448,11 +2449,12 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
         </div>
     </div>
 
-    <!-- Record Payment Modal (improved) -->
+    <!-- Record Payment Modal -->
     <div class="modal-overlay" id="recordPaymentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Record Payment</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Record Payment</span>
                 <span class="modal-close" onclick="closeModal('recordPaymentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2500,7 +2502,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="reminderDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Payment Reminder Details</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Payment Reminder Details</span>
                 <span class="modal-close" onclick="closeModal('reminderDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="reminderDetailsContent"></div>
@@ -2515,7 +2518,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="signedAgreementsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Signed Agreements</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Signed Agreements</span>
                 <span class="modal-close" onclick="closeModal('signedAgreementsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="signedAgreementsContent">
@@ -2531,7 +2535,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> Send Promotion</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>Send Promotion</span>
                 <span class="modal-close" onclick="closeModal('promotionModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2574,7 +2579,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <div class="modal-overlay" id="sudoModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px; height:24px; margin-right:8px;"> ⚠️ Sudo Reset</span>
+                <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+                <span>⚠️ Sudo Reset</span>
                 <span class="modal-close" onclick="closeModal('sudoModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2594,13 +2600,6 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
     <script>
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
-        // MODIFICATIONS:
-        // 1. Dropdowns close after click.
-        // 2. Loan cards redesigned (compact with customer/agent avatars, icons).
-        // 3. Fixed confirmPayment and recordPayment to correctly update status.
-        // 4. Real-time notifications for new pending items.
-        // 5. Advanced commission payment (bulk pay with method selection).
-        // 6. Logo added throughout UI.
         // =========================================================================
         
         // Firebase configuration
@@ -2644,14 +2643,8 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
         let agentFilter = 'active';
         let customerFilter = 'all';
         let cloudinaryWidget = null;
-
-        // For real-time notifications (store last seen IDs)
-        let lastNotified = {
-            agentApps: new Set(),
-            payments: new Set(),
-            loans: new Set(),
-            customers: new Set()
-        };
+        // Set to track already notified events (avoid duplicates)
+        const notifiedEvents = new Set();
 
         // ========== UTILITIES ==========
         const Utils = {
@@ -2879,7 +2872,6 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }
         }
 
-        // ========== getUpcomingPayments ==========
         function getUpcomingPayments() {
             const now = Date.now();
             const sixtyDays = 60 * 24 * 60 * 60 * 1000;
@@ -3066,11 +3058,11 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             link.click();
         }
 
-        // ========== EXPORT ALL DATA AS ZIP ==========
         async function exportAllData() {
             Utils.showLoading('Generating ZIP...');
             const zip = new JSZip();
             
+            // Customers
             const customersData = allCustomers.map(c => ({
                 Name: c.fullName,
                 Email: c.email,
@@ -3086,6 +3078,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("customers.csv", Papa.unparse(customersData));
             
+            // Agents
             const agentsData = allAgents.map(a => ({
                 Name: a.fullName,
                 Email: a.email,
@@ -3101,6 +3094,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("agents.csv", Papa.unparse(agentsData));
             
+            // Loans
             const loansData = allLoans.map(l => ({
                 'Loan ID': l.id,
                 Customer: l.customerName,
@@ -3126,6 +3120,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
+            // Payments
             const paymentsData = allPayments.map(p => ({
                 'Payment ID': p.id,
                 'Loan ID': p.loanId,
@@ -3139,6 +3134,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("payments.csv", Papa.unparse(paymentsData));
             
+            // Commission History
             const commissionData = allCommissionHistory.map(c => {
                 const agent = allAgents.find(a => a.id === c.agentId);
                 return {
@@ -3153,6 +3149,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             });
             zip.file("commission.csv", Papa.unparse(commissionData));
             
+            // Agent Applications (all)
             const appsData = allAgentApplications.map(app => ({
                 Name: app.fullName,
                 Phone: app.phone,
@@ -3163,6 +3160,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("applications.csv", Papa.unparse(appsData));
             
+            // Audit Logs
             const auditData = allAuditLogs.map(log => ({
                 Action: log.action,
                 Admin: log.adminEmail,
@@ -3171,6 +3169,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("audit.csv", Papa.unparse(auditData));
             
+            // Messages
             const messagesData = allMessages.map(m => ({
                 Recipient: m.recipientId,
                 Message: m.message,
@@ -3178,6 +3177,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("messages.csv", Papa.unparse(messagesData));
 
+            // Promotions
             const promotionsData = allPromotions.map(p => ({
                 Title: p.title,
                 Message: p.message,
@@ -3187,6 +3187,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }));
             zip.file("promotions.csv", Papa.unparse(promotionsData));
             
+            // Generate zip
             const content = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
@@ -3195,42 +3196,6 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             
             Utils.hideLoading();
             Utils.showToast('Success', 'Full data export generated', 'success');
-        }
-
-        // ========== REAL-TIME NOTIFICATIONS ==========
-        function checkNewPendingItems() {
-            // Agent applications
-            allAgentApplications.forEach(app => {
-                if (app.status === 'pending' && !lastNotified.agentApps.has(app.id)) {
-                    Utils.showToast('New Application', `Agent application from ${app.fullName}`, 'info');
-                    lastNotified.agentApps.add(app.id);
-                }
-            });
-
-            // Payments
-            allPayments.forEach(pay => {
-                if (pay.status === 'pending' && !lastNotified.payments.has(pay.id)) {
-                    Utils.showToast('Payment Pending', `Payment of ${Utils.formatCurrency(pay.amount)} from ${pay.customerName}`, 'warning');
-                    lastNotified.payments.add(pay.id);
-                }
-            });
-
-            // Loans
-            allLoans.forEach(loan => {
-                if (loan.status === 'pending' && !lastNotified.loans.has(loan.id)) {
-                    Utils.showToast('Loan Application', `New loan from ${loan.customerName}`, 'info');
-                    lastNotified.loans.add(loan.id);
-                }
-            });
-
-            // New customers (active status with recent createdAt, within last hour)
-            const oneHourAgo = Date.now() - 3600000;
-            allCustomers.forEach(cust => {
-                if (cust.createdAt && cust.createdAt > oneHourAgo && !lastNotified.customers.has(cust.id)) {
-                    Utils.showToast('New Customer', `${cust.fullName} registered`, 'success');
-                    lastNotified.customers.add(cust.id);
-                }
-            });
         }
 
         // ========== LOAD ALL DATA ==========
@@ -3270,11 +3235,11 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
                 const promoSnap = await db.ref('promotions').once('value');
                 allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
 
+                // Apply penalties after loading loans
                 await applyPenaltiesToAllLoans();
 
                 populateSettingsForm();
                 updateUI();
-                checkNewPendingItems(); // initial check
                 Utils.hideLoading();
             } catch (error) {
                 Utils.showToast('Error', 'Failed to load data: ' + error.message, 'error');
@@ -3490,7 +3455,6 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             `).join('');
         }
 
-        // Redesigned loan cards
         function renderLoans() {
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
@@ -3510,29 +3474,26 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             container.innerHTML = filtered.map(l => {
                 const customer = allCustomers.find(c => c.id === l.customerId);
                 const agent = allAgents.find(a => a.id === l.agentId);
+                const totalPaid = l.totalPaid || 0;
+                const penalty = l.totalPenalty || 0;
                 const hasCollateral = l.collateral?.images && l.collateral.images.length > 0;
-                const hasWitness = l.witness && l.witness.name;
+                const hasWitness = l.witness ? true : false;
                 const hasSigned = l.signedAgreementUrl ? true : false;
                 
                 return `
                 <div class="loan-card" onclick="showLoanDetails('${l.id}')">
-                    <div class="loan-card-left">
-                        <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')+'&background=007AFF&color=fff'}" class="loan-card-avatar">
-                    </div>
-                    <div class="loan-card-center">
-                        <div class="loan-card-customer">${l.customerName}</div>
-                        <div class="loan-card-amount">${Utils.formatCurrency(l.amount)}</div>
-                        <div class="loan-card-icons">
-                            ${hasCollateral ? '<i class="fas fa-image" title="Has collateral"></i>' : ''}
-                            ${hasWitness ? '<i class="fas fa-user" title="Has witness"></i>' : ''}
-                            ${hasSigned ? '<i class="fas fa-file-signature" title="Signed agreement"></i>' : ''}
-                            ${l.totalPenalty ? '<i class="fas fa-exclamation-triangle text-red" title="Penalty applied"></i>' : ''}
+                    <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')}" class="loan-avatar" alt="Customer">
+                    <div class="loan-info">
+                        <div class="loan-name">${l.customerName}</div>
+                        <div class="loan-amount">${Utils.formatCurrency(l.amount)}</div>
+                        <div class="loan-icons">
+                            ${hasCollateral ? '<span><i class="fas fa-image"></i> ' + l.collateral.images.length + '</span>' : ''}
+                            ${hasWitness ? '<span><i class="fas fa-user"></i> Witness</span>' : ''}
+                            ${hasSigned ? '<span><i class="fas fa-file-signature"></i> Signed</span>' : ''}
+                            ${penalty > 0 ? '<span class="text-red"><i class="fas fa-exclamation-triangle"></i> Penalty</span>' : ''}
                         </div>
                     </div>
-                    <div class="loan-card-right">
-                        <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')+'&background=5856d6&color=fff'}" class="loan-card-agent-avatar">
-                        <div class="loan-card-agent-name">${agent?.fullName || 'No Agent'}</div>
-                    </div>
+                    <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')}" class="loan-avatar" alt="Agent">
                 </div>
             `}).join('');
         }
@@ -3741,6 +3702,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             `).join('');
         }
 
+        // ===== UPCOMING PAYMENTS =====
         function renderUpcomingPayments() {
             const upcoming = getUpcomingPayments();
             const overdue = getOverduePayments();
@@ -3944,7 +3906,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             Utils.hideLoading();
         });
 
-        // Fixed record payment button in loan modal
+        // ===== RECORD PAYMENT (Fixed) =====
         document.getElementById('recordPaymentBtn').addEventListener('click', () => {
             const loanId = document.getElementById('loanDetailsContent')?.getAttribute('data-loan-id');
             if (!loanId) return;
@@ -3984,7 +3946,6 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             openModal('recordPaymentModal');
         });
 
-        // Fixed confirmRecordPayment (sets payment status to confirmed)
         document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
             const loanId = document.getElementById('recordLoanId').value;
             const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
@@ -4039,6 +4000,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
 
                 await loanRef.update(updates);
 
+                // Create payment record with status 'confirmed' (since admin records it)
                 const paymentId = Utils.generateId('PAY');
                 await db.ref('payments/' + paymentId).set({
                     id: paymentId,
@@ -4049,13 +4011,14 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
                     method: method,
                     reference: reference,
                     proofUrl: proofUrl || null,
-                    status: 'confirmed',  // directly confirmed
+                    status: 'confirmed', // Directly confirmed
                     timestamp: Date.now(),
                     verifiedAt: Date.now(),
                     verifiedBy: currentUser.uid,
                     notes: 'Manual payment recorded by admin'
                 });
 
+                // Calculate interest portion for commission
                 const interestPortion = (amount / inst.totalDue) * inst.interest;
                 if (interestPortion > 0 && loan.agentId) {
                     const commissionAmount = interestPortion * 0.15;
@@ -4080,6 +4043,131 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             }
             Utils.hideLoading();
         });
+
+        // ===== CONFIRM PAYMENT (Fixed) =====
+        async function confirmPayment(paymentId) {
+            if (!confirm('Confirm this payment?')) return;
+            
+            const payment = allPayments.find(p => p.id === paymentId);
+            if (!payment) return;
+            
+            Utils.showLoading('Verifying payment...');
+            try {
+                const loanRef = db.ref('loans/' + payment.loanId);
+                const loanSnap = await loanRef.once('value');
+                const loan = loanSnap.val();
+                
+                if (!loan) {
+                    Utils.showToast('Error', 'Loan not found', 'error');
+                    return;
+                }
+                
+                let schedule = loan.repaymentSchedule || [];
+                if (schedule.length === 0) {
+                    Utils.showToast('Error', 'No repayment schedule for this loan', 'error');
+                    return;
+                }
+                
+                let remainingAmount = payment.amount;
+                let totalPrincipalPaid = 0;
+                let totalInterestPaid = 0;
+                
+                for (let i = 0; i < schedule.length; i++) {
+                    const inst = schedule[i];
+                    if (inst.status === 'paid') continue;
+                    
+                    const due = inst.totalDue - (inst.paidAmount || 0);
+                    if (due <= 0) continue;
+                    
+                    const paidThisInst = Math.min(remainingAmount, due);
+                    inst.paidAmount = (inst.paidAmount || 0) + paidThisInst;
+                    inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+                    
+                    const principalFraction = inst.principal / inst.totalDue;
+                    const interestFraction = inst.interest / inst.totalDue;
+                    
+                    totalPrincipalPaid += paidThisInst * principalFraction;
+                    totalInterestPaid += paidThisInst * interestFraction;
+                    
+                    remainingAmount -= paidThisInst;
+                    if (remainingAmount <= 0) break;
+                }
+                
+                const newTotalPaid = schedule.reduce((sum, inst) => sum + (inst.paidAmount || 0), 0);
+                const newInterestPaid = schedule.reduce((sum, inst) => {
+                    const paid = inst.paidAmount || 0;
+                    const interestPart = (paid / inst.totalDue) * inst.interest;
+                    return sum + (isNaN(interestPart) ? 0 : interestPart);
+                }, 0);
+                
+                const loanUpdates = {
+                    repaymentSchedule: schedule,
+                    totalPaid: newTotalPaid,
+                    interestPaid: newInterestPaid
+                };
+                
+                if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
+                    loanUpdates.status = 'completed';
+                    loanUpdates.completedAt = Date.now();
+                }
+                
+                // Update loan
+                await loanRef.update(loanUpdates);
+                
+                // Update payment status
+                await db.ref('payments/' + paymentId).update({
+                    status: 'confirmed',
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser?.uid
+                });
+                
+                if (totalInterestPaid > 0 && loan.agentId) {
+                    const commissionAmount = totalInterestPaid * 0.15;
+                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
+                        agentId: loan.agentId,
+                        customerId: payment.customerId,
+                        loanId: payment.loanId,
+                        customerName: payment.customerName,
+                        amount: commissionAmount,
+                        paidAt: null,
+                        paidBy: null,
+                        status: 'pending'
+                    });
+                }
+                
+                await Utils.sendNotification(payment.customerId, `Your payment of ${Utils.formatCurrency(payment.amount)} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
+                if (loan.agentId) {
+                    await Utils.sendNotification(loan.agentId, `Payment of ${Utils.formatCurrency(payment.amount)} from customer ${payment.customerName} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
+                }
+                
+                await Utils.logAudit('CONFIRM_PAYMENT', { paymentId, loanId: payment.loanId });
+                Utils.showToast('Success', 'Payment confirmed', 'success');
+                closeModal('paymentDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        }
+
+        async function rejectPayment(paymentId) {
+            if (!confirm('Reject this payment?')) return;
+            
+            Utils.showLoading('Rejecting payment...');
+            try {
+                await db.ref('payments/' + paymentId).update({ 
+                    status: 'rejected',
+                    rejectedAt: Date.now(),
+                    rejectedBy: currentUser?.uid
+                });
+                
+                await Utils.logAudit('REJECT_PAYMENT', { paymentId });
+                Utils.showToast('Success', 'Payment rejected', 'info');
+                closeModal('paymentDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        }
 
         // Send Message
         document.getElementById('sendMessageBtn')?.addEventListener('click', async () => {
@@ -5070,7 +5158,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             Utils.hideLoading();
         }
 
-        // ========== COMMISSION PAYMENT MODAL ==========
+        // ========== ADVANCED COMMISSION PAYMENT MODAL ==========
         window.openPayCommissionModal = (agentId) => {
             const agent = allAgents.find(a => a.id === agentId);
             if (!agent) return;
@@ -5081,19 +5169,22 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
                 return { ...entry, loan };
             });
             
-            let loansHtml = '';
+            let checkboxesHtml = '';
+            let totalSelected = 0;
             if (loansWithPending.length === 0) {
-                loansHtml = '<p class="text-muted">No pending commission for this agent.</p>';
+                checkboxesHtml = '<p class="text-muted">No pending commission for this agent.</p>';
             } else {
-                loansHtml = loansWithPending.map(entry => `
-                    <div class="detail-card mb-2">
-                        <div class="d-flex justify-between">
-                            <span><strong>Loan ID:</strong> ${entry.loanId.substring(0,8)}...</span>
-                            <span><strong>Amount:</strong> ${Utils.formatCurrency(entry.amount)}</span>
+                checkboxesHtml = loansWithPending.map(entry => {
+                    totalSelected += entry.amount;
+                    return `
+                    <div class="commission-checkbox-item">
+                        <input type="checkbox" class="commission-checkbox" value="${entry.id}" data-amount="${entry.amount}" checked>
+                        <div class="commission-info">
+                            <div><strong>Loan:</strong> ${entry.loanId.substring(0,8)}... | <strong>Customer:</strong> ${entry.customerName || 'Unknown'}</div>
+                            <div><strong>Amount:</strong> ${Utils.formatCurrency(entry.amount)}</div>
                         </div>
-                        <div class="profile-meta">Customer: ${entry.customerName || 'Unknown'}</div>
                     </div>
-                `).join('');
+                `}).join('');
             }
             
             const content = `
@@ -5106,8 +5197,13 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
                 </div>
                 
                 <div class="detail-section">
-                    <h4 class="detail-title">Pending Commission</h4>
-                    ${loansHtml}
+                    <h4 class="detail-title">Select Pending Commissions to Pay</h4>
+                    <div id="commissionCheckboxList">
+                        ${checkboxesHtml}
+                    </div>
+                    <div class="mt-2 text-right">
+                        <strong>Total Selected: <span id="selectedCommissionTotal">${Utils.formatCurrency(totalSelected)}</span></strong>
+                    </div>
                 </div>
                 
                 <div class="form-group">
@@ -5123,7 +5219,25 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             
             document.getElementById('payCommissionContent').innerHTML = content;
             
+            // Add event listeners to checkboxes to update total
+            const checkboxes = document.querySelectorAll('.commission-checkbox');
+            const totalSpan = document.getElementById('selectedCommissionTotal');
+            checkboxes.forEach(cb => {
+                cb.addEventListener('change', () => {
+                    let total = 0;
+                    document.querySelectorAll('.commission-checkbox:checked').forEach(c => {
+                        total += parseFloat(c.dataset.amount);
+                    });
+                    totalSpan.innerText = Utils.formatCurrency(total);
+                });
+            });
+            
             document.getElementById('processCommissionPayment').onclick = async () => {
+                const selectedIds = Array.from(document.querySelectorAll('.commission-checkbox:checked')).map(cb => cb.value);
+                if (selectedIds.length === 0) {
+                    Utils.showToast('Error', 'No commissions selected', 'error');
+                    return;
+                }
                 const method = document.getElementById('commissionPaymentMethod').value;
                 if (!method) {
                     Utils.showToast('Error', 'Select payment method', 'error');
@@ -5133,25 +5247,27 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
                 Utils.showLoading('Processing payment...');
                 try {
                     const updates = {};
-                    pendingEntries.forEach(entry => {
-                        updates[`commissionHistory/${entry.id}/status`] = 'paid';
-                        updates[`commissionHistory/${entry.id}/paidAt`] = Date.now();
-                        updates[`commissionHistory/${entry.id}/paidBy`] = currentUser?.uid;
-                        updates[`commissionHistory/${entry.id}/paymentMethod`] = method;
+                    let totalAmount = 0;
+                    selectedIds.forEach(id => {
+                        updates[`commissionHistory/${id}/status`] = 'paid';
+                        updates[`commissionHistory/${id}/paidAt`] = Date.now();
+                        updates[`commissionHistory/${id}/paidBy`] = currentUser?.uid;
+                        updates[`commissionHistory/${id}/paymentMethod`] = method;
+                        const entry = allCommissionHistory.find(e => e.id === id);
+                        if (entry) totalAmount += entry.amount;
                     });
                     
                     await db.ref().update(updates);
                     
-                    for (const entry of pendingEntries) {
-                        await Utils.sendNotification(
-                            agentId,
-                            `Your commission payment of ${Utils.formatCurrency(entry.amount)} for loan ${entry.loanId.substring(0,8)} has been processed via ${method}.`,
-                            'commission_paid',
-                            entry.loanId
-                        );
-                    }
+                    // Send notification to agent
+                    await Utils.sendNotification(
+                        agentId,
+                        `Your commission payment of ${Utils.formatCurrency(totalAmount)} has been processed via ${method}.`,
+                        'commission_paid',
+                        null
+                    );
                     
-                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: pendingEntries.reduce((s,e) => s + e.amount, 0), method });
+                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: totalAmount, method, selectedCount: selectedIds.length });
                     Utils.showToast('Success', 'Commission paid', 'success');
                     closeModal('payCommissionModal');
                 } catch (e) {
@@ -5238,130 +5354,6 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
                 await Utils.logAudit('MARK_DEFAULTED', { loanId });
                 Utils.showToast('Success', 'Loan marked as defaulted', 'warning');
                 closeModal('loanDetailsModal');
-            } catch (e) {
-                Utils.showToast('Error', e.message, 'error');
-            }
-            Utils.hideLoading();
-        }
-
-        // Fixed confirmPayment (updates loan and payment status)
-        async function confirmPayment(paymentId) {
-            if (!confirm('Confirm this payment?')) return;
-            
-            const payment = allPayments.find(p => p.id === paymentId);
-            if (!payment) return;
-            
-            Utils.showLoading('Verifying payment...');
-            try {
-                const loanRef = db.ref('loans/' + payment.loanId);
-                const loanSnap = await loanRef.once('value');
-                const loan = loanSnap.val();
-                
-                if (!loan) {
-                    Utils.showToast('Error', 'Loan not found', 'error');
-                    return;
-                }
-                
-                let schedule = loan.repaymentSchedule || [];
-                if (schedule.length === 0) {
-                    Utils.showToast('Error', 'No repayment schedule for this loan', 'error');
-                    return;
-                }
-                
-                let remainingAmount = payment.amount;
-                let totalPrincipalPaid = 0;
-                let totalInterestPaid = 0;
-                
-                for (let i = 0; i < schedule.length; i++) {
-                    const inst = schedule[i];
-                    if (inst.status === 'paid') continue;
-                    
-                    const due = inst.totalDue - (inst.paidAmount || 0);
-                    if (due <= 0) continue;
-                    
-                    const paidThisInst = Math.min(remainingAmount, due);
-                    inst.paidAmount = (inst.paidAmount || 0) + paidThisInst;
-                    inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
-                    
-                    const principalFraction = inst.principal / inst.totalDue;
-                    const interestFraction = inst.interest / inst.totalDue;
-                    
-                    totalPrincipalPaid += paidThisInst * principalFraction;
-                    totalInterestPaid += paidThisInst * interestFraction;
-                    
-                    remainingAmount -= paidThisInst;
-                    if (remainingAmount <= 0) break;
-                }
-                
-                const newTotalPaid = schedule.reduce((sum, inst) => sum + (inst.paidAmount || 0), 0);
-                const newInterestPaid = schedule.reduce((sum, inst) => {
-                    const paid = inst.paidAmount || 0;
-                    const interestPart = (paid / inst.totalDue) * inst.interest;
-                    return sum + (isNaN(interestPart) ? 0 : interestPart);
-                }, 0);
-                
-                const updates = {
-                    repaymentSchedule: schedule,
-                    totalPaid: newTotalPaid,
-                    interestPaid: newInterestPaid
-                };
-                
-                if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
-                    updates.status = 'completed';
-                    updates.completedAt = Date.now();
-                }
-                
-                // Update payment node
-                await db.ref('payments/' + paymentId).update({
-                    status: 'confirmed',
-                    verifiedAt: Date.now(),
-                    verifiedBy: currentUser?.uid
-                });
-                
-                await loanRef.update(updates);
-                
-                if (totalInterestPaid > 0 && loan.agentId) {
-                    const commissionAmount = totalInterestPaid * 0.15;
-                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
-                        agentId: loan.agentId,
-                        customerId: payment.customerId,
-                        loanId: payment.loanId,
-                        customerName: payment.customerName,
-                        amount: commissionAmount,
-                        paidAt: null,
-                        paidBy: null,
-                        status: 'pending'
-                    });
-                }
-                
-                await Utils.sendNotification(payment.customerId, `Your payment of ${Utils.formatCurrency(payment.amount)} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
-                if (loan.agentId) {
-                    await Utils.sendNotification(loan.agentId, `Payment of ${Utils.formatCurrency(payment.amount)} from customer ${payment.customerName} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
-                }
-                
-                await Utils.logAudit('CONFIRM_PAYMENT', { paymentId, loanId: payment.loanId });
-                Utils.showToast('Success', 'Payment confirmed', 'success');
-                closeModal('paymentDetailsModal');
-            } catch (e) {
-                Utils.showToast('Error', e.message, 'error');
-            }
-            Utils.hideLoading();
-        }
-
-        async function rejectPayment(paymentId) {
-            if (!confirm('Reject this payment?')) return;
-            
-            Utils.showLoading('Rejecting payment...');
-            try {
-                await db.ref('payments/' + paymentId).update({ 
-                    status: 'rejected',
-                    rejectedAt: Date.now(),
-                    rejectedBy: currentUser?.uid
-                });
-                
-                await Utils.logAudit('REJECT_PAYMENT', { paymentId });
-                Utils.showToast('Success', 'Payment rejected', 'info');
-                closeModal('paymentDetailsModal');
             } catch (e) {
                 Utils.showToast('Error', e.message, 'error');
             }
@@ -5821,42 +5813,42 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
 
         // ========== FILTERS ==========
         document.querySelectorAll('[data-agent-filter]').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 agentFilter = item.dataset.agentFilter;
                 renderAgents();
-                // Close dropdown
-                const menu = e.target.closest('.quick-actions-menu');
+                // Close dropdown after click
+                const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
 
         document.querySelectorAll('[data-loan-filter]').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 currentLoanFilter = item.dataset.loanFilter;
                 renderLoans();
-                const menu = e.target.closest('.quick-actions-menu');
+                const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
 
-        document.getElementById('filterAllCustomers')?.addEventListener('click', (e) => {
+        document.getElementById('filterAllCustomers')?.addEventListener('click', () => {
             customerFilter = 'all';
             renderCustomers();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
         
-        document.getElementById('filterActiveCustomers')?.addEventListener('click', (e) => {
+        document.getElementById('filterActiveCustomers')?.addEventListener('click', () => {
             customerFilter = 'active';
             renderCustomers();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
         
-        document.getElementById('filterBannedCustomers')?.addEventListener('click', (e) => {
+        document.getElementById('filterBannedCustomers')?.addEventListener('click', () => {
             customerFilter = 'banned';
             renderCustomers();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
 
@@ -5888,28 +5880,28 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             });
         });
 
-        document.getElementById('filterPaymentsPending')?.addEventListener('click', (e) => {
+        document.getElementById('filterPaymentsPending')?.addEventListener('click', () => {
             currentPaymentFilter = 'pending';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
             renderPayments();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
-        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', (e) => {
+        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', () => {
             currentPaymentFilter = 'confirmed';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
             renderPayments();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
-        document.getElementById('filterPaymentsRejected')?.addEventListener('click', (e) => {
+        document.getElementById('filterPaymentsRejected')?.addEventListener('click', () => {
             currentPaymentFilter = 'rejected';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
             renderPayments();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
 
@@ -5923,7 +5915,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
 
         // ========== REPORTS (dropdown) ==========
         document.querySelectorAll('[data-report]').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 const reportType = item.dataset.report;
                 let report = '';
                 
@@ -6001,8 +5993,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
                 }
                 
                 document.getElementById('reportOutput').innerHTML = report;
-                // Close dropdown
-                const menu = e.target.closest('.quick-actions-menu');
+                const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
@@ -6357,7 +6348,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             
             document.getElementById('adminNameDisplay').innerText = adminData?.fullName || 'Admin';
             document.getElementById('sidebarName').innerText = adminData?.fullName || 'Admin User';
-            document.getElementById('sidebarAvatar').innerHTML = `<img src="logo.png">`;
+            document.getElementById('sidebarAvatar').innerHTML = `<img src="logo.png" alt="Logo">`;
 
             await loadAllData();
             setupRealtimeListeners();
@@ -6365,26 +6356,61 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
 
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
 
+        // ========== REAL-TIME NOTIFICATIONS ==========
         function setupRealtimeListeners() {
+            // Agent Applications - new pending
+            db.ref('agentApplications').on('child_added', (snap) => {
+                const app = snap.val();
+                if (app.status === 'pending' && !notifiedEvents.has(snap.key)) {
+                    notifiedEvents.add(snap.key);
+                    Utils.showToast('New Agent Application', `${app.fullName} applied to become an agent.`, 'info');
+                }
+            });
+            
+            // Payments - new pending
+            db.ref('payments').on('child_added', (snap) => {
+                const payment = snap.val();
+                if (payment.status === 'pending' && !notifiedEvents.has(snap.key)) {
+                    notifiedEvents.add(snap.key);
+                    Utils.showToast('Payment Pending', `Payment of ${Utils.formatCurrency(payment.amount)} from ${payment.customerName} awaiting verification.`, 'info');
+                }
+            });
+            
+            // Loans - new pending
+            db.ref('loans').on('child_added', (snap) => {
+                const loan = snap.val();
+                if (loan.status === 'pending' && !notifiedEvents.has(snap.key)) {
+                    notifiedEvents.add(snap.key);
+                    Utils.showToast('Loan Application', `${loan.customerName} applied for a loan of ${Utils.formatCurrency(loan.amount)}.`, 'info');
+                }
+            });
+            
+            // Users - new customer registration
+            db.ref('users').on('child_added', (snap) => {
+                const user = snap.val();
+                if (user.userType === 'customer' && !notifiedEvents.has(snap.key)) {
+                    notifiedEvents.add(snap.key);
+                    Utils.showToast('New Customer', `${user.fullName} registered as a customer.`, 'info');
+                }
+            });
+
+            // Existing listeners for data updates (keep UI in sync)
             db.ref('users').on('value', (snap) => {
                 const users = snap.val() || {};
                 allAgents = Object.entries(users).filter(([_,u]) => u.userType === 'agent').map(([id,u]) => ({...u, id}));
                 allCustomers = Object.entries(users).filter(([_,u]) => u.userType === 'customer').map(([id,u]) => ({...u, id}));
                 updateUI();
-                checkNewPendingItems();
             });
             
             db.ref('loans').on('value', (snap) => {
                 allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
                 applyPenaltiesToAllLoans();
                 updateUI();
-                checkNewPendingItems();
             });
             
             db.ref('payments').on('value', (snap) => {
                 allPayments = Object.entries(snap.val() || {}).map(([id,p]) => ({...p, id}));
                 updateUI();
-                checkNewPendingItems();
             });
             
             db.ref('commissionHistory').on('value', (snap) => {
@@ -6395,7 +6421,6 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             db.ref('agentApplications').on('value', (snap) => {
                 allAgentApplications = Object.entries(snap.val() || {}).map(([id,a]) => ({...a, id}));
                 updateUI();
-                checkNewPendingItems();
             });
             
             db.ref('auditLogs').on('value', (snap) => {
@@ -6419,6 +6444,7 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
             });
         }
 
+        // ===== CHARTS =====
         let loanTrendChart, paymentTrendChart;
         function initCharts() {
             const ctxLoan = document.getElementById('loanTrendChart')?.getContext('2d');
@@ -6491,4 +6517,4 @@ rewrite this code entirely reduce the size of everything by 20% and most importa
         setInterval(initCharts, 1000);
     </script>
 </body>
-</html>) write the full production ready code
+</html>
