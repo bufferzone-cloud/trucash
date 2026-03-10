@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -83,7 +82,7 @@
             z-index: -1;
         }
 
-        /* ===== Header with logo ===== */
+        /* ===== Header ===== */
         .app-header {
             position: sticky;
             top: 0;
@@ -107,18 +106,14 @@
         .logo-icon {
             width: 40px;
             height: 40px;
-            background: transparent;
+            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
             border-radius: 10px;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
             font-size: 20px;
-        }
-        .logo-icon img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
+            box-shadow: 0 4px 8px rgba(0,122,255,0.2);
         }
 
         .logo-text {
@@ -167,7 +162,7 @@
             transform: translateY(-1px);
         }
 
-        /* ===== Sidebar with logo ===== */
+        /* ===== Sidebar ===== */
         .sidebar-overlay {
             position: fixed;
             top: 0;
@@ -221,17 +216,14 @@
             width: 56px;
             height: 56px;
             border-radius: 50%;
-            background: white;
+            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-size: 22px;
+            font-weight: 500;
             box-shadow: 0 4px 12px rgba(0,122,255,0.2);
-            overflow: hidden;
-        }
-        .sidebar-avatar img {
-            width: 100%;
-            height: 100%;
-            object-fit: contain;
         }
 
         .sidebar-user {
@@ -654,72 +646,62 @@
             color: var(--ios-gray5);
         }
 
-        /* ===== Compact Loan Card (redesigned) ===== */
-        .loan-card-compact {
-            background: var(--ios-card);
-            border-radius: var(--radius-sm);
-            padding: 12px;
-            margin-bottom: 12px;
-            box-shadow: var(--shadow-sm);
-            border: 1px solid var(--ios-gray2);
-            cursor: pointer;
-            transition: 0.2s;
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        .loan-card-compact:hover {
-            box-shadow: var(--shadow-md);
-            transform: translateY(-2px);
-        }
-        .loan-card-row {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        .loan-card-left, .loan-card-right {
+        /* ===== Split Profile Card (for compact loan cards) ===== */
+        .split-profile-compact {
             display: flex;
             align-items: center;
             gap: 8px;
+            margin-bottom: 8px;
+        }
+        .split-profile-compact .left, .split-profile-compact .right {
             flex: 1;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            min-width: 0;
         }
-        .loan-card-left .profile-img, .loan-card-right .profile-img {
-            width: 40px;
-            height: 40px;
-        }
-        .loan-card-center {
+        .split-profile-compact .center {
             flex: 2;
             text-align: center;
-        }
-        .loan-card-center .customer-name {
             font-weight: 600;
-            font-size: 14px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
         }
-        .loan-card-center .loan-amount {
-            font-size: 16px;
+        .split-avatar-small {
+            width: 40px;
+            height: 40px;
+            border-radius: 40px;
+            object-fit: cover;
+            border: 2px solid white;
+            box-shadow: var(--shadow-sm);
+        }
+        .loan-amount-compact {
+            text-align: center;
+            font-size: 18px;
             font-weight: 700;
             color: var(--ios-blue);
+            margin: 4px 0;
         }
-        .loan-card-badges {
+        .loan-badges-compact {
             display: flex;
-            gap: 8px;
-            flex-wrap: wrap;
             justify-content: center;
-            margin-top: 4px;
+            gap: 8px;
+            margin: 8px 0 4px;
         }
-        .loan-card-badges .badge {
+        .loan-badges-compact .badge-icon {
             background: var(--ios-gray1);
             border-radius: 20px;
             padding: 4px 10px;
             font-size: 11px;
-            font-weight: 500;
             display: inline-flex;
             align-items: center;
             gap: 4px;
+            color: var(--ios-gray6);
+            border: 1px solid var(--ios-gray2);
         }
-        .loan-card-badges .badge i {
-            font-size: 10px;
-            color: var(--ios-gray5);
+        .loan-badges-compact .badge-icon i {
+            color: var(--ios-blue);
         }
 
         /* ===== Badges ===== */
@@ -829,7 +811,7 @@
             box-shadow: var(--shadow-md);
         }
 
-        /* ===== Modal System (improved styling) ===== */
+        /* ===== Modal System ===== */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
@@ -894,11 +876,6 @@
             z-index: 10;
             border-radius: 28px 28px 0 0;
         }
-        .modal-header .logo-icon {
-            width: 30px;
-            height: 30px;
-            margin-right: 10px;
-        }
 
         .modal-close {
             font-size: 18px;
@@ -929,7 +906,6 @@
             display: flex;
             justify-content: flex-end;
             gap: 12px;
-            flex-wrap: wrap;
         }
 
         /* ===== Detail Cards ===== */
@@ -1475,6 +1451,7 @@
             font-size: 11px;
             font-weight: 600;
         }
+        /* Resend button style */
         .resend-btn {
             background: transparent;
             border: 1px solid var(--ios-blue);
@@ -1488,6 +1465,16 @@
         .resend-btn:hover {
             background: var(--ios-blue);
             color: white;
+        }
+        /* Logo styling */
+        .logo-img {
+            height: 36px;
+            width: auto;
+        }
+        .sidebar-logo {
+            height: 48px;
+            width: auto;
+            margin-right: 8px;
         }
     </style>
 </head>
@@ -1504,7 +1491,8 @@
     <!-- Header -->
     <div class="app-header">
         <div class="logo-area">
-            <div class="logo-icon"><img src="logo.png" alt="TruCash"></div>
+            <!-- Logo image -->
+            <img src="logo.png" alt="TruCash" class="logo-img">
             <span class="logo-text">TruCash Enterprise</span>
         </div>
         <div class="admin-name" id="adminNameDisplay">Admin</div>
@@ -1515,7 +1503,8 @@
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
-            <div class="sidebar-avatar"><img src="logo.png" alt="Logo"></div>
+            <!-- Sidebar logo -->
+            <img src="logo.png" alt="TruCash" class="sidebar-logo">
             <div class="sidebar-user">
                 <div class="name" id="sidebarName">Admin User</div>
                 <div class="role">Administrator</div>
@@ -2055,12 +2044,13 @@
         </section>
     </div>
 
-    <!-- ========== MODALS (unchanged) ========== -->
+    <!-- ========== MODALS (unchanged but with logo added in headers where appropriate) ========== -->
     <!-- Create Customer Modal -->
     <div class="modal-overlay" id="createCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Create Customer</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Create Customer</span>
                 <span class="modal-close" onclick="closeModal('createCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2145,7 +2135,8 @@
     <div class="modal-overlay" id="createAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Create Agent</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Create Agent</span>
                 <span class="modal-close" onclick="closeModal('createAgentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2230,7 +2221,8 @@
     <div class="modal-overlay" id="createAdminModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Create Admin</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Create Admin</span>
                 <span class="modal-close" onclick="closeModal('createAdminModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2264,7 +2256,8 @@
     <div class="modal-overlay" id="agentApplicationModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Agent Application</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Agent Application</span>
                 <span class="modal-close" onclick="closeModal('agentApplicationModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="agentApplicationContent"></div>
@@ -2280,7 +2273,8 @@
     <div class="modal-overlay" id="customerDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Customer Profile</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Customer Profile</span>
                 <span class="modal-close" onclick="closeModal('customerDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="customerDetailsContent"></div>
@@ -2297,7 +2291,8 @@
     <div class="modal-overlay" id="editCustomerModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Edit Customer</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Edit Customer</span>
                 <span class="modal-close" onclick="closeModal('editCustomerModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="editCustomerContent"></div>
@@ -2312,7 +2307,8 @@
     <div class="modal-overlay" id="agentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Agent Profile</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Agent Profile</span>
                 <span class="modal-close" onclick="closeModal('agentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="agentDetailsContent"></div>
@@ -2329,7 +2325,8 @@
     <div class="modal-overlay" id="editAgentModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Edit Agent</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Edit Agent</span>
                 <span class="modal-close" onclick="closeModal('editAgentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="editAgentContent"></div>
@@ -2340,14 +2337,15 @@
         </div>
     </div>
 
-    <!-- Loan Details Modal -->
+    <!-- Loan Details Modal (improved styling) -->
     <div class="modal-overlay" id="loanDetailsModal">
-        <div class="modal-container large">
-            <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Loan Details</span>
-                <span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
+        <div class="modal-container large" style="background: white;">
+            <div class="modal-header" style="background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple)); color: white;">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px; filter: brightness(0) invert(1);">
+                <span>Loan Details</span>
+                <span class="modal-close" style="color: white;" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
-            <div class="modal-body" id="loanDetailsContent"></div>
+            <div class="modal-body" id="loanDetailsContent" style="max-height: 70vh; overflow-y: auto;"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline btn-small" onclick="closeModal('loanDetailsModal')">Close</button>
                 <button class="btn btn-success btn-small" id="approveLoanBtn">Approve</button>
@@ -2363,7 +2361,8 @@
     <div class="modal-overlay" id="paymentDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Payment Details</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Payment Details</span>
                 <span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="paymentDetailsContent"></div>
@@ -2375,37 +2374,18 @@
         </div>
     </div>
 
-    <!-- Rejection Reason Modal (new) -->
-    <div class="modal-overlay" id="rejectionReasonModal">
-        <div class="modal-container compact">
-            <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Rejection Reason</span>
-                <span class="modal-close" onclick="closeModal('rejectionReasonModal')"><i class="fas fa-times"></i></span>
-            </div>
-            <div class="modal-body">
-                <div class="form-group">
-                    <label class="form-label">Reason for rejection</label>
-                    <textarea id="rejectionReasonInput" class="form-textarea" rows="3" placeholder="Enter reason..."></textarea>
-                </div>
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" onclick="closeModal('rejectionReasonModal')">Cancel</button>
-                <button class="btn btn-danger" id="submitRejectionReason">Confirm Reject</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Pay Commission Modal -->
+    <!-- Pay Commission Modal (advanced: selectable commissions) -->
     <div class="modal-overlay" id="payCommissionModal">
         <div class="modal-container">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Pay Commission</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Pay Commission</span>
                 <span class="modal-close" onclick="closeModal('payCommissionModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="payCommissionContent"></div>
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('payCommissionModal')">Cancel</button>
-                <button class="btn btn-success" id="processCommissionPayment">Pay Now</button>
+                <button class="btn btn-success" id="processCommissionPayment">Pay Selected</button>
             </div>
         </div>
     </div>
@@ -2414,7 +2394,8 @@
     <div class="modal-overlay" id="commissionMathModal">
         <div class="modal-container">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Commission Breakdown</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Commission Breakdown</span>
                 <span class="modal-close" onclick="closeModal('commissionMathModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="commissionMathContent"></div>
@@ -2425,7 +2406,8 @@
     <div class="modal-overlay" id="sendReminderModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Send Reminder</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Send Reminder</span>
                 <span class="modal-close" onclick="closeModal('sendReminderModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2453,12 +2435,13 @@
         </div>
     </div>
 
-    <!-- Record Payment Modal (improved) -->
+    <!-- Record Payment Modal (improved styling) -->
     <div class="modal-overlay" id="recordPaymentModal">
-        <div class="modal-container compact">
-            <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Record Payment</span>
-                <span class="modal-close" onclick="closeModal('recordPaymentModal')"><i class="fas fa-times"></i></span>
+        <div class="modal-container compact" style="background: white;">
+            <div class="modal-header" style="background: var(--ios-green); color: white;">
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px; filter: brightness(0) invert(1);">
+                <span>Record Payment</span>
+                <span class="modal-close" style="color: white;" onclick="closeModal('recordPaymentModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
                 <input type="hidden" id="recordLoanId">
@@ -2505,7 +2488,8 @@
     <div class="modal-overlay" id="reminderDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Payment Reminder Details</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Payment Reminder Details</span>
                 <span class="modal-close" onclick="closeModal('reminderDetailsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="reminderDetailsContent"></div>
@@ -2520,7 +2504,8 @@
     <div class="modal-overlay" id="signedAgreementsModal">
         <div class="modal-container large">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Signed Agreements</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Signed Agreements</span>
                 <span class="modal-close" onclick="closeModal('signedAgreementsModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body" id="signedAgreementsContent">
@@ -2536,7 +2521,8 @@
     <div class="modal-overlay" id="promotionModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> Send Promotion</span>
+                <img src="logo.png" alt="TruCash" style="height:24px; margin-right:8px;">
+                <span>Send Promotion</span>
                 <span class="modal-close" onclick="closeModal('promotionModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2579,7 +2565,7 @@
     <div class="modal-overlay" id="sudoModal">
         <div class="modal-container compact">
             <div class="modal-header">
-                <span><img src="logo.png" class="logo-icon" style="width:24px;height:24px;"> ⚠️ Sudo Reset</span>
+                <span>⚠️ Sudo Reset</span>
                 <span class="modal-close" onclick="closeModal('sudoModal')"><i class="fas fa-times"></i></span>
             </div>
             <div class="modal-body">
@@ -2600,14 +2586,15 @@
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
         // MODIFICATIONS:
-        // 1. Dropdowns retract after click.
-        // 2. Improved modal CSS, added rejection reason modal.
-        // 3. Redesigned loan cards (compact).
-        // 4. Fixed payment confirmation & record payment bugs.
-        // 5. Real-time notifications (once per new item).
-        // 6. Logo added throughout.
+        // 1. Dropdowns retract after click
+        // 2. Improved CSS for modals, rejection reason (prompt replaced with modal)
+        // 3. Compact loan cards with left/right profiles & icons
+        // 4. Fixed confirm payment (now moves to confirmed) and record payment (saves to Firebase + Cloudinary)
+        // 5. Real-time admin notifications (toast once per new item)
+        // 6. Advanced commission payment (selectable per loan)
+        // 7. Logo added throughout
         // =========================================================================
-        
+
         // Firebase configuration
         const firebaseConfig = {
             apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
@@ -2650,11 +2637,13 @@
         let customerFilter = 'all';
         let cloudinaryWidget = null;
 
-        // For real-time notifications (track seen IDs)
-        let seenLoans = new Set();
-        let seenPayments = new Set();
-        let seenAgentApps = new Set();
-        let seenCustomers = new Set();
+        // For admin real‑time notifications (store last seen timestamps)
+        let lastNotificationTimestamps = {
+            agentApplication: 0,
+            loanPending: 0,
+            paymentPending: 0,
+            customerNew: 0
+        };
 
         // ========== UTILITIES ==========
         const Utils = {
@@ -2882,7 +2871,6 @@
             }
         }
 
-        // ========== UPDATED: getUpcomingPayments ==========
         function getUpcomingPayments() {
             const now = Date.now();
             const sixtyDays = 60 * 24 * 60 * 60 * 1000;
@@ -2938,7 +2926,7 @@
             return overdue;
         }
 
-        // ========== CSV EXPORT ==========
+        // ========== CSV EXPORT (unchanged) ==========
         function exportData(type) {
             let data = [];
             let filename = '';
@@ -3069,12 +3057,10 @@
             link.click();
         }
 
-        // ========== EXPORT ALL DATA AS ZIP ==========
         async function exportAllData() {
             Utils.showLoading('Generating ZIP...');
             const zip = new JSZip();
             
-            // Customers
             const customersData = allCustomers.map(c => ({
                 Name: c.fullName,
                 Email: c.email,
@@ -3090,7 +3076,6 @@
             }));
             zip.file("customers.csv", Papa.unparse(customersData));
             
-            // Agents
             const agentsData = allAgents.map(a => ({
                 Name: a.fullName,
                 Email: a.email,
@@ -3106,7 +3091,6 @@
             }));
             zip.file("agents.csv", Papa.unparse(agentsData));
             
-            // Loans
             const loansData = allLoans.map(l => ({
                 'Loan ID': l.id,
                 Customer: l.customerName,
@@ -3132,7 +3116,6 @@
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
-            // Payments
             const paymentsData = allPayments.map(p => ({
                 'Payment ID': p.id,
                 'Loan ID': p.loanId,
@@ -3146,7 +3129,6 @@
             }));
             zip.file("payments.csv", Papa.unparse(paymentsData));
             
-            // Commission History
             const commissionData = allCommissionHistory.map(c => {
                 const agent = allAgents.find(a => a.id === c.agentId);
                 return {
@@ -3161,7 +3143,6 @@
             });
             zip.file("commission.csv", Papa.unparse(commissionData));
             
-            // Agent Applications (all)
             const appsData = allAgentApplications.map(app => ({
                 Name: app.fullName,
                 Phone: app.phone,
@@ -3172,7 +3153,6 @@
             }));
             zip.file("applications.csv", Papa.unparse(appsData));
             
-            // Audit Logs
             const auditData = allAuditLogs.map(log => ({
                 Action: log.action,
                 Admin: log.adminEmail,
@@ -3181,7 +3161,6 @@
             }));
             zip.file("audit.csv", Papa.unparse(auditData));
             
-            // Messages
             const messagesData = allMessages.map(m => ({
                 Recipient: m.recipientId,
                 Message: m.message,
@@ -3189,7 +3168,6 @@
             }));
             zip.file("messages.csv", Papa.unparse(messagesData));
 
-            // Promotions
             const promotionsData = allPromotions.map(p => ({
                 Title: p.title,
                 Message: p.message,
@@ -3199,7 +3177,6 @@
             }));
             zip.file("promotions.csv", Papa.unparse(promotionsData));
             
-            // Generate zip
             const content = await zip.generateAsync({ type: "blob" });
             const link = document.createElement('a');
             link.href = URL.createObjectURL(content);
@@ -3208,6 +3185,45 @@
             
             Utils.hideLoading();
             Utils.showToast('Success', 'Full data export generated', 'success');
+        }
+
+        // ========== REAL-TIME ADMIN NOTIFICATIONS ==========
+        function setupAdminNotifications() {
+            // Listen for new agent applications
+            db.ref('agentApplications').orderByChild('submittedAt').startAt(lastNotificationTimestamps.agentApplication).on('child_added', (snap) => {
+                const app = snap.val();
+                if (app.submittedAt > lastNotificationTimestamps.agentApplication && app.status === 'pending') {
+                    Utils.showToast('New Application', `Agent application from ${app.fullName}`, 'info');
+                    lastNotificationTimestamps.agentApplication = app.submittedAt;
+                }
+            });
+
+            // Listen for new loans with status pending
+            db.ref('loans').orderByChild('createdAt').startAt(lastNotificationTimestamps.loanPending).on('child_added', (snap) => {
+                const loan = snap.val();
+                if (loan.createdAt > lastNotificationTimestamps.loanPending && loan.status === 'pending') {
+                    Utils.showToast('New Loan', `Loan application from ${loan.customerName} for ${Utils.formatCurrency(loan.amount)}`, 'info');
+                    lastNotificationTimestamps.loanPending = loan.createdAt;
+                }
+            });
+
+            // Listen for new payments with status pending
+            db.ref('payments').orderByChild('timestamp').startAt(lastNotificationTimestamps.paymentPending).on('child_added', (snap) => {
+                const payment = snap.val();
+                if (payment.timestamp > lastNotificationTimestamps.paymentPending && payment.status === 'pending') {
+                    Utils.showToast('New Payment', `Payment of ${Utils.formatCurrency(payment.amount)} from ${payment.customerName} awaiting confirmation`, 'info');
+                    lastNotificationTimestamps.paymentPending = payment.timestamp;
+                }
+            });
+
+            // Listen for new customers
+            db.ref('users').orderByChild('createdAt').startAt(lastNotificationTimestamps.customerNew).on('child_added', (snap) => {
+                const user = snap.val();
+                if (user.userType === 'customer' && user.createdAt > lastNotificationTimestamps.customerNew) {
+                    Utils.showToast('New Customer', `New customer registered: ${user.fullName}`, 'success');
+                    lastNotificationTimestamps.customerNew = user.createdAt;
+                }
+            });
         }
 
         // ========== LOAD ALL DATA ==========
@@ -3247,12 +3263,14 @@
                 const promoSnap = await db.ref('promotions').once('value');
                 allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
 
-                // Apply penalties after loading loans
                 await applyPenaltiesToAllLoans();
 
                 populateSettingsForm();
                 updateUI();
                 Utils.hideLoading();
+
+                // Start listening for real-time admin notifications
+                setupAdminNotifications();
             } catch (error) {
                 Utils.showToast('Error', 'Failed to load data: ' + error.message, 'error');
                 Utils.hideLoading();
@@ -3290,7 +3308,7 @@
             renderPendingApplications();
             renderRejectedApplications();
             renderUpcomingPayments();
-            renderMessages(); 
+            renderMessages();
             renderPromotionHistory();
             updateBadges();
         }
@@ -3467,7 +3485,7 @@
             `).join('');
         }
 
-        // REDESIGNED LOAN CARD (compact)
+        // COMPACT LOAN CARDS (requirement 3)
         function renderLoans() {
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
@@ -3487,30 +3505,49 @@
             container.innerHTML = filtered.map(l => {
                 const customer = allCustomers.find(c => c.id === l.customerId);
                 const agent = allAgents.find(a => a.id === l.agentId);
+                const hasCollateral = l.collateral?.images?.length > 0;
+                const hasWitness = l.witness ? true : false;
+                const hasSigned = l.signedAgreementUrl ? true : false;
                 const totalPaid = l.totalPaid || 0;
+                const progress = (totalPaid / (l.totalPayable || l.amount)) * 100;
                 
                 return `
-                <div class="loan-card-compact" onclick="showLoanDetails('${l.id}')">
-                    <div class="loan-card-row">
-                        <div class="loan-card-left">
-                            <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')+'&background=007AFF&color=fff'}" class="profile-img">
-                            <div class="profile-meta">${customer?.phone || ''}</div>
+                <div class="floating-card compact-card" onclick="showLoanDetails('${l.id}')" style="padding: 12px; cursor: pointer;">
+                    <!-- Top row: left customer, center customer name, right agent -->
+                    <div class="split-profile-compact">
+                        <div class="left" onclick="event.stopPropagation(); showCustomerDetails('${customer?.id}')">
+                            <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')}" class="split-avatar-small">
                         </div>
-                        <div class="loan-card-center">
-                            <div class="customer-name">${l.customerName}</div>
-                            <div class="loan-amount">${Utils.formatCurrency(l.amount)}</div>
+                        <div class="center">
+                            <strong>${l.customerName}</strong>
                         </div>
-                        <div class="loan-card-right">
-                            <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')+'&background=5856d6&color=fff'}" class="profile-img">
-                            <div class="profile-meta">${agent?.agentId || ''}</div>
+                        <div class="right" onclick="event.stopPropagation(); showAgentDetails('${agent?.id}')">
+                            <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')}" class="split-avatar-small">
                         </div>
                     </div>
-                    <div class="loan-card-badges">
-                        ${l.collateral?.images ? `<span class="badge"><i class="fas fa-image"></i> ${l.collateral.images.length}</span>` : ''}
-                        ${l.witness ? `<span class="badge"><i class="fas fa-user"></i> Witness</span>` : ''}
-                        ${l.signedAgreementUrl ? `<span class="badge"><i class="fas fa-file-signature"></i> Signed</span>` : ''}
-                        <span class="status-badge ${l.status}">${l.status}</span>
+                    <!-- Loan amount -->
+                    <div class="loan-amount-compact">
+                        ${Utils.formatCurrency(l.amount)}
                     </div>
+                    <!-- Icons row -->
+                    <div class="loan-badges-compact">
+                        ${hasCollateral ? '<span class="badge-icon"><i class="fas fa-image"></i> Collateral</span>' : ''}
+                        ${hasWitness ? '<span class="badge-icon"><i class="fas fa-user"></i> Witness</span>' : ''}
+                        ${hasSigned ? '<span class="badge-icon"><i class="fas fa-file-signature"></i> Signed</span>' : ''}
+                        ${l.status === 'rejected' ? '<span class="badge-icon" style="color: var(--ios-red);"><i class="fas fa-times-circle"></i> Rejected</span>' : ''}
+                    </div>
+                    <!-- Optional progress bar (can be hidden if too cluttered) -->
+                    ${l.status === 'active' ? `
+                    <div class="mt-2" style="font-size: 11px;">
+                        <div class="d-flex justify-between">
+                            <span>Paid: ${Utils.formatCurrency(totalPaid)}</span>
+                            <span>Total: ${Utils.formatCurrency(l.totalPayable || l.amount)}</span>
+                        </div>
+                        <div style="height:4px; background:var(--ios-gray2); border-radius:2px; margin-top:2px;">
+                            <div style="width: ${progress}%; height:4px; background:var(--ios-blue); border-radius:2px;"></div>
+                        </div>
+                    </div>
+                    ` : ''}
                 </div>
             `}).join('');
         }
@@ -3961,7 +3998,7 @@
             openModal('recordPaymentModal');
         });
 
-        // FIXED: Record payment now correctly updates payment and loan, and marks as confirmed
+        // FIXED: confirmRecordPayment now sets payment status to 'confirmed' immediately and updates loan
         document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
             const loanId = document.getElementById('recordLoanId').value;
             const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
@@ -4014,10 +4051,9 @@
                     updates.completedAt = Date.now();
                 }
 
-                // Update loan
                 await loanRef.update(updates);
 
-                // Create payment record (confirmed)
+                // Create payment record with status 'confirmed'
                 const paymentId = Utils.generateId('PAY');
                 await db.ref('payments/' + paymentId).set({
                     id: paymentId,
@@ -4035,7 +4071,7 @@
                     notes: 'Manual payment recorded by admin'
                 });
 
-                // Commission for interest portion
+                // Calculate and store commission on interest portion
                 const interestPortion = (amount / inst.totalDue) * inst.interest;
                 if (interestPortion > 0 && loan.agentId) {
                     const commissionAmount = interestPortion * 0.15;
@@ -4060,116 +4096,6 @@
             }
             Utils.hideLoading();
         });
-
-        // FIXED: Confirm payment function with proper multi-path update
-        async function confirmPayment(paymentId) {
-            const payment = allPayments.find(p => p.id === paymentId);
-            if (!payment) return;
-
-            Utils.showLoading('Verifying payment...');
-            try {
-                const loanRef = db.ref('loans/' + payment.loanId);
-                const loanSnap = await loanRef.once('value');
-                const loan = loanSnap.val();
-                if (!loan) throw new Error('Loan not found');
-
-                let schedule = loan.repaymentSchedule || [];
-                if (schedule.length === 0) throw new Error('No repayment schedule');
-
-                let remainingAmount = payment.amount;
-                let totalInterestPaid = 0;
-
-                for (let i = 0; i < schedule.length; i++) {
-                    const inst = schedule[i];
-                    if (inst.status === 'paid') continue;
-
-                    const due = inst.totalDue - (inst.paidAmount || 0);
-                    if (due <= 0) continue;
-
-                    const paidThisInst = Math.min(remainingAmount, due);
-                    inst.paidAmount = (inst.paidAmount || 0) + paidThisInst;
-                    inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
-
-                    const interestPart = (paidThisInst / inst.totalDue) * inst.interest;
-                    totalInterestPaid += interestPart;
-
-                    remainingAmount -= paidThisInst;
-                    if (remainingAmount <= 0) break;
-                }
-
-                const newTotalPaid = schedule.reduce((sum, inst) => sum + (inst.paidAmount || 0), 0);
-                const newInterestPaid = schedule.reduce((sum, inst) => {
-                    const paid = inst.paidAmount || 0;
-                    const interestPart = (paid / inst.totalDue) * inst.interest;
-                    return sum + (isNaN(interestPart) ? 0 : interestPart);
-                }, 0);
-
-                const loanUpdates = {
-                    repaymentSchedule: schedule,
-                    totalPaid: newTotalPaid,
-                    interestPaid: newInterestPaid
-                };
-                if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
-                    loanUpdates.status = 'completed';
-                    loanUpdates.completedAt = Date.now();
-                }
-
-                // Multi-path update: loan and payment
-                const updates = {};
-                updates[`loans/${payment.loanId}`] = loanUpdates;
-                updates[`payments/${paymentId}/status`] = 'confirmed';
-                updates[`payments/${paymentId}/verifiedAt`] = Date.now();
-                updates[`payments/${paymentId}/verifiedBy`] = currentUser?.uid;
-
-                await db.ref().update(updates);
-
-                // Commission
-                if (totalInterestPaid > 0 && loan.agentId) {
-                    const commissionAmount = totalInterestPaid * 0.15;
-                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
-                        agentId: loan.agentId,
-                        customerId: payment.customerId,
-                        loanId: payment.loanId,
-                        customerName: payment.customerName,
-                        amount: commissionAmount,
-                        paidAt: null,
-                        paidBy: null,
-                        status: 'pending'
-                    });
-                }
-
-                await Utils.sendNotification(payment.customerId, `Your payment of ${Utils.formatCurrency(payment.amount)} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
-                if (loan.agentId) {
-                    await Utils.sendNotification(loan.agentId, `Payment of ${Utils.formatCurrency(payment.amount)} from customer ${payment.customerName} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
-                }
-
-                await Utils.logAudit('CONFIRM_PAYMENT', { paymentId, loanId: payment.loanId });
-                Utils.showToast('Success', 'Payment confirmed', 'success');
-                closeModal('paymentDetailsModal');
-            } catch (e) {
-                Utils.showToast('Error', e.message, 'error');
-            }
-            Utils.hideLoading();
-        }
-
-        async function rejectPayment(paymentId) {
-            if (!confirm('Reject this payment?')) return;
-            
-            Utils.showLoading('Rejecting payment...');
-            try {
-                await db.ref('payments/' + paymentId).update({ 
-                    status: 'rejected',
-                    rejectedAt: Date.now(),
-                    rejectedBy: currentUser?.uid
-                });
-                await Utils.logAudit('REJECT_PAYMENT', { paymentId });
-                Utils.showToast('Success', 'Payment rejected', 'info');
-                closeModal('paymentDetailsModal');
-            } catch (e) {
-                Utils.showToast('Error', e.message, 'error');
-            }
-            Utils.hideLoading();
-        }
 
         // Send Message
         document.getElementById('sendMessageBtn')?.addEventListener('click', async () => {
@@ -4548,6 +4474,7 @@
         };
 
         async function banUser(userId, type) {
+            // Replace prompt with a nicer modal? For now keep prompt but we can improve.
             const reason = prompt(`Enter reason for banning this ${type}:`);
             if (reason === null) return;
             if (!reason.trim()) {
@@ -4767,59 +4694,12 @@
             document.getElementById('recordPaymentBtn').style.display = loan.status === 'active' || loan.status === 'approved' ? 'inline-flex' : 'none';
             
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
-            document.getElementById('rejectLoanBtn').onclick = () => openRejectionModal(loan.id); // use modal instead of prompt
+            document.getElementById('rejectLoanBtn').onclick = () => rejectLoan(loan.id);
             document.getElementById('markDefaultedBtn').onclick = () => markAsDefaulted(loan.id);
             document.getElementById('editLoanBtn').onclick = () => editLoan(loan.id);
             
             openModal('loanDetailsModal');
         };
-
-        // Rejection modal handling
-        let currentRejectLoanId = null;
-        function openRejectionModal(loanId) {
-            currentRejectLoanId = loanId;
-            document.getElementById('rejectionReasonInput').value = '';
-            openModal('rejectionReasonModal');
-        }
-
-        document.getElementById('submitRejectionReason').addEventListener('click', async () => {
-            const reason = document.getElementById('rejectionReasonInput').value.trim();
-            if (!reason) {
-                Utils.showToast('Error', 'Rejection reason cannot be empty', 'error');
-                return;
-            }
-            closeModal('rejectionReasonModal');
-            await rejectLoan(currentRejectLoanId, reason);
-        });
-
-        async function rejectLoan(loanId, reason) {
-            Utils.showLoading('Rejecting loan...');
-            try {
-                await db.ref('loans/' + loanId).update({
-                    status: 'rejected',
-                    rejectedAt: Date.now(),
-                    rejectedBy: currentUser?.uid,
-                    rejectionReason: reason
-                });
-                
-                const loan = allLoans.find(l => l.id === loanId);
-                if (loan) {
-                    if (loan.customerId) {
-                        await Utils.sendNotification(loan.customerId, `Your loan application (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
-                    }
-                    if (loan.agentId) {
-                        await Utils.sendNotification(loan.agentId, `Loan for customer ${loan.customerName} (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
-                    }
-                }
-                
-                await Utils.logAudit('REJECT_LOAN', { loanId, reason });
-                Utils.showToast('Success', 'Loan rejected', 'info');
-                closeModal('loanDetailsModal');
-            } catch (e) {
-                Utils.showToast('Error', e.message, 'error');
-            }
-            Utils.hideLoading();
-        }
 
         window.showPaymentDetails = (id) => {
             const payment = allPayments.find(p => p.id === id);
@@ -5207,28 +5087,25 @@
             Utils.hideLoading();
         }
 
-        // ========== COMMISSION PAYMENT MODAL ==========
+        // ========== ADVANCED COMMISSION PAYMENT MODAL (selectable) ==========
         window.openPayCommissionModal = (agentId) => {
             const agent = allAgents.find(a => a.id === agentId);
             if (!agent) return;
             
             const pendingEntries = allCommissionHistory.filter(c => c.agentId === agentId && c.status === 'pending');
-            const loansWithPending = pendingEntries.map(entry => {
-                const loan = allLoans.find(l => l.id === entry.loanId);
-                return { ...entry, loan };
-            });
             
-            let loansHtml = '';
-            if (loansWithPending.length === 0) {
-                loansHtml = '<p class="text-muted">No pending commission for this agent.</p>';
+            let checkboxesHtml = '';
+            if (pendingEntries.length === 0) {
+                checkboxesHtml = '<p class="text-muted">No pending commission for this agent.</p>';
             } else {
-                loansHtml = loansWithPending.map(entry => `
-                    <div class="detail-card mb-2">
-                        <div class="d-flex justify-between">
-                            <span><strong>Loan ID:</strong> ${entry.loanId.substring(0,8)}...</span>
-                            <span><strong>Amount:</strong> ${Utils.formatCurrency(entry.amount)}</span>
+                checkboxesHtml = pendingEntries.map(entry => `
+                    <div class="detail-card mb-2" style="display: flex; align-items: center; gap: 10px;">
+                        <input type="checkbox" class="commission-checkbox" value="${entry.id}" data-amount="${entry.amount}" checked>
+                        <div>
+                            <strong>Loan:</strong> ${entry.loanId.substring(0,8)}... 
+                            <strong>Amount:</strong> ${Utils.formatCurrency(entry.amount)}
+                            <div class="profile-meta">Customer: ${entry.customerName || 'Unknown'}</div>
                         </div>
-                        <div class="profile-meta">Customer: ${entry.customerName || 'Unknown'}</div>
                     </div>
                 `).join('');
             }
@@ -5243,8 +5120,8 @@
                 </div>
                 
                 <div class="detail-section">
-                    <h4 class="detail-title">Pending Commission</h4>
-                    ${loansHtml}
+                    <h4 class="detail-title">Select Commissions to Pay</h4>
+                    ${checkboxesHtml}
                 </div>
                 
                 <div class="form-group">
@@ -5261,6 +5138,12 @@
             document.getElementById('payCommissionContent').innerHTML = content;
             
             document.getElementById('processCommissionPayment').onclick = async () => {
+                const checkboxes = document.querySelectorAll('.commission-checkbox:checked');
+                if (checkboxes.length === 0) {
+                    Utils.showToast('Error', 'Select at least one commission to pay', 'error');
+                    return;
+                }
+                
                 const method = document.getElementById('commissionPaymentMethod').value;
                 if (!method) {
                     Utils.showToast('Error', 'Select payment method', 'error');
@@ -5270,25 +5153,27 @@
                 Utils.showLoading('Processing payment...');
                 try {
                     const updates = {};
-                    pendingEntries.forEach(entry => {
-                        updates[`commissionHistory/${entry.id}/status`] = 'paid';
-                        updates[`commissionHistory/${entry.id}/paidAt`] = Date.now();
-                        updates[`commissionHistory/${entry.id}/paidBy`] = currentUser?.uid;
-                        updates[`commissionHistory/${entry.id}/paymentMethod`] = method;
+                    let totalAmount = 0;
+                    checkboxes.forEach(cb => {
+                        const entryId = cb.value;
+                        const amount = parseFloat(cb.dataset.amount);
+                        totalAmount += amount;
+                        updates[`commissionHistory/${entryId}/status`] = 'paid';
+                        updates[`commissionHistory/${entryId}/paidAt`] = Date.now();
+                        updates[`commissionHistory/${entryId}/paidBy`] = currentUser?.uid;
+                        updates[`commissionHistory/${entryId}/paymentMethod`] = method;
                     });
                     
                     await db.ref().update(updates);
                     
-                    for (const entry of pendingEntries) {
-                        await Utils.sendNotification(
-                            agentId,
-                            `Your commission payment of ${Utils.formatCurrency(entry.amount)} for loan ${entry.loanId.substring(0,8)} has been processed via ${method}.`,
-                            'commission_paid',
-                            entry.loanId
-                        );
-                    }
+                    // Send notification
+                    await Utils.sendNotification(
+                        agentId,
+                        `Your commission payment of ${Utils.formatCurrency(totalAmount)} has been processed via ${method}.`,
+                        'commission_paid'
+                    );
                     
-                    await Utils.logAudit('PAY_COMMISSION_BULK', { agentId, amount: pendingEntries.reduce((s,e) => s + e.amount, 0), method });
+                    await Utils.logAudit('PAY_COMMISSION_SELECTED', { agentId, amount: totalAmount, method });
                     Utils.showToast('Success', 'Commission paid', 'success');
                     closeModal('payCommissionModal');
                 } catch (e) {
@@ -5329,6 +5214,38 @@
             Utils.hideLoading();
         }
 
+        async function rejectLoan(loanId) {
+            const reason = prompt('Enter reason for rejection:');
+            if (reason === null) return;
+            
+            Utils.showLoading('Rejecting loan...');
+            try {
+                await db.ref('loans/' + loanId).update({
+                    status: 'rejected',
+                    rejectedAt: Date.now(),
+                    rejectedBy: currentUser?.uid,
+                    rejectionReason: reason
+                });
+                
+                const loan = allLoans.find(l => l.id === loanId);
+                if (loan) {
+                    if (loan.customerId) {
+                        await Utils.sendNotification(loan.customerId, `Your loan application (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
+                    }
+                    if (loan.agentId) {
+                        await Utils.sendNotification(loan.agentId, `Loan for customer ${loan.customerName} (${loanId.substring(0,8)}) has been rejected. Reason: ${reason}`, 'loan_rejected', loanId);
+                    }
+                }
+                
+                await Utils.logAudit('REJECT_LOAN', { loanId, reason });
+                Utils.showToast('Success', 'Loan rejected', 'info');
+                closeModal('loanDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        }
+
         async function markAsDefaulted(loanId) {
             if (!confirm('Mark this loan as defaulted?')) return;
             
@@ -5343,6 +5260,130 @@
                 await Utils.logAudit('MARK_DEFAULTED', { loanId });
                 Utils.showToast('Success', 'Loan marked as defaulted', 'warning');
                 closeModal('loanDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        }
+
+        // FIXED: confirmPayment now properly updates loan and sets payment to confirmed
+        async function confirmPayment(paymentId) {
+            if (!confirm('Confirm this payment?')) return;
+            
+            const payment = allPayments.find(p => p.id === paymentId);
+            if (!payment) return;
+            
+            Utils.showLoading('Verifying payment...');
+            try {
+                const loanRef = db.ref('loans/' + payment.loanId);
+                const loanSnap = await loanRef.once('value');
+                const loan = loanSnap.val();
+                
+                if (!loan) {
+                    Utils.showToast('Error', 'Loan not found', 'error');
+                    return;
+                }
+                
+                let schedule = loan.repaymentSchedule || [];
+                if (schedule.length === 0) {
+                    Utils.showToast('Error', 'No repayment schedule for this loan', 'error');
+                    return;
+                }
+                
+                let remainingAmount = payment.amount;
+                let totalPrincipalPaid = 0;
+                let totalInterestPaid = 0;
+                
+                for (let i = 0; i < schedule.length; i++) {
+                    const inst = schedule[i];
+                    if (inst.status === 'paid') continue;
+                    
+                    const due = inst.totalDue - (inst.paidAmount || 0);
+                    if (due <= 0) continue;
+                    
+                    const paidThisInst = Math.min(remainingAmount, due);
+                    inst.paidAmount = (inst.paidAmount || 0) + paidThisInst;
+                    inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+                    
+                    const principalFraction = inst.principal / inst.totalDue;
+                    const interestFraction = inst.interest / inst.totalDue;
+                    
+                    totalPrincipalPaid += paidThisInst * principalFraction;
+                    totalInterestPaid += paidThisInst * interestFraction;
+                    
+                    remainingAmount -= paidThisInst;
+                    if (remainingAmount <= 0) break;
+                }
+                
+                const newTotalPaid = schedule.reduce((sum, inst) => sum + (inst.paidAmount || 0), 0);
+                const newInterestPaid = schedule.reduce((sum, inst) => {
+                    const paid = inst.paidAmount || 0;
+                    const interestPart = (paid / inst.totalDue) * inst.interest;
+                    return sum + (isNaN(interestPart) ? 0 : interestPart);
+                }, 0);
+                
+                const updates = {
+                    repaymentSchedule: schedule,
+                    totalPaid: newTotalPaid,
+                    interestPaid: newInterestPaid
+                };
+                
+                if (newTotalPaid >= (loan.totalPayable || loan.amount)) {
+                    updates.status = 'completed';
+                    updates.completedAt = Date.now();
+                }
+                
+                await loanRef.update(updates);
+                
+                // Mark payment as confirmed
+                await db.ref('payments/' + paymentId).update({
+                    status: 'confirmed',
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser?.uid
+                });
+                
+                if (totalInterestPaid > 0 && loan.agentId) {
+                    const commissionAmount = totalInterestPaid * 0.15;
+                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
+                        agentId: loan.agentId,
+                        customerId: payment.customerId,
+                        loanId: payment.loanId,
+                        customerName: payment.customerName,
+                        amount: commissionAmount,
+                        paidAt: null,
+                        paidBy: null,
+                        status: 'pending'
+                    });
+                }
+                
+                await Utils.sendNotification(payment.customerId, `Your payment of ${Utils.formatCurrency(payment.amount)} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
+                if (loan.agentId) {
+                    await Utils.sendNotification(loan.agentId, `Payment of ${Utils.formatCurrency(payment.amount)} from customer ${payment.customerName} for loan ${payment.loanId.substring(0,8)} has been confirmed.`, 'payment_confirmed', payment.loanId);
+                }
+                
+                await Utils.logAudit('CONFIRM_PAYMENT', { paymentId, loanId: payment.loanId });
+                Utils.showToast('Success', 'Payment confirmed', 'success');
+                closeModal('paymentDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        }
+
+        async function rejectPayment(paymentId) {
+            if (!confirm('Reject this payment?')) return;
+            
+            Utils.showLoading('Rejecting payment...');
+            try {
+                await db.ref('payments/' + paymentId).update({ 
+                    status: 'rejected',
+                    rejectedAt: Date.now(),
+                    rejectedBy: currentUser?.uid
+                });
+                
+                await Utils.logAudit('REJECT_PAYMENT', { paymentId });
+                Utils.showToast('Success', 'Payment rejected', 'info');
+                closeModal('paymentDetailsModal');
             } catch (e) {
                 Utils.showToast('Error', e.message, 'error');
             }
@@ -5802,43 +5843,42 @@
 
         // ========== FILTERS ==========
         document.querySelectorAll('[data-agent-filter]').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 agentFilter = item.dataset.agentFilter;
                 renderAgents();
-                // Close dropdown
+                // Close dropdown after click
                 const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
 
         document.querySelectorAll('[data-loan-filter]').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 currentLoanFilter = item.dataset.loanFilter;
                 renderLoans();
-                // Close dropdown
                 const menu = item.closest('.quick-actions-menu');
                 if (menu) menu.classList.remove('show');
             });
         });
 
-        document.getElementById('filterAllCustomers')?.addEventListener('click', (e) => {
+        document.getElementById('filterAllCustomers')?.addEventListener('click', () => {
             customerFilter = 'all';
             renderCustomers();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
         
-        document.getElementById('filterActiveCustomers')?.addEventListener('click', (e) => {
+        document.getElementById('filterActiveCustomers')?.addEventListener('click', () => {
             customerFilter = 'active';
             renderCustomers();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
         
-        document.getElementById('filterBannedCustomers')?.addEventListener('click', (e) => {
+        document.getElementById('filterBannedCustomers')?.addEventListener('click', () => {
             customerFilter = 'banned';
             renderCustomers();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#customersSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
 
@@ -5870,28 +5910,28 @@
             });
         });
 
-        document.getElementById('filterPaymentsPending')?.addEventListener('click', (e) => {
+        document.getElementById('filterPaymentsPending')?.addEventListener('click', () => {
             currentPaymentFilter = 'pending';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
             renderPayments();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
-        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', (e) => {
+        document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', () => {
             currentPaymentFilter = 'confirmed';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
             renderPayments();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
-        document.getElementById('filterPaymentsRejected')?.addEventListener('click', (e) => {
+        document.getElementById('filterPaymentsRejected')?.addEventListener('click', () => {
             currentPaymentFilter = 'rejected';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
             renderPayments();
-            const menu = e.target.closest('.quick-actions-menu');
+            const menu = document.querySelector('#paymentsSection .quick-actions-menu');
             if (menu) menu.classList.remove('show');
         });
 
@@ -5905,7 +5945,7 @@
 
         // ========== REPORTS (dropdown) ==========
         document.querySelectorAll('[data-report]').forEach(item => {
-            item.addEventListener('click', (e) => {
+            item.addEventListener('click', () => {
                 const reportType = item.dataset.report;
                 let report = '';
                 
@@ -6316,42 +6356,6 @@
             }
         };
 
-        // ========== REAL-TIME NOTIFICATIONS (once per new item) ==========
-        function setupRealtimeNotifications() {
-            // New pending loans
-            db.ref('loans').on('child_added', (snap) => {
-                const loan = snap.val();
-                if (loan.status === 'pending' && !seenLoans.has(snap.key)) {
-                    seenLoans.add(snap.key);
-                    Utils.showToast('New Loan Application', `Loan from ${loan.customerName} for ${Utils.formatCurrency(loan.amount)}`, 'info');
-                }
-            });
-            // New pending payments
-            db.ref('payments').on('child_added', (snap) => {
-                const payment = snap.val();
-                if (payment.status === 'pending' && !seenPayments.has(snap.key)) {
-                    seenPayments.add(snap.key);
-                    Utils.showToast('New Payment', `Payment of ${Utils.formatCurrency(payment.amount)} from ${payment.customerName} awaiting confirmation`, 'info');
-                }
-            });
-            // New agent applications
-            db.ref('agentApplications').on('child_added', (snap) => {
-                const app = snap.val();
-                if (app.status === 'pending' && !seenAgentApps.has(snap.key)) {
-                    seenAgentApps.add(snap.key);
-                    Utils.showToast('New Agent Application', `${app.fullName} applied to be an agent`, 'info');
-                }
-            });
-            // New customer registrations (only if status active)
-            db.ref('users').on('child_added', (snap) => {
-                const user = snap.val();
-                if (user.userType === 'customer' && user.status === 'active' && !seenCustomers.has(snap.key)) {
-                    seenCustomers.add(snap.key);
-                    Utils.showToast('New Customer', `${user.fullName} registered`, 'success');
-                }
-            });
-        }
-
         // ========== AUTH ==========
         auth.onAuthStateChanged(async (user) => {
             if (!user) { window.location = 'login.html'; return; }
@@ -6375,11 +6379,10 @@
             
             document.getElementById('adminNameDisplay').innerText = adminData?.fullName || 'Admin';
             document.getElementById('sidebarName').innerText = adminData?.fullName || 'Admin User';
-            document.getElementById('sidebarAvatar').innerHTML = '<img src="logo.png" alt="Logo">';
+            document.getElementById('sidebarAvatar').innerText = (adminData?.fullName || 'A')[0];
 
             await loadAllData();
             setupRealtimeListeners();
-            setupRealtimeNotifications();
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
@@ -6394,7 +6397,7 @@
             
             db.ref('loans').on('value', (snap) => {
                 allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
-                applyPenaltiesToAllLoans(); // apply penalties on new loan data
+                applyPenaltiesToAllLoans();
                 updateUI();
             });
             
