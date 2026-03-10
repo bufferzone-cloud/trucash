@@ -111,8 +111,6 @@
             display: flex;
             align-items: center;
             justify-content: center;
-            color: white;
-            font-size: 20px;
             box-shadow: 0 4px 8px rgba(0,122,255,0.2);
         }
         .logo-icon img {
@@ -655,18 +653,19 @@
             color: var(--ios-gray5);
         }
 
-        /* ===== Split Profile Card (for loan card compact) ===== */
+        /* ===== Compact Loan Card ===== */
         .loan-compact-card {
             background: var(--ios-card);
             border-radius: var(--radius-sm);
             padding: 12px;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 10px;
             box-shadow: var(--shadow-sm);
             margin-bottom: 12px;
             cursor: pointer;
             transition: 0.3s;
+            border: 1px solid rgba(0,0,0,0.03);
         }
         .loan-compact-card:hover {
             box-shadow: var(--shadow-md);
@@ -675,7 +674,7 @@
         .loan-compact-header {
             display: flex;
             align-items: center;
-            gap: 12px;
+            justify-content: space-between;
         }
         .loan-compact-left, .loan-compact-right {
             display: flex;
@@ -688,6 +687,8 @@
             height: 40px;
             border-radius: 50%;
             object-fit: cover;
+            border: 2px solid white;
+            box-shadow: var(--shadow-sm);
         }
         .loan-compact-name {
             font-weight: 600;
@@ -699,12 +700,12 @@
         }
         .loan-compact-middle {
             text-align: center;
-            min-width: 0;
-            flex-shrink: 1;
+            flex: 1;
         }
         .loan-compact-customer-name {
             font-weight: 600;
             font-size: 14px;
+            margin-bottom: 2px;
         }
         .loan-compact-amount {
             font-size: 16px;
@@ -714,6 +715,8 @@
         .loan-compact-icons {
             display: flex;
             gap: 8px;
+            flex-wrap: wrap;
+            align-items: center;
             justify-content: center;
             margin-top: 4px;
         }
@@ -903,6 +906,7 @@
             width: 30px;
             height: 30px;
             margin-right: 8px;
+            vertical-align: middle;
         }
 
         .modal-close {
@@ -1434,16 +1438,6 @@
             .grid-2, .grid-3 {
                 grid-template-columns: 1fr;
             }
-            
-            .split-profile-card {
-                flex-direction: column;
-                height: auto;
-            }
-            
-            .split-profile-left {
-                border-right: none;
-                border-bottom: 1px dashed var(--ios-gray3);
-            }
         }
 
         /* ===== Notifications specific ===== */
@@ -1495,9 +1489,8 @@
             color: white;
         }
 
-        /* Rejection reason modal */
+        /* Rejection reason modal textarea */
         .rejection-reason-input {
-            width: 100%;
             min-height: 100px;
         }
     </style>
@@ -1545,7 +1538,6 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
-            <!-- New red button for upcoming payments -->
             <div class="sidebar-item upcoming-payments" data-section="upcomingPayments">
                 <i class="fas fa-exclamation-triangle"></i> Upcoming Payments
                 <span class="sidebar-badge" id="sidebarUpcomingBadge" style="display: none;">0</span>
@@ -2614,11 +2606,12 @@
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (PRODUCTION READY)
         // MODIFICATIONS:
         // 1. Dropdowns close after item click
-        // 2. Improved CSS for modals, loan cards compact
-        // 3. Fixed confirm payment (multi-path update)
-        // 4. Real-time notifications for new items (only once)
-        // 5. Advanced commission payment (bulk with details)
-        // 6. Logo everywhere
+        // 2. Improved CSS for rejection reason (modal)
+        // 3. Loan cards compact (left customer, right agent, amount in middle, icons)
+        // 4. Fixed confirm payment (multi-path update)
+        // 5. Real-time notifications (toasts for new items)
+        // 6. Advanced commission payment (bulk with details)
+        // 7. Logo everywhere
         // =========================================================================
         
         // Firebase configuration
@@ -2668,7 +2661,8 @@
             agentApps: 0,
             payments: 0,
             loans: 0,
-            customers: 0
+            customers: 0,
+            lastCustomerCheck: 0
         };
 
         // ========== UTILITIES ==========
@@ -5866,11 +5860,15 @@
 
         // ========== FILTERS & DROPDOWNS ==========
         // Close dropdown after item click
+        function closeDropdowns() {
+            document.querySelectorAll('.quick-actions-menu').forEach(m => m.classList.remove('show'));
+        }
+
         document.querySelectorAll('[data-agent-filter]').forEach(item => {
             item.addEventListener('click', (e) => {
                 agentFilter = e.target.dataset.agentFilter;
                 renderAgents();
-                e.target.closest('.quick-actions-menu').classList.remove('show');
+                closeDropdowns();
             });
         });
 
@@ -5878,26 +5876,26 @@
             item.addEventListener('click', (e) => {
                 currentLoanFilter = e.target.dataset.loanFilter;
                 renderLoans();
-                e.target.closest('.quick-actions-menu').classList.remove('show');
+                closeDropdowns();
             });
         });
 
         document.getElementById('filterAllCustomers')?.addEventListener('click', (e) => {
             customerFilter = 'all';
             renderCustomers();
-            e.target.closest('.quick-actions-menu').classList.remove('show');
+            closeDropdowns();
         });
         
         document.getElementById('filterActiveCustomers')?.addEventListener('click', (e) => {
             customerFilter = 'active';
             renderCustomers();
-            e.target.closest('.quick-actions-menu').classList.remove('show');
+            closeDropdowns();
         });
         
         document.getElementById('filterBannedCustomers')?.addEventListener('click', (e) => {
             customerFilter = 'banned';
             renderCustomers();
-            e.target.closest('.quick-actions-menu').classList.remove('show');
+            closeDropdowns();
         });
 
         document.getElementById('filterPaymentsPending')?.addEventListener('click', (e) => {
@@ -5905,21 +5903,21 @@
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="pending"]').classList.add('active');
             renderPayments();
-            e.target.closest('.quick-actions-menu').classList.remove('show');
+            closeDropdowns();
         });
         document.getElementById('filterPaymentsConfirmed')?.addEventListener('click', (e) => {
             currentPaymentFilter = 'confirmed';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="confirmed"]').classList.add('active');
             renderPayments();
-            e.target.closest('.quick-actions-menu').classList.remove('show');
+            closeDropdowns();
         });
         document.getElementById('filterPaymentsRejected')?.addEventListener('click', (e) => {
             currentPaymentFilter = 'rejected';
             document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
             document.querySelector('#paymentsSection .tab[data-status="rejected"]').classList.add('active');
             renderPayments();
-            e.target.closest('.quick-actions-menu').classList.remove('show');
+            closeDropdowns();
         });
 
         document.getElementById('agentSearch').addEventListener('input', renderAgents);
@@ -6038,7 +6036,7 @@
                 }
                 
                 document.getElementById('reportOutput').innerHTML = report;
-                e.target.closest('.quick-actions-menu').classList.remove('show');
+                closeDropdowns();
             });
         });
 
