@@ -277,21 +277,6 @@
             font-size: 18px;
         }
 
-        /* Red upcoming payments button */
-        .sidebar-item.upcoming {
-            background: rgba(255,59,48,0.1);
-            color: var(--ios-red);
-            border: 1px solid rgba(255,59,48,0.3);
-            font-weight: 600;
-        }
-        .sidebar-item.upcoming i {
-            color: var(--ios-red);
-        }
-        .sidebar-item.upcoming:hover {
-            background: rgba(255,59,48,0.2);
-            transform: translateX(-4px);
-        }
-
         .sidebar-item.logout {
             margin-top: 32px;
             color: var(--ios-red);
@@ -299,6 +284,20 @@
 
         .sidebar-item.logout i {
             color: var(--ios-red);
+        }
+
+        .sidebar-item.upcoming-payments {
+            background-color: var(--ios-red);
+            color: white;
+            border: none;
+            box-shadow: 0 4px 12px rgba(255,59,48,0.3);
+        }
+        .sidebar-item.upcoming-payments i {
+            color: white;
+        }
+        .sidebar-item.upcoming-payments:hover {
+            background-color: #e02b20;
+            transform: translateX(-4px);
         }
 
         .sidebar-badge {
@@ -1508,15 +1507,14 @@
             <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
             <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
             <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Applications</div>
-            <!-- NEW RED BUTTON: Upcoming Payments -->
-            <div class="sidebar-item upcoming" data-section="upcoming">
+            <!-- New red button for upcoming payments -->
+            <div class="sidebar-item upcoming-payments" data-section="upcomingPayments">
                 <i class="fas fa-exclamation-triangle"></i> Upcoming Payments
                 <span class="sidebar-badge" id="sidebarUpcomingBadge" style="display: none;">0</span>
             </div>
-            <!-- Notifications now only for messages/promotions (badge removed) -->
             <div class="sidebar-item" data-section="notifications">
                 <i class="fas fa-bell"></i> Notifications
-                <!-- no badge here anymore -->
+                <span class="sidebar-badge" id="sidebarNotificationsBadge" style="display: none;">0</span>
             </div>
             <div class="sidebar-item" id="signedAgreementsBtn"><i class="fas fa-file-signature"></i> Signed Agreements</div>
             <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> Settings</div>
@@ -1524,7 +1522,7 @@
         </div>
     </div>
 
-    <!-- Bottom Navigation (unchanged) -->
+    <!-- Bottom Navigation -->
     <div class="bottom-nav">
         <div class="nav-item-bottom active" data-section="dashboard">
             <i class="fas fa-home"></i><span>Home</span>
@@ -1550,7 +1548,7 @@
 
     <!-- Main Content -->
     <div class="main-content" id="mainContent">
-        <!-- DASHBOARD SECTION (unchanged) -->
+        <!-- DASHBOARD SECTION -->
         <section class="content-section active" id="dashboardSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('dashboard')"><i class="fas fa-download"></i> Export Dashboard</button>
@@ -1613,7 +1611,7 @@
             </div>
         </section>
 
-        <!-- CUSTOMERS SECTION (unchanged) -->
+        <!-- CUSTOMERS SECTION -->
         <section class="content-section" id="customersSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('customers')"><i class="fas fa-download"></i> Export Customers CSV</button>
@@ -1640,7 +1638,7 @@
             <div id="customersList"></div>
         </section>
 
-        <!-- AGENTS SECTION (unchanged) -->
+        <!-- AGENTS SECTION -->
         <section class="content-section" id="agentsSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('agents')"><i class="fas fa-download"></i> Export Agents CSV</button>
@@ -1671,7 +1669,7 @@
             <div id="rejectedApplicationsList" style="display: none;"></div>
         </section>
 
-        <!-- LOANS SECTION (unchanged) -->
+        <!-- LOANS SECTION -->
         <section class="content-section" id="loansSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('loans')"><i class="fas fa-download"></i> Export Loans CSV</button>
@@ -1702,7 +1700,7 @@
             <div id="loansList"></div>
         </section>
 
-        <!-- PAYMENTS SECTION (unchanged) -->
+        <!-- PAYMENTS SECTION -->
         <section class="content-section" id="paymentsSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('payments')"><i class="fas fa-download"></i> Export Payments CSV</button>
@@ -1734,7 +1732,7 @@
             <div id="paymentsList"></div>
         </section>
 
-        <!-- ANALYTICS SECTION (unchanged) -->
+        <!-- ANALYTICS SECTION -->
         <section class="content-section" id="analyticsSection">
             <div class="grid-2">
                 <div class="chart-container">
@@ -1776,7 +1774,7 @@
             </div>
         </section>
 
-        <!-- COMMISSION SECTION (unchanged) -->
+        <!-- COMMISSION SECTION -->
         <section class="content-section" id="commissionSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('commission')"><i class="fas fa-download"></i> Export Commission CSV</button>
@@ -1808,7 +1806,7 @@
             </div>
         </section>
 
-        <!-- PROFIT SECTION (unchanged) -->
+        <!-- PROFIT SECTION -->
         <section class="content-section" id="profitSection">
             <div class="stats-grid">
                 <div class="stat-card">
@@ -1835,7 +1833,7 @@
             </div>
         </section>
 
-        <!-- REPORTS SECTION (unchanged) -->
+        <!-- REPORTS SECTION (dropdown) -->
         <section class="content-section" id="reportsSection">
             <div class="action-row">
                 <div class="quick-actions-dropdown">
@@ -1852,7 +1850,7 @@
             <div id="reportOutput" class="floating-card">Select a report to generate</div>
         </section>
 
-        <!-- ASSIGNMENT SECTION (unchanged) -->
+        <!-- ASSIGNMENT SECTION (with profile pictures) -->
         <section class="content-section" id="assignmentSection">
             <div class="grid-2">
                 <div class="floating-card">
@@ -1875,7 +1873,7 @@
             </div>
         </section>
 
-        <!-- AUDIT LOGS SECTION (unchanged) -->
+        <!-- AUDIT LOGS SECTION -->
         <section class="content-section" id="auditSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('audit')"><i class="fas fa-download"></i> Export Audit CSV</button>
@@ -1891,7 +1889,7 @@
             </div>
         </section>
 
-        <!-- PENDING APPLICATIONS SECTION (unchanged) -->
+        <!-- PENDING APPLICATIONS SECTION -->
         <section class="content-section" id="applicationsSection">
             <div class="export-section">
                 <button class="export-btn" onclick="exportData('applications')"><i class="fas fa-download"></i> Export Applications CSV</button>
@@ -1903,15 +1901,15 @@
             </div>
         </section>
 
-        <!-- NEW UPCOMING PAYMENTS SECTION (moved from notifications) -->
-        <section class="content-section" id="upcomingSection">
+        <!-- NEW: UPCOMING PAYMENTS SECTION (separate page) -->
+        <section class="content-section" id="upcomingPaymentsSection">
             <div class="floating-card">
                 <h3 class="mb-4">Upcoming & Overdue Payments</h3>
                 <div id="upcomingPaymentsList"></div>
             </div>
         </section>
 
-        <!-- NOTIFICATIONS SECTION (now only messages & promotions) -->
+        <!-- NOTIFICATIONS SECTION (now only promotions & messages) -->
         <section class="content-section" id="notificationsSection">
             <div class="floating-card">
                 <h3 class="mb-4">Send Message</h3>
@@ -1945,7 +1943,7 @@
             </div>
         </section>
 
-        <!-- SETTINGS SECTION (unchanged) -->
+        <!-- SETTINGS SECTION (enhanced with separate contact details) -->
         <section class="content-section" id="settingsSection">
             <div class="grid-2">
                 <div class="floating-card">
@@ -2315,7 +2313,7 @@
         </div>
     </div>
 
-    <!-- Loan Details Modal (modified to show penalty) -->
+    <!-- Loan Details Modal -->
     <div class="modal-overlay" id="loanDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
@@ -2376,7 +2374,7 @@
         </div>
     </div>
 
-    <!-- Send Reminder Modal (unchanged) -->
+    <!-- Send Reminder Modal -->
     <div class="modal-overlay" id="sendReminderModal">
         <div class="modal-container compact">
             <div class="modal-header">
@@ -2398,7 +2396,7 @@
                 </div>
                 <div class="form-group">
                     <label class="form-label">Reminder Message</label>
-                    <textarea id="reminderMessage" class="form-textarea" rows="4"></textarea>
+                    <textarea id="reminderMessage" class="form-textarea" rows="4">Your payment is due soon. Please pay promptly to avoid penalties.</textarea>
                 </div>
             </div>
             <div class="modal-footer">
@@ -2408,7 +2406,7 @@
         </div>
     </div>
 
-    <!-- Record Payment Modal (unchanged) -->
+    <!-- Record Payment Modal -->
     <div class="modal-overlay" id="recordPaymentModal">
         <div class="modal-container compact">
             <div class="modal-header">
@@ -2456,7 +2454,7 @@
         </div>
     </div>
 
-    <!-- Reminder Details Modal (unchanged) -->
+    <!-- Reminder Details Modal -->
     <div class="modal-overlay" id="reminderDetailsModal">
         <div class="modal-container large">
             <div class="modal-header">
@@ -2555,10 +2553,9 @@
         // =========================================================================
         // ENHANCED ADMIN PANEL - TRUCASH ENTERPRISE (FULL PRODUCTION CODE)
         // MODIFICATIONS:
-        // - New Upcoming Payments section with red sidebar button
-        // - Late penalty: 2% per day after 5-day grace period on total loan amount
-        // - Penalty included in reminders and loan details
-        // - Notifications section now only shows messages & promotions
+        // 1. New "Upcoming Payments" page with red sidebar button.
+        // 2. Penalty system: 2% daily after 5-day grace period.
+        // 3. Notifications section now only shows promotions and messages.
         // =========================================================================
         
         // Firebase configuration
@@ -2602,10 +2599,6 @@
         let agentFilter = 'active';
         let customerFilter = 'all';
         let cloudinaryWidget = null;
-
-        // Penalty configuration
-        const PENALTY_DAILY_RATE = 0.02; // 2% per day
-        const GRACE_PERIOD_DAYS = 5;
 
         // ========== UTILITIES ==========
         const Utils = {
@@ -2652,10 +2645,11 @@
                         installment: i,
                         dueDate,
                         principal: principalPortion,
-                        interest,
+                        interest: interest,
                         totalDue: payment,
                         paidAmount: 0,
-                        status: 'pending'
+                        status: 'pending',
+                        penalty: 0           // NEW: penalty accumulated on this installment
                     });
                 }
                 return schedule;
@@ -2685,68 +2679,93 @@
             }
         };
 
-        // ========== PENALTY FUNCTIONS ==========
-        async function applyLatePenalties() {
+        // ========== PENALTY SYSTEM ==========
+        // Grace period in days
+        const GRACE_DAYS = 5;
+        // Daily penalty rate (2% = 0.02)
+        const PENALTY_RATE = 0.02;
+
+        // Apply penalties to all active/approved loans
+        async function applyPenaltiesToAllLoans() {
             const now = Date.now();
-            const loansToUpdate = allLoans.filter(l => l.status === 'approved' || l.status === 'active');
-            for (const loan of loansToUpdate) {
-                if (!loan.repaymentSchedule) continue;
-                let penaltyAdded = false;
-                let totalPenalty = loan.penaltyAccumulated || 0;
-                const lastCalc = loan.lastPenaltyCalculation || loan.approvedAt || loan.createdAt;
-                // For each installment that is not paid
-                for (let i = 0; i < loan.repaymentSchedule.length; i++) {
-                    const inst = loan.repaymentSchedule[i];
-                    if (inst.status === 'paid') continue;
-                    const dueDate = inst.dueDate;
-                    const graceEnd = dueDate + GRACE_PERIOD_DAYS * 24 * 60 * 60 * 1000;
-                    if (now > graceEnd) {
-                        // Calculate days from max(graceEnd, lastCalc) to now
-                        const start = Math.max(graceEnd, lastCalc);
-                        if (now > start) {
-                            const daysLate = Math.ceil((now - start) / (1000 * 60 * 60 * 24));
-                            if (daysLate > 0) {
-                                // Penalty on total loan amount (original + interest) – use totalPayable
-                                const totalLoanAmount = loan.totalPayable || loan.amount;
-                                const dailyPenalty = totalLoanAmount * PENALTY_DAILY_RATE;
-                                const penaltyForPeriod = dailyPenalty * daysLate;
-                                totalPenalty += penaltyForPeriod;
-                                penaltyAdded = true;
-                                // Send reminder for each day? We'll send one summary reminder
-                                // But we'll record in messages and send once after calculation
-                            }
-                        }
-                    }
+            for (const loan of allLoans) {
+                if (loan.status !== 'active' && loan.status !== 'approved') continue;
+                await applyPenaltiesToLoan(loan, now);
+            }
+        }
+
+        // Apply penalties to a single loan up to current date
+        async function applyPenaltiesToLoan(loan, now = Date.now()) {
+            if (!loan.repaymentSchedule) return;
+            let lastPenaltyDate = loan.lastPenaltyDate || 0;
+            let totalPenalty = loan.totalPenalty || 0;
+            const totalPayable = loan.totalPayable || loan.amount || 0;
+            let schedule = [...loan.repaymentSchedule];
+            let updated = false;
+
+            for (let i = 0; i < schedule.length; i++) {
+                const inst = schedule[i];
+                if (inst.status === 'paid') continue;
+                const dueDate = inst.dueDate;
+                const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
+                if (now <= graceEnd) continue; // within grace period, no penalty
+
+                // Days overdue beyond grace
+                const overdueMs = now - graceEnd;
+                const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
+                if (overdueDays <= 0) continue;
+
+                // If we have a lastPenaltyDate, only apply for days after that
+                let startDay = 1;
+                if (lastPenaltyDate > graceEnd) {
+                    const alreadyPenalizedMs = lastPenaltyDate - graceEnd;
+                    startDay = Math.floor(alreadyPenalizedMs / (24 * 60 * 60 * 1000)) + 1;
                 }
-                if (penaltyAdded) {
-                    // Update loan with new penalty and last calculation timestamp
-                    const updates = {
-                        penaltyAccumulated: totalPenalty,
-                        lastPenaltyCalculation: now
-                    };
-                    await db.ref('loans/' + loan.id).update(updates);
-                    // Send notification to customer and agent about penalty
-                    const penaltyMsg = `A late payment penalty of ${Utils.formatCurrency(totalPenalty)} has been applied to your loan (${loan.id.substring(0,8)}). Please pay immediately to avoid further charges.`;
-                    await Utils.sendNotification(loan.customerId, penaltyMsg, 'penalty', loan.id);
-                    if (loan.agentId) {
-                        await Utils.sendNotification(loan.agentId, `Penalty of ${Utils.formatCurrency(totalPenalty)} applied to loan ${loan.id.substring(0,8)} for customer ${loan.customerName}.`, 'penalty', loan.id);
+                if (startDay > overdueDays) continue;
+
+                // Penalty per day = totalPayable * PENALTY_RATE
+                const penaltyPerDay = totalPayable * PENALTY_RATE;
+                const daysToApply = overdueDays - startDay + 1;
+                const penaltyAmount = penaltyPerDay * daysToApply;
+
+                // Update installment
+                inst.penalty = (inst.penalty || 0) + penaltyAmount;
+                inst.totalDue = inst.principal + inst.interest + inst.penalty;
+                inst.status = 'pending'; // ensure not marked paid
+
+                totalPenalty += penaltyAmount;
+                updated = true;
+            }
+
+            if (updated) {
+                // Update loan
+                loan.repaymentSchedule = schedule;
+                loan.totalPenalty = totalPenalty;
+                loan.totalPayable = (loan.totalPayable || loan.amount) + totalPenalty;
+                loan.lastPenaltyDate = now;
+
+                // Save to Firebase
+                await db.ref('loans/' + loan.id).update({
+                    repaymentSchedule: schedule,
+                    totalPenalty: totalPenalty,
+                    totalPayable: loan.totalPayable,
+                    lastPenaltyDate: now
+                });
+
+                // Send notifications (limit to one per day to avoid spam)
+                // We can check if last penalty notification date is > 24h ago
+                if (!loan.lastPenaltyNotif || now - loan.lastPenaltyNotif > 24 * 60 * 60 * 1000) {
+                    const customer = allCustomers.find(c => c.id === loan.customerId);
+                    if (customer) {
+                        const message = `Penalty of ${Utils.formatCurrency(penaltyAmount)} has been applied to your loan (${loan.id.substring(0,8)}) due to late payment. Please pay immediately to avoid further penalties.`;
+                        await Utils.sendNotification(customer.id, message, 'penalty', loan.id);
                     }
-                    // Also record in messages
-                    await db.ref('messages/' + Utils.generateId('MSG')).set({
-                        recipientId: loan.customerId,
-                        message: penaltyMsg,
-                        timestamp: now,
-                        senderId: 'system',
-                        senderName: 'System',
-                        read: false,
-                        type: 'penalty',
-                        relatedLoan: loan.id
-                    });
+                    await db.ref('loans/' + loan.id).update({ lastPenaltyNotif: now });
                 }
             }
         }
 
-        // ========== UPDATE BADGE NUMBERS (now for upcoming) ==========
+        // ========== UPDATE BADGE NUMBERS ==========
         function updateBadges() {
             const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
             const pendingAgentApps = allAgentApplications.filter(a => a.status === 'pending').length;
@@ -2819,7 +2838,7 @@
             }
         }
 
-        // ========== getUpcomingPayments (60 days, include approved loans) ==========
+        // ========== UPDATED: getUpcomingPayments (60 days, include approved loans) ==========
         function getUpcomingPayments() {
             const now = Date.now();
             const sixtyDays = 60 * 24 * 60 * 60 * 1000;
@@ -2839,7 +2858,7 @@
                                 installment: inst.installment,
                                 paidAmount: inst.paidAmount || 0,
                                 status: inst.status,
-                                penalty: loan.penaltyAccumulated || 0 // include penalty
+                                penalty: inst.penalty || 0
                             });
                         }
                     });
@@ -2848,6 +2867,7 @@
             return upcoming;
         }
 
+        // ========== UPDATED: getOverduePayments (include approved loans) ==========
         function getOverduePayments() {
             const now = Date.now();
             const overdue = [];
@@ -2866,63 +2886,13 @@
                                 installment: inst.installment,
                                 paidAmount: inst.paidAmount || 0,
                                 status: inst.status,
-                                penalty: loan.penaltyAccumulated || 0
+                                penalty: inst.penalty || 0
                             });
                         }
                     });
                 }
             });
             return overdue;
-        }
-
-        // ========== RENDER UPCOMING PAYMENTS (new page) ==========
-        function renderUpcomingPayments() {
-            const upcoming = getUpcomingPayments();
-            const overdue = getOverduePayments();
-            
-            const now = Date.now();
-            
-            const allReminders = [...overdue.map(p => ({...p, type: 'overdue'})), ...upcoming.map(p => ({...p, type: 'upcoming'}))];
-            allReminders.sort((a,b) => a.dueDate - b.dueDate);
-            
-            const container = document.getElementById('upcomingPaymentsList');
-            if (!container) return;
-            
-            if (allReminders.length === 0) {
-                container.innerHTML = '<p class="text-muted">No upcoming or overdue payments.</p>';
-            } else {
-                container.innerHTML = allReminders.map(p => {
-                    const daysLeft = Math.ceil((p.dueDate - now) / (1000*60*60*24));
-                    const statusClass = p.type === 'overdue' ? 'overdue' : 'upcoming';
-                    const badgeText = p.type === 'overdue' ? `${Math.abs(daysLeft)} day${Math.abs(daysLeft)!==1?'s':''} overdue` : `${daysLeft} day${daysLeft!==1?'s':''} left`;
-                    const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
-                    
-                    // Include penalty in display
-                    const penaltyDisplay = p.penalty > 0 ? ` · Penalty: ${Utils.formatCurrency(p.penalty)}` : '';
-                    
-                    return `
-                    <div class="notification-item ${statusClass}" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
-                        <div class="d-flex justify-between align-center">
-                            <div>
-                                <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
-                            </div>
-                            <span class="${badgeClass}">${badgeText}</span>
-                        </div>
-                        <div class="profile-meta">
-                            Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
-                            Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}${penaltyDisplay}
-                        </div>
-                        <div class="profile-meta">
-                            Agent: ${p.agentName || 'None'}
-                        </div>
-                        <div class="mt-2">
-                            <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId}')">
-                                <i class="fas fa-bell"></i> Send Reminder
-                            </button>
-                        </div>
-                    </div>
-                `}).join('');
-            }
         }
 
         // ========== CSV EXPORT ==========
@@ -2987,7 +2957,7 @@
                         'Witness NRC': l.witness?.nrc || 'N/A',
                         'Signed Agreement': l.signedAgreementUrl || 'N/A',
                         RejectionReason: l.rejectionReason || '',
-                        'Penalty Accumulated': Utils.formatCurrency(l.penaltyAccumulated || 0)
+                        'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0)
                     }));
                     filename = 'loans.csv';
                     break;
@@ -3115,7 +3085,7 @@
                 'Witness NRC': l.witness?.nrc || 'N/A',
                 'Signed Agreement': l.signedAgreementUrl || 'N/A',
                 RejectionReason: l.rejectionReason || '',
-                'Penalty Accumulated': Utils.formatCurrency(l.penaltyAccumulated || 0)
+                'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0)
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
@@ -3234,8 +3204,8 @@
                 const promoSnap = await db.ref('promotions').once('value');
                 allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p]) => ({...p, id})).sort((a,b) => b.createdAt - a.createdAt);
 
-                // Apply late penalties
-                await applyLatePenalties();
+                // Apply penalties after loading loans
+                await applyPenaltiesToAllLoans();
 
                 populateSettingsForm();
                 updateUI();
@@ -3276,7 +3246,7 @@
             renderAuditLogs();
             renderPendingApplications();
             renderRejectedApplications();
-            renderUpcomingPayments();   // new
+            renderUpcomingPayments();  // NEW: separate page
             renderMessages(); 
             renderPromotionHistory();
             updateBadges();
@@ -3475,9 +3445,7 @@
                 const agent = allAgents.find(a => a.id === l.agentId);
                 const totalPaid = l.totalPaid || 0;
                 const progress = (totalPaid / (l.totalPayable || l.amount)) * 100;
-                
-                // Show penalty if any
-                const penaltyDisplay = l.penaltyAccumulated ? `<span class="status-badge overdue">Penalty: ${Utils.formatCurrency(l.penaltyAccumulated)}</span>` : '';
+                const penalty = l.totalPenalty || 0;
                 
                 return `
                 <div class="floating-card" onclick="showLoanDetails('${l.id}')">
@@ -3523,6 +3491,7 @@
                         <div class="progress-bar mt-1" style="height:6px; background:var(--ios-gray2); border-radius:3px;">
                             <div class="progress-fill" style="width: ${progress}%; height:6px; background:var(--ios-blue); border-radius:3px;"></div>
                         </div>
+                        ${penalty > 0 ? `<div class="text-red mt-1">Penalty: ${Utils.formatCurrency(penalty)}</div>` : ''}
                     </div>
                     
                     <div class="mt-2 d-flex gap-2">
@@ -3530,7 +3499,6 @@
                         ${l.witness ? `<span class="status-badge"><i class="fas fa-user"></i> Witness</span>` : ''}
                         ${l.signedAgreementUrl ? `<span class="status-badge"><i class="fas fa-file-signature"></i> Signed</span>` : ''}
                         ${l.status === 'rejected' && l.rejectionReason ? `<span class="status-badge rejected">Rejected</span>` : ''}
-                        ${penaltyDisplay}
                     </div>
                 </div>
             `}).join('');
@@ -3740,7 +3708,402 @@
             `).join('');
         }
 
-        // ===== NOTIFICATIONS (now only messages & promotions) =====
+        // ===== UPCOMING PAYMENTS (new page) =====
+        function renderUpcomingPayments() {
+            const upcoming = getUpcomingPayments();
+            const overdue = getOverduePayments();
+            
+            const now = Date.now();
+            
+            const allReminders = [...overdue.map(p => ({...p, type: 'overdue'})), ...upcoming.map(p => ({...p, type: 'upcoming'}))];
+            allReminders.sort((a,b) => a.dueDate - b.dueDate);
+            
+            const container = document.getElementById('upcomingPaymentsList');
+            if (!container) return;
+            
+            if (allReminders.length === 0) {
+                container.innerHTML = '<p class="text-muted">No upcoming or overdue payments.</p>';
+            } else {
+                container.innerHTML = allReminders.map(p => {
+                    const daysLeft = Math.ceil((p.dueDate - now) / (1000*60*60*24));
+                    const statusClass = p.type === 'overdue' ? 'overdue' : 'upcoming';
+                    const badgeText = p.type === 'overdue' ? `${Math.abs(daysLeft)} day${Math.abs(daysLeft)!==1?'s':''} overdue` : `${daysLeft} day${daysLeft!==1?'s':''} left`;
+                    const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
+                    
+                    return `
+                    <div class="notification-item ${statusClass}" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
+                        <div class="d-flex justify-between align-center">
+                            <div>
+                                <strong>${p.customerName}</strong> · Loan: ${p.loanId.substring(0,8)}
+                            </div>
+                            <span class="${badgeClass}">${badgeText}</span>
+                        </div>
+                        <div class="profile-meta">
+                            Installment #${p.installment} · Due: ${Utils.formatDate(p.dueDate)} · 
+                            Amount: ${Utils.formatCurrency(p.amount)} · Paid: ${Utils.formatCurrency(p.paidAmount || 0)}
+                        </div>
+                        <div class="profile-meta">
+                            Penalty: ${Utils.formatCurrency(p.penalty || 0)} · Agent: ${p.agentName || 'None'}
+                        </div>
+                        <div class="mt-2">
+                            <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId}')">
+                                <i class="fas fa-bell"></i> Send Reminder
+                            </button>
+                        </div>
+                    </div>
+                `}).join('');
+            }
+        }
+
+        window.showReminderDetails = (loanId, installment) => {
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan) return;
+            const inst = loan.repaymentSchedule?.[installment-1];
+            if (!inst) return;
+            
+            const customer = allCustomers.find(c => c.id === loan.customerId);
+            const agent = allAgents.find(a => a.id === loan.agentId);
+            
+            const now = Date.now();
+            const daysLeft = Math.ceil((inst.dueDate - now) / (1000*60*60*24));
+            const statusText = daysLeft < 0 ? `Overdue by ${Math.abs(daysLeft)} days` : `${daysLeft} days remaining`;
+            
+            const content = `
+                <div class="split-profile-card mb-4">
+                    <div class="split-profile-left" onclick="showCustomerDetails('${customer?.id}')" style="cursor:pointer;">
+                        <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(loan.customerName)}" class="split-avatar">
+                        <div class="split-info">
+                            <div class="split-label">Customer</div>
+                            <div class="split-name">${loan.customerName}</div>
+                            <div class="split-label">${customer?.phone || ''}</div>
+                        </div>
+                    </div>
+                    <div class="split-profile-right" onclick="showAgentDetails('${agent?.id}')" style="cursor:pointer;">
+                        <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')}" class="split-avatar">
+                        <div class="split-info">
+                            <div class="split-label">Agent</div>
+                            <div class="split-name">${agent?.fullName || 'Not Assigned'}</div>
+                            <div class="split-label">${agent?.agentId || ''}</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3 class="detail-title">Loan Summary</h3>
+                    <div class="grid-3">
+                        <div class="detail-card">
+                            <div class="detail-label">Loan ID</div>
+                            <div class="detail-value">${loan.id.substring(0,8)}...</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Amount</div>
+                            <div class="detail-value">${Utils.formatCurrency(loan.amount)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Status</div>
+                            <div class="detail-value"><span class="status-badge ${loan.status}">${loan.status}</span></div>
+                        </div>
+                    </div>
+                </div>
+                
+                <div class="detail-section">
+                    <h3 class="detail-title">Next Payment Details</h3>
+                    <div class="grid-3">
+                        <div class="detail-card">
+                            <div class="detail-label">Installment #</div>
+                            <div class="detail-value">${inst.installment}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Due Date</div>
+                            <div class="detail-value">${Utils.formatDate(inst.dueDate)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Days</div>
+                            <div class="detail-value">${statusText}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Amount Due</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.totalDue)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Paid So Far</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.paidAmount || 0)}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Remaining</div>
+                            <div class="detail-value">${Utils.formatCurrency(inst.totalDue - (inst.paidAmount || 0))}</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Penalty</div>
+                            <div class="detail-value text-red">${Utils.formatCurrency(inst.penalty || 0)}</div>
+                        </div>
+                    </div>
+                </div>
+            `;
+            
+            document.getElementById('reminderDetailsContent').innerHTML = content;
+            document.getElementById('reminderDetailsSendBtn').onclick = () => {
+                openSendReminderModal(loanId, installment, loan.customerId, loan.agentId);
+            };
+            openModal('reminderDetailsModal');
+        };
+
+        window.openSendReminderModal = (loanId, installment, customerId, agentId) => {
+            document.getElementById('reminderLoanId').value = loanId;
+            document.getElementById('reminderInstallment').value = installment;
+            document.getElementById('reminderCustomerId').value = customerId;
+            document.getElementById('reminderAgentId').value = agentId;
+            
+            const loan = allLoans.find(l => l.id === loanId);
+            const inst = loan?.repaymentSchedule?.[installment-1];
+            if (loan && inst) {
+                const dueDate = Utils.formatDate(inst.dueDate);
+                const amount = Utils.formatCurrency(inst.totalDue);
+                const penalty = Utils.formatCurrency(inst.penalty || 0);
+                const message = `Reminder: Your payment for loan ${loanId.substring(0,8)} (installment #${installment}) of ${amount} (including penalty: ${penalty}) is due on ${dueDate}. Please pay promptly to avoid further penalties.`;
+                document.getElementById('reminderMessage').value = message;
+            }
+            
+            openModal('sendReminderModal');
+        };
+
+        document.getElementById('sendReminderBtn').addEventListener('click', async () => {
+            const loanId = document.getElementById('reminderLoanId').value;
+            const installment = document.getElementById('reminderInstallment').value;
+            const customerId = document.getElementById('reminderCustomerId').value;
+            const agentId = document.getElementById('reminderAgentId').value;
+            const recipient = document.getElementById('reminderRecipient').value;
+            const message = document.getElementById('reminderMessage').value.trim();
+
+            if (!message) {
+                Utils.showToast('Error', 'Message cannot be empty', 'error');
+                return;
+            }
+
+            Utils.showLoading('Sending reminder...');
+            try {
+                const loan = allLoans.find(l => l.id === loanId);
+                if (!loan) throw new Error('Loan not found');
+
+                if (recipient === 'customer' || recipient === 'both') {
+                    await Utils.sendNotification(customerId, message, 'reminder', loanId);
+                }
+                if ((recipient === 'agent' || recipient === 'both') && agentId) {
+                    await Utils.sendNotification(agentId, message, 'reminder', loanId);
+                }
+
+                const msgId = Utils.generateId('MSG');
+                await db.ref('messages/' + msgId).set({
+                    recipientId: recipient === 'both' ? 'both' : (recipient === 'customer' ? customerId : agentId),
+                    message: message,
+                    timestamp: Date.now(),
+                    senderId: currentUser.uid,
+                    senderName: adminData?.fullName,
+                    read: false,
+                    type: 'reminder',
+                    relatedLoan: loanId
+                });
+
+                Utils.showToast('Success', 'Reminder sent', 'success');
+                closeModal('sendReminderModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        document.getElementById('recordPaymentBtn').addEventListener('click', () => {
+            const loanId = document.getElementById('loanDetailsContent')?.getAttribute('data-loan-id');
+            if (!loanId) return;
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan || !loan.repaymentSchedule) return;
+
+            const select = document.getElementById('recordInstallment');
+            select.innerHTML = '';
+            loan.repaymentSchedule.forEach((inst, index) => {
+                if (inst.status !== 'paid') {
+                    const option = document.createElement('option');
+                    option.value = index;
+                    const remaining = inst.totalDue - (inst.paidAmount || 0);
+                    option.textContent = `#${inst.installment} - Due: ${Utils.formatDate(inst.dueDate)} - Amount: ${Utils.formatCurrency(inst.totalDue)} (Paid: ${Utils.formatCurrency(inst.paidAmount || 0)} - Remaining: ${Utils.formatCurrency(remaining)})`;
+                    option.dataset.remaining = remaining;
+                    select.appendChild(option);
+                }
+            });
+
+            select.addEventListener('change', (e) => {
+                const selectedOption = e.target.options[e.target.selectedIndex];
+                const remaining = selectedOption.dataset.remaining;
+                document.getElementById('installmentRemaining').innerText = `Remaining for this installment: ${Utils.formatCurrency(remaining || 0)}`;
+                document.getElementById('recordAmount').max = remaining;
+            });
+            if (select.options.length > 0) {
+                const event = new Event('change');
+                select.dispatchEvent(event);
+            }
+
+            document.getElementById('recordLoanId').value = loanId;
+            document.getElementById('recordAmount').value = '';
+            document.getElementById('recordMethod').value = 'Cash';
+            document.getElementById('recordReference').value = '';
+            document.getElementById('paymentProofUrl').value = '';
+            document.getElementById('paymentProofPreview').innerHTML = '';
+            openModal('recordPaymentModal');
+        });
+
+        document.getElementById('confirmRecordPayment').addEventListener('click', async () => {
+            const loanId = document.getElementById('recordLoanId').value;
+            const installmentIndex = parseInt(document.getElementById('recordInstallment').value);
+            const amount = parseFloat(document.getElementById('recordAmount').value);
+            const method = document.getElementById('recordMethod').value;
+            const reference = document.getElementById('recordReference').value;
+            const proofUrl = document.getElementById('paymentProofUrl').value;
+
+            if (isNaN(amount) || amount <= 0) {
+                Utils.showToast('Error', 'Enter a valid amount', 'error');
+                return;
+            }
+
+            Utils.showLoading('Recording payment...');
+            try {
+                const loanRef = db.ref('loans/' + loanId);
+                const loanSnap = await loanRef.once('value');
+                const loan = loanSnap.val();
+                if (!loan) throw new Error('Loan not found');
+
+                let schedule = loan.repaymentSchedule || [];
+                if (schedule.length === 0) throw new Error('No repayment schedule');
+
+                const inst = schedule[installmentIndex];
+                const due = inst.totalDue - (inst.paidAmount || 0);
+                if (amount > due) {
+                    Utils.showToast('Error', 'Amount exceeds remaining due for this installment', 'error');
+                    return;
+                }
+
+                inst.paidAmount = (inst.paidAmount || 0) + amount;
+                inst.status = inst.paidAmount >= inst.totalDue ? 'paid' : 'partial';
+
+                let totalPaid = 0, interestPaid = 0;
+                schedule.forEach(i => {
+                    totalPaid += i.paidAmount || 0;
+                    const paid = i.paidAmount || 0;
+                    const interestPart = (paid / i.totalDue) * i.interest;
+                    interestPaid += isNaN(interestPart) ? 0 : interestPart;
+                });
+
+                const updates = {
+                    repaymentSchedule: schedule,
+                    totalPaid: totalPaid,
+                    interestPaid: interestPaid
+                };
+
+                if (totalPaid >= (loan.totalPayable || loan.amount)) {
+                    updates.status = 'completed';
+                    updates.completedAt = Date.now();
+                }
+
+                await loanRef.update(updates);
+
+                const paymentId = Utils.generateId('PAY');
+                await db.ref('payments/' + paymentId).set({
+                    id: paymentId,
+                    loanId: loanId,
+                    customerId: loan.customerId,
+                    customerName: loan.customerName,
+                    amount: amount,
+                    method: method,
+                    reference: reference,
+                    proofUrl: proofUrl || null,
+                    status: 'confirmed',
+                    timestamp: Date.now(),
+                    verifiedAt: Date.now(),
+                    verifiedBy: currentUser.uid,
+                    notes: 'Manual payment recorded by admin'
+                });
+
+                const interestPortion = (amount / inst.totalDue) * inst.interest;
+                if (interestPortion > 0 && loan.agentId) {
+                    const commissionAmount = interestPortion * 0.15;
+                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
+                        agentId: loan.agentId,
+                        customerId: loan.customerId,
+                        loanId: loanId,
+                        customerName: loan.customerName,
+                        amount: commissionAmount,
+                        paidAt: null,
+                        paidBy: null,
+                        status: 'pending'
+                    });
+                }
+
+                await Utils.logAudit('RECORD_PAYMENT', { loanId, amount, method, installment: installmentIndex+1 });
+                Utils.showToast('Success', 'Payment recorded', 'success');
+                closeModal('recordPaymentModal');
+                closeModal('loanDetailsModal');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        // Send Message
+        document.getElementById('sendMessageBtn')?.addEventListener('click', async () => {
+            const recipientType = document.getElementById('msgRecipientType').value;
+            const message = document.getElementById('msgText').value.trim();
+            if (!message) {
+                Utils.showToast('Error', 'Message cannot be empty', 'error');
+                return;
+            }
+            
+            let recipientId = null;
+            if (recipientType === 'specific_customer' || recipientType === 'specific_agent') {
+                recipientId = document.getElementById('specificRecipientId').value;
+                if (!recipientId) {
+                    Utils.showToast('Error', 'Please select a recipient', 'error');
+                    return;
+                }
+            } else if (recipientType === 'all_customers') {
+                recipientId = 'all_customers';
+            } else if (recipientType === 'all_agents') {
+                recipientId = 'all_agents';
+            }
+            
+            Utils.showLoading('Sending message...');
+            try {
+                await db.ref('messages/' + Utils.generateId('MSG')).set({
+                    recipientId: recipientId,
+                    message: message,
+                    timestamp: Date.now(),
+                    senderId: currentUser.uid,
+                    senderName: adminData?.fullName,
+                    read: false,
+                    type: 'admin'
+                });
+                Utils.showToast('Message sent', 'Message saved', 'success');
+                document.getElementById('msgText').value = '';
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
+
+        document.getElementById('msgRecipientType')?.addEventListener('change', (e) => {
+            const type = e.target.value;
+            const specificDiv = document.getElementById('specificRecipientSelect');
+            const select = document.getElementById('specificRecipientId');
+            
+            if (type === 'specific_customer') {
+                specificDiv.style.display = 'block';
+                select.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName} (${c.phone})</option>`).join('');
+            } else if (type === 'specific_agent') {
+                specificDiv.style.display = 'block';
+                select.innerHTML = allAgents.map(a => `<option value="${a.id}">${a.fullName} (${a.agentId})</option>`).join('');
+            } else {
+                specificDiv.style.display = 'none';
+            }
+        });
+
         function renderMessages() {
             const container = document.getElementById('recentMessagesList');
             if (!container) return;
@@ -4114,18 +4477,10 @@
                 </div>
             ` : '<p class="text-muted">No witness recorded</p>';
             
-            // Include penalty in schedule display
-            const penaltyDisplay = loan.penaltyAccumulated ? `
-                <div class="detail-card">
-                    <div class="detail-label">Total Penalty</div>
-                    <div class="detail-value large text-red">${Utils.formatCurrency(loan.penaltyAccumulated)}</div>
-                </div>
-            ` : '';
-            
             const scheduleHtml = loan.repaymentSchedule ? `
                 <table class="repayment-table">
                     <thead>
-                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Total</th><th>Paid</th><th>Status</th></tr>
+                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>
                     </thead>
                     <tbody>
                         ${loan.repaymentSchedule.map((inst, i) => {
@@ -4138,6 +4493,7 @@
                                 <td>${Utils.formatDate(inst.dueDate)}</td>
                                 <td>${Utils.formatCurrency(inst.principal)}</td>
                                 <td>${Utils.formatCurrency(inst.interest)}</td>
+                                <td>${Utils.formatCurrency(inst.penalty || 0)}</td>
                                 <td>${Utils.formatCurrency(inst.totalDue)}</td>
                                 <td>${Utils.formatCurrency(paid)}</td>
                                 <td><span class="status-badge ${statusClass}">${statusText}</span></td>
@@ -4213,6 +4569,10 @@
                             <div class="detail-value">${Utils.formatCurrency(loan.totalInterest || 0)}</div>
                         </div>
                         <div class="detail-card">
+                            <div class="detail-label">Total Penalty</div>
+                            <div class="detail-value text-red">${Utils.formatCurrency(loan.totalPenalty || 0)}</div>
+                        </div>
+                        <div class="detail-card">
                             <div class="detail-label">Total Payable</div>
                             <div class="detail-value">${Utils.formatCurrency(loan.totalPayable || loan.amount)}</div>
                         </div>
@@ -4224,7 +4584,6 @@
                             <div class="detail-label">Remaining</div>
                             <div class="detail-value">${Utils.formatCurrency((loan.totalPayable || loan.amount) - totalPaid)}</div>
                         </div>
-                        ${penaltyDisplay}
                     </div>
                 </div>
                 
@@ -4877,15 +5236,6 @@
                 let remainingAmount = payment.amount;
                 let totalPrincipalPaid = 0;
                 let totalInterestPaid = 0;
-                
-                // First, apply payment to penalty if any
-                if (loan.penaltyAccumulated > 0) {
-                    const penaltyPaid = Math.min(remainingAmount, loan.penaltyAccumulated);
-                    remainingAmount -= penaltyPaid;
-                    // Update penalty
-                    loan.penaltyAccumulated -= penaltyPaid;
-                    await loanRef.update({ penaltyAccumulated: loan.penaltyAccumulated });
-                }
                 
                 for (let i = 0; i < schedule.length; i++) {
                     const inst = schedule[i];
@@ -5704,7 +6054,7 @@
                 assignment: 'assignmentSection',
                 audit: 'auditSection',
                 applications: 'applicationsSection',
-                upcoming: 'upcomingSection',
+                upcomingPayments: 'upcomingPaymentsSection',  // new
                 notifications: 'notificationsSection',
                 settings: 'settingsSection'
             };
@@ -5721,7 +6071,7 @@
             if (sectionId === 'audit') renderAuditLogs();
             if (sectionId === 'analytics') renderAnalytics();
             if (sectionId === 'applications') renderPendingApplications();
-            if (sectionId === 'upcoming') renderUpcomingPayments();
+            if (sectionId === 'upcomingPayments') renderUpcomingPayments();
             if (sectionId === 'notifications') {
                 renderMessages();
                 renderPromotionHistory();
@@ -5967,7 +6317,7 @@
             
             db.ref('loans').on('value', (snap) => {
                 allLoans = Object.entries(snap.val() || {}).map(([id,l]) => ({...l, id}));
-                applyLatePenalties(); // reapply penalties on loan updates
+                applyPenaltiesToAllLoans(); // apply penalties on new loan data
                 updateUI();
             });
             
