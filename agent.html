@@ -5,14 +5,20 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
     <title>TruCash | Agent</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js for analytics -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <!-- Firebase SDK -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <!-- Cloudinary -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <!-- Chart.js for analytics -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Moment.js for date handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
+    <!-- PapaParse for CSV export -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <!-- html2pdf for PDF statements -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
         /* === Enhanced iOS‑inspired Mobile Theme – SCALED DOWN 10% === */
         * {
@@ -26,7 +32,7 @@
             background: #f5f7fa;
             color: #1c1e24;
             line-height: 1.5;
-            padding-bottom: 72px; /* 80px * 0.9 */
+            padding-bottom: 72px;
             min-height: 100vh;
             display: flex;
             flex-direction: column;
@@ -36,29 +42,29 @@
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(9px); /* 10px * 0.9 */
+            backdrop-filter: blur(9px);
             z-index: 5000;
             display: flex;
             flex-direction: column;
             align-items: center;
             justify-content: center;
             text-align: center;
-            padding: 18px; /* 20px * 0.9 */
+            padding: 18px;
         }
         .maintenance-overlay h2 {
             color: #ff3b30;
-            margin-bottom: 9px; /* 10px * 0.9 */
+            margin-bottom: 9px;
         }
         .maintenance-overlay p {
             color: #1c1e24;
-            max-width: 360px; /* 400px * 0.9 */
+            max-width: 360px;
         }
         /* header with profile pic, title and notification bell */
         .agent-header {
             background: rgba(255,255,255,0.9);
-            backdrop-filter: blur(18px); /* 20px * 0.9 */
+            backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
-            padding: 10.8px 18px; /* 12px->10.8, 20px->18 */
+            padding: 11px 18px;
             border-bottom: 1px solid rgba(0,0,0,0.05);
             display: flex;
             align-items: center;
@@ -66,100 +72,100 @@
             position: sticky;
             top: 0;
             z-index: 100;
-            box-shadow: 0 1.8px 10.8px rgba(0,0,0,0.02); /* 2px->1.8, 12px->10.8 */
+            box-shadow: 0 2px 11px rgba(0,0,0,0.02);
         }
         .header-left {
             display: flex;
             align-items: center;
-            gap: 10.8px; /* 12px * 0.9 */
+            gap: 11px;
         }
         .agent-avatar {
-            width: 39.6px; /* 44px * 0.9 */
-            height: 39.6px;
-            border-radius: 19.8px; /* 22px * 0.9 */
+            width: 40px;
+            height: 40px;
+            border-radius: 20px;
             background: linear-gradient(145deg, #e1e8f0, #d0d8e8);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px; /* 20px * 0.9 */
+            font-size: 18px;
             color: #2d3a4a;
             object-fit: cover;
-            border: 1.8px solid #007aff; /* 2px * 0.9 */
+            border: 2px solid #007aff;
         }
         .agent-name {
-            font-size: 16.2px; /* 18px * 0.9 */
+            font-size: 16px;
             font-weight: 600;
             color: #1c1e24;
         }
         .agent-name small {
-            font-size: 11.7px; /* 13px * 0.9 */
+            font-size: 12px;
             font-weight: 400;
             color: #6c7a8a;
             display: block;
-            margin-top: 1.8px; /* 2px * 0.9 */
+            margin-top: 2px;
         }
         .header-right {
             display: flex;
             align-items: center;
-            gap: 13.5px; /* 15px * 0.9 */
+            gap: 14px;
         }
         .badge-container {
             position: relative;
             cursor: pointer;
         }
         .badge-container i {
-            font-size: 21.6px; /* 24px * 0.9 */
+            font-size: 22px;
             color: #2d3a4a;
         }
         .unread-badge {
             position: absolute;
-            top: -5.4px; /* -6px * 0.9 */
-            right: -7.2px; /* -8px * 0.9 */
+            top: -5px;
+            right: -7px;
             background: #ff3b30;
             color: white;
-            border-radius: 18px; /* 20px * 0.9 */
-            padding: 1.8px 7.2px; /* 2px->1.8, 8px->7.2 */
-            font-size: 9.9px; /* 11px * 0.9 */
+            border-radius: 18px;
+            padding: 2px 7px;
+            font-size: 10px;
             font-weight: 600;
-            box-shadow: 0 3.6px 7.2px rgba(255,59,48,0.3); /* 4px->3.6, 8px->7.2 */
+            box-shadow: 0 4px 7px rgba(255,59,48,0.3);
         }
         .agent-code-badge {
             font-weight: 700;
-            font-size: 14.4px; /* 16px * 0.9 */
+            font-size: 14px;
             color: #007aff;
-            letter-spacing: 0.45px; /* 0.5px * 0.9 */
+            letter-spacing: 0.5px;
             background: #e8f0fe;
-            padding: 5.4px 12.6px; /* 6px->5.4, 14px->12.6 */
-            border-radius: 27px; /* 30px * 0.9 */
+            padding: 5px 13px;
+            border-radius: 27px;
         }
         /* main content */
         .main-content {
             flex: 1;
-            padding: 18px 14.4px; /* 20px->18, 16px->14.4 */
+            padding: 18px 14px;
         }
         .section-title {
-            font-size: 16.2px; /* 18px * 0.9 */
+            font-size: 16px;
             font-weight: 600;
-            margin-bottom: 14.4px; /* 16px * 0.9 */
-            padding-left: 3.6px; /* 4px * 0.9 */
+            margin-bottom: 14px;
+            padding-left: 4px;
             color: #1c1e24;
-            border-left: 3.6px solid #007aff; /* 4px * 0.9 */
+            border-left: 4px solid #007aff;
         }
         .customer-grid {
             display: flex;
             flex-direction: column;
-            gap: 14.4px; /* 16px * 0.9 */
+            gap: 14px;
         }
         .customer-card {
             background: white;
-            border-radius: 21.6px; /* 24px * 0.9 */
-            padding: 16.2px; /* 18px * 0.9 */
-            box-shadow: 0 5.4px 16.2px rgba(0,0,0,0.03), 0 1.8px 3.6px rgba(0,0,0,0.05); /* 6->5.4, 18->16.2, 2->1.8, 4->3.6 */
+            border-radius: 22px;
+            padding: 16px;
+            box-shadow: 0 5px 16px rgba(0,0,0,0.03), 0 2px 4px rgba(0,0,0,0.05);
             border: 1px solid #edf2f7;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 14.4px; /* 16px * 0.9 */
+            gap: 14px;
             cursor: pointer;
             position: relative;
         }
@@ -169,7 +175,7 @@
         }
         /* Overdue styling */
         .customer-card.overdue .customer-avatar {
-            border: 2.7px solid #ff3b30 !important; /* 3px * 0.9 */
+            border: 3px solid #ff3b30 !important;
         }
         .customer-card.overdue .customer-name {
             color: #ff3b30 !important;
@@ -179,14 +185,14 @@
             background: #28a745;
             color: white;
             border: none;
-            border-radius: 27px; /* 30px * 0.9 */
-            padding: 7.2px 14.4px; /* 8px->7.2, 16px->14.4 */
-            font-size: 12.6px; /* 14px * 0.9 */
+            border-radius: 27px;
+            padding: 7px 14px;
+            font-size: 13px;
             display: flex;
             align-items: center;
-            gap: 5.4px; /* 6px * 0.9 */
+            gap: 5px;
             cursor: pointer;
-            box-shadow: 0 3.6px 9px rgba(40,167,69,0.3); /* 4px->3.6, 10px->9 */
+            box-shadow: 0 4px 9px rgba(40,167,69,0.3);
             margin-left: auto;
             transition: 0.2s;
             z-index: 10;
@@ -196,23 +202,23 @@
             transform: scale(1.05);
         }
         .call-button i {
-            font-size: 14.4px; /* 16px * 0.9 */
+            font-size: 14px;
         }
         .overdue-message {
-            font-size: 11.7px; /* 13px * 0.9 */
+            font-size: 12px;
             color: #ff3b30;
-            margin-top: 7.2px; /* 8px * 0.9 */
-            padding: 5.4px 10.8px; /* 6px->5.4, 12px->10.8 */
+            margin-top: 7px;
+            padding: 5px 11px;
             background: rgba(255,59,48,0.05);
-            border-radius: 18px; /* 20px * 0.9 */
+            border-radius: 18px;
             display: flex;
             align-items: center;
-            gap: 7.2px; /* 8px * 0.9 */
+            gap: 7px;
             width: 100%;
         }
         .overdue-message i {
             color: #ff3b30;
-            font-size: 12.6px; /* 14px * 0.9 */
+            font-size: 13px;
         }
         .overdue-message .call-link {
             color: #007aff;
@@ -221,50 +227,50 @@
             margin-left: auto;
         }
         .customer-avatar {
-            width: 50.4px; /* 56px * 0.9 */
-            height: 50.4px;
-            border-radius: 25.2px; /* 28px * 0.9 */
+            width: 50px;
+            height: 50px;
+            border-radius: 25px;
             background: linear-gradient(145deg, #e1e8f0, #d0d8e8);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 21.6px; /* 24px * 0.9 */
+            font-size: 22px;
             color: #2d3a4a;
             flex-shrink: 0;
             object-fit: cover;
-            border: 1.8px solid white; /* 2px * 0.9 */
-            box-shadow: 0 3.6px 10.8px rgba(0,0,0,0.06); /* 4px->3.6, 12px->10.8 */
+            border: 2px solid white;
+            box-shadow: 0 4px 11px rgba(0,0,0,0.06);
         }
         .customer-info {
             flex: 1;
         }
         .customer-name {
             font-weight: 600;
-            font-size: 15.3px; /* 17px * 0.9 */
-            margin-bottom: 3.6px; /* 4px * 0.9 */
+            font-size: 15px;
+            margin-bottom: 4px;
             color: #1e293b;
         }
         .customer-meta {
-            font-size: 11.7px; /* 13px * 0.9 */
+            font-size: 12px;
             color: #617388;
             display: flex;
             flex-wrap: wrap;
-            gap: 7.2px; /* 8px * 0.9 */
+            gap: 7px;
         }
         .customer-meta i {
-            width: 14.4px; /* 16px * 0.9 */
+            width: 14px;
             color: #007aff;
         }
         .badge {
             background: #eef3f8;
-            border-radius: 18px; /* 20px * 0.9 */
-            padding: 3.6px 9px; /* 4px->3.6, 10px->9 */
-            font-size: 10.8px; /* 12px * 0.9 */
+            border-radius: 18px;
+            padding: 4px 9px;
+            font-size: 11px;
             font-weight: 500;
             color: #2d3a4a;
             display: inline-flex;
             align-items: center;
-            gap: 3.6px; /* 4px * 0.9 */
+            gap: 4px;
         }
         /* bottom navigation */
         .bottom-nav {
@@ -273,41 +279,41 @@
             left: 0;
             width: 100%;
             background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(18px); /* 20px * 0.9 */
+            backdrop-filter: blur(18px);
             -webkit-backdrop-filter: blur(18px);
             border-top: 1px solid #e2e8f0;
             display: flex;
             justify-content: space-around;
-            padding: 7.2px 9px 18px; /* 8px->7.2, 10px->9, 20px->18 */
+            padding: 7px 9px 18px;
             z-index: 100;
-            box-shadow: 0 -3.6px 10.8px rgba(0,0,0,0.02); /* 4px->3.6, 12px->10.8 */
+            box-shadow: 0 -4px 11px rgba(0,0,0,0.02);
         }
         .nav-item {
             display: flex;
             flex-direction: column;
             align-items: center;
-            gap: 3.6px; /* 4px * 0.9 */
+            gap: 4px;
             color: #8a9aa8;
-            font-size: 10.8px; /* 12px * 0.9 */
+            font-size: 11px;
             transition: 0.2s;
             cursor: pointer;
             flex: 1;
-            max-width: 63px; /* 70px * 0.9 */
+            max-width: 63px;
         }
         .nav-item i {
-            font-size: 19.8px; /* 22px * 0.9 */
+            font-size: 20px;
         }
         .nav-item.active {
             color: #007aff;
             font-weight: 500;
-            transform: translateY(-1.8px); /* -2px * 0.9 */
+            transform: translateY(-2px);
         }
         /* modals (enhanced) */
         .modal-overlay {
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
             background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(3.6px); /* 4px * 0.9 */
+            backdrop-filter: blur(4px);
             display: none;
             align-items: flex-end;
             justify-content: center;
@@ -319,12 +325,12 @@
         .modal-card {
             background: white;
             width: 100%;
-            max-width: 450px; /* 500px * 0.9 */
-            border-radius: 27px 27px 0 0; /* 30px->27 */
-            padding: 21.6px 18px 27px; /* 24px->21.6, 20px->18, 30px->27 */
-            box-shadow: 0 -9px 36px rgba(0,0,0,0.1); /* 10px->9, 40px->36 */
+            max-width: 500px;
+            border-radius: 27px 27px 0 0;
+            padding: 22px 18px 27px;
+            box-shadow: 0 -9px 36px rgba(0,0,0,0.1);
             animation: slideUp 0.3s ease;
-            max-height: 76.5vh; /* 85vh * 0.9 */
+            max-height: 85vh;
             overflow-y: auto;
         }
         @keyframes slideUp {
@@ -335,10 +341,10 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 18px; /* 20px * 0.9 */
+            margin-bottom: 18px;
         }
         .modal-header h3 {
-            font-size: 18px; /* 20px * 0.9 */
+            font-size: 18px;
             font-weight: 600;
             background: linear-gradient(135deg, #007aff, #5856d6);
             -webkit-background-clip: text;
@@ -347,20 +353,20 @@
         .modal-close {
             background: none;
             border: none;
-            font-size: 21.6px; /* 24px * 0.9 */
+            font-size: 22px;
             color: #8e9dab;
             cursor: pointer;
-            padding: 7.2px; /* 8px * 0.9 */
+            padding: 7px;
         }
         /* detail rows */
         .detail-row {
             display: flex;
-            margin-bottom: 12.6px; /* 14px * 0.9 */
+            margin-bottom: 13px;
             border-bottom: 1px solid #edf2f7;
-            padding-bottom: 9px; /* 10px * 0.9 */
+            padding-bottom: 9px;
         }
         .detail-label {
-            width: 90px; /* 100px * 0.9 */
+            width: 90px;
             font-weight: 500;
             color: #5b6f82;
         }
@@ -371,27 +377,27 @@
         }
         .photo-strip {
             display: flex;
-            gap: 10.8px; /* 12px * 0.9 */
+            gap: 11px;
             overflow-x: auto;
-            padding: 9px 0; /* 10px * 0.9 */
+            padding: 9px 0;
         }
         .photo-thumb {
-            width: 72px; /* 80px * 0.9 */
+            width: 72px;
             height: 72px;
-            border-radius: 14.4px; /* 16px * 0.9 */
+            border-radius: 14px;
             object-fit: cover;
             border: 1px solid #dde3e9;
         }
         .collateral-grid {
             display: grid;
             grid-template-columns: repeat(3, 1fr);
-            gap: 9px; /* 10px * 0.9 */
-            margin: 13.5px 0; /* 15px * 0.9 */
+            gap: 9px;
+            margin: 14px 0;
         }
         .collateral-grid img {
             width: 100%;
             aspect-ratio: 1;
-            border-radius: 14.4px; /* 16px * 0.9 */
+            border-radius: 14px;
             object-fit: cover;
             border: 1px solid #dee6ed;
         }
@@ -399,198 +405,212 @@
             background: linear-gradient(135deg, #007aff, #005bbf);
             color: white;
             border: none;
-            padding: 12.6px 18px; /* 14px->12.6, 20px->18 */
-            border-radius: 27px; /* 30px * 0.9 */
+            padding: 13px 18px;
+            border-radius: 27px;
             font-weight: 600;
-            font-size: 14.4px; /* 16px * 0.9 */
+            font-size: 14px;
             width: 100%;
             cursor: pointer;
-            margin: 7.2px 0; /* 8px * 0.9 */
-            box-shadow: 0 7.2px 16.2px rgba(0,122,255,0.25); /* 8px->7.2, 18px->16.2 */
+            margin: 7px 0;
+            box-shadow: 0 7px 16px rgba(0,122,255,0.25);
             transition: 0.2s;
         }
         .btn-outline {
             background: white;
-            border: 1.35px solid #007aff; /* 1.5px * 0.9 */
+            border: 1.5px solid #007aff;
             color: #007aff;
             box-shadow: none;
         }
         .btn-small {
-            padding: 9px 14.4px; /* 10px->9, 16px->14.4 */
-            font-size: 12.6px; /* 14px * 0.9 */
+            padding: 9px 14px;
+            font-size: 13px;
         }
         .agent-code {
             background: #eaf2ff;
-            border-radius: 18px; /* 20px * 0.9 */
-            padding: 12.6px; /* 14px * 0.9 */
+            border-radius: 18px;
+            padding: 13px;
             display: flex;
             align-items: center;
             justify-content: space-between;
-            margin: 14.4px 0; /* 16px * 0.9 */
+            margin: 14px 0;
         }
         .code {
             font-family: monospace;
-            font-size: 16.2px; /* 18px * 0.9 */
+            font-size: 16px;
             font-weight: 600;
             color: #0055aa;
-            letter-spacing: 0.9px; /* 1px * 0.9 */
+            letter-spacing: 1px;
         }
         .copy-btn {
             background: #007aff;
             color: white;
             border: none;
-            border-radius: 27px; /* 30px * 0.9 */
-            padding: 7.2px 16.2px; /* 8px->7.2, 18px->16.2 */
-            font-size: 12.6px; /* 14px * 0.9 */
+            border-radius: 27px;
+            padding: 7px 16px;
+            font-size: 13px;
             display: flex;
             align-items: center;
-            gap: 5.4px; /* 6px * 0.9 */
+            gap: 5px;
             cursor: pointer;
-            box-shadow: 0 3.6px 9px rgba(0,122,255,0.2); /* 4px->3.6, 10px->9 */
+            box-shadow: 0 4px 9px rgba(0,122,255,0.2);
         }
         .section-card {
             background: white;
-            border-radius: 25.2px; /* 28px * 0.9 */
-            padding: 18px; /* 20px * 0.9 */
-            margin-bottom: 18px; /* 20px * 0.9 */
-            box-shadow: 0 5.4px 16.2px rgba(0,0,0,0.02); /* 6px->5.4, 18px->16.2 */
+            border-radius: 25px;
+            padding: 18px;
+            margin-bottom: 18px;
+            box-shadow: 0 5px 16px rgba(0,0,0,0.02);
             border: 1px solid #edf2f7;
         }
         /* Enhanced Commission Overview Cards */
         .commission-overview-card {
             background: linear-gradient(135deg, #ffffff 0%, #f8fcff 100%);
-            border-radius: 25.2px; /* 28px * 0.9 */
-            padding: 21.6px 18px; /* 24px->21.6, 20px->18 */
-            margin-bottom: 21.6px; /* 24px * 0.9 */
-            box-shadow: 0 9px 22.5px rgba(0,122,255,0.08), 0 1.8px 4.5px rgba(0,0,0,0.02); /* 10px->9, 25px->22.5, 2px->1.8, 5px->4.5 */
+            border-radius: 25px;
+            padding: 22px 18px;
+            margin-bottom: 22px;
+            box-shadow: 0 9px 23px rgba(0,122,255,0.08), 0 2px 5px rgba(0,0,0,0.02);
             border: 1px solid rgba(0,122,255,0.1);
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(117px, 1fr)); /* 130px->117 */
-            gap: 14.4px; /* 16px * 0.9 */
+            grid-template-columns: repeat(auto-fit, minmax(117px, 1fr));
+            gap: 14px;
         }
         .commission-stat {
             text-align: center;
-            padding: 7.2px 3.6px; /* 8px->7.2, 4px->3.6 */
+            padding: 7px 4px;
         }
         .commission-stat .stat-icon {
-            font-size: 25.2px; /* 28px * 0.9 */
+            font-size: 25px;
             color: #007aff;
-            margin-bottom: 7.2px; /* 8px * 0.9 */
+            margin-bottom: 7px;
             background: rgba(0,122,255,0.1);
-            width: 43.2px; /* 48px * 0.9 */
-            height: 43.2px;
-            line-height: 43.2px;
-            border-radius: 21.6px; /* 24px * 0.9 */
+            width: 43px;
+            height: 43px;
+            line-height: 43px;
+            border-radius: 22px;
             display: inline-block;
         }
         .commission-stat .stat-label {
-            font-size: 12.6px; /* 14px * 0.9 */
+            font-size: 13px;
             color: #5b6f82;
-            margin-bottom: 3.6px; /* 4px * 0.9 */
+            margin-bottom: 4px;
             font-weight: 500;
         }
         .commission-stat .stat-value {
-            font-size: 21.6px; /* 24px * 0.9 */
+            font-size: 22px;
             font-weight: 700;
             color: #1c1e24;
         }
         .commission-stat .stat-sub {
-            font-size: 10.8px; /* 12px * 0.9 */
+            font-size: 11px;
             color: #8a9aa8;
-            margin-top: 3.6px; /* 4px * 0.9 */
+            margin-top: 4px;
+        }
+        /* Chart containers */
+        .chart-container {
+            background: white;
+            border-radius: 22px;
+            padding: 14px;
+            margin-bottom: 14px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.02);
+            border: 1px solid #edf2f7;
+        }
+        .chart-row {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
         }
         /* About page styling */
         .about-page {
-            padding: 7.2px 0; /* 8px * 0.9 */
+            padding: 7px 0;
         }
         .about-page h4 {
-            font-size: 18px; /* 20px * 0.9 */
-            margin: 25.2px 0 14.4px; /* 28px->25.2, 16px->14.4 */
+            font-size: 18px;
+            margin: 25px 0 14px;
             color: #007aff;
             font-weight: 600;
             display: flex;
             align-items: center;
-            gap: 7.2px; /* 8px * 0.9 */
+            gap: 7px;
         }
         .about-page h4 i {
-            font-size: 21.6px; /* 24px * 0.9 */
+            font-size: 22px;
             color: #007aff;
             background: rgba(0,122,255,0.1);
-            padding: 7.2px; /* 8px * 0.9 */
-            border-radius: 10.8px; /* 12px * 0.9 */
+            padding: 7px;
+            border-radius: 11px;
         }
         .about-page p {
-            margin-bottom: 14.4px; /* 16px * 0.9 */
+            margin-bottom: 14px;
             color: #2d3a4a;
             line-height: 1.6;
         }
         .benefits-grid {
             display: grid;
             grid-template-columns: 1fr;
-            gap: 14.4px; /* 16px * 0.9 */
-            margin: 18px 0; /* 20px * 0.9 */
+            gap: 14px;
+            margin: 18px 0;
         }
         .benefit-card {
             background: #f8fafd;
-            border-radius: 18px; /* 20px * 0.9 */
-            padding: 16.2px; /* 18px * 0.9 */
+            border-radius: 18px;
+            padding: 16px;
             border: 1px solid #edf2f7;
             transition: all 0.2s;
             display: flex;
             align-items: center;
-            gap: 14.4px; /* 16px * 0.9 */
+            gap: 14px;
         }
         .benefit-card:hover {
             background: white;
-            box-shadow: 0 7.2px 18px rgba(0,0,0,0.04); /* 8px->7.2, 20px->18 */
+            box-shadow: 0 7px 18px rgba(0,0,0,0.04);
         }
         .benefit-icon {
-            font-size: 25.2px; /* 28px * 0.9 */
+            font-size: 25px;
             color: #007aff;
             background: white;
-            width: 46.8px; /* 52px * 0.9 */
-            height: 46.8px;
-            border-radius: 23.4px; /* 26px * 0.9 */
+            width: 47px;
+            height: 47px;
+            border-radius: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
-            box-shadow: 0 5.4px 10.8px rgba(0,122,255,0.12); /* 6px->5.4, 12px->10.8 */
+            box-shadow: 0 5px 11px rgba(0,122,255,0.12);
         }
         .benefit-content {
             flex: 1;
         }
         .benefit-title {
             font-weight: 600;
-            font-size: 14.4px; /* 16px * 0.9 */
-            margin-bottom: 3.6px; /* 4px * 0.9 */
+            font-size: 14px;
+            margin-bottom: 4px;
             color: #1e293b;
         }
         .benefit-desc {
-            font-size: 12.6px; /* 14px * 0.9 */
+            font-size: 13px;
             color: #617388;
         }
         .contact-info {
             background: #f0f7ff;
-            border-radius: 21.6px; /* 24px * 0.9 */
-            padding: 18px; /* 20px * 0.9 */
-            margin: 18px 0; /* 20px * 0.9 */
-            border-left: 3.6px solid #007aff; /* 4px * 0.9 */
+            border-radius: 22px;
+            padding: 18px;
+            margin: 18px 0;
+            border-left: 4px solid #007aff;
         }
         .contact-info p {
-            margin: 7.2px 0; /* 8px * 0.9 */
+            margin: 7px 0;
             display: flex;
             align-items: center;
-            gap: 10.8px; /* 12px * 0.9 */
+            gap: 11px;
         }
         .contact-info i {
-            width: 21.6px; /* 24px * 0.9 */
+            width: 22px;
             color: #007aff;
         }
         /* other utility */
         .commission-item {
             display: flex;
             justify-content: space-between;
-            padding: 10.8px 0; /* 12px * 0.9 */
+            padding: 11px 0;
             border-bottom: 1px solid #f0f4f9;
         }
         .text-muted { color: #7e8c9c; }
@@ -600,14 +620,14 @@
 
         /* payment list & loan cards */
         .payment-list {
-            margin-top: 14.4px; /* 16px * 0.9 */
+            margin-top: 14px;
             border-top: 1px solid #edf2f7;
         }
         .payment-item {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            padding: 10.8px 0; /* 12px * 0.9 */
+            padding: 11px 0;
             border-bottom: 1px dashed #e2e8f0;
         }
         .payment-due {
@@ -618,9 +638,9 @@
             font-weight: 600;
         }
         .payment-status {
-            padding: 3.6px 9px; /* 4px->3.6, 10px->9 */
-            border-radius: 27px; /* 30px * 0.9 */
-            font-size: 10.8px; /* 12px * 0.9 */
+            padding: 4px 9px;
+            border-radius: 27px;
+            font-size: 11px;
             font-weight: 500;
         }
         .status-paid {
@@ -633,9 +653,9 @@
         }
         .loan-summary-card {
             background: #f8fafd;
-            border-radius: 18px; /* 20px * 0.9 */
-            padding: 14.4px; /* 16px * 0.9 */
-            margin-bottom: 10.8px; /* 12px * 0.9 */
+            border-radius: 18px;
+            padding: 14px;
+            margin-bottom: 11px;
             border: 1px solid #e9ecf0;
             cursor: pointer;
             transition: 0.2s;
@@ -645,22 +665,22 @@
         }
         .commission-breakdown {
             background: #f2f7ff;
-            border-radius: 18px; /* 20px * 0.9 */
-            padding: 14.4px; /* 16px * 0.9 */
-            margin: 14.4px 0; /* 16px * 0.9 */
+            border-radius: 18px;
+            padding: 14px;
+            margin: 14px 0;
         }
         .commission-row {
             display: flex;
             justify-content: space-between;
-            padding: 7.2px 0; /* 8px * 0.9 */
+            padding: 7px 0;
         }
         /* notifications modal specific */
         .notification-item {
             background: #f8fafd;
-            border-radius: 14.4px; /* 16px * 0.9 */
-            padding: 14.4px; /* 16px * 0.9 */
-            margin-bottom: 9px; /* 10px * 0.9 */
-            border-left: 3.6px solid #007aff; /* 4px * 0.9 */
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 9px;
+            border-left: 4px solid #007aff;
         }
         .notification-item.unread {
             background: #eef5ff;
@@ -668,41 +688,41 @@
         }
         .notification-message {
             font-weight: 500;
-            margin-bottom: 5.4px; /* 6px * 0.9 */
+            margin-bottom: 5px;
         }
         .notification-time {
-            font-size: 10.8px; /* 12px * 0.9 */
+            font-size: 11px;
             color: #7e8c9c;
         }
         .mark-read-btn {
             background: none;
             border: none;
             color: #007aff;
-            font-size: 10.8px; /* 12px * 0.9 */
+            font-size: 11px;
             cursor: pointer;
-            margin-top: 5.4px; /* 6px * 0.9 */
+            margin-top: 5px;
         }
         /* promotion modal */
         .promotion-image {
             max-width: 100%;
-            max-height: 180px; /* 200px * 0.9 */
+            max-height: 180px;
             object-fit: contain;
-            border-radius: 10.8px; /* 12px * 0.9 */
-            margin: 13.5px 0; /* 15px * 0.9 */
+            border-radius: 11px;
+            margin: 14px 0;
         }
         /* new filter dropdown */
         .filter-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 14.4px; /* 16px * 0.9 */
+            margin-bottom: 14px;
         }
         .filter-select {
             background: white;
             border: 1px solid #dde3e9;
-            border-radius: 27px; /* 30px * 0.9 */
-            padding: 7.2px 14.4px; /* 8px->7.2, 16px->14.4 */
-            font-size: 12.6px; /* 14px * 0.9 */
+            border-radius: 27px;
+            padding: 7px 14px;
+            font-size: 13px;
             color: #1c1e24;
             outline: none;
             cursor: pointer;
@@ -710,193 +730,116 @@
         .rejection-reason {
             background: #ffebee;
             color: #c62828;
-            padding: 3.6px 7.2px; /* 4px->3.6, 8px->7.2 */
-            border-radius: 18px; /* 20px * 0.9 */
-            font-size: 10.8px; /* 12px * 0.9 */
-            margin-top: 5.4px; /* 6px * 0.9 */
+            padding: 4px 7px;
+            border-radius: 18px;
+            font-size: 11px;
+            margin-top: 5px;
         }
-
-        /* === New Styles for Advanced Features === */
-        /* Chart containers */
-        .chart-container {
-            position: relative;
-            height: 180px; /* 200px * 0.9 */
-            width: 100%;
-            margin: 18px 0; /* 20px * 0.9 */
-        }
-        .commission-charts {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 18px; /* 20px * 0.9 */
-            margin-bottom: 18px; /* 20px * 0.9 */
-        }
-        @media (min-width: 640px) {
-            .commission-charts {
-                grid-template-columns: 1fr 1fr;
-            }
-        }
-        /* Onboarding wizard steps */
+        /* Wizard steps */
         .wizard-step {
-            margin-bottom: 18px; /* 20px * 0.9 */
+            margin-bottom: 18px;
+            border: 1px solid #edf2f7;
+            border-radius: 22px;
+            padding: 14px;
+            background: #fafcfd;
         }
-        .step-indicator {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 18px; /* 20px * 0.9 */
-            position: relative;
-        }
-        .step-indicator::before {
-            content: '';
-            position: absolute;
-            top: 11.7px; /* 13px * 0.9 */
-            left: 9px; /* 10px * 0.9 */
-            right: 9px;
-            height: 1.8px; /* 2px * 0.9 */
-            background: var(--ios-gray-2);
-            z-index: 1;
-        }
-        .step {
-            position: relative;
-            z-index: 2;
-            background: white;
-            padding: 0 4.5px; /* 5px * 0.9 */
-            text-align: center;
-            flex: 1;
-        }
-        .step-number {
-            width: 23.4px; /* 26px * 0.9 */
-            height: 23.4px;
-            border-radius: 50%;
-            background: #e9ecef;
-            color: #6c757d;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin: 0 auto 4.5px; /* 5px * 0.9 */
-            font-weight: 600;
-            font-size: 11.7px; /* 13px * 0.9 */
-        }
-        .step.active .step-number {
-            background: #007aff;
-            color: white;
-        }
-        .step.completed .step-number {
-            background: #28a745;
-            color: white;
-        }
-        .step-label {
-            font-size: 10.8px; /* 12px * 0.9 */
-            color: #6c757d;
-        }
-        .step.active .step-label {
+        .wizard-step h4 {
+            font-size: 15px;
+            margin-bottom: 11px;
             color: #007aff;
             font-weight: 600;
         }
-        /* Toast container (from customer) */
-        .toast-container {
-            position: fixed;
-            top: 18px; /* 20px * 0.9 */
-            right: 18px;
-            z-index: 9999;
-            max-width: 315px; /* 350px * 0.9 */
+        .wizard-step .step-number {
+            background: #007aff;
+            color: white;
+            width: 24px;
+            height: 24px;
+            border-radius: 50%;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 13px;
+            margin-right: 7px;
         }
-        .toast {
-            background: white;
-            border-radius: 12.6px; /* 14px * 0.9 */
-            padding: 11.7px 12.6px; /* 13px->11.7, 14px->12.6 */
-            margin-bottom: 9px; /* 10px * 0.9 */
-            box-shadow: 0 7.2px 18px rgba(0,0,0,0.15); /* 8px->7.2, 20px->18 */
-            border-left: 3.6px solid #28a745; /* 4px * 0.9 */
+        /* Export buttons */
+        .export-btn {
+            background: #28a745;
+            color: white;
+            padding: 7px 14px;
+            border-radius: 27px;
+            font-size: 12px;
+            display: inline-flex;
+            align-items: center;
+            gap: 5px;
+            border: none;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 3px 8px rgba(40,167,69,0.2);
+        }
+        .export-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 12px rgba(40,167,69,0.3);
+        }
+        .date-picker {
+            padding: 6px 10px;
+            border: 1px solid #dde3e9;
+            border-radius: 27px;
+            font-size: 12px;
+        }
+        .tab-bar {
             display: flex;
-            align-items: flex-start;
-            gap: 9px; /* 10px * 0.9 */
-            animation: slideInRight 0.3s ease;
+            gap: 7px;
+            margin-bottom: 14px;
+            flex-wrap: wrap;
         }
-        .toast.error { border-left-color: #ff3b30; }
-        .toast.warning { border-left-color: #ff9500; }
-        .toast.info { border-left-color: #007aff; }
-        .toast.reminder { border-left-color: #ff3b30; background: #fff0f0; }
-        .toast.notification { border-left-color: #28a745; background: #f0fff0; }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(100%); }
-            to { opacity: 1; transform: translateX(0); }
+        .tab {
+            padding: 6px 13px;
+            background: white;
+            border: 1px solid #e2e8f0;
+            border-radius: 27px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .toast-icon { font-size: 14.4px; /* 16px * 0.9 */ margin-top: 1.8px; }
-        .toast-content { flex: 1; }
-        .toast-title { font-weight: 700; margin-bottom: 3.6px; color: #1c1e24; font-size: 12.6px; /* 14px * 0.9 */ }
-        .toast-message { font-size: 10.8px; /* 12px * 0.9 */ color: #6c757d; }
-        .toast-close { background: none; border: none; color: #adb5bd; cursor: pointer; font-size: 11.7px; /* 13px * 0.9 */ padding: 0; width: 16.2px; height: 16.2px; display: flex; align-items: center; justify-content: center; }
-
-        /* Progress bar (from customer) */
+        .tab.active {
+            background: #007aff;
+            color: white;
+            border-color: #007aff;
+        }
+        /* Credit score badge */
+        .credit-score-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 9px;
+            border-radius: 27px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+            background: #8e8e93;
+        }
+        .credit-score-badge.excellent { background: #34C759; }
+        .credit-score-badge.good { background: #5856d6; }
+        .credit-score-badge.fair { background: #FF9500; }
+        .credit-score-badge.poor { background: #FF3B30; }
+        /* Progress bar */
         .progress-container {
             width: 100%;
-            background-color: #e9ecef;
-            border-radius: 18px; /* 20px * 0.9 */
-            height: 7.2px; /* 8px * 0.9 */
-            margin: 7.2px 0; /* 8px * 0.9 */
+            background-color: #e5e5ea;
+            border-radius: 18px;
+            height: 7px;
+            margin: 7px 0;
             overflow: hidden;
         }
         .progress-bar {
             height: 100%;
             background: linear-gradient(90deg, #007aff, #5856d6);
-            border-radius: 18px; /* 20px * 0.9 */
+            border-radius: 18px;
             transition: width 0.3s ease;
         }
         .progress-label {
-            font-size: 9px; /* 10px * 0.9 */
-            color: #6c757d;
-            margin-top: 1.8px; /* 2px * 0.9 */
-        }
-        /* Export buttons */
-        .export-buttons {
-            display: flex;
-            gap: 9px; /* 10px * 0.9 */
-            margin-bottom: 14.4px; /* 16px * 0.9 */
-            flex-wrap: wrap;
-        }
-        .btn-export {
-            background: white;
-            border: 1px solid #007aff;
-            color: #007aff;
-            padding: 7.2px 12.6px; /* 8px->7.2, 14px->12.6 */
-            border-radius: 18px; /* 20px * 0.9 */
-            font-size: 11.7px; /* 13px * 0.9 */
-            cursor: pointer;
-            transition: 0.2s;
-            display: inline-flex;
-            align-items: center;
-            gap: 4.5px; /* 5px * 0.9 */
-        }
-        .btn-export:hover {
-            background: #007aff;
-            color: white;
-        }
-        /* wizard document upload grid */
-        .doc-upload-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 9px; /* 10px * 0.9 */
-        }
-        .upload-box-small {
-            aspect-ratio: 1;
-            border: 1.8px dashed #ced4da; /* 2px->1.8 */
-            border-radius: 10.8px; /* 12px * 0.9 */
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            position: relative;
-            background: #f8f9fa;
-        }
-        .upload-box-small i { font-size: 18px; /* 20px * 0.9 */ color: #6c757d; }
-        .upload-box-small span { font-size: 9px; /* 10px * 0.9 */ color: #6c757d; text-align: center; }
-        .upload-box-small .upload-preview {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: 9px; /* 10px * 0.9 */
+            font-size: 10px;
+            color: #8e8e93;
+            margin-top: 2px;
         }
     </style>
 </head>
@@ -904,7 +847,7 @@
 
     <!-- Maintenance Overlay (shown when app disabled) -->
     <div class="maintenance-overlay" id="maintenanceOverlay" style="display: none;">
-        <i class="fas fa-tools" style="font-size: 54px; color: #ff3b30; margin-bottom: 18px;"></i> <!-- 60px->54, 20px->18 -->
+        <i class="fas fa-tools" style="font-size: 54px; color: #ff3b30; margin-bottom: 18px;"></i>
         <h2>Under Maintenance</h2>
         <p>The agent app is currently disabled by the administrator. Please check back later.</p>
     </div>
@@ -927,20 +870,21 @@
     <div class="main-content" id="mainContent">
         <!-- Home section (customers) -->
         <div id="homeSection" class="section">
-            <div class="section-title"><i class="fas fa-users" style="margin-right: 7.2px; color: #007aff;"></i> My Customers</div>
-            <!-- Add Customer Button (opens wizard) -->
-            <div style="margin-bottom: 14.4px;">
-                <button class="btn btn-outline btn-small" id="addCustomerBtn"><i class="fas fa-user-plus"></i> Add New Customer</button>
-            </div>
+            <div class="section-title"><i class="fas fa-users" style="margin-right: 7px; color: #007aff;"></i> My Customers</div>
+            <button class="btn btn-primary btn-small" id="onboardCustomerBtn" style="margin-bottom: 14px;"><i class="fas fa-user-plus"></i> Onboard New Customer</button>
             <div class="customer-grid" id="customersList"></div>
         </div>
 
-        <!-- Loans section (all loans with filter) -->
+        <!-- Loans section (all loans with filter, default to approved) -->
         <div id="loansSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-file-invoice" style="margin-right: 7.2px; color: #007aff;"></i> All Loans</div>
-            <div class="export-buttons">
-                <button class="btn-export" id="exportLoansCsv"><i class="fas fa-file-csv"></i> Export to CSV</button>
-                <button class="btn-export" id="exportLoansExcel"><i class="fas fa-file-excel"></i> Export to Excel</button>
+            <div class="section-title"><i class="fas fa-file-invoice" style="margin-right: 7px; color: #007aff;"></i> All Loans</div>
+            <div class="tab-bar" id="loanTabs">
+                <span class="tab" data-status="approved">Approved</span>
+                <span class="tab" data-status="pending">Pending</span>
+                <span class="tab" data-status="active">Active</span>
+                <span class="tab" data-status="completed">Completed</span>
+                <span class="tab" data-status="rejected">Rejected</span>
+                <span class="tab" data-status="defaulted">Defaulted</span>
             </div>
             <div class="filter-bar">
                 <span>Filter by status:</span>
@@ -959,12 +903,8 @@
 
         <!-- Commission section (enhanced with charts) -->
         <div id="commissionSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-coins" style="margin-right: 7.2px; color: #007aff;"></i> Commission Overview</div>
-            <div class="export-buttons">
-                <button class="btn-export" id="exportCommissionCsv"><i class="fas fa-file-csv"></i> Export History</button>
-                <button class="btn-export" id="exportCommissionPdf"><i class="fas fa-file-pdf"></i> PDF Statement</button>
-            </div>
-            <!-- New commission cards -->
+            <div class="section-title"><i class="fas fa-coins" style="margin-right: 7px; color: #007aff;"></i> Commission Overview</div>
+            <!-- New commission cards with icons -->
             <div class="commission-overview-card">
                 <div class="commission-stat">
                     <div class="stat-icon"><i class="fas fa-wallet"></i></div>
@@ -986,34 +926,33 @@
                 </div>
             </div>
 
-            <!-- Advanced Charts -->
-            <div class="commission-charts">
-                <div class="section-card">
-                    <div style="font-weight:600; margin-bottom:9px;">Earnings Trend (Last 6 months)</div>
-                    <div class="chart-container">
-                        <canvas id="commissionLineChart"></canvas>
-                    </div>
+            <!-- Charts -->
+            <div class="chart-row">
+                <div class="chart-container">
+                    <canvas id="commissionLineChart" style="height:170px; width:100%;"></canvas>
                 </div>
-                <div class="section-card">
-                    <div style="font-weight:600; margin-bottom:9px;">Commission by Customer</div>
-                    <div class="chart-container">
-                        <canvas id="commissionPieChart"></canvas>
-                    </div>
+                <div class="chart-container">
+                    <canvas id="commissionPieChart" style="height:170px; width:100%;"></canvas>
                 </div>
             </div>
 
-            <div class="section-title" style="margin-top: 21.6px;">Customers</div>
+            <div class="section-title" style="margin-top: 22px;">Customers</div>
             <div class="customer-grid" id="customersCommissionList"></div>
+
+            <!-- Export button -->
+            <div class="d-flex justify-end mt-2">
+                <button class="export-btn" id="exportCommissionCSV"><i class="fas fa-download"></i> Export CSV</button>
+            </div>
         </div>
 
-        <!-- Settings section (unchanged) -->
+        <!-- Settings section -->
         <div id="settingsSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-cog" style="margin-right: 7.2px; color: #007aff;"></i> Settings</div>
+            <div class="section-title"><i class="fas fa-cog" style="margin-right: 7px; color: #007aff;"></i> Settings</div>
             <div class="section-card">
-                <div style="display: flex; align-items: center; gap: 14.4px; margin-bottom: 21.6px;">
-                    <img src="" alt="avatar" class="customer-avatar" id="settingsAvatar" style="width: 63px; height: 63px; border-radius: 31.5px;">
+                <div style="display: flex; align-items: center; gap: 14px; margin-bottom: 22px;">
+                    <img src="" alt="avatar" class="customer-avatar" id="settingsAvatar" style="width: 63px; height: 63px; border-radius: 32px;">
                     <div>
-                        <div style="font-weight: 600; font-size: 16.2px;" id="settingsName"></div>
+                        <div style="font-weight: 600; font-size: 16px;" id="settingsName"></div>
                         <div style="color: #617388;" id="settingsEmail"></div>
                     </div>
                 </div>
@@ -1021,7 +960,7 @@
                     <span class="code" id="agentCodeDisplay">AGENT123</span>
                     <button class="copy-btn" id="copyAgentCode"><i class="fas fa-copy"></i> Copy</button>
                 </div>
-                <div style="margin: 14.4px 0;">
+                <div style="margin: 14px 0;">
                     <div><span class="text-muted">Branch:</span> <span id="settingsBranch"></span></div>
                     <div><span class="text-muted">Registered:</span> <span id="settingsRegDate"></span></div>
                 </div>
@@ -1031,9 +970,9 @@
             </div>
         </div>
 
-        <!-- About section (unchanged) -->
+        <!-- About section (enhanced, with dynamic contact) -->
         <div id="aboutSection" class="section d-none">
-            <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 7.2px; color: #007aff;"></i> About TruCash</div>
+            <div class="section-title"><i class="fas fa-info-circle" style="margin-right: 7px; color: #007aff;"></i> About TruCash</div>
             <div class="section-card about-page">
                 <h4><i class="fas fa-bullseye"></i> What is TruCash?</h4>
                 <p>TruCash is a Zambian‑registered microfinance institution dedicated to providing fast, collateral‑based loans to individuals and small businesses. We leverage technology to make credit accessible while ensuring responsible lending.</p>
@@ -1098,7 +1037,7 @@
         <div class="nav-item" data-section="about"><i class="fas fa-info-circle"></i><span>About</span></div>
     </div>
 
-    <!-- Modals (existing) -->
+    <!-- Modals -->
     <!-- Customer details modal -->
     <div class="modal-overlay" id="customerModal">
         <div class="modal-card">
@@ -1107,6 +1046,10 @@
                 <button class="modal-close" id="closeCustomerModal">&times;</button>
             </div>
             <div id="customerModalContent"></div>
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-outline btn-small" id="exportCustomerLoansCSV"><i class="fas fa-download"></i> Export Loans CSV</button>
+                <button class="btn btn-outline btn-small" id="exportCustomerPDF"><i class="fas fa-file-pdf"></i> Statement PDF</button>
+            </div>
         </div>
     </div>
 
@@ -1118,6 +1061,9 @@
                 <button class="modal-close" id="closeLoanModal">&times;</button>
             </div>
             <div id="loanModalContent"></div>
+            <div class="d-flex gap-2 mt-3">
+                <button class="btn btn-outline btn-small" id="exportScheduleCSV"><i class="fas fa-download"></i> Export Schedule</button>
+            </div>
         </div>
     </div>
 
@@ -1140,6 +1086,7 @@
                 <button class="modal-close" id="closeCommissionMathModal">&times;</button>
             </div>
             <div id="commissionMathContent"></div>
+            <button class="btn btn-outline btn-small mt-3" id="exportCommissionMathPDF"><i class="fas fa-file-pdf"></i> Export as PDF</button>
         </div>
     </div>
 
@@ -1151,9 +1098,9 @@
                 <button class="modal-close" id="closePasswordModal">&times;</button>
             </div>
             <div>
-                <input type="password" id="currentPass" class="detail-value" style="width:100%; padding:12.6px; border-radius:27px; border:1px solid #dee6ed; margin-bottom:10.8px;" placeholder="Current password">
-                <input type="password" id="newPass" class="detail-value" style="width:100%; padding:12.6px; border-radius:27px; border:1px solid #dee6ed; margin-bottom:10.8px;" placeholder="New password">
-                <input type="password" id="confirmPass" class="detail-value" style="width:100%; padding:12.6px; border-radius:27px; border:1px solid #dee6ed; margin-bottom:10.8px;" placeholder="Confirm new">
+                <input type="password" id="currentPass" class="detail-value" style="width:100%; padding:13px; border-radius:27px; border:1px solid #dee6ed; margin-bottom:11px;" placeholder="Current password">
+                <input type="password" id="newPass" class="detail-value" style="width:100%; padding:13px; border-radius:27px; border:1px solid #dee6ed; margin-bottom:11px;" placeholder="New password">
+                <input type="password" id="confirmPass" class="detail-value" style="width:100%; padding:13px; border-radius:27px; border:1px solid #dee6ed; margin-bottom:11px;" placeholder="Confirm new">
                 <button class="btn" id="submitPasswordChange">Update Password</button>
             </div>
         </div>
@@ -1203,41 +1150,88 @@
         </div>
     </div>
 
-    <!-- NEW: Customer Onboarding Wizard Modal -->
-    <div class="modal-overlay" id="onboardingWizardModal">
-        <div class="modal-card" style="max-width: 540px;"> <!-- slightly wider for forms -->
+    <!-- Customer Onboarding Wizard Modal -->
+    <div class="modal-overlay" id="onboardWizardModal">
+        <div class="modal-card" style="max-width: 550px;">
             <div class="modal-header">
-                <h3>Add New Customer</h3>
+                <h3>Onboard New Customer</h3>
                 <button class="modal-close" id="closeWizardModal">&times;</button>
             </div>
-            <div class="step-indicator" id="wizardSteps">
-                <div class="step active" data-step="1">
-                    <div class="step-number">1</div>
-                    <div class="step-label">Personal</div>
+            <div class="wizard-step" id="step1">
+                <h4><span class="step-number">1</span> Personal Information</h4>
+                <div class="form-group">
+                    <label>Full Name *</label>
+                    <input type="text" id="wizName" class="form-input" placeholder="John Doe">
                 </div>
-                <div class="step" data-step="2">
-                    <div class="step-number">2</div>
-                    <div class="step-label">Documents</div>
+                <div class="form-group">
+                    <label>Email *</label>
+                    <input type="email" id="wizEmail" class="form-input" placeholder="customer@example.com">
                 </div>
-                <div class="step" data-step="3">
-                    <div class="step-number">3</div>
-                    <div class="step-label">Loan (opt)</div>
+                <div class="form-group">
+                    <label>Phone *</label>
+                    <input type="tel" id="wizPhone" class="form-input" placeholder="+260 123 456 789">
                 </div>
-                <div class="step" data-step="4">
-                    <div class="step-number">4</div>
-                    <div class="step-label">Confirm</div>
+                <div class="form-group">
+                    <label>NRC *</label>
+                    <input type="text" id="wizNrc" class="form-input" placeholder="123456/78/9">
+                </div>
+                <div class="form-group">
+                    <label>Address *</label>
+                    <input type="text" id="wizAddress" class="form-input" placeholder="Residence, House number">
+                </div>
+                <div class="form-group">
+                    <label>Password *</label>
+                    <input type="password" id="wizPassword" class="form-input" placeholder="********">
+                </div>
+                <button class="btn btn-primary" id="wizNext1">Next</button>
+            </div>
+            <div class="wizard-step d-none" id="step2">
+                <h4><span class="step-number">2</span> Documents</h4>
+                <p>Upload required documents (NRC front/back, profile photo).</p>
+                <div class="doc-grid">
+                    <div class="upload-box" data-type="wiz-nrc-front" onclick="openCloudinaryUpload('wiz-nrc-front')">
+                        <i class="fas fa-id-card"></i>
+                        <span>NRC Front</span>
+                        <div class="upload-preview" id="wizNrcFrontPreview"></div>
+                    </div>
+                    <div class="upload-box" data-type="wiz-nrc-back" onclick="openCloudinaryUpload('wiz-nrc-back')">
+                        <i class="fas fa-id-card"></i>
+                        <span>NRC Back</span>
+                        <div class="upload-preview" id="wizNrcBackPreview"></div>
+                    </div>
+                    <div class="upload-box" data-type="wiz-profile" onclick="openCloudinaryUpload('wiz-profile')">
+                        <i class="fas fa-user"></i>
+                        <span>Profile Photo</span>
+                        <div class="upload-preview" id="wizProfilePreview"></div>
+                    </div>
+                </div>
+                <input type="hidden" id="wizNrcFrontUrl">
+                <input type="hidden" id="wizNrcBackUrl">
+                <input type="hidden" id="wizProfileUrl">
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-outline" id="wizPrev2">Back</button>
+                    <button class="btn btn-primary" id="wizNext2">Next</button>
                 </div>
             </div>
-            <div id="wizardContent"></div>
-            <div style="display: flex; gap: 9px; margin-top: 18px;">
-                <button class="btn btn-outline" id="wizardPrevBtn" style="flex:1;" disabled>Previous</button>
-                <button class="btn btn-primary" id="wizardNextBtn" style="flex:1;">Next</button>
+            <div class="wizard-step d-none" id="step3">
+                <h4><span class="step-number">3</span> Loan Application (Optional)</h4>
+                <div class="form-group">
+                    <label>Apply for loan now?</label>
+                    <select id="wizApplyNow" class="form-select">
+                        <option value="no">No, just create customer</option>
+                        <option value="yes">Yes, proceed to loan application</option>
+                    </select>
+                </div>
+                <div class="d-flex gap-2 mt-3">
+                    <button class="btn btn-outline" id="wizPrev3">Back</button>
+                    <button class="btn btn-success" id="wizFinish">Finish & Create</button>
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- Toast container (from customer) -->
-    <div class="toast-container" id="toastContainer"></div>
+    <!-- Toast container -->
+    <div id="toastContainer" style="position:fixed; top:18px; right:18px; z-index:9999;"></div>
 
     <script>
         // ==================== FIREBASE CONFIG ====================
@@ -1262,6 +1256,10 @@
         const auth = firebase.auth();
         const db = firebase.database();
 
+        // ==================== CONSTANTS ====================
+        const GRACE_DAYS = 5;
+        const PENALTY_RATE = 0.02;
+
         // ==================== APP STATE ====================
         const AppState = {
             currentUser: null,
@@ -1275,17 +1273,9 @@
             currentPromotionIndex: 0,
             seenPromotions: new Set(),
             systemSettings: {},
-            // Penalty system (from customer)
-            GRACE_DAYS: 5,
-            PENALTY_RATE: 0.02,
-            shownNotifications: new Set(), // for duplicate prevention
-            // Onboarding wizard state
-            wizardStep: 1,
-            wizardData: {
-                personal: {},
-                documents: {},
-                loan: {}
-            }
+            shownNotifications: new Set(), // for one-time toasts
+            lineChart: null,
+            pieChart: null
         };
 
         // Load shown notifications from localStorage
@@ -1299,39 +1289,21 @@
             showLoading(msg) {},
             hideLoading() {},
             formatCurrency(amount) { return 'K' + (amount || 0).toFixed(2).replace(/\d(?=(\d{3})+\.)/g, '$&,'); },
-            formatDate(ts) { return ts ? new Date(ts).toLocaleDateString() : 'N/A'; },
-            formatDateTime(ts) { return ts ? new Date(ts).toLocaleString() : 'N/A'; },
-            // Enhanced toast with duplicate prevention (from customer)
-            showToast(title, message, type = 'info', duration = 5000, id = null) {
-                if (id && AppState.shownNotifications.has(id)) return; // prevent duplicate
+            formatDate(ts) { return ts ? moment(ts).format('MMM D, YYYY') : 'N/A'; },
+            formatDateTime(ts) { return ts ? moment(ts).format('MMM D, YYYY h:mm A') : 'N/A'; },
+            showToast(title, msg, type='info', id = null) {
+                if (id && AppState.shownNotifications.has(id)) return;
                 if (id) {
                     AppState.shownNotifications.add(id);
                     localStorage.setItem('trucash_agent_shown_notifications', JSON.stringify(Array.from(AppState.shownNotifications)));
                 }
-                const container = document.getElementById('toastContainer');
                 const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                toast.innerHTML = `
-                    <div class="toast-icon">
-                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'reminder' ? 'bell' : 'info-circle'}"></i>
-                    </div>
-                    <div class="toast-content">
-                        <div class="toast-title">${title}</div>
-                        <div class="toast-message">${message}</div>
-                    </div>
-                    <button class="toast-close" onclick="this.parentElement.remove()">
-                        <i class="fas fa-times"></i>
-                    </button>
-                `;
-                container.appendChild(toast);
-                setTimeout(() => {
-                    if (toast.parentNode) {
-                        toast.style.opacity = '0';
-                        toast.style.transform = 'translateX(100%)';
-                        setTimeout(() => toast.remove(), 300);
-                    }
-                }, duration);
-                return toast;
+                toast.style.background = type==='error'?'#ff3b30':'#007aff';
+                toast.style.color='white'; toast.style.padding='11px 18px'; toast.style.borderRadius='27px';
+                toast.style.marginBottom='9px'; toast.style.boxShadow='0 7px 18px rgba(0,0,0,0.2)';
+                toast.innerHTML = `<strong>${title}</strong> ${msg}`;
+                document.getElementById('toastContainer').appendChild(toast);
+                setTimeout(()=>toast.remove(), 4000);
             },
             loadSeenPromotions() {
                 try {
@@ -1340,23 +1312,17 @@
                         const ids = JSON.parse(seen);
                         AppState.seenPromotions = new Set(ids);
                     }
-                } catch (e) {
-                    console.warn('Failed to load seen promotions', e);
-                }
+                } catch (e) { console.warn('Failed to load seen promotions', e); }
             },
             saveSeenPromotions() {
                 try {
                     const ids = Array.from(AppState.seenPromotions);
                     localStorage.setItem('trucash_agent_seen_promotions', JSON.stringify(ids));
-                } catch (e) {
-                    console.warn('Failed to save seen promotions', e);
-                }
+                } catch (e) { console.warn('Failed to save seen promotions', e); }
             },
-            // Check if a customer has any overdue payment (pending payment with due date before today)
             hasOverduePayment(customerId) {
                 return this.getOverduePaymentDetails(customerId) !== null;
             },
-            // Get the earliest overdue payment details for a customer
             getOverduePaymentDetails(customerId) {
                 const customerLoans = AppState.loans.filter(l => l.customerId === customerId);
                 const today = new Date();
@@ -1383,60 +1349,104 @@
                 }
                 return earliestOverdue;
             },
-            // Check for overdue and upcoming payments, show daily reminders (from customer)
+            // Penalty functions
+            async applyPenaltiesToLoan(loan, now = Date.now()) {
+                if (!loan.repaymentSchedule) return;
+                let lastPenaltyDate = loan.lastPenaltyDate || 0;
+                let totalPenalty = loan.totalPenalty || 0;
+                const totalPayable = loan.totalPayable || loan.amount || 0;
+                let schedule = [...loan.repaymentSchedule];
+                let updated = false;
+
+                for (let i = 0; i < schedule.length; i++) {
+                    const inst = schedule[i];
+                    if (inst.status === 'paid') continue;
+                    const dueDate = inst.dueDate;
+                    const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
+                    if (now <= graceEnd) continue;
+
+                    const overdueMs = now - graceEnd;
+                    const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
+                    if (overdueDays <= 0) continue;
+
+                    let startDay = 1;
+                    if (lastPenaltyDate > graceEnd) {
+                        const alreadyPenalizedMs = lastPenaltyDate - graceEnd;
+                        startDay = Math.floor(alreadyPenalizedMs / (24 * 60 * 60 * 1000)) + 1;
+                    }
+                    if (startDay > overdueDays) continue;
+
+                    const penaltyPerDay = totalPayable * PENALTY_RATE;
+                    const daysToApply = overdueDays - startDay + 1;
+                    const penaltyAmount = penaltyPerDay * daysToApply;
+
+                    inst.penalty = (inst.penalty || 0) + penaltyAmount;
+                    inst.totalDue = inst.principal + inst.interest + inst.penalty;
+                    inst.status = 'pending';
+
+                    totalPenalty += penaltyAmount;
+                    updated = true;
+                }
+
+                if (updated) {
+                    loan.repaymentSchedule = schedule;
+                    loan.totalPenalty = totalPenalty;
+                    loan.totalPayable = (loan.totalPayable || loan.amount) + totalPenalty;
+                    loan.lastPenaltyDate = now;
+
+                    await db.ref('loans/' + loan.id).update({
+                        repaymentSchedule: schedule,
+                        totalPenalty: totalPenalty,
+                        totalPayable: loan.totalPayable,
+                        lastPenaltyDate: now
+                    });
+
+                    if (!loan.lastPenaltyNotif || now - loan.lastPenaltyNotif > 24 * 60 * 60 * 1000) {
+                        const customer = AppState.customers.find(c => c.id === loan.customerId);
+                        if (customer) {
+                            const message = `Penalty of ${Utils.formatCurrency(penaltyAmount)} has been applied to your loan (${loan.id.substring(0,8)}) due to late payment.`;
+                            await FirebaseService.addMessage(loan.customerId, message, 'penalty');
+                        }
+                        await db.ref('loans/' + loan.id).update({ lastPenaltyNotif: now });
+                    }
+                }
+            },
+            async applyPenaltiesToAllLoans() {
+                const now = Date.now();
+                for (const loan of AppState.loans) {
+                    if (loan.status !== 'active' && loan.status !== 'approved') continue;
+                    await this.applyPenaltiesToLoan(loan, now);
+                }
+            },
             checkPaymentReminders() {
                 const now = Date.now();
                 AppState.loans.forEach(loan => {
                     if (loan.status !== 'active' && loan.status !== 'approved') return;
                     if (!loan.repaymentSchedule) return;
-                    const customer = AppState.customers.find(c => c.id === loan.customerId);
-                    if (!customer) return;
                     loan.repaymentSchedule.forEach((inst, index) => {
                         if (inst.status === 'paid') return;
                         const dueDate = inst.dueDate;
-                        const graceEnd = dueDate + AppState.GRACE_DAYS * 24 * 60 * 60 * 1000;
+                        const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
                         if (now > graceEnd) {
                             const overdueMs = now - graceEnd;
                             const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
                             if (overdueDays >= 1) {
-                                const reminderId = `agent_reminder_${loan.id}_${index}_day${overdueDays}`;
-                                const penaltyPerDay = (loan.totalPayable || loan.amount) * AppState.PENALTY_RATE;
+                                const reminderId = `reminder_${loan.id}_${index}_day${overdueDays}`;
+                                const penaltyPerDay = (loan.totalPayable || loan.amount) * PENALTY_RATE;
                                 const totalPenalty = penaltyPerDay * overdueDays;
-                                const message = `Customer ${customer.fullName} loan ${loan.id.substring(0,8)} is ${overdueDays} day(s) overdue. Penalty: ${Utils.formatCurrency(penaltyPerDay)}/day. Total penalty: ${Utils.formatCurrency(totalPenalty)}.`;
-                                Utils.showToast('⚠️ Overdue Payment', message, 'reminder', 10000, reminderId);
+                                const message = `Loan ${loan.id.substring(0,8)} is ${overdueDays} day(s) overdue. Penalty added: ${Utils.formatCurrency(penaltyPerDay)} per day. Total penalty so far: ${Utils.formatCurrency(totalPenalty)}.`;
+                                Utils.showToast('⚠️ Overdue', message, 'error', reminderId);
                             }
                         } else if (now < dueDate) {
                             const daysLeft = Math.ceil((dueDate - now) / (24*60*60*1000));
                             if (daysLeft <= 5 && daysLeft > 0) {
-                                const reminderId = `agent_upcoming_${loan.id}_${index}_day${daysLeft}`;
-                                const message = `Customer ${customer.fullName} payment of ${Utils.formatCurrency(inst.totalDue)} for loan ${loan.id.substring(0,8)} is due in ${daysLeft} day(s).`;
-                                Utils.showToast('📅 Upcoming Payment', message, 'info', 8000, reminderId);
+                                const reminderId = `upcoming_${loan.id}_${index}_day${daysLeft}`;
+                                const message = `Payment of ${Utils.formatCurrency(inst.totalDue)} for loan ${loan.id.substring(0,8)} is due in ${daysLeft} day(s).`;
+                                Utils.showToast('📅 Upcoming Payment', message, 'info', reminderId);
                             }
                         }
                     });
                 });
-            },
-            // Export to CSV
-            exportToCSV(data, filename) {
-                if (!data || !data.length) {
-                    Utils.showToast('No Data', 'Nothing to export', 'warning');
-                    return;
-                }
-                const headers = Object.keys(data[0]).join(',');
-                const rows = data.map(row => Object.values(row).map(val => `"${val}"`).join(',')).join('\n');
-                const csv = headers + '\n' + rows;
-                const blob = new Blob([csv], { type: 'text/csv' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = filename;
-                a.click();
-                URL.revokeObjectURL(url);
-            },
-            // Generate PDF statement (simple placeholder, can be enhanced with jsPDF)
-            generatePDF(data, title) {
-                alert('PDF generation would be implemented with a library like jsPDF. For now, see console.');
-                console.log('PDF data:', data);
             }
         };
 
@@ -1456,11 +1466,9 @@
                             AppState.agentData = snap.val();
                             AppState.agentId = user.uid;
 
-                            // Load system settings and listen
                             await this.loadSystemSettings();
-                            this.listenForSystemSettings(); // real-time updates
+                            this.listenForSystemSettings();
 
-                            // Check if agent app is enabled
                             if (AppState.systemSettings.enableAgentApp === false) {
                                 document.getElementById('maintenanceOverlay').style.display = 'flex';
                             } else {
@@ -1468,13 +1476,13 @@
                             }
 
                             await this.loadCustomers();
-                            this.listenForCustomers(); // real-time
+                            this.listenForCustomers();
 
                             await this.loadLoans();
-                            this.listenForLoans(); // real-time
+                            this.listenForLoans();
 
                             await this.loadCommissions();
-                            this.listenForCommissions(); // real-time
+                            this.listenForCommissions();
 
                             await this.loadNotifications();
                             this.listenForNotifications();
@@ -1482,6 +1490,9 @@
                             Utils.loadSeenPromotions();
                             await this.loadPromotions();
                             this.listenForPromotions();
+
+                            // Apply penalties on load
+                            await Utils.applyPenaltiesToAllLoans();
 
                             resolve(AppState.agentData);
                         } catch(e) { console.error(e); resolve(null); }
@@ -1512,22 +1523,22 @@
             },
             listenForCustomers() {
                 db.ref('users').orderByChild('assignedAgentId').equalTo(AppState.agentId).on('value', (snap) => {
-                    const oldIds = new Set(AppState.customers.map(c => c.id));
                     AppState.customers = [];
                     snap.forEach(child => {
                         const c = child.val();
                         if (c.userType === 'customer') {
                             c.id = child.key;
                             AppState.customers.push(c);
-                            // New customer notification (only once)
-                            if (!oldIds.has(c.id)) {
-                                Utils.showToast('👤 New Customer', `Customer ${c.fullName} has been assigned to you.`, 'notification', 8000, `new_customer_${c.id}`);
+                            // Notify for new customer (once)
+                            const notifId = `newcust_${c.id}`;
+                            if (!AppState.shownNotifications.has(notifId)) {
+                                Utils.showToast('New Customer', `${c.fullName} assigned to you`, 'success', notifId);
                             }
                         }
                     });
                     UIManager.renderCustomers();
-                    UIManager.renderCustomersWithLoans(); // updates loans section
-                    UIManager.renderCommissionCustomers(); // updates commission customer list
+                    UIManager.renderCustomersWithLoans();
+                    UIManager.renderCommissionCustomers();
                 });
             },
             async loadLoans() {
@@ -1541,36 +1552,35 @@
             },
             listenForLoans() {
                 const loansRef = db.ref('loans').orderByChild('agentId').equalTo(AppState.agentId);
-                loansRef.on('child_added', (snap) => {
+                loansRef.on('child_added', async (snap) => {
                     const loan = snap.val();
                     loan.id = snap.key;
                     const existing = AppState.loans.findIndex(l => l.id === snap.key);
                     if (existing === -1) {
                         AppState.loans.push(loan);
-                        // New loan notification
-                        Utils.showToast('💰 New Loan', `Loan ${loan.id.substring(0,8)} for ${Utils.formatCurrency(loan.amount)} created.`, 'notification', 8000, `new_loan_${loan.id}`);
                     } else {
                         AppState.loans[existing] = loan;
                     }
+                    // Apply penalties
+                    await Utils.applyPenaltiesToLoan(loan);
+                    // Notify for new loan
+                    const notifId = `newloan_${loan.id}`;
+                    if (!AppState.shownNotifications.has(notifId)) {
+                        Utils.showToast('New Loan', `Loan for ${loan.customerName} of ${Utils.formatCurrency(loan.amount)}`, 'info', notifId);
+                    }
                     UIManager.updateLoanSections();
-                    Utils.checkPaymentReminders(); // check after loans update
                 });
-                loansRef.on('child_changed', (snap) => {
+                loansRef.on('child_changed', async (snap) => {
                     const loan = snap.val();
                     loan.id = snap.key;
                     const index = AppState.loans.findIndex(l => l.id === snap.key);
                     if (index !== -1) {
-                        const oldStatus = AppState.loans[index].status;
                         AppState.loans[index] = loan;
-                        // Loan status change notification
-                        if (oldStatus !== loan.status) {
-                            Utils.showToast('📊 Loan Status', `Loan ${loan.id.substring(0,8)} changed from ${oldStatus} to ${loan.status}.`, 'info', 8000, `loan_status_${loan.id}_${Date.now()}`);
-                        }
                     } else {
                         AppState.loans.push(loan);
                     }
+                    await Utils.applyPenaltiesToLoan(loan);
                     UIManager.updateLoanSections();
-                    Utils.checkPaymentReminders();
                 });
                 loansRef.on('child_removed', (snap) => {
                     const index = AppState.loans.findIndex(l => l.id === snap.key);
@@ -1597,8 +1607,7 @@
                         c.id = child.key;
                         AppState.commissions.push(c);
                     });
-                    UIManager.renderCommission(); // update commission section
-                    UIManager.updateCharts(); // update charts
+                    UIManager.renderCommission();
                 });
             },
             async loadNotifications() {
@@ -1623,8 +1632,9 @@
                         if (document.getElementById('notificationsModal').classList.contains('active')) {
                             UIManager.renderNotifications();
                         }
-                        // Show toast for new message
-                        Utils.showToast('📬 New Message', msg.message, 'info', 8000, `msg_${snap.key}`);
+                        // Show toast for new notification
+                        const notifId = `msg_${snap.key}`;
+                        Utils.showToast('📬 New Message', msg.message, 'info', notifId);
                     }
                 });
                 db.ref('messages').on('child_changed', (snap) => {
@@ -1713,42 +1723,46 @@
                 await AppState.currentUser.updatePassword(newPass);
             },
             async signOut() { await auth.signOut(); window.location.href='login.html'; },
-            // NEW: Add customer (onboarding)
-            async addCustomer(customerData) {
-                try {
-                    const email = customerData.email;
-                    const password = customerData.password; // generate or use provided? For simplicity, generate random
-                    // In real app, you'd create auth user via admin SDK. Here we'll just save to database with a placeholder auth.
-                    const tempId = 'temp_' + Date.now();
-                    const userRef = db.ref('users/' + tempId);
-                    await userRef.set({
-                        ...customerData,
-                        userType: 'customer',
-                        assignedAgentId: AppState.agentId,
-                        agentCustomId: AppState.agentData.agentId,
-                        createdAt: Date.now(),
-                        updatedAt: Date.now(),
-                        status: 'active',
-                        creditScore: 0,
-                        banned: false
-                    });
-                    // Notify customer via message
-                    await this.addMessage(tempId, `Welcome! You have been registered by agent ${AppState.agentData.fullName}.`, 'system');
-                    return { success: true, customerId: tempId };
-                } catch (error) {
-                    console.error('Error adding customer:', error);
-                    return { success: false, error: error.message };
-                }
-            },
             async addMessage(recipientId, message, type = 'system') {
-                const msgRef = db.ref('messages').push();
-                await msgRef.set({
+                await db.ref('messages/' + Utils.generateId('MSG')).set({
                     recipientId,
                     message,
                     timestamp: Date.now(),
                     read: false,
                     type
                 });
+            },
+            // Wizard: create customer
+            async createCustomer(customerData) {
+                try {
+                    const cred = await auth.createUserWithEmailAndPassword(customerData.email, customerData.password);
+                    const uid = cred.user.uid;
+                    const agentName = AppState.agentData.fullName;
+                    const newCustomer = {
+                        fullName: customerData.name,
+                        email: customerData.email,
+                        phone: customerData.phone,
+                        nrc: customerData.nrc,
+                        residence: customerData.address,
+                        userType: 'customer',
+                        status: 'active',
+                        assignedAgentId: AppState.agentId,
+                        agentName: agentName,
+                        createdAt: Date.now(),
+                        nrcFront: customerData.nrcFront,
+                        nrcBack: customerData.nrcBack,
+                        profilePhoto: customerData.profilePhoto
+                    };
+                    await db.ref('users/' + uid).set(newCustomer);
+                    // Update agent's customer count
+                    const agentRef = db.ref('users/' + AppState.agentId);
+                    const agentSnap = await agentRef.once('value');
+                    const agent = agentSnap.val();
+                    await agentRef.update({ totalCustomers: (agent.totalCustomers || 0) + 1 });
+                    return { success: true, customerId: uid };
+                } catch (error) {
+                    return { success: false, error: error.message };
+                }
             }
         };
 
@@ -1828,27 +1842,33 @@
                 this.markAllReadBtn.addEventListener('click', ()=> FirebaseService.markAllAsRead());
                 // loan filter change
                 this.loanFilterSelect.addEventListener('change', ()=> this.renderLoans());
-
-                // NEW: Add Customer button
-                document.getElementById('addCustomerBtn').addEventListener('click', ()=> this.openOnboardingWizard());
-
+                // loan tabs
+                document.querySelectorAll('#loanTabs .tab').forEach(tab => {
+                    tab.addEventListener('click', (e) => {
+                        document.querySelectorAll('#loanTabs .tab').forEach(t => t.classList.remove('active'));
+                        e.target.classList.add('active');
+                        this.loanFilterSelect.value = e.target.dataset.status;
+                        this.renderLoans();
+                    });
+                });
+                // Default loans tab to approved
+                const defaultTab = document.querySelector('#loanTabs .tab[data-status="approved"]');
+                if (defaultTab) defaultTab.classList.add('active');
+                // Onboard button
+                document.getElementById('onboardCustomerBtn').addEventListener('click', () => this.openWizard());
+                // Wizard close
+                document.getElementById('closeWizardModal').addEventListener('click', () => this.closeWizard());
+                // Wizard steps
+                document.getElementById('wizNext1').addEventListener('click', () => this.wizardStep2());
+                document.getElementById('wizPrev2').addEventListener('click', () => this.wizardStep1());
+                document.getElementById('wizNext2').addEventListener('click', () => this.wizardStep3());
+                document.getElementById('wizPrev3').addEventListener('click', () => this.wizardStep2());
+                document.getElementById('wizFinish').addEventListener('click', () => this.finishWizard());
                 // Export buttons
-                document.getElementById('exportLoansCsv')?.addEventListener('click', ()=> this.exportLoans('csv'));
-                document.getElementById('exportLoansExcel')?.addEventListener('click', ()=> this.exportLoans('excel'));
-                document.getElementById('exportCommissionCsv')?.addEventListener('click', ()=> this.exportCommission('csv'));
-                document.getElementById('exportCommissionPdf')?.addEventListener('click', ()=> this.exportCommission('pdf'));
-
-                // Wizard elements
-                this.wizardModal = document.getElementById('onboardingWizardModal');
-                this.closeWizardModal = document.getElementById('closeWizardModal');
-                this.wizardPrevBtn = document.getElementById('wizardPrevBtn');
-                this.wizardNextBtn = document.getElementById('wizardNextBtn');
-                this.wizardSteps = document.getElementById('wizardSteps');
-                this.wizardContent = document.getElementById('wizardContent');
-
-                this.closeWizardModal.addEventListener('click', ()=> this.wizardModal.classList.remove('active'));
-                this.wizardPrevBtn.addEventListener('click', ()=> this.wizardPrevious());
-                this.wizardNextBtn.addEventListener('click', ()=> this.wizardNext());
+                document.getElementById('exportCommissionCSV').addEventListener('click', () => this.exportCommissionCSV());
+                document.getElementById('exportCustomerLoansCSV').addEventListener('click', () => this.exportCustomerLoansCSV());
+                document.getElementById('exportScheduleCSV').addEventListener('click', () => this.exportScheduleCSV());
+                document.getElementById('exportCommissionMathPDF').addEventListener('click', () => this.exportCommissionMathPDF());
             },
             bindEvents() {
                 this.navItems.forEach(item => {
@@ -1867,10 +1887,9 @@
                 if (section === 'loans') this.renderLoans();
                 if (section === 'commission') {
                     this.renderCommission();
-                    setTimeout(() => this.updateCharts(), 100); // ensure canvas exists
+                    this.updateCharts();
                 }
             },
-            // Update texts that depend on commission rate
             updateCommissionRateTexts() {
                 const rate = AppState.systemSettings.commissionRate || 15;
                 if (this.pendingCommissionLabel) {
@@ -1880,7 +1899,6 @@
                     this.commissionBenefitTitle.textContent = `Earn ${rate}% commission`;
                 }
             },
-            // Update contact info in about section from systemSettings
             updateContactInfo() {
                 const settings = AppState.systemSettings;
                 document.getElementById('contactPhone').textContent = settings.agentContactPhone || '+260 123 456 789';
@@ -1905,8 +1923,8 @@
                 this.renderLoans();
                 this.renderCommission();
                 this.updateNotificationBadge();
-                // Start periodic reminders check
-                setInterval(() => Utils.checkPaymentReminders(), 60 * 60 * 1000); // hourly
+                // Start periodic reminder checks
+                setInterval(() => Utils.checkPaymentReminders(), 60000); // every minute
             },
             updateLoanSections() {
                 if (!this.sections.loans.classList.contains('d-none')) {
@@ -1953,10 +1971,8 @@
                 }
                 this.customersList.innerHTML = AppState.customers.map(c => {
                     const loanCount = AppState.loans.filter(l => l.customerId === c.id).length;
-                    const isOverdue = Utils.hasOverduePayment(c.id);
-                    const overdueClass = isOverdue ? 'overdue' : '';
                     return `
-                    <div class="customer-card ${overdueClass}" data-id="${c.id}" onclick="UIManager.showCustomerModal('${c.id}')">
+                    <div class="customer-card" data-id="${c.id}" onclick="UIManager.showCustomerModal('${c.id}')">
                         <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar" onerror="this.src='https://ui-avatars.com/api/?name=C&background=007AFF&color=fff'">
                         <div class="customer-info">
                             <div class="customer-name">${c.fullName || 'Unknown'}</div>
@@ -1972,7 +1988,6 @@
                 if (filter !== 'all') {
                     filteredLoans = filteredLoans.filter(l => l.status === filter);
                 }
-                // Sort by creation date descending
                 filteredLoans.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
 
                 if (!filteredLoans.length) {
@@ -1994,6 +2009,9 @@
                     ` : '';
                     const rejectionReason = loan.status === 'rejected' && loan.rejectionReason ? 
                         `<div class="rejection-reason"><i class="fas fa-times-circle"></i> Reason: ${loan.rejectionReason}</div>` : '';
+                    const totalPaid = loan.totalPaid || 0;
+                    const totalPayable = loan.totalPayable || loan.amount;
+                    const percentPaid = totalPayable > 0 ? ((totalPaid / totalPayable) * 100).toFixed(1) : 0;
                     return `
                         <div class="customer-card ${overdueClass}" onclick="UIManager.showLoanModal('${loan.id}')">
                             <img src="${customer.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(customer.fullName||'C')+'&background=007AFF&color=fff'}" class="customer-avatar">
@@ -2005,6 +2023,10 @@
                                         ${loan.status}
                                     </span>
                                 </div>
+                                <div class="progress-container">
+                                    <div class="progress-bar" style="width: ${percentPaid}%;"></div>
+                                </div>
+                                <div class="progress-label">${percentPaid}% paid</div>
                                 ${overdueMessage}
                                 ${rejectionReason}
                             </div>
@@ -2023,7 +2045,7 @@
                             <span><strong>${Utils.formatCurrency(loan.amount)}</strong> (${loan.status})</span>
                             <span class="badge">Due: ${loan.repaymentSchedule?.find(p=>p.status==='pending')?.dueDate ? Utils.formatDate(loan.repaymentSchedule.find(p=>p.status==='pending').dueDate) : 'None'}</span>
                         </div>
-                        <div style="margin-top:7.2px; color:#617388;">Purpose: ${loan.purpose || 'N/A'}</div>
+                        <div style="margin-top:7px; color:#617388;">Purpose: ${loan.purpose || 'N/A'}</div>
                     </div>
                 `).join('');
                 document.getElementById('customerLoansList').innerHTML = listHtml;
@@ -2044,6 +2066,8 @@
                         ${customer.nrcBack ? `<img src="${customer.nrcBack}" class="photo-thumb">` : ''}
                     </div>
                 `;
+                // Store customer id for export
+                this.customerModal.dataset.customerId = customerId;
                 this.customerModal.classList.add('active');
             },
             showLoanModal(loanId) {
@@ -2054,7 +2078,7 @@
                 const paidPayments = payments.filter(p => p.status === 'paid');
                 const pendingPayments = payments.filter(p => p.status === 'pending');
                 const rejectionHtml = loan.status === 'rejected' && loan.rejectionReason ? 
-                    `<div class="rejection-reason" style="margin-bottom:14.4px;"><i class="fas fa-times-circle"></i> Rejection reason: ${loan.rejectionReason}</div>` : '';
+                    `<div class="rejection-reason" style="margin-bottom:14px;"><i class="fas fa-times-circle"></i> Rejection reason: ${loan.rejectionReason}</div>` : '';
                 const content = `
                     ${rejectionHtml}
                     <div style="margin-bottom:18px;">
@@ -2069,17 +2093,17 @@
                     <div class="detail-row"><span class="detail-label">Interest</span><span class="detail-value">${Utils.formatCurrency(loan.totalInterest)}</span></div>
                     <div class="detail-row"><span class="detail-label">Total payable</span><span class="detail-value">${Utils.formatCurrency(loan.totalPayable)}</span></div>
                     
-                    <h4 style="margin:14.4px 0 7.2px;">Collateral</h4>
+                    <h4 style="margin:14px 0 7px;">Collateral</h4>
                     <div><strong>${loan.collateral?.category}</strong> - ${Utils.formatCurrency(loan.collateral?.value)}</div>
                     <div>${loan.collateral?.description}</div>
                     <div class="collateral-grid">
                         ${loan.collateral?.images?.map(img => `<img src="${img}">`).join('') || '<p>No images</p>'}
                     </div>
 
-                    <h4 style="margin:14.4px 0 7.2px;">Agreement</h4>
+                    <h4 style="margin:14px 0 7px;">Agreement</h4>
                     ${loan.signedAgreementUrl ? `<a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-small">View Signed Agreement</a>` : '<p>Not available</p>'}
 
-                    <h4 style="margin:14.4px 0 7.2px;">Payment Schedule</h4>
+                    <h4 style="margin:14px 0 7px;">Payment Schedule</h4>
                     <div class="payment-list">
                         ${payments.length ? payments.map(p => `
                             <div class="payment-item">
@@ -2091,12 +2115,13 @@
                             </div>
                         `).join('') : '<p>No schedule available</p>'}
                     </div>
-                    <div style="margin-top:10.8px;">
+                    <div style="margin-top:11px;">
                         <div>Total Paid: ${Utils.formatCurrency(loan.totalPaid || 0)}</div>
                         <div>Remaining: ${Utils.formatCurrency((loan.totalPayable||0) - (loan.totalPaid||0))}</div>
                     </div>
                 `;
                 document.getElementById('loanModalContent').innerHTML = content;
+                this.loanModal.dataset.loanId = loanId;
                 this.loanModal.classList.add('active');
             },
             renderCommission() {
@@ -2104,7 +2129,6 @@
                 const commissionRate = (AppState.systemSettings.commissionRate || 15) / 100;
                 const totalEarned = commissions.filter(c => c.status === 'paid').reduce((s,c)=> s + (c.amount||0),0);
                 const pending = commissions.filter(c => c.status === 'pending').reduce((s,c)=> s + (c.amount||0),0);
-                // For future earnings, only consider active loans that are not rejected
                 const activeLoans = AppState.loans.filter(l => l.status === 'active');
                 const future = activeLoans.reduce((s,loan)=> s + (loan.totalInterest * commissionRate || 0), 0);
                 this.totalCommissionEarned.textContent = Utils.formatCurrency(totalEarned);
@@ -2126,7 +2150,6 @@
                 }).join('');
             },
             renderCommissionCustomers() {
-                // called when customers change (listener)
                 this.renderCommission();
             },
             showCommissionMath(customerId) {
@@ -2135,7 +2158,6 @@
                 const commissions = AppState.commissions.filter(c => c.customerId === customerId);
                 const commissionRate = (AppState.systemSettings.commissionRate || 15) / 100;
                 
-                // Only include loans that are not rejected for future calculations (but include all for interest history)
                 let totalInterest = 0;
                 loans.forEach(loan => { totalInterest += loan.totalInterest || 0; });
                 const totalCommissionPossible = totalInterest * commissionRate;
@@ -2144,8 +2166,7 @@
                 const future = totalCommissionPossible - earned - pending;
 
                 const breakdownHtml = loans.map(loan => {
-                    // Don't show commission for rejected loans (they have no interest paid anyway, but just to be safe)
-                    if (loan.status === 'rejected') return ''; // skip rejected loans
+                    if (loan.status === 'rejected') return '';
                     const interest = loan.totalInterest || 0;
                     const commission = interest * commissionRate;
                     return `
@@ -2166,7 +2187,7 @@
                     <div class="commission-row"><span>Already earned</span> <span class="text-success">${Utils.formatCurrency(earned)}</span></div>
                     <div class="commission-row"><span>Pending (awaiting payment)</span> <span>${Utils.formatCurrency(pending)}</span></div>
                     <div class="commission-row"><span>Future (active loans)</span> <span>${Utils.formatCurrency(future)}</span></div>
-                    <p style="margin-top:14.4px; font-size:12.6px; color:#617388;">Commission is credited when the customer pays interest. ${Math.round(commissionRate*100)}% of each interest payment.</p>
+                    <p style="margin-top:14px; font-size:13px; color:#617388;">Commission is credited when the customer pays interest. ${Math.round(commissionRate*100)}% of each interest payment.</p>
                 `;
                 document.getElementById('commissionMathContent').innerHTML = content;
                 this.commissionMathModal.classList.add('active');
@@ -2235,38 +2256,28 @@
                     AppState.currentPromotionIndex = 0;
                 }
             },
-            // NEW: Charts
+            // Charts
             updateCharts() {
-                const lineCtx = document.getElementById('commissionLineChart')?.getContext('2d');
-                const pieCtx = document.getElementById('commissionPieChart')?.getContext('2d');
-                if (!lineCtx || !pieCtx) return;
-
-                // Line chart: last 6 months
-                const months = [];
-                const earnedData = [];
-                const now = new Date();
-                for (let i = 5; i >= 0; i--) {
-                    const d = new Date(now.getFullYear(), now.getMonth() - i, 1);
-                    months.push(d.toLocaleString('default', { month: 'short' }));
-                    const monthStart = d.getTime();
-                    const monthEnd = new Date(now.getFullYear(), now.getMonth() - i + 1, 1).getTime();
-                    const monthlyEarned = AppState.commissions
-                        .filter(c => c.status === 'paid' && c.timestamp >= monthStart && c.timestamp < monthEnd)
-                        .reduce((s,c)=> s + c.amount, 0);
-                    earnedData.push(monthlyEarned);
-                }
-
-                if (window.lineChart) window.lineChart.destroy();
-                window.lineChart = new Chart(lineCtx, {
+                // Line chart: commission earned over time (last 6 months)
+                const months = [...Array(6)].map((_, i) => moment().subtract(5-i, 'months').format('MMM YYYY'));
+                const monthlyEarned = months.map(month => {
+                    const start = moment(month, 'MMM YYYY').startOf('month').valueOf();
+                    const end = moment(month, 'MMM YYYY').endOf('month').valueOf();
+                    return AppState.commissions.filter(c => c.status === 'paid' && c.paidAt >= start && c.paidAt <= end)
+                        .reduce((s,c) => s + c.amount, 0);
+                });
+                const ctxLine = document.getElementById('commissionLineChart').getContext('2d');
+                if (AppState.lineChart) AppState.lineChart.destroy();
+                AppState.lineChart = new Chart(ctxLine, {
                     type: 'line',
                     data: {
                         labels: months,
                         datasets: [{
-                            label: 'Commission Earned (K)',
-                            data: earnedData,
+                            label: 'Commission Earned',
+                            data: monthlyEarned,
                             borderColor: '#007aff',
                             backgroundColor: 'rgba(0,122,255,0.1)',
-                            tension: 0.3,
+                            tension: 0.4,
                             fill: true
                         }]
                     },
@@ -2278,25 +2289,22 @@
                 });
 
                 // Pie chart: commission by customer
-                const customerMap = new Map();
-                AppState.commissions.forEach(c => {
-                    if (c.status === 'paid') {
-                        const cust = AppState.customers.find(cust => cust.id === c.customerId);
-                        const name = cust ? cust.fullName : 'Unknown';
-                        customerMap.set(name, (customerMap.get(name) || 0) + c.amount);
-                    }
+                const customerCommission = {};
+                AppState.commissions.filter(c => c.status === 'paid').forEach(c => {
+                    const name = c.customerName || 'Unknown';
+                    customerCommission[name] = (customerCommission[name] || 0) + c.amount;
                 });
-                const labels = Array.from(customerMap.keys());
-                const values = Array.from(customerMap.values());
-
-                if (window.pieChart) window.pieChart.destroy();
-                window.pieChart = new Chart(pieCtx, {
+                const pieLabels = Object.keys(customerCommission);
+                const pieData = Object.values(customerCommission);
+                const ctxPie = document.getElementById('commissionPieChart').getContext('2d');
+                if (AppState.pieChart) AppState.pieChart.destroy();
+                AppState.pieChart = new Chart(ctxPie, {
                     type: 'pie',
                     data: {
-                        labels: labels,
+                        labels: pieLabels,
                         datasets: [{
-                            data: values,
-                            backgroundColor: ['#007aff', '#34c759', '#ff9500', '#ff3b30', '#5856d6', '#5ac8fa']
+                            data: pieData,
+                            backgroundColor: ['#007aff', '#5856d6', '#ff9500', '#34c759', '#ff3b30', '#ffcc00']
                         }]
                     },
                     options: {
@@ -2306,261 +2314,206 @@
                     }
                 });
             },
-            // NEW: Onboarding wizard
-            openOnboardingWizard() {
-                AppState.wizardStep = 1;
-                AppState.wizardData = { personal: {}, documents: {}, loan: {} };
-                this.renderWizardStep();
-                this.wizardModal.classList.add('active');
+            // Wizard
+            openWizard() {
+                document.getElementById('wizName').value = '';
+                document.getElementById('wizEmail').value = '';
+                document.getElementById('wizPhone').value = '';
+                document.getElementById('wizNrc').value = '';
+                document.getElementById('wizAddress').value = '';
+                document.getElementById('wizPassword').value = '';
+                document.getElementById('wizNrcFrontUrl').value = '';
+                document.getElementById('wizNrcBackUrl').value = '';
+                document.getElementById('wizProfileUrl').value = '';
+                document.querySelectorAll('#onboardWizardModal .upload-preview').forEach(el => el.innerHTML = '');
+                this.wizardStep1();
+                document.getElementById('onboardWizardModal').classList.add('active');
             },
-            renderWizardStep() {
-                const step = AppState.wizardStep;
-                // Update step indicators
-                document.querySelectorAll('#wizardSteps .step').forEach(el => {
-                    const stepNum = parseInt(el.dataset.step);
-                    el.classList.remove('active', 'completed');
-                    if (stepNum === step) el.classList.add('active');
-                    else if (stepNum < step) el.classList.add('completed');
-                });
-                let html = '';
-                if (step === 1) {
-                    html = `
-                        <div class="wizard-step">
-                            <h4>Personal Information</h4>
-                            <div class="form-group">
-                                <label>Full Name</label>
-                                <input type="text" id="wizardFullName" class="form-input" value="${AppState.wizardData.personal.fullName || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>Email</label>
-                                <input type="email" id="wizardEmail" class="form-input" value="${AppState.wizardData.personal.email || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>Phone</label>
-                                <input type="tel" id="wizardPhone" class="form-input" value="${AppState.wizardData.personal.phone || ''}">
-                            </div>
-                            <div class="form-group">
-                                <label>NRC</label>
-                                <input type="text" id="wizardNrc" class="form-input" value="${AppState.wizardData.personal.nrc || ''}">
-                            </div>
-                            <div class="form-row">
-                                <div class="form-group">
-                                    <label>Residence</label>
-                                    <input type="text" id="wizardResidence" class="form-input" value="${AppState.wizardData.personal.residence || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>House Number</label>
-                                    <input type="text" id="wizardHouseNumber" class="form-input" value="${AppState.wizardData.personal.houseNumber || ''}">
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else if (step === 2) {
-                    html = `
-                        <div class="wizard-step">
-                            <h4>Upload Documents</h4>
-                            <div class="doc-upload-grid">
-                                <div class="upload-box-small" data-doc="profilePhoto" onclick="openDocUpload(this)">
-                                    <i class="fas fa-camera"></i>
-                                    <span>Profile Photo</span>
-                                    ${AppState.wizardData.documents.profilePhoto ? '<img src="'+AppState.wizardData.documents.profilePhoto+'" class="upload-preview">' : ''}
-                                </div>
-                                <div class="upload-box-small" data-doc="nrcFront" onclick="openDocUpload(this)">
-                                    <i class="fas fa-camera"></i>
-                                    <span>NRC Front</span>
-                                    ${AppState.wizardData.documents.nrcFront ? '<img src="'+AppState.wizardData.documents.nrcFront+'" class="upload-preview">' : ''}
-                                </div>
-                                <div class="upload-box-small" data-doc="nrcBack" onclick="openDocUpload(this)">
-                                    <i class="fas fa-camera"></i>
-                                    <span>NRC Back</span>
-                                    ${AppState.wizardData.documents.nrcBack ? '<img src="'+AppState.wizardData.documents.nrcBack+'" class="upload-preview">' : ''}
-                                </div>
-                                <div class="upload-box-small" data-doc="other" onclick="openDocUpload(this)">
-                                    <i class="fas fa-camera"></i>
-                                    <span>Other</span>
-                                    ${AppState.wizardData.documents.other ? '<img src="'+AppState.wizardData.documents.other+'" class="upload-preview">' : ''}
-                                </div>
-                            </div>
-                            <p class="text-muted" style="font-size:10.8px; margin-top:9px;">Click boxes to upload images</p>
-                        </div>
-                    `;
-                } else if (step === 3) {
-                    html = `
-                        <div class="wizard-step">
-                            <h4>Loan Application (Optional)</h4>
-                            <div class="form-check">
-                                <input type="checkbox" id="wizardApplyLoan" ${AppState.wizardData.loan.apply ? 'checked' : ''}>
-                                <label>Apply for a loan now</label>
-                            </div>
-                            <div id="wizardLoanFields" style="${AppState.wizardData.loan.apply ? '' : 'display:none;'}">
-                                <div class="form-group">
-                                    <label>Loan Amount (K)</label>
-                                    <input type="number" id="wizardLoanAmount" class="form-input" value="${AppState.wizardData.loan.amount || ''}">
-                                </div>
-                                <div class="form-group">
-                                    <label>Duration (months)</label>
-                                    <select id="wizardLoanDuration" class="form-input">
-                                        <option value="3" ${AppState.wizardData.loan.duration == 3 ? 'selected' : ''}>3 months</option>
-                                        <option value="6" ${AppState.wizardData.loan.duration == 6 ? 'selected' : ''}>6 months</option>
-                                        <option value="12" ${AppState.wizardData.loan.duration == 12 ? 'selected' : ''}>12 months</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Purpose</label>
-                                    <select id="wizardLoanPurpose" class="form-input">
-                                        <option value="business" ${AppState.wizardData.loan.purpose == 'business' ? 'selected' : ''}>Business</option>
-                                        <option value="personal" ${AppState.wizardData.loan.purpose == 'personal' ? 'selected' : ''}>Personal</option>
-                                        <option value="education" ${AppState.wizardData.loan.purpose == 'education' ? 'selected' : ''}>Education</option>
-                                    </select>
-                                </div>
-                                <div class="form-group">
-                                    <label>Purpose Description</label>
-                                    <textarea id="wizardLoanDescription" class="form-input">${AppState.wizardData.loan.description || ''}</textarea>
-                                </div>
-                            </div>
-                        </div>
-                    `;
-                } else if (step === 4) {
-                    html = `
-                        <div class="wizard-step">
-                            <h4>Confirm Details</h4>
-                            <p><strong>Name:</strong> ${AppState.wizardData.personal.fullName}</p>
-                            <p><strong>Email:</strong> ${AppState.wizardData.personal.email}</p>
-                            <p><strong>Phone:</strong> ${AppState.wizardData.personal.phone}</p>
-                            <p><strong>NRC:</strong> ${AppState.wizardData.personal.nrc}</p>
-                            <p><strong>Address:</strong> ${AppState.wizardData.personal.residence}, ${AppState.wizardData.personal.houseNumber}</p>
-                            <p><strong>Documents:</strong> ${Object.keys(AppState.wizardData.documents).length} uploaded</p>
-                            <p><strong>Apply for loan:</strong> ${AppState.wizardData.loan.apply ? 'Yes' : 'No'}</p>
-                        </div>
-                    `;
-                }
-                this.wizardContent.innerHTML = html;
-                this.wizardPrevBtn.disabled = (step === 1);
-                this.wizardNextBtn.textContent = (step === 4) ? 'Submit' : 'Next';
+            closeWizard() {
+                document.getElementById('onboardWizardModal').classList.remove('active');
             },
-            wizardPrevious() {
-                if (AppState.wizardStep > 1) {
-                    this.saveWizardData();
-                    AppState.wizardStep--;
-                    this.renderWizardStep();
-                }
+            wizardStep1() {
+                document.getElementById('step1').classList.remove('d-none');
+                document.getElementById('step2').classList.add('d-none');
+                document.getElementById('step3').classList.add('d-none');
             },
-            wizardNext() {
-                this.saveWizardData();
-                if (AppState.wizardStep < 4) {
-                    AppState.wizardStep++;
-                    this.renderWizardStep();
-                } else {
-                    // Submit
-                    this.submitWizard();
-                }
+            wizardStep2() {
+                if (!this.validateStep1()) return;
+                document.getElementById('step1').classList.add('d-none');
+                document.getElementById('step2').classList.remove('d-none');
+                document.getElementById('step3').classList.add('d-none');
             },
-            saveWizardData() {
-                const step = AppState.wizardStep;
-                if (step === 1) {
-                    AppState.wizardData.personal = {
-                        fullName: document.getElementById('wizardFullName')?.value || '',
-                        email: document.getElementById('wizardEmail')?.value || '',
-                        phone: document.getElementById('wizardPhone')?.value || '',
-                        nrc: document.getElementById('wizardNrc')?.value || '',
-                        residence: document.getElementById('wizardResidence')?.value || '',
-                        houseNumber: document.getElementById('wizardHouseNumber')?.value || ''
-                    };
-                } else if (step === 3) {
-                    const apply = document.getElementById('wizardApplyLoan')?.checked || false;
-                    AppState.wizardData.loan.apply = apply;
-                    if (apply) {
-                        AppState.wizardData.loan.amount = document.getElementById('wizardLoanAmount')?.value;
-                        AppState.wizardData.loan.duration = document.getElementById('wizardLoanDuration')?.value;
-                        AppState.wizardData.loan.purpose = document.getElementById('wizardLoanPurpose')?.value;
-                        AppState.wizardData.loan.description = document.getElementById('wizardLoanDescription')?.value;
-                    } else {
-                        AppState.wizardData.loan = {};
-                    }
-                }
+            wizardStep3() {
+                if (!this.validateStep2()) return;
+                document.getElementById('step1').classList.add('d-none');
+                document.getElementById('step2').classList.add('d-none');
+                document.getElementById('step3').classList.remove('d-none');
             },
-            async submitWizard() {
-                const personal = AppState.wizardData.personal;
-                if (!personal.fullName || !personal.email || !personal.phone || !personal.nrc) {
-                    Utils.showToast('Error', 'Please fill all personal details', 'error');
-                    return;
+            validateStep1() {
+                const name = document.getElementById('wizName').value.trim();
+                const email = document.getElementById('wizEmail').value.trim();
+                const phone = document.getElementById('wizPhone').value.trim();
+                const nrc = document.getElementById('wizNrc').value.trim();
+                const address = document.getElementById('wizAddress').value.trim();
+                const password = document.getElementById('wizPassword').value.trim();
+                if (!name || !email || !phone || !nrc || !address || !password) {
+                    Utils.showToast('Error', 'All fields required', 'error');
+                    return false;
                 }
-                // Generate a random password for customer (in real app, send email)
-                const tempPassword = Math.random().toString(36).slice(-8);
+                if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email)) {
+                    Utils.showToast('Error', 'Invalid email', 'error');
+                    return false;
+                }
+                if (password.length < 6) {
+                    Utils.showToast('Error', 'Password must be at least 6 characters', 'error');
+                    return false;
+                }
+                return true;
+            },
+            validateStep2() {
+                const nrcFront = document.getElementById('wizNrcFrontUrl').value;
+                const nrcBack = document.getElementById('wizNrcBackUrl').value;
+                const profile = document.getElementById('wizProfileUrl').value;
+                if (!nrcFront || !nrcBack || !profile) {
+                    Utils.showToast('Error', 'Please upload all required documents', 'error');
+                    return false;
+                }
+                return true;
+            },
+            async finishWizard() {
+                const applyNow = document.getElementById('wizApplyNow').value === 'yes';
                 const customerData = {
-                    ...personal,
-                    password: tempPassword, // not stored, just for demo
-                    profilePhoto: AppState.wizardData.documents.profilePhoto || '',
-                    nrcFront: AppState.wizardData.documents.nrcFront || '',
-                    nrcBack: AppState.wizardData.documents.nrcBack || '',
-                    otherDoc: AppState.wizardData.documents.other || '',
-                    createdAt: Date.now(),
-                    status: 'active'
+                    name: document.getElementById('wizName').value.trim(),
+                    email: document.getElementById('wizEmail').value.trim(),
+                    phone: document.getElementById('wizPhone').value.trim(),
+                    nrc: document.getElementById('wizNrc').value.trim(),
+                    address: document.getElementById('wizAddress').value.trim(),
+                    password: document.getElementById('wizPassword').value.trim(),
+                    nrcFront: document.getElementById('wizNrcFrontUrl').value,
+                    nrcBack: document.getElementById('wizNrcBackUrl').value,
+                    profilePhoto: document.getElementById('wizProfileUrl').value
                 };
-                const result = await FirebaseService.addCustomer(customerData);
+                Utils.showLoading('Creating customer...');
+                const result = await FirebaseService.createCustomer(customerData);
+                Utils.hideLoading();
                 if (result.success) {
-                    Utils.showToast('Success', 'Customer added successfully!', 'success');
-                    if (AppState.wizardData.loan.apply) {
-                        // Here you would create a loan application automatically
-                        Utils.showToast('Info', 'Loan application would be created now.', 'info');
+                    Utils.showToast('Success', 'Customer created', 'success');
+                    this.closeWizard();
+                    if (applyNow) {
+                        // Redirect to loan application with customer pre-filled? For simplicity, just inform.
+                        Utils.showToast('Info', 'Loan application flow not yet implemented', 'info');
                     }
-                    this.wizardModal.classList.remove('active');
                 } else {
                     Utils.showToast('Error', result.error, 'error');
                 }
             },
-            // NEW: Export functions
-            exportLoans(format) {
-                const loans = AppState.loans.map(l => {
-                    const customer = AppState.customers.find(c => c.id === l.customerId);
-                    return {
-                        'Loan ID': l.id,
-                        'Customer': customer ? customer.fullName : 'Unknown',
-                        'Amount': l.amount,
-                        'Status': l.status,
-                        'Created': Utils.formatDate(l.createdAt),
-                        'Total Paid': l.totalPaid || 0
-                    };
-                });
-                if (format === 'csv') {
-                    Utils.exportToCSV(loans, 'loans.csv');
-                } else {
-                    Utils.generatePDF(loans, 'Loans Report');
-                }
+            // Export functions
+            exportCommissionCSV() {
+                const data = AppState.commissions.map(c => ({
+                    Customer: c.customerName,
+                    Amount: c.amount,
+                    Status: c.status,
+                    PaidDate: c.paidAt ? Utils.formatDate(c.paidAt) : '',
+                    LoanID: c.loanId
+                }));
+                const csv = Papa.unparse(data);
+                this.downloadCSV(csv, 'commission.csv');
             },
-            exportCommission(format) {
-                const commissions = AppState.commissions.map(c => {
-                    const customer = AppState.customers.find(cust => cust.id === c.customerId);
-                    return {
-                        'Commission ID': c.id,
-                        'Customer': customer ? customer.fullName : 'Unknown',
-                        'Amount': c.amount,
-                        'Status': c.status,
-                        'Date': Utils.formatDate(c.timestamp),
-                        'Loan ID': c.loanId
-                    };
-                });
-                if (format === 'csv') {
-                    Utils.exportToCSV(commissions, 'commission_history.csv');
-                } else {
-                    Utils.generatePDF(commissions, 'Commission Statement');
-                }
+            exportCustomerLoansCSV() {
+                const customerId = this.customerModal.dataset.customerId;
+                const loans = AppState.loans.filter(l => l.customerId === customerId);
+                const data = loans.map(l => ({
+                    LoanID: l.id,
+                    Amount: l.amount,
+                    Status: l.status,
+                    Disbursed: Utils.formatDate(l.createdAt),
+                    TotalPaid: l.totalPaid || 0,
+                    Remaining: (l.totalPayable || l.amount) - (l.totalPaid || 0)
+                }));
+                const csv = Papa.unparse(data);
+                this.downloadCSV(csv, 'customer_loans.csv');
+            },
+            exportScheduleCSV() {
+                const loanId = this.loanModal.dataset.loanId;
+                const loan = AppState.loans.find(l => l.id === loanId);
+                if (!loan || !loan.repaymentSchedule) return;
+                const data = loan.repaymentSchedule.map(inst => ({
+                    Installment: inst.installment,
+                    DueDate: Utils.formatDate(inst.dueDate),
+                    Principal: inst.principal,
+                    Interest: inst.interest,
+                    Penalty: inst.penalty || 0,
+                    TotalDue: inst.totalDue,
+                    PaidAmount: inst.paidAmount || 0,
+                    Status: inst.status
+                }));
+                const csv = Papa.unparse(data);
+                this.downloadCSV(csv, 'loan_schedule.csv');
+            },
+            exportCommissionMathPDF() {
+                const element = document.getElementById('commissionMathContent');
+                const opt = {
+                    margin: 0.5,
+                    filename: 'commission_breakdown.pdf',
+                    image: { type: 'jpeg', quality: 0.98 },
+                    html2canvas: { scale: 2 },
+                    jsPDF: { unit: 'in', format: 'letter', orientation: 'portrait' }
+                };
+                html2pdf().set(opt).from(element).save();
+            },
+            downloadCSV(csv, filename) {
+                const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8;' });
+                const link = document.createElement('a');
+                link.href = URL.createObjectURL(blob);
+                link.download = filename;
+                link.click();
             }
         };
 
         // Attach UIManager to window for inline onclick handlers
         window.UIManager = UIManager;
-        window.openDocUpload = function(box) {
-            // Simple simulation - in real app integrate Cloudinary
-            const type = box.dataset.doc;
-            const url = prompt('Enter image URL (simulated upload):');
-            if (url) {
-                AppState.wizardData.documents[type] = url;
-                const img = document.createElement('img');
-                img.src = url;
-                img.className = 'upload-preview';
-                box.innerHTML = '';
-                box.appendChild(img);
+
+        // Cloudinary widget
+        let cloudinaryWidget = null;
+        window.initCloudinaryWidget = () => {
+            if (cloudinaryWidget) return;
+            cloudinaryWidget = cloudinary.createUploadWidget({
+                cloudName: cloudinaryConfig.cloudName,
+                uploadPreset: cloudinaryConfig.uploadPreset,
+                folder: cloudinaryConfig.folder,
+                multiple: false,
+                maxFileSize: 5242880,
+                clientAllowedFormats: ['jpg', 'jpeg', 'png'],
+                cropping: true,
+                showCompletedButton: true
+            }, (error, result) => {
+                if (error) return;
+                if (result && result.event === 'success') {
+                    const info = result.info;
+                    const activeBox = document.querySelector('.upload-box.active');
+                    if (activeBox) {
+                        const existingPreview = activeBox.querySelector('.upload-preview');
+                        if (existingPreview) existingPreview.remove();
+                        const preview = document.createElement('img');
+                        preview.className = 'upload-preview';
+                        preview.src = info.secure_url;
+                        activeBox.appendChild(preview);
+                        const type = activeBox.dataset.type;
+                        if (type === 'wiz-nrc-front') document.getElementById('wizNrcFrontUrl').value = info.secure_url;
+                        else if (type === 'wiz-nrc-back') document.getElementById('wizNrcBackUrl').value = info.secure_url;
+                        else if (type === 'wiz-profile') document.getElementById('wizProfileUrl').value = info.secure_url;
+                        activeBox.classList.remove('active');
+                    }
+                }
+            });
+        };
+        window.openCloudinaryUpload = (type) => {
+            window.initCloudinaryWidget();
+            document.querySelectorAll('.upload-box').forEach(b => b.classList.remove('active'));
+            const target = document.querySelector(`.upload-box[data-type="${type}"]`);
+            if (target) {
+                target.classList.add('active');
+                cloudinaryWidget.open();
             }
         };
 
