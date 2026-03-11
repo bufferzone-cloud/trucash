@@ -394,6 +394,21 @@
             box-shadow: 0 4px 8px rgba(255,59,48,0.2);
         }
 
+        /* Credit score badge */
+        .credit-score-badge {
+            display: inline-flex;
+            align-items: center;
+            padding: 3px 10px;
+            border-radius: 20px;
+            font-size: 11px;
+            font-weight: 600;
+            color: white;
+        }
+        .credit-score-badge.excellent { background: var(--score-excellent); }
+        .credit-score-badge.good { background: var(--score-good); }
+        .credit-score-badge.fair { background: var(--score-fair); }
+        .credit-score-badge.poor { background: var(--score-poor); }
+
         /* Floating cards and buttons */
         .dashboard-card, .section, .agent-validation, .loan-card, .notification-item, .document-card, .settings-card {
             transition: var(--ios-transition);
@@ -470,21 +485,6 @@
             font-size: 11px;
             color: var(--ios-gray-4);
         }
-
-        /* Credit score badge */
-        .credit-score-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            color: white;
-        }
-        .credit-score-badge.excellent { background: var(--score-excellent); }
-        .credit-score-badge.good { background: var(--score-good); }
-        .credit-score-badge.fair { background: var(--score-fair); }
-        .credit-score-badge.poor { background: var(--score-poor); }
 
         .section {
             background: var(--ios-white);
@@ -736,6 +736,7 @@
             border-radius: var(--ios-border-radius-small);
         }
 
+        /* Loan preview */
         .loan-preview {
             background: var(--ios-gray-1);
             padding: 12px;
@@ -1634,6 +1635,12 @@
         .ban-overlay p {
             color: var(--ios-gray-6);
             max-width: 400px;
+        }
+
+        /* Overdue warning card */
+        #overdueWarningCard {
+            background: #ffebee;
+            border-left: 4px solid var(--ios-red);
         }
     </style>
 </head>
@@ -3010,7 +3017,7 @@
             document.getElementById('overdueWarningModal').classList.add('active');
         }
 
-        // ===== Cloudinary Service (all uploads) =====
+        // ===== Cloudinary Service =====
         const CloudinaryService = {
             widget: null,
             initUploadWidget() {
