@@ -914,18 +914,50 @@
         .export-btn:hover {
             transform: translateY(-2px);
         }
-        /* Loan calculator modal */
+        /* ===== NEW STYLES FOR LOAN CALCULATOR MODAL ===== */
+        .form-group {
+            margin-bottom: 14px;
+        }
+        .form-label {
+            font-weight: 500;
+            font-size: 13px;
+            margin-bottom: 5px;
+            display: block;
+            color: #1c1e24;
+        }
+        .form-input, .form-select {
+            width: 100%;
+            padding: 12px 14px;
+            border: 1px solid #dde3e9;
+            border-radius: 27px;
+            font-size: 14px;
+            background: white;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+        .form-input:focus, .form-select:focus {
+            border-color: #007aff;
+            box-shadow: 0 0 0 3px rgba(0,122,255,0.1);
+        }
         .calc-result {
             background: #f0f7ff;
-            border-radius: 16px;                                /* reduced */
-            padding: 14px;                                      /* reduced */
-            margin: 14px 0;                                     /* reduced */
+            border-radius: 16px;
+            padding: 16px;
+            margin: 16px 0;
             text-align: center;
+            border: 1px solid rgba(0,122,255,0.2);
         }
         .calc-result .amount {
-            font-size: 24px;                                    /* reduced */
+            font-size: 26px;
             font-weight: 700;
             color: #007aff;
+        }
+        .calc-result div {
+            margin: 8px 0;
+        }
+        /* Button inside calculator modal (already styled with .btn) */
+        #calculateBtn {
+            margin-top: 8px;
         }
     </style>
 </head>
@@ -1448,7 +1480,7 @@
                     const customer = AppState.customers.find(c => c.id === loan.customerId);
                     if (customer) {
                         const message = `Penalty of ${Utils.formatCurrency(totalPenalty)} has been applied to your loan (${loan.id.substring(0,8)}) due to late payment. Please pay immediately to avoid further penalties.`;
-                        await Utils.sendNotification(customer.id, message, 'penalty', loan.id);
+                        await sendNotification(customer.id, message, 'penalty', loan.id);
                     }
                     await db.ref('loans/' + loan.id).update({ lastPenaltyNotif: now });
                 }
@@ -1481,7 +1513,7 @@
                 }
             });
             // New payments pending
-            // (Assuming payments are stored – we need to load them. We'll add later if needed)
+            // (Assuming payments are stored – we'll add later if needed)
             // Overdue notifications per loan (one per loan)
             AppState.loans.forEach(loan => {
                 if (loan.repaymentSchedule) {
