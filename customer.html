@@ -51,6 +51,8 @@
             /* Penalty colors */
             --penalty-badge: #ff3b30;
             --grace-badge: #ff9500;
+            --reminder-red: #ff3b30;
+            --notification-green: #34c759;
         }
 
         body {
@@ -836,6 +838,8 @@
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 10px;
+            display: inline-block;
+            margin-right: 5px;
         }
         .grace-badge {
             background: var(--ios-orange);
@@ -844,6 +848,8 @@
             padding: 2px 8px;
             border-radius: 12px;
             font-size: 10px;
+            display: inline-block;
+            margin-right: 5px;
         }
         .countdown-timer {
             font-size: 11px;
@@ -857,6 +863,25 @@
         }
         .notification-item.notification-green {
             border-left: 4px solid var(--ios-green);
+        }
+
+        /* Interest preview card */
+        .interest-preview {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius-small);
+            padding: 12px;
+            margin-bottom: 16px;
+        }
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 6px;
+            font-size: 13px;
+        }
+        .preview-total {
+            font-weight: 700;
+            color: var(--ios-green);
+            font-size: 16px;
         }
 
         .modal {
@@ -1976,26 +2001,26 @@
                             </div>
                             
                             <!-- Interest Preview -->
-                            <div class="detail-card mb-4" id="interestPreview" style="background: var(--ios-gray-1);">
-                                <div class="d-flex justify-between">
-                                    <span class="detail-label">Principal:</span>
-                                    <span class="detail-value" id="previewPrincipal">K0.00</span>
+                            <div class="interest-preview" id="interestPreview">
+                                <div class="preview-row">
+                                    <span>Principal:</span>
+                                    <span id="previewPrincipal">K0.00</span>
                                 </div>
-                                <div class="d-flex justify-between">
-                                    <span class="detail-label">Interest Rate:</span>
-                                    <span class="detail-value" id="previewRate">35% (monthly)</span>
+                                <div class="preview-row">
+                                    <span>Interest Rate:</span>
+                                    <span id="previewRate">35% (monthly)</span>
                                 </div>
-                                <div class="d-flex justify-between">
-                                    <span class="detail-label">Total Interest:</span>
-                                    <span class="detail-value" id="previewInterest">K0.00</span>
+                                <div class="preview-row">
+                                    <span>Total Interest:</span>
+                                    <span id="previewInterest">K0.00</span>
                                 </div>
-                                <div class="d-flex justify-between">
-                                    <span class="detail-label">Total Payable:</span>
-                                    <span class="detail-value large" id="previewTotal">K0.00</span>
+                                <div class="preview-row">
+                                    <span>Total Payable:</span>
+                                    <span class="preview-total" id="previewTotal">K0.00</span>
                                 </div>
-                                <div class="d-flex justify-between">
-                                    <span class="detail-label">Periodic Payment:</span>
-                                    <span class="detail-value" id="previewPeriodic">K0.00</span>
+                                <div class="preview-row">
+                                    <span>Periodic Payment:</span>
+                                    <span id="previewPeriodic">K0.00</span>
                                 </div>
                             </div>
                             
@@ -2092,7 +2117,7 @@
                                         <li>Allow verification of collateral</li>
                                         <li>Accept interest rates as determined by TruCash</li>
                                         <li>Make timely repayments</li>
-                                        <li>Accept penalties for late payments</li>
+                                        <li>Accept penalties for late payments (2% per day after 5-day grace period)</li>
                                         <li>Allow TruCash to secure the loan with provided collateral</li>
                                     </ul>
                                     <div class="form-check">
@@ -4741,7 +4766,7 @@
                         
                         <h3>5. Terms and Conditions</h3>
                         <p><b>1. Repayment:</b> The Borrower agrees to repay the full loan amount with interest as specified by the repayment date.</p>
-                        <p><b>2. Default:</b> If the Borrower fails to repay on time, the Lender has the right to sell the collateral to recover the loan and take legal action.</p>
+                        <p><b>2. Default:</b> If the Borrower fails to repay on time, the Lender has the right to sell the collateral to recover the loan and take legal action. A penalty of 2% per day after a 5-day grace period will be applied.</p>
                         <p><b>3. Third-Party Witness:</b> A third-party witness is required to validate the agreement.</p>
                         
                         <h3>6. Signatures</h3>
@@ -4888,7 +4913,7 @@
                         
                         <div class="section">
                             <h3>5. Terms and Conditions</h3>
-                            <p>Standard terms apply.</p>
+                            <p>Standard terms apply. Penalty of 2% per day after 5-day grace period for late payment.</p>
                         </div>
                         
                         <div class="section">
