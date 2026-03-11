@@ -12,6 +12,8 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-storage-compat.js"></script>
     <!-- Cloudinary SDK -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+    <!-- Moment.js for date handling -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <style>
         /* ===== iOS Optimized CSS Reset ===== */
         * {
@@ -48,11 +50,13 @@
             --ios-transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             --ios-safe-area-inset-bottom: env(safe-area-inset-bottom, 20px);
             --ios-safe-area-inset-top: env(safe-area-inset-top, 20px);
-            /* Credit score colors */
-            --score-excellent: #34C759;
-            --score-good: #5856d6;
-            --score-fair: #FF9500;
-            --score-poor: #FF3B30;
+            /* Penalty colors */
+            --penalty-red: #ff3b30;
+            --grace-orange: #ff9500;
+            --reminder-bg: #fff5f5;
+            --reminder-border: #ff3b30;
+            --info-bg: #e8f5e9;
+            --info-border: #34c759;
         }
 
         body {
@@ -394,21 +398,6 @@
             box-shadow: 0 4px 8px rgba(255,59,48,0.2);
         }
 
-        /* Credit score badge */
-        .credit-score-badge {
-            display: inline-flex;
-            align-items: center;
-            padding: 3px 10px;
-            border-radius: 20px;
-            font-size: 11px;
-            font-weight: 600;
-            color: white;
-        }
-        .credit-score-badge.excellent { background: var(--score-excellent); }
-        .credit-score-badge.good { background: var(--score-good); }
-        .credit-score-badge.fair { background: var(--score-fair); }
-        .credit-score-badge.poor { background: var(--score-poor); }
-
         /* Floating cards and buttons */
         .dashboard-card, .section, .agent-validation, .loan-card, .notification-item, .document-card, .settings-card {
             transition: var(--ios-transition);
@@ -736,20 +725,6 @@
             border-radius: var(--ios-border-radius-small);
         }
 
-        /* Loan preview */
-        .loan-preview {
-            background: var(--ios-gray-1);
-            padding: 12px;
-            border-radius: var(--ios-border-radius-small);
-            margin-bottom: 16px;
-            font-size: 13px;
-        }
-        .preview-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 4px;
-        }
-
         .loan-stages {
             display: flex;
             justify-content: space-between;
@@ -855,11 +830,6 @@
         }
 
         .status-rejected {
-            background: #f8d7da;
-            color: #721c24;
-        }
-
-        .status-overdue {
             background: #f8d7da;
             color: #721c24;
         }
@@ -1045,14 +1015,6 @@
             border-left-color: var(--ios-blue);
         }
 
-        .toast.reminder {
-            border-left-color: var(--ios-orange);
-        }
-
-        .toast.penalty {
-            border-left-color: var(--ios-red);
-        }
-
         @keyframes slideInRight {
             from {
                 opacity: 0;
@@ -1070,14 +1032,8 @@
             margin-top: 2px;
         }
 
-        .toast.error .toast-icon,
-        .toast.penalty .toast-icon {
+        .toast.error .toast-icon {
             color: var(--ios-red);
-        }
-
-        .toast.warning .toast-icon,
-        .toast.reminder .toast-icon {
-            color: var(--ios-orange);
         }
 
         .toast-content {
@@ -1356,24 +1312,24 @@
             background: var(--ios-green-dark);
             transform: scale(1.05);
         }
-        .days-badge {
-            display: inline-block;
-            padding: 2px 6px;
-            border-radius: 12px;
-            font-size: 10px;
+
+        /* Penalty and countdown styles */
+        .grace-countdown {
+            font-size: 12px;
             font-weight: 600;
-        }
-        .days-urgent {
-            background: var(--ios-red);
+            padding: 3px 8px;
+            border-radius: 16px;
+            background: var(--grace-orange);
             color: white;
+            display: inline-block;
+            margin-right: 6px;
         }
-        .days-warning {
-            background: var(--ios-orange);
-            color: white;
+        .overdue-countdown {
+            background: var(--penalty-red);
         }
-        .days-safe {
-            background: var(--ios-gray-2);
-            color: var(--ios-gray-6);
+        .penalty-amount {
+            color: var(--penalty-red);
+            font-weight: 600;
         }
 
         /* Loan Details Card */
@@ -1520,6 +1476,61 @@
             max-width: 150px;
         }
 
+        /* Loan preview box */
+        .loan-preview-box {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius);
+            padding: 16px;
+            margin: 16px 0;
+            border: 1px solid var(--ios-gray-2);
+        }
+        .preview-row {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
+            font-size: 14px;
+        }
+        .preview-row.total {
+            font-weight: 700;
+            color: var(--ios-green);
+            border-top: 1px solid var(--ios-gray-2);
+            padding-top: 8px;
+            margin-top: 8px;
+        }
+
+        /* Notification items */
+        .notification-item {
+            background: #f8fafd;
+            border-radius: 16px;
+            padding: 16px;
+            margin-bottom: 10px;
+            border-left: 4px solid #007aff;
+        }
+        .notification-item.reminder {
+            background: var(--reminder-bg);
+            border-left-color: var(--reminder-border);
+        }
+        .notification-item.info {
+            background: var(--info-bg);
+            border-left-color: var(--info-border);
+        }
+        .notification-message {
+            font-weight: 500;
+            margin-bottom: 6px;
+        }
+        .notification-time {
+            font-size: 12px;
+            color: #7e8c9c;
+        }
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 12px;
+            cursor: pointer;
+            margin-top: 6px;
+        }
+
         /* Additional spacing for mobile */
         @media (max-width: 768px) {
             .main-content {
@@ -1550,39 +1561,6 @@
             font-size: 11px;
             font-weight: 600;
             box-shadow: 0 4px 8px rgba(255,59,48,0.3);
-        }
-        /* Notification items */
-        .notification-item {
-            background: #f8fafd;
-            border-radius: 16px;
-            padding: 16px;
-            margin-bottom: 10px;
-            border-left: 4px solid #007aff;
-        }
-        .notification-item.unread {
-            background: #eef5ff;
-        }
-        .notification-item.reminder {
-            border-left-color: #ff9500;
-        }
-        .notification-item.penalty {
-            border-left-color: #ff3b30;
-        }
-        .notification-message {
-            font-weight: 500;
-            margin-bottom: 6px;
-        }
-        .notification-time {
-            font-size: 12px;
-            color: #7e8c9c;
-        }
-        .mark-read-btn {
-            background: none;
-            border: none;
-            color: #007aff;
-            font-size: 12px;
-            cursor: pointer;
-            margin-top: 6px;
         }
 
         /* Maintenance overlay */
@@ -1635,12 +1613,6 @@
         .ban-overlay p {
             color: var(--ios-gray-6);
             max-width: 400px;
-        }
-
-        /* Overdue warning card */
-        #overdueWarningCard {
-            background: #ffebee;
-            border-left: 4px solid var(--ios-red);
         }
     </style>
 </head>
@@ -1804,12 +1776,12 @@
 
                         <div class="dashboard-card">
                             <div class="card-header">
-                                <div class="card-title">Credit Score</div>
-                                <i class="fas fa-star" style="color: var(--ios-green);"></i>
+                                <div class="card-title">Payment Due</div>
+                                <i class="fas fa-calendar-alt" style="color: var(--ios-green);"></i>
                             </div>
-                            <div class="card-value" id="creditScore">0</div>
-                            <div class="card-subtitle" id="creditGrade">N/A</div>
-                            <div class="card-footer">Based on payment history</div>
+                            <div class="card-value" id="paymentDue">K0.00</div>
+                            <div class="card-subtitle">Next payment amount</div>
+                            <div class="card-footer" id="dueDateInfo">No due date</div>
                         </div>
                     </div>
 
@@ -1905,15 +1877,6 @@
                             </button>
                         </div>
                     </div>
-
-                    <!-- Overdue Warning Card (if any) -->
-                    <div id="overdueWarningCard" class="section" style="background: #ffebee; border-left: 4px solid var(--ios-red); display: none;">
-                        <div class="section-header">
-                            <div class="section-title" style="color: var(--ios-red);">⚠️ Overdue Payment Warning</div>
-                            <button class="btn btn-danger btn-small" id="viewOverdueDetailsBtn">View Details</button>
-                        </div>
-                        <p id="overdueWarningText">You have overdue payments. Please pay immediately to avoid penalties.</p>
-                    </div>
                 </section>
 
                 <!-- Profile Section -->
@@ -1967,14 +1930,6 @@
                             </div>
                             
                             <div class="form-group">
-                                <label class="form-label">Credit Score</label>
-                                <div class="d-flex align-items-center">
-                                    <span class="credit-score-badge" id="profileCreditBadge">N/A</span>
-                                    <span class="text-muted ml-2" id="profileCreditScore"></span>
-                                </div>
-                            </div>
-                            
-                            <div class="form-group">
                                 <label class="form-label">Profile Photo</label>
                                 <div class="profile-photo-container text-center">
                                     <img src="" alt="Profile Photo" id="profilePhoto" class="profile-avatar" style="width: 80px; height: 80px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>U</text></svg>'">
@@ -2009,15 +1964,6 @@
                                 <div class="form-text text-muted" id="amountValidation" style="font-size: 11px;"></div>
                             </div>
                             
-                            <!-- Loan preview -->
-                            <div class="loan-preview" id="loanPreview">
-                                <div class="preview-item"><span>Interest Rate:</span> <span id="previewInterestRate">35% monthly</span></div>
-                                <div class="preview-item"><span>Total Interest:</span> <span id="previewTotalInterest">K0.00</span></div>
-                                <div class="preview-item"><span>Total Payable:</span> <span id="previewTotalPayable">K0.00</span></div>
-                                <div class="preview-item"><span>Periodic Payment:</span> <span id="previewPeriodicPayment">K0.00</span></div>
-                                <div class="preview-item"><span>Penalty Rate:</span> <span>2% per day after 5-day grace</span></div>
-                            </div>
-                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="loanDuration" class="form-label">Loan Duration</label>
@@ -2028,12 +1974,37 @@
                                 <div class="form-group">
                                     <label class="form-label">Duration Unit</label>
                                     <div class="duration-unit-group">
-                                        <div class="duration-unit-option active" data-unit="months">Months</div>
-                                        <div class="duration-unit-option" data-unit="weeks">Weeks</div>
+                                        <div class="duration-unit-option active" data-unit="months" onclick="setDurationUnit('months')">Months</div>
+                                        <div class="duration-unit-option" data-unit="weeks" onclick="setDurationUnit('weeks')">Weeks</div>
                                     </div>
                                 </div>
                             </div>
                             
+                            <!-- Loan Preview Box -->
+                            <div class="loan-preview-box" id="loanPreviewBox" style="display: none;">
+                                <h4 class="mb-2">Loan Summary</h4>
+                                <div class="preview-row">
+                                    <span>Principal:</span>
+                                    <span id="previewPrincipal">K0.00</span>
+                                </div>
+                                <div class="preview-row">
+                                    <span>Interest Rate:</span>
+                                    <span id="previewRate">35% (monthly)</span>
+                                </div>
+                                <div class="preview-row">
+                                    <span>Total Interest:</span>
+                                    <span id="previewInterest">K0.00</span>
+                                </div>
+                                <div class="preview-row total">
+                                    <span>Total Payable:</span>
+                                    <span id="previewTotal">K0.00</span>
+                                </div>
+                                <div class="preview-row">
+                                    <span>Periodic Payment:</span>
+                                    <span id="previewPeriodic">K0.00</span>
+                                </div>
+                            </div>
+
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="loanPurpose" class="form-label">Loan Purpose</label>
@@ -2382,23 +2353,6 @@
         </div>
     </div>
 
-    <!-- Overdue Warning Modal -->
-    <div class="modal" id="overdueWarningModal">
-        <div class="modal-content">
-            <div class="modal-header" style="background: var(--ios-red); color: white;">
-                <h3 class="modal-title" style="color: white;">⚠️ Overdue Payment Warning</h3>
-                <button class="modal-close" id="closeOverdueWarningModal"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body" id="overdueWarningBody">
-                <!-- dynamic content -->
-            </div>
-            <div class="modal-footer">
-                <button class="btn btn-outline" id="dismissOverdueWarning">Remind Later</button>
-                <button class="btn btn-primary" id="goToPaymentsBtn">Pay Now</button>
-            </div>
-        </div>
-    </div>
-
     <!-- Statement Modal -->
     <div class="modal" id="statementModal">
         <div class="modal-content large">
@@ -2679,12 +2633,8 @@
             promotions: [],
             currentPromotionIndex: 0,
             seenPromotions: new Set(),
-            lastPenaltyCheck: 0
+            seenNotifications: new Set() // to avoid duplicates
         };
-
-        // Penalty constants
-        const GRACE_DAYS = 5;
-        const PENALTY_RATE = 0.02;
 
         // ===== Initialize Firebase =====
         let firebaseApp, auth, db;
@@ -2697,6 +2647,21 @@
             console.error("❌ Firebase initialization error:", error);
             showToast('System Error', 'Failed to initialize application', 'error');
         }
+
+        // ===== Load seen notifications from localStorage =====
+        try {
+            const stored = localStorage.getItem('trucash_seen_notifications');
+            if (stored) AppState.seenNotifications = new Set(JSON.parse(stored));
+        } catch (e) {}
+
+        function markNotificationShown(id) {
+            AppState.seenNotifications.add(id);
+            localStorage.setItem('trucash_seen_notifications', JSON.stringify(Array.from(AppState.seenNotifications)));
+        }
+
+        // ===== Penalty Constants =====
+        const GRACE_DAYS = 5;
+        const PENALTY_RATE = 0.02; // 2% per day
 
         // ===== Enhanced Utility Functions =====
         const Utils = {
@@ -2716,7 +2681,7 @@
                 toast.className = `toast ${type}`;
                 toast.innerHTML = `
                     <div class="toast-icon">
-                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' || type === 'reminder' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
                     </div>
                     <div class="toast-content">
                         <div class="toast-title">${title}</div>
@@ -2863,161 +2828,59 @@
                 } catch (e) {
                     console.warn('Failed to save seen promotions', e);
                 }
+            },
+            // Apply penalties to a loan based on current date
+            applyPenaltiesToLoan(loan) {
+                if (!loan.repaymentSchedule || (loan.status !== 'active' && loan.status !== 'approved')) return;
+                const now = Date.now();
+                let totalPenalty = loan.totalPenalty || 0;
+                let schedule = [...loan.repaymentSchedule];
+                let updated = false;
+
+                schedule.forEach(inst => {
+                    if (inst.status === 'paid') return;
+                    const dueDate = inst.dueDate;
+                    const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
+                    if (now <= graceEnd) return;
+
+                    const overdueMs = now - graceEnd;
+                    const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
+                    if (overdueDays <= 0) return;
+
+                    // Calculate penalty for this installment
+                    const penaltyPerDay = loan.totalPayable * PENALTY_RATE;
+                    const penaltyAmount = penaltyPerDay * overdueDays;
+                    if (penaltyAmount > (inst.penalty || 0)) {
+                        const additional = penaltyAmount - (inst.penalty || 0);
+                        inst.penalty = penaltyAmount;
+                        inst.totalDue = inst.principal + inst.interest + inst.penalty;
+                        totalPenalty += additional;
+                        updated = true;
+                    }
+                });
+
+                if (updated) {
+                    loan.repaymentSchedule = schedule;
+                    loan.totalPenalty = totalPenalty;
+                    loan.totalPayable = (loan.totalPayable || loan.amount) + totalPenalty;
+                }
+                return updated;
+            },
+            // Get countdown text for a due date
+            getDueCountdown(dueDate) {
+                const now = Date.now();
+                const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
+                if (now <= graceEnd) {
+                    const daysLeft = Math.ceil((graceEnd - now) / (24 * 60 * 60 * 1000));
+                    return { text: `${daysLeft} day${daysLeft !== 1 ? 's' : ''} left in grace`, class: 'grace-countdown' };
+                } else {
+                    const overdueDays = Math.floor((now - graceEnd) / (24 * 60 * 60 * 1000));
+                    return { text: `${overdueDays} day${overdueDays !== 1 ? 's' : ''} overdue`, class: 'grace-countdown overdue-countdown' };
+                }
             }
         };
 
-        // ===== Penalty Functions =====
-        async function applyPenaltiesToAllLoans() {
-            const now = Date.now();
-            for (const loan of AppState.activeLoans) {
-                if (loan.status !== 'active' && loan.status !== 'approved') continue;
-                await applyPenaltiesToLoan(loan, now);
-            }
-        }
-
-        async function applyPenaltiesToLoan(loan, now = Date.now()) {
-            if (!loan.repaymentSchedule) return;
-            let lastPenaltyDate = loan.lastPenaltyDate || 0;
-            let totalPenalty = loan.totalPenalty || 0;
-            const totalPayable = loan.totalPayable || loan.amount || 0;
-            let schedule = [...loan.repaymentSchedule];
-            let updated = false;
-
-            for (let i = 0; i < schedule.length; i++) {
-                const inst = schedule[i];
-                if (inst.status === 'paid') continue;
-                const dueDate = inst.dueDate;
-                const graceEnd = dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000;
-                if (now <= graceEnd) continue;
-
-                const overdueMs = now - graceEnd;
-                const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
-                if (overdueDays <= 0) continue;
-
-                let startDay = 1;
-                if (lastPenaltyDate > graceEnd) {
-                    const alreadyPenalizedMs = lastPenaltyDate - graceEnd;
-                    startDay = Math.floor(alreadyPenalizedMs / (24 * 60 * 60 * 1000)) + 1;
-                }
-                if (startDay > overdueDays) continue;
-
-                const penaltyPerDay = totalPayable * PENALTY_RATE;
-                const daysToApply = overdueDays - startDay + 1;
-                const penaltyAmount = penaltyPerDay * daysToApply;
-
-                inst.penalty = (inst.penalty || 0) + penaltyAmount;
-                inst.totalDue = (inst.principal || 0) + (inst.interest || 0) + inst.penalty;
-                inst.status = 'pending';
-
-                totalPenalty += penaltyAmount;
-                updated = true;
-            }
-
-            if (updated) {
-                loan.repaymentSchedule = schedule;
-                loan.totalPenalty = totalPenalty;
-                loan.totalPayable = (loan.totalPayable || loan.amount) + totalPenalty;
-                loan.lastPenaltyDate = now;
-
-                try {
-                    await db.ref('loans/' + loan.id).update({
-                        repaymentSchedule: schedule,
-                        totalPenalty: totalPenalty,
-                        totalPayable: loan.totalPayable,
-                        lastPenaltyDate: now
-                    });
-                } catch (error) {
-                    console.error('Error updating loan penalties:', error);
-                }
-
-                // Send notification if not sent recently
-                if (!loan.lastPenaltyNotif || now - loan.lastPenaltyNotif > 24 * 60 * 60 * 1000) {
-                    const message = `A penalty of ${Utils.formatCurrency(penaltyAmount)} has been applied to your loan (${loan.id.substring(0,8)}) due to late payment. Please pay immediately to avoid further penalties.`;
-                    await FirebaseService.addMessage(loan.customerId, message, 'penalty');
-                    await db.ref('loans/' + loan.id).update({ lastPenaltyNotif: now });
-                    Utils.showToast('Penalty Applied', `Penalty of ${Utils.formatCurrency(penaltyAmount)} added to loan ${loan.id.substring(0,8)}`, 'penalty');
-                }
-            }
-        }
-
-        // ===== Credit Score Calculation =====
-        function calculateCreditScore(customerId) {
-            const customerLoans = AppState.activeLoans.concat(AppState.completedLoans).filter(l => l.customerId === customerId);
-            const customerPayments = AppState.payments.filter(p => p.customerId === customerId);
-
-            if (customerLoans.length === 0) return { score: 70, grade: 'N/A' };
-
-            let latePayments = 0;
-            let defaultedLoans = 0;
-            let totalDue = 0;
-            let totalPaid = 0;
-
-            customerLoans.forEach(loan => {
-                totalDue += loan.totalPayable || loan.amount;
-                totalPaid += loan.totalPaid || 0;
-                if (loan.status === 'defaulted') defaultedLoans++;
-                if (loan.repaymentSchedule) {
-                    loan.repaymentSchedule.forEach(inst => {
-                        if (inst.status === 'paid' && inst.paidAt && inst.dueDate && inst.paidAt > inst.dueDate + GRACE_DAYS * 24 * 60 * 60 * 1000) {
-                            latePayments++;
-                        }
-                    });
-                }
-            });
-
-            const paymentRatio = totalDue > 0 ? totalPaid / totalDue : 1;
-            const onTimeRatio = latePayments > 0 ? (customerPayments.length - latePayments) / customerPayments.length : 1;
-
-            let score = 100;
-            score -= defaultedLoans * 15;
-            score -= latePayments * 2;
-            score = score * (0.5 + 0.5 * paymentRatio);
-            score = Math.min(100, Math.max(0, Math.round(score)));
-
-            let grade;
-            if (score >= 80) grade = 'Excellent';
-            else if (score >= 60) grade = 'Good';
-            else if (score >= 40) grade = 'Fair';
-            else grade = 'Poor';
-
-            return { score, grade };
-        }
-
-        // ===== Check for overdue warnings =====
-        function checkForOverdueWarnings() {
-            const now = Date.now();
-            let hasOverdue = false;
-            let totalOverdue = 0;
-            for (const loan of AppState.activeLoans) {
-                if (loan.repaymentSchedule) {
-                    for (const inst of loan.repaymentSchedule) {
-                        if (inst.status !== 'paid' && inst.dueDate < now) {
-                            hasOverdue = true;
-                            totalOverdue += inst.totalDue - (inst.paidAmount || 0);
-                        }
-                    }
-                }
-            }
-            if (hasOverdue) {
-                document.getElementById('overdueWarningCard').style.display = 'block';
-                document.getElementById('overdueWarningText').innerText = `You have overdue payments totaling ${Utils.formatCurrency(totalOverdue)}. Please pay immediately to avoid further penalties.`;
-                // Show modal if not dismissed recently (using localStorage)
-                const lastDismiss = localStorage.getItem('overdueWarningDismissed');
-                if (!lastDismiss || Date.now() - parseInt(lastDismiss) > 24 * 60 * 60 * 1000) {
-                    showOverdueWarningModal(totalOverdue);
-                }
-            } else {
-                document.getElementById('overdueWarningCard').style.display = 'none';
-            }
-        }
-
-        function showOverdueWarningModal(totalOverdue) {
-            const body = document.getElementById('overdueWarningBody');
-            body.innerHTML = `<p>You have overdue payments totaling <strong>${Utils.formatCurrency(totalOverdue)}</strong>. Failure to pay may result in additional penalties and damage to your credit score.</p>`;
-            document.getElementById('overdueWarningModal').classList.add('active');
-        }
-
-        // ===== Cloudinary Service =====
+        // ===== Cloudinary Service (all uploads) =====
         const CloudinaryService = {
             widget: null,
             initUploadWidget() {
@@ -3347,12 +3210,14 @@
                                 const banMessage = document.getElementById('banMessage');
                                 const banDetails = document.getElementById('banDetails');
                                 banMessage.textContent = `Sorry, ${userData.fullName || 'User'}`;
+                                // Update ban details from systemSettings if available
                                 if (AppState.systemSettings) {
                                     banDetails.textContent = `You have been banned from TruCash. For more inquiries, contact ${AppState.systemSettings.customerContactEmail || 'support@trucash.zm'} or call ${AppState.systemSettings.customerContactPhone || '+260 123 456 789'}.`;
                                 } else {
                                     banDetails.textContent = 'You have been banned from TruCash. For more inquiries, contact support@trucash.zm or call +260 123 456 789.';
                                 }
                                 banOverlay.style.display = 'flex';
+                                // Hide all main content
                                 document.querySelector('.dashboard-container').style.opacity = '0.3';
                                 document.querySelector('.dashboard-container').style.pointerEvents = 'none';
                                 Utils.hideLoading();
@@ -3360,6 +3225,7 @@
                                 return;
                             }
 
+                            // Check if customer app is enabled
                             if (AppState.systemSettings && AppState.systemSettings.enableCustomerApp === false) {
                                 document.getElementById('maintenanceOverlay').style.display = 'flex';
                                 document.querySelector('.dashboard-container').style.opacity = '0.3';
@@ -3383,6 +3249,7 @@
                     const snapshot = await settingsRef.once('value');
                     if (snapshot.exists()) {
                         AppState.systemSettings = snapshot.val();
+                        // Update UI elements that depend on settings
                         this.updateSettingsUI();
                     } else {
                         AppState.systemSettings = {
@@ -3402,14 +3269,18 @@
                     console.error('Error loading system settings:', error);
                 }
             },
+            // Update UI elements that depend on systemSettings (contact info, loan limits, etc.)
             updateSettingsUI() {
                 if (!AppState.systemSettings) return;
+                // Update support modal
                 document.getElementById('supportPhone').textContent = AppState.systemSettings.customerContactPhone || '+260 123 456 789';
                 document.getElementById('supportEmail').textContent = AppState.systemSettings.customerContactEmail || 'support@trucash.zm';
                 document.getElementById('supportWebsite').textContent = AppState.systemSettings.customerContactWebsite || 'https://trucash.zm';
+                // Update about section contact
                 document.getElementById('contactPhone').textContent = AppState.systemSettings.customerContactPhone || '+260 123 456 789';
                 document.getElementById('contactEmail').textContent = AppState.systemSettings.customerContactEmail || 'support@trucash.zm';
                 document.getElementById('contactWebsite').textContent = AppState.systemSettings.customerContactWebsite || 'https://trucash.zm';
+                // Update loan limit info
                 const maxAmount = AppState.systemSettings.maxLoanAmount || 50000;
                 document.getElementById('loanLimitInfo').textContent = `Maximum loan amount: ${Utils.formatCurrency(maxAmount)}`;
             },
@@ -3424,16 +3295,6 @@
                     this.listenForNotifications();
                     await this.loadPromotions();
                     this.listenForPromotions();
-                    
-                    // Apply penalties after loading loans
-                    await applyPenaltiesToAllLoans();
-                    
-                    // Update UI with penalties
-                    UIManager.updateDashboardUI();
-                    UIManager.updateLoansUI();
-                    
-                    // Check for overdue warnings
-                    checkForOverdueWarnings();
                 } catch (error) {
                     console.error('Error loading customer data:', error);
                     Utils.showToast('Data Error', 'Failed to load customer data', 'error');
@@ -3573,6 +3434,12 @@
                             loans.push(loan);
                         });
                         loans.sort((a, b) => b.createdAt - a.createdAt);
+                        // Apply penalties to each active loan
+                        loans.forEach(loan => {
+                            if (loan.status === 'active' || loan.status === 'approved') {
+                                Utils.applyPenaltiesToLoan(loan);
+                            }
+                        });
                         AppState.activeLoans = loans.filter(loan => 
                             loan.status === 'active' || 
                             loan.status === 'pending' || 
@@ -3637,6 +3504,13 @@
                         if (AppState.currentSection === 'notifications') {
                             UIManager.updateNotificationsUI();
                         }
+                        // Show toast for new notification, but avoid duplicates using seenNotifications
+                        const notifId = snap.key;
+                        if (!AppState.seenNotifications.has(notifId)) {
+                            const type = (msg.type && msg.type.includes('reminder')) ? 'warning' : 'info';
+                            Utils.showToast('New Notification', msg.message, type);
+                            markNotificationShown(notifId);
+                        }
                     }
                 });
                 db.ref('messages').on('child_changed', (snap) => {
@@ -3659,11 +3533,13 @@
                     AppState.promotions = [];
                     Object.entries(allPromos).forEach(([id, promo]) => {
                         if (promo.active && (promo.recipients === 'all_customers' || promo.recipients === 'both')) {
+                            // Check expiry
                             if (promo.expiresAt && promo.expiresAt < now) return;
                             AppState.promotions.push({ id, ...promo });
                         }
                     });
                     AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                    // Show first unseen promotion
                     Utils.loadSeenPromotions();
                     const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
                     if (unseen.length > 0) {
@@ -3682,6 +3558,7 @@
                         if (!AppState.promotions.find(p => p.id === snap.key)) {
                             AppState.promotions.unshift({ id: snap.key, ...promo });
                             AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
+                            // If this promotion is unseen and no modal is active, show it
                             if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('promotionModal').classList.contains('active')) {
                                 UIManager.showPromotion({ id: snap.key, ...promo });
                             }
@@ -3694,6 +3571,7 @@
                     if (index !== -1) {
                         const now = Date.now();
                         if (!promo.active || (promo.recipients !== 'all_customers' && promo.recipients !== 'both') || (promo.expiresAt && promo.expiresAt < now)) {
+                            // Remove from list
                             AppState.promotions.splice(index, 1);
                             if (document.getElementById('promotionModal').classList.contains('active') && AppState.promotions[AppState.currentPromotionIndex]?.id === snap.key) {
                                 UIManager.closePromotion();
@@ -3827,8 +3705,7 @@
                         witness: witnessData,
                         totalPaid: 0,
                         totalPenalty: 0,
-                        lastPenaltyDate: null,
-                        lastPenaltyNotif: null
+                        lastPenaltyDate: 0
                     };
                     await loanRef.set(loan);
                     await this.addMessage(
@@ -4005,27 +3882,6 @@
             }
         };
 
-        // ===== Loan Preview Function =====
-        function updateLoanPreview() {
-            const amount = parseFloat(document.getElementById('loanAmount').value) || 0;
-            const duration = parseInt(document.getElementById('loanDuration').value) || 1;
-            const isWeekly = AppState.durationUnit === 'weeks';
-            const rate = isWeekly 
-                ? (AppState.systemSettings?.weeklyInterestRate || 10) / 100 
-                : (AppState.systemSettings?.monthlyInterestRate || 35) / 100;
-            
-            const totalInterest = Utils.calculateTotalInterest(amount, rate, duration, isWeekly);
-            const totalPayable = amount + totalInterest;
-            const periodicPayment = isWeekly
-                ? Utils.calculateWeeklyPayment(amount, rate, duration)
-                : Utils.calculateMonthlyPayment(amount, rate * 12, duration);
-            
-            document.getElementById('previewInterestRate').textContent = isWeekly ? '10% weekly' : '35% monthly';
-            document.getElementById('previewTotalInterest').textContent = Utils.formatCurrency(totalInterest);
-            document.getElementById('previewTotalPayable').textContent = Utils.formatCurrency(totalPayable);
-            document.getElementById('previewPeriodicPayment').textContent = Utils.formatCurrency(periodicPayment);
-        }
-
         // ===== Enhanced UI Manager =====
         const UIManager = {
             init() {
@@ -4110,11 +3966,13 @@
                 this.notificationsModalList = document.getElementById('notificationsModalList');
                 this.loanTabs = document.querySelectorAll('.loan-tab');
                 this.durationUnitOptions = document.querySelectorAll('.duration-unit-option');
-                this.overdueWarningModal = document.getElementById('overdueWarningModal');
-                this.closeOverdueWarningModal = document.getElementById('closeOverdueWarningModal');
-                this.dismissOverdueWarning = document.getElementById('dismissOverdueWarning');
-                this.goToPaymentsBtn = document.getElementById('goToPaymentsBtn');
-                this.viewOverdueDetailsBtn = document.getElementById('viewOverdueDetailsBtn');
+                // Promotion modal elements
+                this.promotionModal = document.getElementById('promotionModal');
+                this.closePromotionModal = document.getElementById('closePromotionModal');
+                this.dismissPromotionBtn = document.getElementById('dismissPromotion');
+                this.promotionTitle = document.getElementById('promotionTitle');
+                this.promotionMessage = document.getElementById('promotionMessage');
+                this.promotionImage = document.getElementById('promotionImage');
             },
             bindEvents() {
                 this.menuToggle?.addEventListener('click', () => {
@@ -4273,46 +4131,8 @@
                 this.markAllReadModalBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
 
                 // Promotion modal close events
-                this.closePromotionModal = document.getElementById('closePromotionModal');
-                this.dismissPromotionBtn = document.getElementById('dismissPromotion');
-                if (this.closePromotionModal) {
-                    this.closePromotionModal.addEventListener('click', () => this.closePromotion());
-                }
-                if (this.dismissPromotionBtn) {
-                    this.dismissPromotionBtn.addEventListener('click', () => this.closePromotion());
-                }
-
-                // Overdue warning events
-                this.closeOverdueWarningModal.addEventListener('click', () => {
-                    this.overdueWarningModal.classList.remove('active');
-                });
-                this.dismissOverdueWarning.addEventListener('click', () => {
-                    this.overdueWarningModal.classList.remove('active');
-                    localStorage.setItem('overdueWarningDismissed', Date.now());
-                });
-                this.goToPaymentsBtn.addEventListener('click', () => {
-                    this.overdueWarningModal.classList.remove('active');
-                    this.showSection('payments');
-                });
-                this.viewOverdueDetailsBtn.addEventListener('click', () => {
-                    this.showOverdueWarningModal();
-                });
-            },
-            showOverdueWarningModal() {
-                const now = Date.now();
-                let totalOverdue = 0;
-                for (const loan of AppState.activeLoans) {
-                    if (loan.repaymentSchedule) {
-                        for (const inst of loan.repaymentSchedule) {
-                            if (inst.status !== 'paid' && inst.dueDate < now) {
-                                totalOverdue += inst.totalDue - (inst.paidAmount || 0);
-                            }
-                        }
-                    }
-                }
-                const body = document.getElementById('overdueWarningBody');
-                body.innerHTML = `<p>You have overdue payments totaling <strong>${Utils.formatCurrency(totalOverdue)}</strong>. Failure to pay may result in additional penalties and damage to your credit score.</p>`;
-                this.overdueWarningModal.classList.add('active');
+                this.closePromotionModal.addEventListener('click', () => this.closePromotion());
+                this.dismissPromotionBtn.addEventListener('click', () => this.closePromotion());
             },
             populateDurationOptions() {
                 const select = document.getElementById('loanDuration');
@@ -4339,7 +4159,6 @@
                     `;
                 }
                 select.innerHTML = options;
-                updateLoanPreview();
             },
             async initAuth() {
                 Utils.showLoading('Authenticating...');
@@ -4375,6 +4194,12 @@
                         loans.push(loan);
                     });
                     loans.sort((a, b) => b.createdAt - a.createdAt);
+                    // Apply penalties to active loans
+                    loans.forEach(loan => {
+                        if (loan.status === 'active' || loan.status === 'approved') {
+                            Utils.applyPenaltiesToLoan(loan);
+                        }
+                    });
                     AppState.activeLoans = loans.filter(loan => 
                         loan.status === 'active' || 
                         loan.status === 'pending' || 
@@ -4385,7 +4210,6 @@
                         loan.status === 'defaulted' || 
                         loan.status === 'rejected'
                     );
-                    await applyPenaltiesToAllLoans();
                     this.updateDashboardUI();
                     if (AppState.currentSection === 'loans') {
                         this.updateLoansUI();
@@ -4393,7 +4217,6 @@
                     if (AppState.currentSection === 'history') {
                         this.updateLoanHistoryUI();
                     }
-                    checkForOverdueWarnings();
                 });
                 AppState.realtimeListeners.push(() => loansRef.off('value', loansListener));
                 const paymentsRef = db.ref('payments').orderByChild('customerId').equalTo(AppState.currentUser.uid);
@@ -4413,13 +4236,14 @@
                 });
                 AppState.realtimeListeners.push(() => paymentsRef.off('value', paymentsListener));
 
+                // System settings listener
                 const settingsRef = db.ref('systemSettings');
                 const settingsListener = settingsRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         AppState.systemSettings = snapshot.val();
                         FirebaseService.updateSettingsUI();
+                        // Also update loan limit on dashboard
                         this.updateDashboardUI();
-                        updateLoanPreview();
                     }
                 });
                 AppState.realtimeListeners.push(() => settingsRef.off('value', settingsListener));
@@ -4453,6 +4277,7 @@
                         break;
                     case 'apply':
                         this.updateLoanApplicationUI();
+                        updateLoanPreview();
                         break;
                     case 'loans':
                         this.updateLoansUI();
@@ -4479,12 +4304,10 @@
                     return;
                 }
                 this.notificationsModalList.innerHTML = AppState.notifications.map(n => {
-                    let itemClass = 'notification-item';
-                    if (!n.read) itemClass += ' unread';
-                    if (n.type === 'penalty') itemClass += ' penalty';
-                    else if (n.type === 'reminder') itemClass += ' reminder';
+                    const isReminder = n.type && n.type.includes('reminder');
+                    const notificationClass = isReminder ? 'reminder' : 'info';
                     return `
-                    <div class="${itemClass}" data-id="${n.id}">
+                    <div class="notification-item ${notificationClass} ${n.read ? '' : 'unread'}" data-id="${n.id}">
                         <div class="notification-message">${n.message || n.type}</div>
                         <div class="notification-time">${Utils.formatDateTime(n.timestamp)}</div>
                         ${!n.read ? `<button class="mark-read-btn" onclick="UIManager.markNotificationRead('${n.id}')"><i class="fas fa-check-circle"></i> Mark as read</button>` : ''}
@@ -4552,11 +4375,6 @@
                     this.profilePhoto.src = user.profilePhoto;
                     this.profileAvatar.src = user.profilePhoto;
                 }
-                const credit = calculateCreditScore(AppState.currentUser.uid);
-                document.getElementById('profileCreditScore').textContent = `${credit.score} (${credit.grade})`;
-                const badge = document.getElementById('profileCreditBadge');
-                badge.textContent = credit.grade;
-                badge.className = `credit-score-badge ${credit.grade.toLowerCase()}`;
                 this.updateDocumentGrid();
             },
             updateDashboardUI() {
@@ -4592,11 +4410,6 @@
                 this.dueDateInfo.textContent = nextDueDate ? `Due: ${nextDueDate}` : 'No due date';
                 const maxAmount = AppState.systemSettings?.maxLoanAmount || 50000;
                 document.getElementById('loanLimitInfo').textContent = `Maximum loan amount: ${Utils.formatCurrency(maxAmount)}`;
-                
-                // Update credit score on dashboard
-                const credit = calculateCreditScore(AppState.currentUser.uid);
-                document.getElementById('creditScore').textContent = credit.score;
-                document.getElementById('creditGrade').textContent = credit.grade;
             },
             updateAgentUI() {
                 if (!AppState.userData) return;
@@ -4865,7 +4678,8 @@
                         <h3>5. Terms and Conditions</h3>
                         <p><b>1. Repayment:</b> The Borrower agrees to repay the full loan amount with interest as specified by the repayment date.</p>
                         <p><b>2. Default:</b> If the Borrower fails to repay on time, the Lender has the right to sell the collateral to recover the loan and take legal action.</p>
-                        <p><b>3. Third-Party Witness:</b> A third-party witness is required to validate the agreement.</p>
+                        <p><b>3. Penalty:</b> A penalty of 2% per day will be applied after a 5-day grace period for any overdue installment.</p>
+                        <p><b>4. Third-Party Witness:</b> A third-party witness is required to validate the agreement.</p>
                         
                         <h3>6. Signatures</h3>
                         <p><b>Lender Representatives:</b> (to be signed by admin)</p>
@@ -4965,17 +4779,19 @@
                     <html>
                     <head><meta charset="UTF-8"><title>Signed Loan Agreement</title>
                     <style>
-                        body { font-family: 'Times New Roman', serif; background: #fefefe; padding: 30px; color: #2c3e50; }
+                        body { font-family: 'Times New Roman', serif; padding: 30px; background: #fefefe; color: #2c3e50; }
                         h1, h2 { text-align: center; color: #1a5276; }
                         h3 { background: #1a5276; color: white; padding: 8px 12px; border-radius: 4px; margin: 20px 0 10px; }
                         .section { margin-top: 25px; }
-                        .label { font-weight: bold; width: 200px; color: #1a5276; }
-                        .detail { margin: 8px 0; display: flex; flex-wrap: wrap; }
+                        .label { font-weight: bold; color: #1a5276; width: 200px; display: inline-block; }
+                        .detail { margin: 8px 0; }
                         .signature-img { max-width: 200px; max-height: 80px; border: 1px solid #ccc; }
+                        .logo { text-align: center; margin-bottom: 20px; }
+                        .logo i { font-size: 50px; color: #1a5276; }
                     </style>
                     </head>
                     <body>
-                        <h1>TrueCash Money Lender Firm</h1>
+                        <div class="logo"><i class="fas fa-wallet"></i><h1>TrueCash Money Lender Firm</h1></div>
                         <h2>Loan Agreement Form</h2>
                         <p>This Loan Agreement is made and entered into on this ${day} day of ${month}, ${year}.</p>
                         
@@ -5013,7 +4829,7 @@
                         
                         <div class="section">
                             <h3>5. Terms and Conditions</h3>
-                            <p>Standard terms apply, including 2% daily penalty after 5-day grace.</p>
+                            <p>Standard terms apply. Penalty of 2% per day after 5-day grace period.</p>
                         </div>
                         
                         <div class="section">
@@ -5075,26 +4891,15 @@
                     return;
                 }
                 let html = '';
-                const now = Date.now();
                 loans.forEach(loan => {
                     const showPayBtn = (loan.status === 'approved' || loan.status === 'active');
-                    // Calculate days left/overdue for next pending installment
-                    let daysStatus = '';
-                    let daysClass = '';
-                    if (loan.repaymentSchedule) {
-                        const nextPending = loan.repaymentSchedule.find(inst => inst.status !== 'paid');
-                        if (nextPending) {
-                            const days = Math.ceil((nextPending.dueDate - now) / (1000*60*60*24));
-                            if (days < 0) {
-                                daysStatus = `Overdue by ${Math.abs(days)} days`;
-                                daysClass = 'days-urgent';
-                            } else if (days <= 5) {
-                                daysStatus = `${days} days left (grace)`;
-                                daysClass = 'days-warning';
-                            } else {
-                                daysStatus = `${days} days left`;
-                                daysClass = 'days-safe';
-                            }
+                    // Get next due installment for countdown
+                    let countdownHtml = '';
+                    if (loan.repaymentSchedule && (loan.status === 'active' || loan.status === 'approved')) {
+                        const nextInst = loan.repaymentSchedule.find(inst => inst.status !== 'paid');
+                        if (nextInst) {
+                            const countdown = Utils.getDueCountdown(nextInst.dueDate);
+                            countdownHtml = `<span class="${countdown.class}">${countdown.text}</span>`;
                         }
                     }
                     html += `
@@ -5104,11 +4909,11 @@
                                 <span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span>
                             </div>
                             <div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div>
+                            ${countdownHtml ? `<div class="mb-2">${countdownHtml}</div>` : ''}
                             <div class="loan-dates">
                                 <span>Created: ${Utils.formatDate(loan.createdAt)}</span>
                                 <span>Due: ${loan.repaymentSchedule && loan.repaymentSchedule[0] ? Utils.formatDate(loan.repaymentSchedule[0].dueDate) : 'N/A'}</span>
                             </div>
-                            ${daysStatus ? `<div class="mt-2"><span class="days-badge ${daysClass}">${daysStatus}</span></div>` : ''}
                             ${showPayBtn ? `<button class="loan-pay-btn" onclick="event.stopPropagation(); UIManager.preparePaymentForLoan('${loan.id}');"><i class="fas fa-credit-card"></i> Pay Now</button>` : ''}
                         </div>
                     `;
@@ -5121,16 +4926,16 @@
                 const modalBody = document.getElementById('loanDetailsModalBody');
                 let scheduleHtml = '';
                 if (loan.repaymentSchedule) {
-                    scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>';
+                    scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Status</th></tr>';
                     loan.repaymentSchedule.forEach(inst => {
+                        const penalty = inst.penalty || 0;
                         scheduleHtml += `<tr>
                             <td>${inst.installment}</td>
                             <td>${Utils.formatDate(inst.dueDate)}</td>
                             <td>${Utils.formatCurrency(inst.principal)}</td>
                             <td>${Utils.formatCurrency(inst.interest)}</td>
-                            <td>${Utils.formatCurrency(inst.penalty || 0)}</td>
+                            <td class="penalty-amount">${Utils.formatCurrency(penalty)}</td>
                             <td>${Utils.formatCurrency(inst.totalDue)}</td>
-                            <td>${Utils.formatCurrency(inst.paidAmount || 0)}</td>
                             <td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td>
                         </tr>`;
                     });
@@ -5145,7 +4950,7 @@
                         <div class="loan-detail-item"><span class="loan-detail-label">${loan.durationUnit === 'weeks' ? 'Weekly' : 'Monthly'} Payment</span><span class="loan-detail-value">${Utils.formatCurrency(loan.periodicPayment)}</span></div>
                         <div class="loan-detail-item"><span class="loan-detail-label">Total Payable</span><span class="loan-detail-value">${Utils.formatCurrency(loan.totalPayable)}</span></div>
                         <div class="loan-detail-item"><span class="loan-detail-label">Paid</span><span class="loan-detail-value">${Utils.formatCurrency(loan.totalPaid || 0)}</span></div>
-                        <div class="loan-detail-item"><span class="loan-detail-label">Total Penalty</span><span class="loan-detail-value text-danger">${Utils.formatCurrency(loan.totalPenalty || 0)}</span></div>
+                        <div class="loan-detail-item"><span class="loan-detail-label">Total Penalty</span><span class="loan-detail-value penalty-amount">${Utils.formatCurrency(loan.totalPenalty || 0)}</span></div>
                         <div class="loan-detail-item"><span class="loan-detail-label">Created</span><span class="loan-detail-value">${Utils.formatDate(loan.createdAt)}</span></div>
                         <div class="loan-detail-item"><span class="loan-detail-label">Agent</span><span class="loan-detail-value">${loan.agentName || 'N/A'}</span></div>
                     </div>
@@ -5409,12 +5214,10 @@
                     return;
                 }
                 list.innerHTML = AppState.notifications.map(n => {
-                    let itemClass = 'notification-item';
-                    if (!n.read) itemClass += ' unread';
-                    if (n.type === 'penalty') itemClass += ' penalty';
-                    else if (n.type === 'reminder') itemClass += ' reminder';
+                    const isReminder = n.type && n.type.includes('reminder');
+                    const notificationClass = isReminder ? 'reminder' : 'info';
                     return `
-                    <div class="${itemClass}">
+                    <div class="notification-item ${notificationClass} ${n.read ? '' : 'unread'}">
                         <div class="notification-message">${n.message || n.type}</div>
                         <div class="notification-time">${Utils.formatDateTime(n.timestamp)}</div>
                     </div>
@@ -5445,6 +5248,7 @@
                 });
                 container.innerHTML = html;
             },
+            // Promotion functions
             showPromotion(promo) {
                 if (!promo) return;
                 this.promotionTitle.textContent = promo.title || 'Special Offer!';
@@ -5466,6 +5270,42 @@
                 this.promotionModal.classList.remove('active');
             }
         };
+
+        // ===== Loan Preview Function =====
+        function updateLoanPreview() {
+            const amount = parseFloat(document.getElementById('loanAmount')?.value) || 0;
+            const duration = parseInt(document.getElementById('loanDuration')?.value) || 1;
+            const unit = AppState.durationUnit || 'months';
+            const isWeekly = unit === 'weeks';
+            const rate = isWeekly 
+                ? (AppState.systemSettings?.weeklyInterestRate || 10) / 100 
+                : (AppState.systemSettings?.monthlyInterestRate || 35) / 100;
+            const previewBox = document.getElementById('loanPreviewBox');
+            if (amount <= 0) {
+                previewBox.style.display = 'none';
+                return;
+            }
+            const totalInterest = Utils.calculateTotalInterest(amount, rate, duration, isWeekly);
+            const totalPayable = amount + totalInterest;
+            const periodicPayment = isWeekly
+                ? Utils.calculateWeeklyPayment(amount, rate, duration)
+                : Utils.calculateMonthlyPayment(amount, rate * 12, duration);
+            document.getElementById('previewPrincipal').textContent = Utils.formatCurrency(amount);
+            document.getElementById('previewRate').textContent = isWeekly ? '10% (weekly)' : '35% (monthly)';
+            document.getElementById('previewInterest').textContent = Utils.formatCurrency(totalInterest);
+            document.getElementById('previewTotal').textContent = Utils.formatCurrency(totalPayable);
+            document.getElementById('previewPeriodic').textContent = Utils.formatCurrency(periodicPayment) + (isWeekly ? ' per week' : ' per month');
+            previewBox.style.display = 'block';
+        }
+
+        function setDurationUnit(unit) {
+            AppState.durationUnit = unit;
+            document.querySelectorAll('.duration-unit-option').forEach(opt => {
+                opt.classList.toggle('active', opt.dataset.unit === unit);
+            });
+            UIManager.populateDurationOptions();
+            updateLoanPreview();
+        }
 
         // ===== Global Functions =====
         function openCloudinaryWidget(element) {
@@ -5502,7 +5342,6 @@
                 Utils.showToast('Amount Limit', `Maximum loan amount is ${Utils.formatCurrency(maxAmount)}`, 'warning');
             }
             UIManager.validateLoanForm();
-            updateLoanPreview();
         }
 
         window.addEventListener('online', () => {
