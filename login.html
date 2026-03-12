@@ -2,8 +2,9 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>TruCash | Secure Login</title>
+    <link rel="manifest" href="manifest.json">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDK - Using Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
@@ -13,7 +14,7 @@
     <!-- Cloudinary Upload Widget -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* ===== iOS White Theme CSS Reset ===== */
+        /* ===== iOS White Theme CSS Reset – Sizes increased by 10% ===== */
         * {
             margin: 0;
             padding: 0;
@@ -40,12 +41,12 @@
             --ios-red: #ff3b30;
             --ios-purple: #5856d6;
             --ios-yellow: #ffcc00;
-            --ios-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
-            --ios-shadow-heavy: 0 4px 16px rgba(0, 0, 0, 0.08);
+            --ios-shadow: 0 2px 9px rgba(0, 0, 0, 0.05);        /* increased */
+            --ios-shadow-heavy: 0 4px 18px rgba(0, 0, 0, 0.08);  /* increased */
             --ios-shadow-light: 0 1px 4px rgba(0, 0, 0, 0.02);
-            --ios-border-radius: 14px;
-            --ios-border-radius-small: 10px;
-            --ios-border-radius-large: 18px;
+            --ios-border-radius: 15px;                           /* 14 → 15 */
+            --ios-border-radius-small: 11px;                     /* 10 → 11 */
+            --ios-border-radius-large: 20px;                     /* 18 → 20 */
             --ios-transition: all 0.25s cubic-bezier(0.4, 0, 0.2, 1);
             --ios-glass: rgba(255, 255, 255, 0.95);
             --ios-glass-border: rgba(255, 255, 255, 0.3);
@@ -58,7 +59,7 @@
             display: flex;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 18px;                /* 16 → 18 */
             line-height: 1.4;
             position: relative;
         }
@@ -80,7 +81,7 @@
         /* ===== Main Container ===== */
         .login-container {
             width: 100%;
-            max-width: 400px;
+            max-width: 440px;               /* 400 → 440 */
             margin: 0 auto;
             animation: containerSlideIn 0.4s ease-out;
         }
@@ -88,7 +89,7 @@
         @keyframes containerSlideIn {
             from {
                 opacity: 0;
-                transform: translateY(10px);
+                transform: translateY(11px); /* 10 → 11 */
             }
             to {
                 opacity: 1;
@@ -99,18 +100,15 @@
         /* ===== Logo Section ===== */
         .logo-container {
             text-align: center;
-            margin-bottom: 28px;
+            margin-bottom: 31px;             /* 28 → 31 */
         }
 
-        .lock-logo {
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 10px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            filter: drop-shadow(0 1px 3px rgba(0, 0, 0, 0.08));
+        .app-logo {
+            width: 88px;                     /* 80 → 88 (big logo) */
+            height: 88px;
+            margin: 0 auto 11px;              /* 10 → 11 */
+            display: block;
+            filter: drop-shadow(0 2px 4px rgba(0,0,0,0.1));
             animation: logoFloat 3s ease-in-out infinite;
         }
 
@@ -119,42 +117,8 @@
             50% { transform: translateY(-3px); }
         }
 
-        .lock-body {
-            width: 36px;
-            height: 28px;
-            background: linear-gradient(135deg, var(--ios-blue) 0%, var(--ios-purple) 100%);
-            border-radius: 6px;
-            position: relative;
-            display: flex;
-            justify-content: center;
-            box-shadow: inset 0 1px 1px rgba(255, 255, 255, 0.2);
-            overflow: hidden;
-        }
-
-        .lock-shackle {
-            width: 44px;
-            height: 22px;
-            border: 8px solid var(--ios-red);
-            border-bottom: none;
-            border-radius: 28px 28px 0 0;
-            position: absolute;
-            top: -14px;
-            left: 6px;
-            filter: drop-shadow(0 1px 1px rgba(0, 0, 0, 0.1));
-        }
-
-        .lock-details {
-            width: 10px;
-            height: 10px;
-            background: linear-gradient(135deg, rgba(255, 255, 255, 0.9) 0%, rgba(255, 255, 255, 0.6) 100%);
-            border-radius: 50%;
-            position: absolute;
-            top: 10px;
-            box-shadow: inset 0 1px 1px rgba(0, 0, 0, 0.1);
-        }
-
         .logo-text {
-            font-size: 22px;
+            font-size: 24px;                  /* 22 → 24 */
             font-weight: 700;
             color: var(--ios-gray-6);
             letter-spacing: -0.5px;
@@ -166,7 +130,7 @@
         }
 
         .logo-subtitle {
-            font-size: 12px;
+            font-size: 13px;                  /* 12 → 13 */
             color: var(--ios-gray-4);
             font-weight: 400;
             letter-spacing: 0.3px;
@@ -178,7 +142,7 @@
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-radius: var(--ios-border-radius-large);
-            padding: 24px 20px;
+            padding: 26px 22px;               /* 24 20 → 26 22 */
             box-shadow: var(--ios-shadow);
             border: 1px solid var(--ios-glass-border);
             transition: var(--ios-transition);
@@ -206,9 +170,9 @@
         }
 
         .login-title {
-            font-size: 18px;
+            font-size: 20px;                  /* 18 → 20 */
             font-weight: 600;
-            margin-bottom: 18px;
+            margin-bottom: 20px;               /* 18 → 20 */
             text-align: center;
             color: var(--ios-gray-6);
             position: relative;
@@ -219,10 +183,10 @@
         .login-title::after {
             content: '';
             position: absolute;
-            bottom: -5px;
+            bottom: -6px;                      /* -5 → -6 */
             left: 50%;
             transform: translateX(-50%);
-            width: 36px;
+            width: 40px;                       /* 36 → 40 */
             height: 2px;
             background: linear-gradient(90deg, var(--ios-blue), var(--ios-purple));
             border-radius: 1px;
@@ -230,12 +194,12 @@
 
         /* ===== Form Elements ===== */
         .form-group {
-            margin-bottom: 14px;
+            margin-bottom: 15px;               /* 14 → 15 */
         }
 
         .form-label {
             display: block;
-            font-size: 11px;
+            font-size: 12px;                   /* 11 → 12 */
             font-weight: 500;
             color: var(--ios-gray-5);
             margin-bottom: 4px;
@@ -246,8 +210,8 @@
 
         .form-input {
             width: 100%;
-            padding: 11px 13px;
-            font-size: 13px;
+            padding: 12px 14px;                /* 11 13 → 12 14 */
+            font-size: 14px;                   /* 13 → 14 */
             border: 1px solid var(--ios-gray-2);
             border-radius: var(--ios-border-radius-small);
             background: rgba(255, 255, 255, 0.95);
@@ -276,16 +240,16 @@
 
         .toggle-password {
             position: absolute;
-            right: 10px;
+            right: 11px;                       /* 10 → 11 */
             top: 50%;
             transform: translateY(-50%);
             background: none;
             border: none;
             color: var(--ios-gray-4);
             cursor: pointer;
-            font-size: 15px;
-            width: 30px;
-            height: 30px;
+            font-size: 16px;                   /* 15 → 16 */
+            width: 33px;                        /* 30 → 33 */
+            height: 33px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -302,8 +266,8 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-top: 18px;
-            margin-bottom: 18px;
+            margin-top: 20px;                  /* 18 → 20 */
+            margin-bottom: 20px;                /* 18 → 20 */
         }
 
         .remember-me {
@@ -314,15 +278,15 @@
         }
 
         .checkbox {
-            margin-right: 7px;
+            margin-right: 8px;                  /* 7 → 8 */
             accent-color: var(--ios-blue);
-            width: 15px;
-            height: 15px;
+            width: 16px;                        /* 15 → 16 */
+            height: 16px;
             cursor: pointer;
         }
 
         .remember-me span {
-            font-size: 12px;
+            font-size: 13px;                    /* 12 → 13 */
             color: var(--ios-gray-5);
             font-weight: 400;
         }
@@ -330,10 +294,10 @@
         .forgot-password {
             color: var(--ios-blue);
             text-decoration: none;
-            font-size: 12px;
+            font-size: 13px;                    /* 12 → 13 */
             font-weight: 500;
             transition: var(--ios-transition);
-            padding: 3px 7px;
+            padding: 3px 8px;                   /* 3 7 → 3 8 */
             border-radius: 5px;
         }
 
@@ -345,25 +309,25 @@
         /* ===== Buttons ===== */
         .login-btn {
             width: 100%;
-            padding: 13px;
+            padding: 14px;                      /* 13 → 14 */
             background: linear-gradient(135deg, var(--ios-blue) 0%, var(--ios-blue-light) 100%);
             color: white;
             border: none;
             border-radius: var(--ios-border-radius-small);
-            font-size: 13px;
+            font-size: 14px;                    /* 13 → 14 */
             font-weight: 600;
             cursor: pointer;
             transition: var(--ios-transition);
-            margin-bottom: 14px;
+            margin-bottom: 15px;                 /* 14 → 15 */
             position: relative;
             overflow: hidden;
             letter-spacing: 0.3px;
-            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
+            box-shadow: 0 2px 7px rgba(0, 122, 255, 0.2); /* increased */
         }
 
         .login-btn:hover {
             background: linear-gradient(135deg, var(--ios-blue-dark) 0%, var(--ios-blue) 100%);
-            box-shadow: 0 3px 10px rgba(0, 122, 255, 0.3);
+            box-shadow: 0 3px 11px rgba(0, 122, 255, 0.3); /* increased */
             transform: translateY(-1px);
         }
 
@@ -396,12 +360,12 @@
 
         .register-btn {
             width: 100%;
-            padding: 13px;
+            padding: 14px;                      /* 13 → 14 */
             background: transparent;
             color: var(--ios-blue);
             border: 1.5px solid var(--ios-gray-2);
             border-radius: var(--ios-border-radius-small);
-            font-size: 13px;
+            font-size: 14px;                    /* 13 → 14 */
             font-weight: 600;
             cursor: pointer;
             transition: var(--ios-transition);
@@ -420,19 +384,19 @@
             background: linear-gradient(135deg, rgba(0, 122, 255, 0.06) 0%, rgba(88, 86, 214, 0.06) 100%);
             border: 1px solid rgba(0, 122, 255, 0.15);
             border-radius: var(--ios-border-radius);
-            padding: 12px 14px;
-            margin-bottom: 14px;
+            padding: 13px 15px;                 /* 12 14 → 13 15 */
+            margin-bottom: 15px;                 /* 14 → 15 */
             display: none;
             animation: fadeIn 0.3s ease;
-            font-size: 12px;
+            font-size: 13px;                    /* 12 → 13 */
             color: var(--ios-gray-6);
             line-height: 1.3;
         }
 
         .user-greeting i {
             color: var(--ios-blue);
-            margin-right: 6px;
-            font-size: 11px;
+            margin-right: 7px;                   /* 6 → 7 */
+            font-size: 12px;                     /* 11 → 12 */
         }
 
         .user-greeting.visible {
@@ -444,8 +408,8 @@
             background: linear-gradient(135deg, rgba(0, 122, 255, 0.06) 0%, rgba(88, 86, 214, 0.06) 100%);
             border: 1px solid rgba(0, 122, 255, 0.15);
             border-radius: var(--ios-border-radius);
-            padding: 14px;
-            margin-bottom: 18px;
+            padding: 15px;                      /* 14 → 15 */
+            margin-bottom: 20px;                 /* 18 → 20 */
             display: none;
             animation: fadeIn 0.3s ease;
         }
@@ -453,15 +417,15 @@
         .agent-info-header {
             display: flex;
             align-items: center;
-            gap: 8px;
-            margin-bottom: 6px;
+            gap: 9px;                           /* 8 → 9 */
+            margin-bottom: 7px;                  /* 6 → 7 */
         }
 
         .agent-info-icon {
             color: var(--ios-blue);
-            font-size: 14px;
-            width: 22px;
-            height: 22px;
+            font-size: 15px;                     /* 14 → 15 */
+            width: 24px;                         /* 22 → 24 */
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -469,30 +433,30 @@
 
         .agent-info-title {
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;                     /* 12 → 13 */
             color: var(--ios-gray-6);
         }
 
         .agent-info-content {
-            font-size: 11px;
+            font-size: 12px;                     /* 11 → 12 */
             color: var(--ios-gray-5);
             line-height: 1.3;
         }
 
         .agent-info-list {
-            margin-top: 6px;
-            padding-left: 14px;
+            margin-top: 7px;                      /* 6 → 7 */
+            padding-left: 15px;                   /* 14 → 15 */
         }
 
         .agent-info-list li {
             margin-bottom: 3px;
-            font-size: 10px;
+            font-size: 11px;                     /* 10 → 11 */
             color: var(--ios-gray-5);
         }
 
         /* ===== Admin Approval Modal ===== */
         .admin-approval-container {
-            max-height: 400px;
+            max-height: 440px;                    /* 400 → 440 */
             overflow-y: auto;
         }
 
@@ -500,8 +464,8 @@
             background: rgba(255, 255, 255, 0.95);
             border: 1px solid var(--ios-gray-2);
             border-radius: var(--ios-border-radius);
-            padding: 14px;
-            margin-bottom: 10px;
+            padding: 15px;                       /* 14 → 15 */
+            margin-bottom: 11px;                  /* 10 → 11 */
             transition: var(--ios-transition);
         }
 
@@ -514,21 +478,21 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 10px;
+            margin-bottom: 11px;                  /* 10 → 11 */
         }
 
         .application-id {
-            font-size: 10px;
+            font-size: 11px;                     /* 10 → 11 */
             color: var(--ios-gray-4);
             background: var(--ios-gray-1);
-            padding: 2px 7px;
-            border-radius: 9px;
+            padding: 2px 8px;                    /* 2 7 → 2 8 */
+            border-radius: 10px;                  /* 9 → 10 */
         }
 
         .application-status {
-            font-size: 10px;
-            padding: 2px 7px;
-            border-radius: 9px;
+            font-size: 11px;                     /* 10 → 11 */
+            padding: 2px 8px;                    /* 2 7 → 2 8 */
+            border-radius: 10px;                  /* 9 → 10 */
             font-weight: 600;
         }
 
@@ -548,17 +512,17 @@
         }
 
         .application-details {
-            font-size: 11px;
+            font-size: 12px;                     /* 11 → 12 */
             color: var(--ios-gray-5);
         }
 
         .detail-row {
             display: flex;
-            margin-bottom: 5px;
+            margin-bottom: 6px;                   /* 5 → 6 */
         }
 
         .detail-label {
-            min-width: 70px;
+            min-width: 77px;                      /* 70 → 77 */
             color: var(--ios-gray-4);
         }
 
@@ -569,14 +533,14 @@
 
         .application-actions {
             display: flex;
-            gap: 7px;
-            margin-top: 10px;
+            gap: 8px;                            /* 7 → 8 */
+            margin-top: 11px;                     /* 10 → 11 */
         }
 
         .btn-small {
-            padding: 5px 10px;
-            font-size: 10px;
-            border-radius: 5px;
+            padding: 6px 11px;                   /* 5 10 → 6 11 */
+            font-size: 11px;                     /* 10 → 11 */
+            border-radius: 6px;                   /* 5 → 6 */
             font-weight: 600;
             cursor: pointer;
             transition: var(--ios-transition);
@@ -602,29 +566,29 @@
 
         /* ===== Credential Generation Modal ===== */
         .credential-generation {
-            padding: 14px;
+            padding: 15px;                      /* 14 → 15 */
             background: rgba(255, 255, 255, 0.95);
             border-radius: var(--ios-border-radius);
             border: 1px solid var(--ios-gray-2);
         }
 
         .credential-form-group {
-            margin-bottom: 10px;
+            margin-bottom: 11px;                 /* 10 → 11 */
         }
 
         .credential-display {
             background: var(--ios-gray-1);
             border: 1px solid var(--ios-gray-2);
             border-radius: var(--ios-border-radius-small);
-            padding: 10px;
-            margin-bottom: 10px;
+            padding: 11px;                       /* 10 → 11 */
+            margin-bottom: 11px;                  /* 10 → 11 */
             font-family: monospace;
-            font-size: 12px;
+            font-size: 13px;                     /* 12 → 13 */
             word-break: break-all;
         }
 
         .credential-note {
-            font-size: 10px;
+            font-size: 11px;                     /* 10 → 11 */
             color: var(--ios-gray-4);
             font-style: italic;
         }
@@ -633,7 +597,7 @@
         .divider {
             display: flex;
             align-items: center;
-            margin: 20px 0;
+            margin: 22px 0;                      /* 20 → 22 */
             color: var(--ios-gray-4);
         }
 
@@ -645,8 +609,8 @@
         }
 
         .divider-text {
-            padding: 0 10px;
-            font-size: 12px;
+            padding: 0 11px;                     /* 0 10 → 0 11 */
+            font-size: 13px;                     /* 12 → 13 */
             font-weight: 400;
             letter-spacing: 0.3px;
         }
@@ -654,33 +618,33 @@
         /* ===== Footer ===== */
         .login-footer {
             text-align: center;
-            margin-top: 20px;
+            margin-top: 22px;                    /* 20 → 22 */
             color: var(--ios-gray-4);
-            font-size: 10px;
+            font-size: 11px;                     /* 10 → 11 */
             line-height: 1.4;
         }
 
         .security-info {
             display: flex;
             justify-content: center;
-            gap: 16px;
-            margin-top: 10px;
-            font-size: 9px;
+            gap: 18px;                           /* 16 → 18 */
+            margin-top: 11px;                     /* 10 → 11 */
+            font-size: 10px;                      /* 9 → 10 */
         }
 
         .security-item {
             display: flex;
             align-items: center;
             gap: 4px;
-            padding: 5px 8px;
+            padding: 6px 9px;                    /* 5 8 → 6 9 */
             background: rgba(255, 255, 255, 0.7);
-            border-radius: 18px;
+            border-radius: 20px;                  /* 18 → 20 */
             border: 1px solid var(--ios-gray-2);
         }
 
         .security-item i {
             color: var(--ios-blue);
-            font-size: 10px;
+            font-size: 11px;                     /* 10 → 11 */
         }
 
         /* ===== Modal Styles ===== */
@@ -692,12 +656,12 @@
             width: 100%;
             height: 100%;
             background: rgba(0, 0, 0, 0.3);
-            backdrop-filter: blur(8px);
-            -webkit-backdrop-filter: blur(8px);
+            backdrop-filter: blur(9px);           /* 8 → 9 */
+            -webkit-backdrop-filter: blur(9px);
             z-index: 1000;
             justify-content: center;
             align-items: center;
-            padding: 16px;
+            padding: 18px;                        /* 16 → 18 */
             opacity: 0;
             transition: opacity 0.3s ease;
         }
@@ -715,17 +679,17 @@
             }
             to {
                 opacity: 1;
-                backdrop-filter: blur(8px);
+                backdrop-filter: blur(9px);
             }
         }
 
         .modal-content {
             background: var(--ios-glass);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(44px);          /* 40 → 44 */
+            -webkit-backdrop-filter: blur(44px);
             border-radius: var(--ios-border-radius-large);
             width: 100%;
-            max-width: 480px;
+            max-width: 528px;                     /* 480 → 528 */
             max-height: 90vh;
             overflow-y: auto;
             box-shadow: var(--ios-shadow-heavy);
@@ -737,7 +701,7 @@
         @keyframes modalSlideHorizontal {
             from {
                 opacity: 0;
-                transform: translateX(80px);
+                transform: translateX(88px);      /* 80 → 88 */
             }
             to {
                 opacity: 1;
@@ -746,34 +710,41 @@
         }
 
         .modal-header {
-            padding: 18px 22px 14px;
+            padding: 20px 24px 15px;              /* 18 22 14 → 20 24 15 */
             border-bottom: 1px solid rgba(0, 0, 0, 0.06);
             display: flex;
-            justify-content: space-between;
             align-items: center;
+            gap: 10px;
             position: sticky;
             top: 0;
             background: var(--ios-glass);
-            backdrop-filter: blur(40px);
+            backdrop-filter: blur(44px);
             z-index: 10;
             border-radius: var(--ios-border-radius-large) var(--ios-border-radius-large) 0 0;
         }
 
+        .modal-logo {
+            width: 36px;                          /* added for logo */
+            height: 36px;
+            object-fit: contain;
+        }
+
         .modal-title {
-            font-size: 16px;
+            font-size: 18px;                      /* 16 → 18 */
             font-weight: 600;
             color: var(--ios-gray-6);
             letter-spacing: -0.3px;
+            flex: 1;
         }
 
         .modal-close {
             background: rgba(0, 0, 0, 0.04);
             border: none;
-            font-size: 15px;
+            font-size: 16px;                      /* 15 → 16 */
             color: var(--ios-gray-5);
             cursor: pointer;
-            width: 26px;
-            height: 26px;
+            width: 29px;                          /* 26 → 29 */
+            height: 29px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -787,19 +758,19 @@
         }
 
         .modal-body {
-            padding: 18px 22px;
+            padding: 20px 24px;                  /* 18 22 → 20 24 */
         }
 
         /* ===== User Type Selection ===== */
         .user-type-selection {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 11px;                           /* 10 → 11 */
+            margin-bottom: 22px;                  /* 20 → 22 */
         }
 
         .user-type-btn {
-            padding: 14px;
+            padding: 15px;                        /* 14 → 15 */
             border: 2px solid var(--ios-gray-2);
             border-radius: var(--ios-border-radius);
             background: rgba(255, 255, 255, 0.9);
@@ -847,8 +818,8 @@
         }
 
         .user-type-icon {
-            font-size: 22px;
-            margin-bottom: 6px;
+            font-size: 24px;                     /* 22 → 24 */
+            margin-bottom: 7px;                   /* 6 → 7 */
             color: var(--ios-blue);
             background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
             -webkit-background-clip: text;
@@ -860,11 +831,11 @@
             font-weight: 600;
             margin-bottom: 3px;
             color: var(--ios-gray-6);
-            font-size: 13px;
+            font-size: 14px;                     /* 13 → 14 */
         }
 
         .user-type-desc {
-            font-size: 11px;
+            font-size: 12px;                     /* 11 → 12 */
             color: var(--ios-gray-4);
             line-height: 1.3;
         }
@@ -873,16 +844,16 @@
         .form-row {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 10px;
-            margin-bottom: 14px;
+            gap: 11px;                           /* 10 → 11 */
+            margin-bottom: 15px;                  /* 14 → 15 */
         }
 
         /* ===== File Upload Grid (2x2) ===== */
         .file-upload-grid {
             display: grid;
             grid-template-columns: repeat(2, 1fr);
-            gap: 10px;
-            margin-bottom: 14px;
+            gap: 11px;                           /* 10 → 11 */
+            margin-bottom: 15px;                  /* 14 → 15 */
         }
 
         .upload-box {
@@ -914,9 +885,9 @@
         }
 
         .upload-box i {
-            font-size: 22px;
+            font-size: 24px;                     /* 22 → 24 */
             color: var(--ios-gray-4);
-            margin-bottom: 6px;
+            margin-bottom: 7px;                   /* 6 → 7 */
             transition: var(--ios-transition);
         }
 
@@ -926,11 +897,11 @@
         }
 
         .upload-box span {
-            font-size: 10px;
+            font-size: 11px;                     /* 10 → 11 */
             color: var(--ios-gray-5);
             font-weight: 500;
             text-align: center;
-            padding: 0 6px;
+            padding: 0 7px;                       /* 0 6 → 0 7 */
         }
 
         .upload-box input {
@@ -968,8 +939,8 @@
         .remove-upload {
             background: rgba(255, 255, 255, 0.95);
             border: none;
-            width: 26px;
-            height: 26px;
+            width: 29px;                         /* 26 → 29 */
+            height: 29px;
             border-radius: 50%;
             display: flex;
             align-items: center;
@@ -987,10 +958,10 @@
 
         .upload-status {
             position: absolute;
-            bottom: 6px;
-            right: 6px;
-            width: 14px;
-            height: 14px;
+            bottom: 7px;                         /* 6 → 7 */
+            right: 7px;
+            width: 15px;                          /* 14 → 15 */
+            height: 15px;
             border-radius: 50%;
             background: var(--ios-green);
             display: none;
@@ -1008,24 +979,24 @@
 
         /* ===== Modal Footer ===== */
         .modal-footer {
-            padding: 14px 22px;
+            padding: 15px 24px;                  /* 14 22 → 15 24 */
             border-top: 1px solid rgba(0, 0, 0, 0.06);
             display: flex;
             justify-content: flex-end;
-            gap: 10px;
+            gap: 11px;                            /* 10 → 11 */
             position: sticky;
             bottom: 0;
             background: var(--ios-glass);
-            backdrop-filter: blur(40px);
+            backdrop-filter: blur(44px);
             border-radius: 0 0 var(--ios-border-radius-large) var(--ios-border-radius-large);
         }
 
         .btn {
-            padding: 9px 18px;
+            padding: 10px 20px;                   /* 9 18 → 10 20 */
             border-radius: var(--ios-border-radius-small);
             font-weight: 600;
             cursor: pointer;
-            font-size: 12px;
+            font-size: 13px;                      /* 12 → 13 */
             transition: var(--ios-transition);
             letter-spacing: 0.3px;
             border: 1.5px solid transparent;
@@ -1047,12 +1018,12 @@
             background: linear-gradient(135deg, var(--ios-blue) 0%, var(--ios-blue-light) 100%);
             border: none;
             color: white;
-            box-shadow: 0 2px 6px rgba(0, 122, 255, 0.2);
+            box-shadow: 0 2px 7px rgba(0, 122, 255, 0.2);
         }
 
         .btn-primary:hover {
             background: linear-gradient(135deg, var(--ios-blue-dark) 0%, var(--ios-blue) 100%);
-            box-shadow: 0 3px 10px rgba(0, 122, 255, 0.3);
+            box-shadow: 0 3px 11px rgba(0, 122, 255, 0.3);
             transform: translateY(-1px);
         }
 
@@ -1064,21 +1035,21 @@
         /* ===== Notifications ===== */
         .notification {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            padding: 14px 18px;
+            top: 22px;                          /* 20 → 22 */
+            right: 22px;
+            padding: 15px 20px;                  /* 14 18 → 15 20 */
             border-radius: var(--ios-border-radius);
             background: var(--ios-glass);
-            backdrop-filter: blur(40px);
-            -webkit-backdrop-filter: blur(40px);
+            backdrop-filter: blur(44px);
+            -webkit-backdrop-filter: blur(44px);
             box-shadow: var(--ios-shadow-heavy);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 11px;                           /* 10 → 11 */
             z-index: 1001;
-            transform: translateX(calc(100% + 20px));
+            transform: translateX(calc(100% + 22px));
             transition: transform 0.3s cubic-bezier(0.4, 0, 0.2, 1);
-            max-width: 300px;
+            max-width: 330px;                     /* 300 → 330 */
             border: 1px solid var(--ios-glass-border);
         }
 
@@ -1103,9 +1074,9 @@
         }
 
         .notification-icon {
-            font-size: 18px;
-            width: 22px;
-            height: 22px;
+            font-size: 20px;                     /* 18 → 20 */
+            width: 24px;                          /* 22 → 24 */
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1134,13 +1105,13 @@
 
         .notification-title {
             font-weight: 600;
-            font-size: 12px;
+            font-size: 13px;                     /* 12 → 13 */
             margin-bottom: 2px;
             color: var(--ios-gray-6);
         }
 
         .notification-message {
-            font-size: 11px;
+            font-size: 12px;                     /* 11 → 12 */
             color: var(--ios-gray-5);
             line-height: 1.3;
         }
@@ -1150,9 +1121,9 @@
             border: none;
             color: var(--ios-gray-4);
             cursor: pointer;
-            font-size: 15px;
-            width: 22px;
-            height: 22px;
+            font-size: 16px;                     /* 15 → 16 */
+            width: 24px;                          /* 22 → 24 */
+            height: 24px;
             display: flex;
             align-items: center;
             justify-content: center;
@@ -1168,8 +1139,8 @@
         /* ===== Loading Spinner ===== */
         .spinner {
             display: inline-block;
-            width: 14px;
-            height: 14px;
+            width: 15px;                         /* 14 → 15 */
+            height: 15px;
             border: 2px solid rgba(255, 255, 255, 0.3);
             border-radius: 50%;
             border-top-color: white;
@@ -1192,7 +1163,7 @@
             background: var(--ios-gray-2);
             border-radius: 1px;
             overflow: hidden;
-            margin: 14px 0;
+            margin: 15px 0;                      /* 14 → 15 */
             display: none;
         }
 
@@ -1236,7 +1207,7 @@
             }
 
             .login-card {
-                padding: 22px 18px;
+                padding: 24px 20px;              /* 22 18 → 24 20 */
             }
 
             .modal-content {
@@ -1257,47 +1228,35 @@
             }
 
             .notification {
-                left: 16px;
-                right: 16px;
+                left: 18px;                       /* 16 → 18 */
+                right: 18px;
                 max-width: none;
             }
         }
 
         @media (max-width: 480px) {
-            .lock-logo {
-                width: 52px;
-                height: 52px;
-            }
-
-            .lock-body {
-                width: 36px;
-                height: 28px;
-            }
-
-            .lock-shackle {
-                width: 44px;
-                height: 20px;
-                border-width: 7px;
-                top: -12px;
+            .app-logo {
+                width: 77px;                      /* 70 → 77 */
+                height: 77px;
             }
 
             .logo-text {
-                font-size: 20px;
+                font-size: 22px;                  /* 20 → 22 */
             }
 
             .login-title {
-                font-size: 16px;
+                font-size: 18px;                  /* 16 → 18 */
             }
 
             .form-options {
                 flex-direction: column;
                 align-items: flex-start;
-                gap: 10px;
+                gap: 11px;                        /* 10 → 11 */
             }
 
             .security-info {
                 flex-direction: column;
-                gap: 6px;
+                gap: 7px;                         /* 6 → 7 */
                 align-items: center;
             }
 
@@ -1312,36 +1271,36 @@
             top: 0;
             left: 0;
             right: 0;
-            height: 44px;
+            height: 48px;                        /* 44 → 48 */
             background: var(--ios-glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
+            backdrop-filter: blur(22px);          /* 20 → 22 */
+            -webkit-backdrop-filter: blur(22px);
             border-bottom: 1px solid var(--ios-glass-border);
             display: flex;
             justify-content: center;
             align-items: center;
             z-index: 100;
-            padding: 0 44px;
+            padding: 0 48px;
         }
 
         .ios-nav-title {
-            font-size: 14px;
+            font-size: 15px;                      /* 14 → 15 */
             font-weight: 600;
             color: var(--ios-gray-6);
         }
 
         .ios-nav-time {
             position: absolute;
-            left: 16px;
-            font-size: 12px;
+            left: 18px;                           /* 16 → 18 */
+            font-size: 13px;                      /* 12 → 13 */
             font-weight: 600;
             color: var(--ios-gray-6);
         }
 
         .ios-nav-status {
             position: absolute;
-            right: 16px;
-            font-size: 12px;
+            right: 18px;
+            font-size: 13px;                      /* 12 → 13 */
             color: var(--ios-gray-6);
         }
 
@@ -1351,7 +1310,7 @@
             bottom: 0;
             left: 0;
             right: 0;
-            height: 34px;
+            height: 37px;                         /* 34 → 37 */
             background: transparent;
             display: flex;
             justify-content: center;
@@ -1360,7 +1319,7 @@
         }
 
         .home-indicator-bar {
-            width: 134px;
+            width: 147px;                         /* 134 → 147 */
             height: 5px;
             background: var(--ios-gray-6);
             border-radius: 3px;
@@ -1384,7 +1343,7 @@
         @keyframes slideUp {
             from {
                 opacity: 0;
-                transform: translateY(8px);
+                transform: translateY(9px);       /* 8 → 9 */
             }
             to {
                 opacity: 1;
@@ -1413,7 +1372,7 @@
         }
 
         .validation-message {
-            font-size: 10px;
+            font-size: 11px;                     /* 10 → 11 */
             margin-top: 3px;
             display: flex;
             align-items: center;
@@ -1436,13 +1395,13 @@
             width: 100%;
             height: 100%;
             background: rgba(255, 255, 255, 0.95);
-            backdrop-filter: blur(10px);
+            backdrop-filter: blur(11px);         /* 10 → 11 */
             display: none;
             justify-content: center;
             align-items: center;
             z-index: 2000;
             flex-direction: column;
-            gap: 14px;
+            gap: 15px;                            /* 14 → 15 */
         }
 
         .loading-overlay.active {
@@ -1452,27 +1411,27 @@
 
         .loading-content {
             text-align: center;
-            max-width: 280px;
+            max-width: 308px;                     /* 280 → 308 */
         }
 
         .loading-spinner {
-            width: 44px;
-            height: 44px;
+            width: 48px;                          /* 44 → 48 */
+            height: 48px;
             border: 3px solid var(--ios-gray-2);
             border-top-color: var(--ios-blue);
             border-radius: 50%;
             animation: spin 1s linear infinite;
-            margin-bottom: 14px;
+            margin-bottom: 15px;                   /* 14 → 15 */
         }
 
         .loading-text {
-            font-size: 13px;
+            font-size: 14px;                      /* 13 → 14 */
             color: var(--ios-gray-6);
             font-weight: 500;
         }
 
         .loading-subtext {
-            font-size: 11px;
+            font-size: 12px;                      /* 11 → 12 */
             color: var(--ios-gray-4);
             margin-top: 3px;
         }
@@ -1480,8 +1439,8 @@
         /* ===== Dashboard Preview Cards ===== */
         .dashboard-preview {
             display: none;
-            margin-top: 16px;
-            padding: 12px;
+            margin-top: 18px;                     /* 16 → 18 */
+            padding: 13px;                        /* 12 → 13 */
             background: rgba(255, 255, 255, 0.9);
             border-radius: var(--ios-border-radius);
             border: 1px solid var(--ios-gray-2);
@@ -1496,25 +1455,25 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
-            margin-bottom: 8px;
+            margin-bottom: 9px;                   /* 8 → 9 */
         }
 
         .preview-title {
-            font-size: 12px;
+            font-size: 13px;                      /* 12 → 13 */
             font-weight: 600;
             color: var(--ios-gray-6);
         }
 
         .preview-badge {
-            font-size: 10px;
-            padding: 2px 8px;
-            border-radius: 10px;
+            font-size: 11px;                      /* 10 → 11 */
+            padding: 2px 9px;                     /* 2 8 → 2 9 */
+            border-radius: 11px;                   /* 10 → 11 */
             background: var(--ios-blue);
             color: white;
         }
 
         .preview-content {
-            font-size: 11px;
+            font-size: 12px;                      /* 11 → 12 */
             color: var(--ios-gray-5);
             line-height: 1.3;
         }
@@ -1522,37 +1481,37 @@
         /* ===== Welcome Message ===== */
         .welcome-message {
             text-align: center;
-            margin-bottom: 16px;
-            padding: 10px;
+            margin-bottom: 18px;                   /* 16 → 18 */
+            padding: 11px;                         /* 10 → 11 */
             background: linear-gradient(135deg, rgba(0, 122, 255, 0.08) 0%, rgba(88, 86, 214, 0.08) 100%);
             border-radius: var(--ios-border-radius);
             border: 1px solid rgba(0, 122, 255, 0.15);
             animation: slideUp 0.3s ease;
-            font-size: 12px;
+            font-size: 13px;                       /* 12 → 13 */
             color: var(--ios-gray-6);
         }
 
         .welcome-message i {
             color: var(--ios-blue);
-            margin-right: 6px;
+            margin-right: 7px;                     /* 6 → 7 */
         }
 
-        /* ===== Enhanced Lock Design ===== */
+        /* ===== Enhanced Lock Design (unchanged but scaled) ===== */
         .lock-logo-v2 {
             position: relative;
-            width: 56px;
-            height: 56px;
-            margin: 0 auto 10px;
+            width: 62px;                          /* 56 → 62 */
+            height: 62px;
+            margin: 0 auto 11px;                   /* 10 → 11 */
         }
 
         .lock-base {
-            width: 40px;
-            height: 28px;
+            width: 44px;                           /* 40 → 44 */
+            height: 31px;                          /* 28 → 31 */
             background: linear-gradient(135deg, #007AFF 0%, #5856D6 100%);
-            border-radius: 8px;
+            border-radius: 9px;                    /* 8 → 9 */
             position: absolute;
             bottom: 0;
-            left: 8px;
+            left: 9px;                             /* 8 → 9 */
             box-shadow: 
                 inset 0 1px 0 rgba(255, 255, 255, 0.3),
                 0 2px 4px rgba(0, 0, 0, 0.1);
@@ -1567,15 +1526,15 @@
             right: 0;
             height: 4px;
             background: rgba(255, 255, 255, 0.2);
-            border-radius: 8px 8px 0 0;
+            border-radius: 9px 9px 0 0;           /* 8 → 9 */
         }
 
         .lock-shackle-v2 {
-            width: 48px;
-            height: 24px;
-            border: 8px solid #FF3B30;
+            width: 53px;                           /* 48 → 53 */
+            height: 26px;                          /* 24 → 26 */
+            border: 9px solid #FF3B30;              /* 8 → 9 */
             border-bottom: none;
-            border-radius: 24px 24px 0 0;
+            border-radius: 26px 26px 0 0;          /* 24 → 26 */
             position: absolute;
             top: 0;
             left: 4px;
@@ -1589,13 +1548,13 @@
         }
 
         .lock-keyhole {
-            width: 6px;
-            height: 6px;
+            width: 7px;                            /* 6 → 7 */
+            height: 7px;
             background: rgba(255, 255, 255, 0.9);
             border-radius: 50%;
             position: absolute;
-            bottom: 10px;
-            left: 17px;
+            bottom: 11px;                          /* 10 → 11 */
+            left: 19px;                            /* 17 → 19 */
             box-shadow: 
                 inset 0 1px 1px rgba(0, 0, 0, 0.2),
                 0 0 0 2px rgba(255, 255, 255, 0.1);
@@ -1613,13 +1572,13 @@
         }
 
         .lock-details-v2 {
-            width: 32px;
+            width: 35px;                           /* 32 → 35 */
             height: 2px;
             background: rgba(255, 255, 255, 0.4);
             border-radius: 1px;
             position: absolute;
-            bottom: 6px;
-            left: 12px;
+            bottom: 7px;                           /* 6 → 7 */
+            left: 13px;                            /* 12 → 13 */
         }
 
         .lock-details-v2::before,
@@ -1645,10 +1604,10 @@
         /* ===== Quick Actions ===== */
         .quick-actions {
             display: flex;
-            gap: 10px;
-            margin-top: 16px;
+            gap: 11px;                            /* 10 → 11 */
+            margin-top: 18px;                     /* 16 → 18 */
             opacity: 0;
-            transform: translateY(10px);
+            transform: translateY(11px);           /* 10 → 11 */
             transition: all 0.3s ease;
         }
 
@@ -1659,7 +1618,7 @@
 
         .quick-action-btn {
             flex: 1;
-            padding: 10px;
+            padding: 11px;                        /* 10 → 11 */
             background: rgba(255, 255, 255, 0.9);
             border: 1px solid var(--ios-gray-2);
             border-radius: var(--ios-border-radius);
@@ -1681,13 +1640,13 @@
         }
 
         .quick-action-icon {
-            font-size: 18px;
-            margin-bottom: 6px;
+            font-size: 20px;                      /* 18 → 20 */
+            margin-bottom: 7px;                   /* 6 → 7 */
             color: var(--ios-blue);
         }
 
         .quick-action-text {
-            font-size: 10px;
+            font-size: 11px;                      /* 10 → 11 */
             font-weight: 600;
             color: var(--ios-gray-6);
         }
@@ -1695,10 +1654,10 @@
         /* ===== Status Indicators ===== */
         .status-indicator {
             display: inline-block;
-            width: 8px;
-            height: 8px;
+            width: 9px;                           /* 8 → 9 */
+            height: 9px;
             border-radius: 50%;
-            margin-right: 6px;
+            margin-right: 7px;                     /* 6 → 7 */
         }
 
         .status-online {
@@ -1720,25 +1679,49 @@
             border-left: 4px solid var(--ios-red);
         }
         .banned-icon {
-            font-size: 48px;
+            font-size: 53px;                      /* 48 → 53 */
             color: var(--ios-red);
             text-align: center;
-            margin-bottom: 16px;
+            margin-bottom: 18px;                   /* 16 → 18 */
         }
         .banned-details {
             background: rgba(255, 59, 48, 0.05);
-            padding: 16px;
+            padding: 18px;                         /* 16 → 18 */
             border-radius: var(--ios-border-radius);
-            margin: 16px 0;
+            margin: 18px 0;                        /* 16 → 18 */
         }
         .banned-reason {
             font-weight: 600;
             color: var(--ios-red);
         }
         .contact-info {
-            margin-top: 16px;
-            padding-top: 16px;
+            margin-top: 18px;                      /* 16 → 18 */
+            padding-top: 18px;                     /* 16 → 18 */
             border-top: 1px solid var(--ios-gray-2);
+        }
+
+        /* ===== Install App Button ===== */
+        .install-btn {
+            position: fixed;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: linear-gradient(135deg, var(--ios-blue), var(--ios-purple));
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            box-shadow: var(--ios-shadow-heavy);
+            cursor: pointer;
+            z-index: 1000;
+            display: none;
+            align-items: center;
+            gap: 8px;
+        }
+        .install-btn.show {
+            display: flex;
         }
     </style>
 </head>
@@ -1753,17 +1736,16 @@
         </div>
     </div>
 
+    <!-- Install App Button (hidden by default) -->
+    <button class="install-btn" id="installBtn">
+        <i class="fas fa-download"></i> Install App
+    </button>
+
     <!-- Main Container -->
     <div class="login-container">
-        <!-- Logo Section -->
+        <!-- Logo Section - Big Logo -->
         <div class="logo-container">
-            <div class="lock-logo-v2">
-                <div class="lock-shackle-v2"></div>
-                <div class="lock-base">
-                    <div class="lock-keyhole"></div>
-                    <div class="lock-details-v2"></div>
-                </div>
-            </div>
+            <img src="logo.png" alt="TruCash" class="app-logo">
             <div class="logo-text">TruCash</div>
             <div class="logo-subtitle">Secure Financial Management</div>
         </div>
@@ -1878,6 +1860,7 @@
     <div class="modal" id="registerModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="modal-logo" alt="TruCash">
                 <h3 class="modal-title">Create Account</h3>
                 <button class="modal-close" id="closeRegisterModal">
                     <i class="fas fa-times"></i>
@@ -2023,7 +2006,7 @@
                 <button class="btn btn-outline" id="cancelRegister">Cancel</button>
                 <button class="btn btn-primary" id="submitRegister" style="display: none;">
                     <span id="submitRegisterText">Create Account</span>
-                    <span id="submitSpinner" style="display: none; margin-left: 6px;"><div class="spinner"></div></span>
+                    <span id="submitSpinner" style="display: none; margin-left: 7px;"><div class="spinner"></div></span>
                 </button>
             </div>
         </div>
@@ -2033,6 +2016,7 @@
     <div class="modal" id="forgotPasswordModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="modal-logo" alt="TruCash">
                 <h3 class="modal-title">Reset Password</h3>
                 <button class="modal-close" id="closeForgotModal">
                     <i class="fas fa-times"></i>
@@ -2044,7 +2028,7 @@
                     <input type="email" id="resetEmail" class="form-input" placeholder="you@example.com">
                     <div class="validation-message" id="resetEmailValidation"></div>
                 </div>
-                <p class="logo-subtitle" style="margin-top: 8px;">
+                <p class="logo-subtitle" style="margin-top: 9px;">
                     We'll send you a link to reset your password.
                 </p>
             </div>
@@ -2061,6 +2045,7 @@
     <div class="modal" id="adminApprovalModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="modal-logo" alt="TruCash">
                 <h3 class="modal-title">Agent Applications</h3>
                 <button class="modal-close" id="closeAdminModal">
                     <i class="fas fa-times"></i>
@@ -2068,8 +2053,8 @@
             </div>
             <div class="modal-body admin-approval-container" id="adminApprovalContainer">
                 <!-- Applications will be loaded here -->
-                <div style="text-align: center; padding: 40px; color: var(--ios-gray-4);">
-                    <i class="fas fa-spinner fa-spin" style="font-size: 24px; margin-bottom: 12px;"></i>
+                <div style="text-align: center; padding: 44px; color: var(--ios-gray-4);">
+                    <i class="fas fa-spinner fa-spin" style="font-size: 26px; margin-bottom: 13px;"></i>
                     <p>Loading agent applications...</p>
                 </div>
             </div>
@@ -2086,6 +2071,7 @@
     <div class="modal" id="credentialModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="modal-logo" alt="TruCash">
                 <h3 class="modal-title">Generate Agent Credentials</h3>
                 <button class="modal-close" id="closeCredentialModal">
                     <i class="fas fa-times"></i>
@@ -2109,6 +2095,7 @@
     <div class="modal" id="dashboardPreviewModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="modal-logo" alt="TruCash">
                 <h3 class="modal-title">Dashboard Preview</h3>
                 <button class="modal-close" id="closeDashboardModal">
                     <i class="fas fa-times"></i>
@@ -2122,7 +2109,7 @@
                     </div>
                     <div class="preview-content">
                         <p>Based on your account type, you'll have access to:</p>
-                        <ul style="margin-top: 8px; padding-left: 16px;">
+                        <ul style="margin-top: 9px; padding-left: 18px;">
                             <li>Real-time financial analytics</li>
                             <li>Transaction history and reports</li>
                             <li>Account management tools</li>
@@ -2131,7 +2118,7 @@
                     </div>
                 </div>
                 
-                <div class="quick-actions visible" style="margin-top: 16px;">
+                <div class="quick-actions visible" style="margin-top: 18px;">
                     <div class="quick-action-btn">
                         <div class="quick-action-icon">
                             <i class="fas fa-chart-bar"></i>
@@ -2158,10 +2145,11 @@
         </div>
     </div>
 
-    <!-- NEW: Banned User Modal -->
+    <!-- Banned User Modal -->
     <div class="modal banned-modal" id="bannedModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="modal-logo" alt="TruCash">
                 <h3 class="modal-title">Account Banned</h3>
                 <button class="modal-close" onclick="document.getElementById('bannedModal').classList.remove('active');">
                     <i class="fas fa-times"></i>
@@ -2171,7 +2159,7 @@
                 <div class="banned-icon">
                     <i class="fas fa-ban"></i>
                 </div>
-                <p class="text-center" style="font-weight: 500; margin-bottom: 16px;">Your account has been suspended by the administrator.</p>
+                <p class="text-center" style="font-weight: 500; margin-bottom: 18px;">Your account has been suspended by the administrator.</p>
                 <div class="banned-details" id="bannedDetails">
                     <!-- Dynamically filled -->
                 </div>
@@ -2185,7 +2173,7 @@
         </div>
     </div>
 
-    <!-- JavaScript Implementation (MODIFIED to detect banned users) -->
+    <!-- JavaScript Implementation (MODIFIED to detect banned users and show contact) -->
     <script>
         // ===== Firebase Configuration =====
         const firebaseConfig = {
@@ -2273,7 +2261,7 @@
             adminMode: false,
             currentEmail: null,
             userGreeting: null,
-            systemSettings: {} // NEW: store system settings (contact info)
+            systemSettings: {}
         };
 
         // ===== Utility Functions =====
@@ -2309,7 +2297,6 @@
             },
             
             showNotification: (title, message, type = 'info', duration = 4000) => {
-                // Silent mode handling
                 if (AppState.silentMode && (title.includes('Cloudinary') || title.includes('Upload'))) {
                     console.log(`Silent notification: ${title} - ${message}`);
                     return null;
@@ -2489,7 +2476,6 @@
                 }
             },
             
-            // MODIFIED: showUserGreeting now shows/hides admin approval button
             showUserGreeting: (email, userData = null) => {
                 const greetingElement = document.getElementById('userGreeting');
                 const greetingText = document.getElementById('greetingText');
@@ -2557,12 +2543,11 @@
                 AppState.userGreeting = null;
             },
             
-            // Sanitize email for use as Firebase key (replace '.' with ',')
             sanitizeEmail: (email) => {
                 return email.replace(/\./g, ',');
             },
 
-            // NEW: Show banned modal
+            // MODIFIED: Show banned modal with contact details based on user type
             showBannedModal: (userName, reason, contact) => {
                 const modal = document.getElementById('bannedModal');
                 const detailsDiv = document.getElementById('bannedDetails');
@@ -2572,7 +2557,7 @@
                     <p><strong>Reason:</strong> <span class="banned-reason">${reason}</span></p>
                 `;
                 contactDiv.innerHTML = `
-                    <h4 style="margin-bottom: 8px;">Contact Support</h4>
+                    <h4 style="margin-bottom: 9px;">Contact Support</h4>
                     <p><i class="fas fa-phone"></i> ${contact.phone || '+1-800-TRU-CASH'}</p>
                     <p><i class="fas fa-envelope"></i> ${contact.email || 'support@trucash.com'}</p>
                     <p><i class="fas fa-globe"></i> ${contact.website || 'https://trucash.com'}</p>
@@ -2581,7 +2566,7 @@
             }
         };
 
-        // ===== Firebase Service (modified to check banned status) =====
+        // ===== Firebase Service (modified to check banned status and return correct contact) =====
         const FirebaseService = {
             async getSystemSettings() {
                 try {
@@ -2674,12 +2659,35 @@
                     if (userData && userData.status === 'banned' && userType !== 'sudo' && userType !== 'admin') {
                         // Sign out the user immediately
                         await auth.signOut();
+                        
+                        // Determine which contact info to show based on user type
+                        let contact = {};
+                        if (userType === 'customer') {
+                            contact = {
+                                phone: AppState.systemSettings.customerContactPhone || '+1-800-TRU-CASH',
+                                email: AppState.systemSettings.customerContactEmail || 'support@trucash.com',
+                                website: AppState.systemSettings.customerContactWebsite || 'https://trucash.com'
+                            };
+                        } else if (userType === 'agent') {
+                            contact = {
+                                phone: AppState.systemSettings.agentContactPhone || '+1-800-TRU-CASH',
+                                email: AppState.systemSettings.agentContactEmail || 'agents@trucash.com',
+                                website: AppState.systemSettings.agentContactWebsite || 'https://trucash.com/agents'
+                            };
+                        } else {
+                            contact = {
+                                phone: AppState.systemSettings.customerContactPhone || '+1-800-TRU-CASH',
+                                email: AppState.systemSettings.customerContactEmail || 'support@trucash.com',
+                                website: AppState.systemSettings.customerContactWebsite || 'https://trucash.com'
+                            };
+                        }
+                        
                         return { 
                             success: false, 
                             banned: true,
                             userName: userData.fullName || 'User',
                             reason: userData.banReason || 'No reason provided',
-                            contact: AppState.systemSettings
+                            contact: contact
                         };
                     }
                     
@@ -2749,16 +2757,14 @@
             },
             
             async registerCustomer(userData) {
+                // ... (rest of the code unchanged from original)
                 try {
                     console.log("Starting customer registration process...");
                     
-                    // Validate required Cloudinary URLs
                     if (!userData.nrcFront || !userData.nrcBack || !userData.profilePhoto) {
                         throw new Error('Missing required document uploads. Please upload all required documents.');
                     }
                     
-                    // Create user in Firebase Auth
-                    console.log("Creating Firebase Auth user...");
                     const userCredential = await auth.createUserWithEmailAndPassword(
                         userData.email,
                         userData.password
@@ -2766,7 +2772,6 @@
                     
                     console.log("Firebase Auth user created:", userCredential.user.uid);
                     
-                    // Prepare user data for Realtime Database
                     const userDoc = {
                         uid: userCredential.user.uid,
                         fullName: userData.fullName,
@@ -2789,16 +2794,12 @@
                         completedLoans: 0
                     };
                     
-                    // Save to Realtime Database
-                    console.log("Saving user data to Realtime Database...");
                     const userRef = db.ref('users/' + userCredential.user.uid);
                     await userRef.set(userDoc);
                     
-                    // Add email mapping
                     const emailKey = Utils.sanitizeEmail(userData.email);
                     await db.ref('userEmails/' + emailKey).set(userCredential.user.uid);
                     
-                    // Add to users list for easy querying (optional)
                     const usersListRef = db.ref('usersList/' + userCredential.user.uid);
                     await usersListRef.set({
                         email: userData.email,
@@ -2808,7 +2809,6 @@
                         createdAt: Date.now()
                     });
                     
-                    // Update application state
                     AppState.currentUser = userCredential.user;
                     AppState.isAuthenticated = true;
                     AppState.userType = 'customer';
@@ -2845,18 +2845,16 @@
             },
             
             async submitAgentApplication(applicationData) {
+                // ... (rest unchanged)
                 try {
                     console.log("Submitting agent application...");
                     
-                    // Validate required Cloudinary URLs
                     if (!applicationData.nrcFront || !applicationData.nrcBack || !applicationData.profilePhoto) {
                         throw new Error('Missing required document uploads. Please upload all required documents.');
                     }
                     
-                    // Generate application ID
                     const applicationId = 'APP' + Date.now().toString().slice(-8) + Math.random().toString(36).substr(2, 4).toUpperCase();
                     
-                    // Prepare application data
                     const application = {
                         applicationId: applicationId,
                         fullName: applicationData.fullName,
@@ -2874,11 +2872,9 @@
                         assignedCredentials: null
                     };
                     
-                    // Save to Realtime Database
                     const applicationRef = db.ref('agentApplications/' + applicationId);
                     await applicationRef.set(application);
                     
-                    // Also add to pending applications list
                     const pendingRef = db.ref('pendingApplications/' + applicationId);
                     await pendingRef.set({
                         applicationId: applicationId,
@@ -2908,6 +2904,7 @@
             },
             
             async getPendingApplications() {
+                // ... unchanged
                 try {
                     console.log("Fetching pending applications...");
                     const pendingRef = db.ref('pendingApplications');
@@ -2932,6 +2929,7 @@
             },
             
             async getAgentApplicationDetails(applicationId) {
+                // ... unchanged
                 try {
                     console.log("Fetching application details for:", applicationId);
                     const applicationRef = db.ref('agentApplications/' + applicationId);
@@ -2949,10 +2947,10 @@
             },
             
             async approveAgentApplication(applicationId, credentials, reviewedBy) {
+                // ... unchanged
                 try {
                     console.log("Approving agent application:", applicationId);
                     
-                    // Update application status
                     const applicationRef = db.ref('agentApplications/' + applicationId);
                     await applicationRef.update({
                         status: 'approved',
@@ -2961,11 +2959,9 @@
                         assignedCredentials: credentials
                     });
                     
-                    // Remove from pending applications
                     const pendingRef = db.ref('pendingApplications/' + applicationId);
                     await pendingRef.remove();
                     
-                    // Add to approved applications
                     const approvedRef = db.ref('approvedApplications/' + applicationId);
                     await approvedRef.set({
                         applicationId: applicationId,
@@ -2982,10 +2978,10 @@
             },
             
             async createAgentAccount(applicationId, credentials, applicationData) {
+                // ... unchanged
                 try {
                     console.log("Creating agent account for application:", applicationId);
                     
-                    // Create user in Firebase Auth
                     const userCredential = await auth.createUserWithEmailAndPassword(
                         credentials.email,
                         credentials.password
@@ -2993,7 +2989,6 @@
                     
                     console.log("Agent Firebase Auth user created:", userCredential.user.uid);
                     
-                    // Prepare agent data for Realtime Database
                     const agentDoc = {
                         uid: userCredential.user.uid,
                         fullName: applicationData.fullName,
@@ -3018,15 +3013,12 @@
                         commissionEarned: 0
                     };
                     
-                    // Save to Realtime Database
                     const userRef = db.ref('users/' + userCredential.user.uid);
                     await userRef.set(agentDoc);
                     
-                    // Add email mapping
                     const emailKey = Utils.sanitizeEmail(credentials.email);
                     await db.ref('userEmails/' + emailKey).set(userCredential.user.uid);
                     
-                    // Add to agents collection
                     const agentsRef = db.ref('agents/' + userCredential.user.uid);
                     await agentsRef.set({
                         agentId: credentials.agentId,
@@ -3098,12 +3090,10 @@
                     
                     if (uidSnapshot.exists()) {
                         const uid = uidSnapshot.val();
-                        // Check users
                         const userSnapshot = await db.ref('users/' + uid).once('value');
                         if (userSnapshot.exists()) {
                             return { success: true, userData: userSnapshot.val(), collection: 'users' };
                         }
-                        // Check agents
                         const agentSnapshot = await db.ref('agents/' + uid).once('value');
                         if (agentSnapshot.exists()) {
                             return { success: true, userData: agentSnapshot.val(), collection: 'agents' };
@@ -3521,9 +3511,9 @@
             displayEmptyState() {
                 const container = document.getElementById('adminApprovalContainer');
                 container.innerHTML = `
-                    <div style="text-align: center; padding: 40px; color: var(--ios-gray-4);">
-                        <i class="fas fa-inbox" style="font-size: 48px; margin-bottom: 16px;"></i>
-                        <h3 style="font-weight: 500; margin-bottom: 8px;">No Pending Applications</h3>
+                    <div style="text-align: center; padding: 44px; color: var(--ios-gray-4);">
+                        <i class="fas fa-inbox" style="font-size: 53px; margin-bottom: 18px;"></i>
+                        <h3 style="font-weight: 500; margin-bottom: 9px;">No Pending Applications</h3>
                         <p>There are no agent applications pending review.</p>
                     </div>
                 `;
@@ -3580,9 +3570,9 @@
                 
                 if (application.assignedCredentials) {
                     html += `
-                        <div style="margin-top: 16px; padding: 12px; background: rgba(52, 199, 89, 0.1); border-radius: 8px;">
-                            <div style="font-weight: 600; color: var(--ios-green); margin-bottom: 8px;">Assigned Credentials:</div>
-                            <div style="font-size: 12px;">
+                        <div style="margin-top: 18px; padding: 13px; background: rgba(52, 199, 89, 0.1); border-radius: 9px;">
+                            <div style="font-weight: 600; color: var(--ios-green); margin-bottom: 9px;">Assigned Credentials:</div>
+                            <div style="font-size: 13px;">
                                 <div>Email: ${application.assignedCredentials.email}</div>
                                 <div>Agent ID: ${application.assignedCredentials.agentId}</div>
                             </div>
@@ -3595,8 +3585,9 @@
                 const modal = document.createElement('div');
                 modal.className = 'modal active';
                 modal.innerHTML = `
-                    <div class="modal-content" style="max-width: 500px;">
+                    <div class="modal-content" style="max-width: 550px;">
                         <div class="modal-header">
+                            <img src="logo.png" class="modal-logo" alt="TruCash">
                             <h3 class="modal-title">Application Details</h3>
                             <button class="modal-close" onclick="this.closest('.modal').remove()">
                                 <i class="fas fa-times"></i>
@@ -3634,7 +3625,7 @@
                 container.innerHTML = `
                     <div class="form-group">
                         <label class="form-label">Applicant Information</label>
-                        <div style="background: var(--ios-gray-1); padding: 12px; border-radius: 8px; font-size: 13px;">
+                        <div style="background: var(--ios-gray-1); padding: 13px; border-radius: 9px; font-size: 14px;">
                             <div><strong>Name:</strong> ${application.fullName}</div>
                             <div><strong>Phone:</strong> ${application.phone}</div>
                             <div><strong>NRC:</strong> ${application.nrc}</div>
@@ -3659,8 +3650,8 @@
                         <div class="credential-note">Unique identifier for the agent</div>
                     </div>
                     
-                    <div style="background: rgba(255, 204, 0, 0.1); padding: 12px; border-radius: 8px; margin-top: 16px;">
-                        <div style="font-size: 12px; color: var(--ios-yellow);">
+                    <div style="background: rgba(255, 204, 0, 0.1); padding: 13px; border-radius: 9px; margin-top: 18px;">
+                        <div style="font-size: 13px; color: var(--ios-yellow);">
                             <i class="fas fa-exclamation-triangle"></i>
                             <strong>Important:</strong> Save these credentials securely. They cannot be retrieved later.
                         </div>
@@ -3789,7 +3780,8 @@
                 this.testFirebaseConnection();
                 this.setupTimeUpdater();
                 this.setupEmailCheck();
-                this.loadSystemSettings(); // NEW: load system settings on startup
+                this.loadSystemSettings();
+                this.setupInstallPrompt();
             },
             
             async loadSystemSettings() {
@@ -3867,6 +3859,9 @@
                 
                 // User greeting
                 this.userGreeting = document.getElementById('userGreeting');
+
+                // Install button
+                this.installBtn = document.getElementById('installBtn');
             },
             
             bindEvents() {
@@ -3933,6 +3928,9 @@
                 
                 // Cloudinary fallback
                 this.setupCloudinaryFallback();
+
+                // Install button
+                this.installBtn.addEventListener('click', this.promptInstall.bind(this));
             },
             
             setupEmailCheck() {
@@ -4113,6 +4111,49 @@
                 Utils.updateTime();
                 setInterval(Utils.updateTime, 60000);
             },
+
+            // Service Worker and Install Prompt
+            setupInstallPrompt() {
+                let deferredPrompt;
+                window.addEventListener('beforeinstallprompt', (e) => {
+                    e.preventDefault();
+                    deferredPrompt = e;
+                    // Show install button if not already installed
+                    if (!window.matchMedia('(display-mode: standalone)').matches) {
+                        this.installBtn.classList.add('show');
+                    }
+                });
+
+                window.addEventListener('appinstalled', () => {
+                    this.installBtn.classList.remove('show');
+                    console.log('PWA installed');
+                });
+
+                // Check if already in standalone mode
+                if (window.matchMedia('(display-mode: standalone)').matches) {
+                    this.installBtn.classList.remove('show');
+                }
+
+                // Store deferredPrompt for later use
+                window.deferredPrompt = deferredPrompt;
+            },
+
+            promptInstall() {
+                if (window.deferredPrompt) {
+                    window.deferredPrompt.prompt();
+                    window.deferredPrompt.userChoice.then((choiceResult) => {
+                        if (choiceResult.outcome === 'accepted') {
+                            console.log('User accepted the install prompt');
+                        } else {
+                            console.log('User dismissed the install prompt');
+                        }
+                        window.deferredPrompt = null;
+                        this.installBtn.classList.remove('show');
+                    });
+                } else {
+                    Utils.showNotification('Info', 'You can install this app from your browser menu (Add to Home Screen).', 'info');
+                }
+            },
             
             // Event Handlers
             async handleLogin(e) {
@@ -4149,7 +4190,6 @@
                             'success'
                         );
                         
-                        // Determine redirect based on user type
                         const userType = result.userType || AppState.userType;
                         let redirectPage = Utils.determineRedirectPage(userType);
                         
@@ -4160,7 +4200,6 @@
                         }, 1500);
                         
                     } else if (result.banned) {
-                        // NEW: Show banned modal
                         Utils.hideProgress('loginProgress');
                         this.resetLoginButton();
                         Utils.showBannedModal(result.userName, result.reason, result.contact);
@@ -4591,11 +4630,11 @@
             });
         }
 
-        // ===== Service Worker =====
+        // ===== Service Worker Registration =====
         function initServiceWorker() {
             if ('serviceWorker' in navigator) {
                 window.addEventListener('load', () => {
-                    navigator.serviceWorker.register('/service-worker.js')
+                    navigator.serviceWorker.register('sw.js')
                         .then(registration => {
                             console.log('ServiceWorker registration successful with scope: ', registration.scope);
                         })
