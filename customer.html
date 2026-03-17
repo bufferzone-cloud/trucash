@@ -1717,6 +1717,51 @@
         .floating-promo .promo-close i {
             font-size: 18px;
         }
+
+        /* ===== ONBOARDING OVERLAY ===== */
+        .onboarding-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            pointer-events: none;
+        }
+        .onboarding-card {
+            background: white;
+            border-radius: 20px;
+            padding: 20px;
+            max-width: 300px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+            pointer-events: auto;
+            text-align: center;
+            position: relative;
+        }
+        .onboarding-card h3 {
+            margin-bottom: 10px;
+            color: var(--ios-green);
+        }
+        .onboarding-card p {
+            margin-bottom: 20px;
+            color: var(--ios-gray-6);
+        }
+        .onboarding-buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        .onboarding-highlight {
+            box-shadow: 0 0 0 4px var(--ios-green), 0 0 20px rgba(52,199,89,0.5);
+            transition: box-shadow 0.3s;
+            border-radius: 8px;
+            z-index: 10001;
+            position: relative;
+        }
     </style>
 </head>
 <body>
@@ -2699,6 +2744,18 @@
                 <img id="promotionImage" src="" alt="Promotion" style="max-width:100%; border-radius:12px; margin-bottom:15px; display:none;">
                 <p id="promotionMessage" style="font-size: 16px; color: #333; margin-bottom: 20px;"></p>
                 <button class="btn btn-primary" id="dismissPromotion" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px 30px; border-radius: 50px; font-weight: bold;">Grab It Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== ONBOARDING OVERLAY ===== -->
+    <div class="onboarding-overlay" id="onboardingOverlay">
+        <div class="onboarding-card" id="onboardingCard">
+            <h3 id="onboardingTitle">Welcome!</h3>
+            <p id="onboardingDescription">Let's get you started with TruCash.</p>
+            <div class="onboarding-buttons">
+                <button class="btn btn-outline" id="onboardingSkip">Skip</button>
+                <button class="btn btn-primary" id="onboardingNext">Next</button>
             </div>
         </div>
     </div>
@@ -4019,6 +4076,16 @@
 
         // ===== Enhanced UI Manager =====
         const UIManager = {
+            // Onboarding properties
+            onboardingSteps: [
+                { selector: '#agentIdInput', title: 'Enter Agent ID', description: 'Enter the Agent ID provided by your agent and click Verify. This assigns you an agent who will assist you throughout your loan journey.' },
+                { selector: '#applyLoanBtn', title: 'Apply for Loan', description: 'After agent verification, you can apply for a loan here. Fill in the details and submit your application.' },
+                { selector: '#makePaymentBtn', title: 'Make Payment', description: 'When your loan is approved, you can make payments here. Always upload a payment screenshot as proof.' },
+                { selector: '#mobileNotificationBell', title: 'Notifications', description: 'Check your notifications regularly for updates on your loans, payments, and messages from your agent.' }
+            ],
+            currentOnboardingStep: 0,
+            onboardingActive: false,
+
             init() {
                 this.cacheElements();
                 this.bindEvents();
@@ -4112,6 +4179,12 @@
                 this.creditScoreValue = document.getElementById('creditScoreValue');
                 this.profileCreditScoreGrade = document.getElementById('profileCreditScoreGrade');
                 this.profileCreditScoreValue = document.getElementById('profileCreditScoreValue');
+                // Onboarding elements
+                this.onboardingOverlay = document.getElementById('onboardingOverlay');
+                this.onboardingTitle = document.getElementById('onboardingTitle');
+                this.onboardingDescription = document.getElementById('onboardingDescription');
+                this.onboardingSkip = document.getElementById('onboardingSkip');
+                this.onboardingNext = document.getElementById('onboardingNext');
             },
             bindEvents() {
                 this.menuToggle?.addEventListener('click', () => {
@@ -4267,6 +4340,10 @@
 
                 // Floating promotion close button
                 this.closeFloatingPromo.addEventListener('click', () => this.closeFloatingPromotion());
+
+                // Onboarding buttons
+                this.onboardingSkip?.addEventListener('click', () => this.completeOnboarding());
+                this.onboardingNext?.addEventListener('click', () => this.nextOnboardingStep());
             },
             populateDurationOptions() {
                 const select = document.getElementById('loanDuration');
@@ -4308,6 +4385,11 @@
                     Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
                 }, 1000);
                 Utils.hideLoading();
+
+                // Check if onboarding needed
+                if (!userData.onboardingCompleted) {
+                    this.startOnboarding();
+                }
             },
             setupRealtimeListeners() {
                 if (!AppState.currentUser) return;
@@ -5415,6 +5497,53 @@
                     this.showFloatingPromotion(unseen[0]);
                 } else {
                     AppState.currentPromotionIndex = 0;
+                }
+            },
+
+            // Onboarding methods
+            startOnboarding() {
+                if (this.onboardingActive) return;
+                this.onboardingActive = true;
+                this.currentOnboardingStep = 0;
+                this.onboardingOverlay.style.display = 'flex';
+                this.showOnboardingStep();
+            },
+            showOnboardingStep() {
+                const step = this.onboardingSteps[this.currentOnboardingStep];
+                this.onboardingTitle.innerText = step.title;
+                this.onboardingDescription.innerText = step.description;
+                // Remove previous highlight
+                document.querySelectorAll('.onboarding-highlight').forEach(el => el.classList.remove('onboarding-highlight'));
+                // Highlight current element
+                const element = document.querySelector(step.selector);
+                if (element) {
+                    element.classList.add('onboarding-highlight');
+                    // Scroll into view
+                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                }
+                // Update next button text if last
+                if (this.currentOnboardingStep === this.onboardingSteps.length - 1) {
+                    this.onboardingNext.innerText = 'Finish';
+                } else {
+                    this.onboardingNext.innerText = 'Next';
+                }
+            },
+            nextOnboardingStep() {
+                if (this.currentOnboardingStep < this.onboardingSteps.length - 1) {
+                    this.currentOnboardingStep++;
+                    this.showOnboardingStep();
+                } else {
+                    this.completeOnboarding();
+                }
+            },
+            async completeOnboarding() {
+                this.onboardingActive = false;
+                this.onboardingOverlay.style.display = 'none';
+                document.querySelectorAll('.onboarding-highlight').forEach(el => el.classList.remove('onboarding-highlight'));
+                // Save to Firebase
+                if (AppState.currentUser) {
+                    await FirebaseService.updateProfile({ onboardingCompleted: true });
+                    AppState.userData.onboardingCompleted = true;
                 }
             }
         };
