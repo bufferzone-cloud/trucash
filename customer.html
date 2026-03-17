@@ -1718,49 +1718,96 @@
             font-size: 18px;
         }
 
-        /* ===== ONBOARDING OVERLAY ===== */
-        .onboarding-overlay {
+        /* ===== FIRST-TIME USER TUTORIAL OVERLAY ===== */
+        .tutorial-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.35); /* 35% black transparency */
             z-index: 10000;
             display: none;
             justify-content: center;
             align-items: center;
-            pointer-events: none;
+            pointer-events: none; /* allow clicks to pass through except on tooltip */
         }
-        .onboarding-card {
-            background: white;
-            border-radius: 20px;
-            padding: 20px;
-            max-width: 300px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.3);
-            pointer-events: auto;
-            text-align: center;
-            position: relative;
-        }
-        .onboarding-card h3 {
-            margin-bottom: 10px;
-            color: var(--ios-green);
-        }
-        .onboarding-card p {
-            margin-bottom: 20px;
-            color: var(--ios-gray-6);
-        }
-        .onboarding-buttons {
+        .tutorial-overlay.active {
             display: flex;
-            gap: 10px;
-            justify-content: center;
         }
-        .onboarding-highlight {
-            box-shadow: 0 0 0 4px var(--ios-green), 0 0 20px rgba(52,199,89,0.5);
-            transition: box-shadow 0.3s;
-            border-radius: 8px;
+        .tutorial-highlight {
+            position: absolute;
+            box-shadow: 0 0 0 9999px rgba(0, 0, 0, 0.35), 0 0 20px 4px #34c759;
+            border-radius: 12px;
+            pointer-events: none;
+            transition: all 0.3s ease;
             z-index: 10001;
-            position: relative;
+        }
+        .tutorial-tooltip {
+            position: absolute;
+            background: white;
+            padding: 20px;
+            border-radius: 16px;
+            max-width: 300px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.3);
+            pointer-events: auto;
+            z-index: 10002;
+            color: #333;
+            font-size: 15px;
+            line-height: 1.4;
+            border: 2px solid #34c759;
+        }
+        .tutorial-tooltip .tutorial-description {
+            margin-bottom: 20px;
+        }
+        .tutorial-tooltip .tutorial-buttons {
+            display: flex;
+            justify-content: space-between;
+            gap: 10px;
+        }
+        .tutorial-tooltip button {
+            padding: 10px 20px;
+            border: none;
+            border-radius: 30px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
+        }
+        .tutorial-tooltip .tutorial-next {
+            background: #34c759;
+            color: white;
+        }
+        .tutorial-tooltip .tutorial-next:hover {
+            background: #248a3d;
+        }
+        .tutorial-tooltip .tutorial-skip {
+            background: #e5e5ea;
+            color: #48484a;
+        }
+        .tutorial-tooltip .tutorial-skip:hover {
+            background: #d1d1d6;
+        }
+        /* Arrow for tooltip */
+        .tutorial-tooltip[data-position="bottom"]::after {
+            content: '';
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-bottom: 10px solid white;
+        }
+        .tutorial-tooltip[data-position="top"]::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
         }
     </style>
 </head>
@@ -2748,14 +2795,14 @@
         </div>
     </div>
 
-    <!-- ===== ONBOARDING OVERLAY ===== -->
-    <div class="onboarding-overlay" id="onboardingOverlay">
-        <div class="onboarding-card" id="onboardingCard">
-            <h3 id="onboardingTitle">Welcome!</h3>
-            <p id="onboardingDescription">Let's get you started with TruCash.</p>
-            <div class="onboarding-buttons">
-                <button class="btn btn-outline" id="onboardingSkip">Skip</button>
-                <button class="btn btn-primary" id="onboardingNext">Next</button>
+    <!-- ===== FIRST-TIME USER TUTORIAL OVERLAY ===== -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-highlight" id="tutorialHighlight"></div>
+        <div class="tutorial-tooltip" id="tutorialTooltip">
+            <div class="tutorial-description" id="tutorialDescription"></div>
+            <div class="tutorial-buttons">
+                <button class="tutorial-skip" id="tutorialSkip">Skip</button>
+                <button class="tutorial-next" id="tutorialNext">Next</button>
             </div>
         </div>
     </div>
@@ -3504,6 +3551,14 @@
                     this.listenForNotifications();
                     await this.loadPromotions();
                     this.listenForPromotions();
+
+                    // After loading all data, check if tutorial should be shown
+                    if (!AppState.userData.tutorialShown) {
+                        // Wait a moment for UI to be ready, then start tutorial
+                        setTimeout(() => {
+                            TutorialManager.start();
+                        }, 500);
+                    }
                 } catch (error) {
                     console.error('Error loading customer data:', error);
                     Utils.showToast('Data Error', 'Failed to load customer data', 'error');
@@ -4071,21 +4126,21 @@
                     console.error('Error signing out:', error);
                     Utils.showToast('Logout Error', 'Failed to logout', 'error');
                 }
+            },
+            // Mark tutorial as completed
+            async markTutorialCompleted() {
+                if (!AppState.currentUser) return;
+                try {
+                    await db.ref('users/' + AppState.currentUser.uid).update({ tutorialShown: true });
+                    AppState.userData.tutorialShown = true;
+                } catch (error) {
+                    console.error('Error marking tutorial as completed:', error);
+                }
             }
         };
 
         // ===== Enhanced UI Manager =====
         const UIManager = {
-            // Onboarding properties
-            onboardingSteps: [
-                { selector: '#agentIdInput', title: 'Enter Agent ID', description: 'Enter the Agent ID provided by your agent and click Verify. This assigns you an agent who will assist you throughout your loan journey.' },
-                { selector: '#applyLoanBtn', title: 'Apply for Loan', description: 'After agent verification, you can apply for a loan here. Fill in the details and submit your application.' },
-                { selector: '#makePaymentBtn', title: 'Make Payment', description: 'When your loan is approved, you can make payments here. Always upload a payment screenshot as proof.' },
-                { selector: '#mobileNotificationBell', title: 'Notifications', description: 'Check your notifications regularly for updates on your loans, payments, and messages from your agent.' }
-            ],
-            currentOnboardingStep: 0,
-            onboardingActive: false,
-
             init() {
                 this.cacheElements();
                 this.bindEvents();
@@ -4179,12 +4234,6 @@
                 this.creditScoreValue = document.getElementById('creditScoreValue');
                 this.profileCreditScoreGrade = document.getElementById('profileCreditScoreGrade');
                 this.profileCreditScoreValue = document.getElementById('profileCreditScoreValue');
-                // Onboarding elements
-                this.onboardingOverlay = document.getElementById('onboardingOverlay');
-                this.onboardingTitle = document.getElementById('onboardingTitle');
-                this.onboardingDescription = document.getElementById('onboardingDescription');
-                this.onboardingSkip = document.getElementById('onboardingSkip');
-                this.onboardingNext = document.getElementById('onboardingNext');
             },
             bindEvents() {
                 this.menuToggle?.addEventListener('click', () => {
@@ -4340,10 +4389,6 @@
 
                 // Floating promotion close button
                 this.closeFloatingPromo.addEventListener('click', () => this.closeFloatingPromotion());
-
-                // Onboarding buttons
-                this.onboardingSkip?.addEventListener('click', () => this.completeOnboarding());
-                this.onboardingNext?.addEventListener('click', () => this.nextOnboardingStep());
             },
             populateDurationOptions() {
                 const select = document.getElementById('loanDuration');
@@ -4385,11 +4430,6 @@
                     Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
                 }, 1000);
                 Utils.hideLoading();
-
-                // Check if onboarding needed
-                if (!userData.onboardingCompleted) {
-                    this.startOnboarding();
-                }
             },
             setupRealtimeListeners() {
                 if (!AppState.currentUser) return;
@@ -5498,53 +5538,105 @@
                 } else {
                     AppState.currentPromotionIndex = 0;
                 }
+            }
+        };
+
+        // ===== FIRST-TIME TUTORIAL MANAGER =====
+        const TutorialManager = {
+            steps: [
+                {
+                    target: '#agentIdInput',
+                    description: '🔑 Enter your agent\'s ID here and click "Verify" to get assigned an agent before applying for a loan.',
+                    position: 'bottom'
+                },
+                {
+                    target: '#applyLoanBtn',
+                    description: '💰 After agent assignment, click here to apply for a new loan. You\'ll need to provide collateral and sign an agreement.',
+                    position: 'top'
+                },
+                {
+                    target: '#makePaymentBtn',
+                    description: '💵 Make payments towards your active loans. Upload a screenshot as proof.',
+                    position: 'top'
+                },
+                {
+                    target: '.mobile-nav-item[data-section="loans"]',
+                    description: '📋 View your active, pending, and approved loans here. Track your repayment progress.',
+                    position: 'top'
+                },
+                {
+                    target: '.mobile-nav-item[data-section="profile"]',
+                    description: '👤 Manage your profile, upload NRC photos, and check your credit score.',
+                    position: 'top'
+                }
+            ],
+            currentStep: 0,
+            overlay: document.getElementById('tutorialOverlay'),
+            highlight: document.getElementById('tutorialHighlight'),
+            tooltip: document.getElementById('tutorialTooltip'),
+            description: document.getElementById('tutorialDescription'),
+            nextBtn: document.getElementById('tutorialNext'),
+            skipBtn: document.getElementById('tutorialSkip'),
+
+            start() {
+                if (!this.overlay || !this.highlight || !this.tooltip) return;
+                this.currentStep = 0;
+                this.overlay.classList.add('active');
+                this.showStep(0);
+                this.nextBtn.addEventListener('click', this.next.bind(this));
+                this.skipBtn.addEventListener('click', this.end.bind(this));
             },
 
-            // Onboarding methods
-            startOnboarding() {
-                if (this.onboardingActive) return;
-                this.onboardingActive = true;
-                this.currentOnboardingStep = 0;
-                this.onboardingOverlay.style.display = 'flex';
-                this.showOnboardingStep();
-            },
-            showOnboardingStep() {
-                const step = this.onboardingSteps[this.currentOnboardingStep];
-                this.onboardingTitle.innerText = step.title;
-                this.onboardingDescription.innerText = step.description;
-                // Remove previous highlight
-                document.querySelectorAll('.onboarding-highlight').forEach(el => el.classList.remove('onboarding-highlight'));
-                // Highlight current element
-                const element = document.querySelector(step.selector);
-                if (element) {
-                    element.classList.add('onboarding-highlight');
-                    // Scroll into view
-                    element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            showStep(index) {
+                if (index >= this.steps.length) {
+                    this.end();
+                    return;
                 }
-                // Update next button text if last
-                if (this.currentOnboardingStep === this.onboardingSteps.length - 1) {
-                    this.onboardingNext.innerText = 'Finish';
+                const step = this.steps[index];
+                const targetEl = document.querySelector(step.target);
+                if (!targetEl) {
+                    // If target not found, skip to next step
+                    this.showStep(index + 1);
+                    return;
+                }
+                const rect = targetEl.getBoundingClientRect();
+                this.highlight.style.top = rect.top + window.scrollY + 'px';
+                this.highlight.style.left = rect.left + window.scrollX + 'px';
+                this.highlight.style.width = rect.width + 'px';
+                this.highlight.style.height = rect.height + 'px';
+                this.description.textContent = step.description;
+                this.tooltip.setAttribute('data-position', step.position);
+
+                // Position tooltip near the element
+                const tooltipRect = this.tooltip.getBoundingClientRect();
+                let tooltipTop, tooltipLeft;
+                if (step.position === 'bottom') {
+                    tooltipTop = rect.bottom + window.scrollY + 15;
+                    tooltipLeft = rect.left + window.scrollX + (rect.width / 2) - (tooltipRect.width / 2);
                 } else {
-                    this.onboardingNext.innerText = 'Next';
+                    tooltipTop = rect.top + window.scrollY - tooltipRect.height - 15;
+                    tooltipLeft = rect.left + window.scrollX + (rect.width / 2) - (tooltipRect.width / 2);
                 }
+                // Keep tooltip within viewport
+                tooltipLeft = Math.max(10, Math.min(tooltipLeft, window.innerWidth - tooltipRect.width - 10));
+                tooltipTop = Math.max(10, tooltipTop);
+                this.tooltip.style.top = tooltipTop + 'px';
+                this.tooltip.style.left = tooltipLeft + 'px';
+
+                // Ensure element is visible (scroll if needed)
+                targetEl.scrollIntoView({ behavior: 'smooth', block: 'center' });
             },
-            nextOnboardingStep() {
-                if (this.currentOnboardingStep < this.onboardingSteps.length - 1) {
-                    this.currentOnboardingStep++;
-                    this.showOnboardingStep();
-                } else {
-                    this.completeOnboarding();
-                }
+
+            next() {
+                this.currentStep++;
+                this.showStep(this.currentStep);
             },
-            async completeOnboarding() {
-                this.onboardingActive = false;
-                this.onboardingOverlay.style.display = 'none';
-                document.querySelectorAll('.onboarding-highlight').forEach(el => el.classList.remove('onboarding-highlight'));
-                // Save to Firebase
-                if (AppState.currentUser) {
-                    await FirebaseService.updateProfile({ onboardingCompleted: true });
-                    AppState.userData.onboardingCompleted = true;
-                }
+
+            async end() {
+                this.overlay.classList.remove('active');
+                await FirebaseService.markTutorialCompleted();
+                this.nextBtn.removeEventListener('click', this.next);
+                this.skipBtn.removeEventListener('click', this.end);
             }
         };
 
