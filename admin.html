@@ -1614,6 +1614,121 @@
         .rejection-reason-text {
             min-height: 85px;                                 
         }
+
+        /* ===== FIRST TIME ADMIN TUTORIAL OVERLAY ===== */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .tutorial-overlay.active {
+            display: flex;
+            pointer-events: all;
+        }
+        .tutorial-highlight {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: pulse 1.5s infinite;
+            pointer-events: none;
+            z-index: 10001;
+            transition: all 0.3s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .tutorial-tooltip {
+            position: absolute;
+            background: white;
+            color: #333;
+            padding: 14px 20px;
+            border-radius: 20px;
+            max-width: 280px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10002;
+            text-align: center;
+            border: 1px solid var(--ios-blue);
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .tutorial-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+        .tutorial-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10003;
+            padding: 0 20px;
+        }
+        .tutorial-btn {
+            background: white;
+            color: var(--ios-blue);
+            border: 1px solid var(--ios-blue);
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: 0.2s;
+            min-width: 120px;
+        }
+        .tutorial-btn.primary {
+            background: var(--ios-blue);
+            color: white;
+            border: none;
+        }
+        .tutorial-btn:hover {
+            transform: scale(1.05);
+        }
+        .tutorial-skip {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 10003;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .tutorial-skip:hover {
+            background: white;
+        }
     </style>
 </head>
 <body>
@@ -2738,6 +2853,18 @@
         </div>
     </div>
 
+    <!-- ===== FIRST TIME ADMIN TUTORIAL OVERLAY ===== -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-highlight" id="tutorialHighlight"></div>
+        <div class="tutorial-tooltip" id="tutorialTooltip"></div>
+        <div class="tutorial-controls">
+            <button class="tutorial-btn" id="tutorialPrevBtn" style="display: none;">Previous</button>
+            <button class="tutorial-btn primary" id="tutorialNextBtn">Next</button>
+            <button class="tutorial-btn" id="tutorialSkipBtn">Skip</button>
+        </div>
+        <button class="tutorial-skip" id="tutorialSkipTop">Skip Tour</button>
+    </div>
+
     <script>
         // =========================================================================
         // TRUCASH ENTERPRISE - FULL PRODUCTION CODE WITH NEW FEATURES
@@ -3284,7 +3411,7 @@
                             'Loan ID': c.loanId,
                             Customer: c.customerName || 'Unknown'
                         };
-                    });
+                    }));
                     filename = 'commission.csv';
                     break;
                     
@@ -6645,6 +6772,14 @@
 
             await loadAllData();
             setupRealtimeListeners();
+
+            // --- First time admin tutorial trigger ---
+            if (adminData && adminData.tutorialCompleted !== true) {
+                // small delay to let UI settle
+                setTimeout(() => {
+                    TutorialManager.startTour();
+                }, 1500);
+            }
         });
 
         document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
@@ -6769,6 +6904,98 @@
             }
         }
         setInterval(initCharts, 1000);
+
+        // ===== TUTORIAL MANAGER =====
+        const TutorialManager = {
+            steps: [
+                { selector: '#adminNameDisplay', text: 'Welcome to TruCash Enterprise! This is your admin dashboard.' },
+                { selector: '#sidebarToggle', text: 'Click here to open the sidebar and access all sections like Customers, Agents, Loans, and more.' },
+                { selector: '.bottom-nav .nav-item-bottom[data-section="dashboard"]', text: 'This is the dashboard home – see key stats at a glance.' },
+                { selector: '.bottom-nav .nav-item-bottom[data-section="agents"]', text: 'Manage agents, approve applications, and track commissions.' },
+                { selector: '.bottom-nav .nav-item-bottom[data-section="customers"]', text: 'View and manage all customers, their loans, and credit scores.' },
+                { selector: '.bottom-nav .nav-item-bottom[data-section="loans"]', text: 'Track loan applications, approve, reject, and monitor repayments.' },
+                { selector: '.bottom-nav .nav-item-bottom[data-section="payments"]', text: 'Verify and confirm payments from customers.' },
+                { selector: null, text: 'You\'re all set! Use the sidebar for advanced features like reports, commissions, and settings. Enjoy full control with TruCash Enterprise.' }
+            ],
+            currentStep: 0,
+            overlay: document.getElementById('tutorialOverlay'),
+            highlightEl: document.getElementById('tutorialHighlight'),
+            tooltipEl: document.getElementById('tutorialTooltip'),
+            nextBtn: document.getElementById('tutorialNextBtn'),
+            prevBtn: document.getElementById('tutorialPrevBtn'),
+            skipBtn: document.getElementById('tutorialSkipBtn'),
+            skipTop: document.getElementById('tutorialSkipTop'),
+
+            startTour() {
+                if (!adminData) return;
+                this.currentStep = 0;
+                this.overlay.classList.add('active');
+                this.showStep(0);
+                this.bindControls();
+            },
+
+            showStep(index) {
+                const step = this.steps[index];
+                if (!step) return;
+                this.tooltipEl.textContent = step.text;
+                if (step.selector) {
+                    const target = document.querySelector(step.selector);
+                    if (target) {
+                        const rect = target.getBoundingClientRect();
+                        this.highlightEl.style.width = (rect.width + 20) + 'px';
+                        this.highlightEl.style.height = (rect.height + 20) + 'px';
+                        this.highlightEl.style.top = (rect.top - 10 + window.scrollY) + 'px';
+                        this.highlightEl.style.left = (rect.left - 10 + window.scrollX) + 'px';
+                        this.highlightEl.style.display = 'block';
+                    } else {
+                        this.highlightEl.style.display = 'none';
+                    }
+                } else {
+                    this.highlightEl.style.display = 'none';
+                }
+                this.prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
+                this.nextBtn.textContent = index === this.steps.length - 1 ? 'Finish' : 'Next';
+            },
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.showStep(this.currentStep);
+                } else {
+                    this.finishTour();
+                }
+            },
+
+            prevStep() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    this.showStep(this.currentStep);
+                }
+            },
+
+            finishTour() {
+                this.overlay.classList.remove('active');
+                // Mark tutorial as completed in Firebase
+                if (currentUser) {
+                    db.ref('users/' + currentUser.uid).update({ tutorialCompleted: true });
+                }
+            },
+
+            skipTour() {
+                this.finishTour();
+            },
+
+            bindControls() {
+                this.nextBtn.onclick = () => this.nextStep();
+                this.prevBtn.onclick = () => this.prevStep();
+                this.skipBtn.onclick = () => this.skipTour();
+                this.skipTop.onclick = () => this.skipTour();
+                // Prevent overlay click from interfering
+                this.overlay.addEventListener('click', (e) => {
+                    if (e.target === this.overlay) e.stopPropagation();
+                });
+            }
+        };
     </script>
 </body>
 </html>
