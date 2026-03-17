@@ -1059,6 +1059,121 @@
             border-radius: 24px;
             background: linear-gradient(135deg, #ffffff, #f5f9ff);
         }
+
+        /* ===== FIRST TIME AGENT TUTORIAL OVERLAY ===== */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35); /* 35% black */
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+        .tutorial-overlay.active {
+            display: flex;
+            pointer-events: all;
+        }
+        .tutorial-highlight {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: pulse 1.5s infinite;
+            pointer-events: none;
+            z-index: 10001;
+            transition: all 0.3s ease;
+        }
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .tutorial-tooltip {
+            position: absolute;
+            background: white;
+            color: #333;
+            padding: 14px 20px;
+            border-radius: 20px;
+            max-width: 280px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10002;
+            text-align: center;
+            border: 1px solid #007aff;
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+        .tutorial-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+        .tutorial-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10003;
+            padding: 0 20px;
+        }
+        .tutorial-btn {
+            background: white;
+            color: #007aff;
+            border: 1px solid #007aff;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: 0.2s;
+            min-width: 120px;
+        }
+        .tutorial-btn.primary {
+            background: #007aff;
+            color: white;
+            border: none;
+        }
+        .tutorial-btn:hover {
+            transform: scale(1.05);
+        }
+        .tutorial-skip {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 10003;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+        .tutorial-skip:hover {
+            background: white;
+        }
     </style>
 </head>
 <body>
@@ -1402,6 +1517,18 @@
 
     <!-- Toast container -->
     <div id="toastContainer" style="position:fixed; top:18px; right:18px; z-index:9999;"></div>
+
+    <!-- ===== FIRST TIME AGENT TUTORIAL OVERLAY ===== -->
+    <div class="tutorial-overlay" id="tutorialOverlay">
+        <div class="tutorial-highlight" id="tutorialHighlight"></div>
+        <div class="tutorial-tooltip" id="tutorialTooltip"></div>
+        <div class="tutorial-controls">
+            <button class="tutorial-btn" id="tutorialPrevBtn" style="display: none;">Previous</button>
+            <button class="tutorial-btn primary" id="tutorialNextBtn">Next</button>
+            <button class="tutorial-btn" id="tutorialSkipBtn">Skip</button>
+        </div>
+        <button class="tutorial-skip" id="tutorialSkipTop">Skip Tour</button>
+    </div>
 
     <script>
         // ==================== FIREBASE CONFIG ====================
@@ -2022,6 +2149,14 @@
                 this.renderCommission();
                 this.updateNotificationBadge();
                 checkForNewNotifications(); // initial check
+
+                // --- First time user tutorial trigger ---
+                if (agent && agent.tutorialCompleted !== true) {
+                    // small delay to let UI settle
+                    setTimeout(() => {
+                        TutorialManager.startTour();
+                    }, 1500);
+                }
             },
             updateLoanSections() {
                 if (!this.sections.loans.classList.contains('d-none')) {
@@ -2516,6 +2651,98 @@
                 document.getElementById('calcInterest').textContent = Utils.formatCurrency(totalInterest);
                 document.getElementById('calcCommission').textContent = Utils.formatCurrency(commission);
                 document.getElementById('calcResult').classList.remove('d-none');
+            }
+        };
+
+        // ===== TUTORIAL MANAGER =====
+        const TutorialManager = {
+            steps: [
+                { selector: '#notificationBell', text: 'Tap here to check notifications about new loan applications, payments, and system updates.' },
+                { selector: '.bottom-nav .nav-item[data-section="home"]', text: 'View all customers assigned to you. Click on any customer to see their details.' },
+                { selector: '.bottom-nav .nav-item[data-section="loans"]', text: 'Track all loan applications. You can filter by status and click on a loan for full details.' },
+                { selector: '.bottom-nav .nav-item[data-section="commission"]', text: 'See your earnings, pending commissions, and projected future commissions.' },
+                { selector: '.bottom-nav .nav-item[data-section="settings"]', text: 'Manage your profile, copy your unique agent code, change password, and more.' },
+                { selector: '.bottom-nav .nav-item[data-section="about"]', text: 'Learn more about TruCash, the benefits of being an agent, and contact information.' },
+                { selector: '#loanCalculatorBtn', text: 'Quickly calculate loan amounts, total interest, and your commission for any loan scenario.' },
+                { selector: null, text: 'You\'re all set! Start earning commissions by helping customers apply for loans.' }
+            ],
+            currentStep: 0,
+            overlay: document.getElementById('tutorialOverlay'),
+            highlightEl: document.getElementById('tutorialHighlight'),
+            tooltipEl: document.getElementById('tutorialTooltip'),
+            nextBtn: document.getElementById('tutorialNextBtn'),
+            prevBtn: document.getElementById('tutorialPrevBtn'),
+            skipBtn: document.getElementById('tutorialSkipBtn'),
+            skipTop: document.getElementById('tutorialSkipTop'),
+
+            startTour() {
+                if (!AppState.agentData) return;
+                this.currentStep = 0;
+                this.overlay.classList.add('active');
+                this.showStep(0);
+                this.bindControls();
+            },
+
+            showStep(index) {
+                const step = this.steps[index];
+                if (!step) return;
+                this.tooltipEl.textContent = step.text;
+                if (step.selector) {
+                    const target = document.querySelector(step.selector);
+                    if (target) {
+                        const rect = target.getBoundingClientRect();
+                        this.highlightEl.style.width = (rect.width + 20) + 'px';
+                        this.highlightEl.style.height = (rect.height + 20) + 'px';
+                        this.highlightEl.style.top = (rect.top - 10 + window.scrollY) + 'px';
+                        this.highlightEl.style.left = (rect.left - 10 + window.scrollX) + 'px';
+                        this.highlightEl.style.display = 'block';
+                    } else {
+                        this.highlightEl.style.display = 'none';
+                    }
+                } else {
+                    this.highlightEl.style.display = 'none';
+                }
+                this.prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
+                this.nextBtn.textContent = index === this.steps.length - 1 ? 'Finish' : 'Next';
+            },
+
+            nextStep() {
+                if (this.currentStep < this.steps.length - 1) {
+                    this.currentStep++;
+                    this.showStep(this.currentStep);
+                } else {
+                    this.finishTour();
+                }
+            },
+
+            prevStep() {
+                if (this.currentStep > 0) {
+                    this.currentStep--;
+                    this.showStep(this.currentStep);
+                }
+            },
+
+            finishTour() {
+                this.overlay.classList.remove('active');
+                // Mark tutorial as completed in Firebase
+                if (AppState.currentUser) {
+                    db.ref('users/' + AppState.currentUser.uid).update({ tutorialCompleted: true });
+                }
+            },
+
+            skipTour() {
+                this.finishTour();
+            },
+
+            bindControls() {
+                this.nextBtn.onclick = () => this.nextStep();
+                this.prevBtn.onclick = () => this.prevStep();
+                this.skipBtn.onclick = () => this.skipTour();
+                this.skipTop.onclick = () => this.skipTour();
+                // Prevent overlay click from interfering
+                this.overlay.addEventListener('click', (e) => {
+                    if (e.target === this.overlay) e.stopPropagation();
+                });
             }
         };
 
