@@ -959,6 +959,106 @@
         #calculateBtn {
             margin-top: 8px;
         }
+
+        /* ===== FLOATING PROMOTION CARD ===== */
+        .floating-promo {
+            position: fixed;
+            bottom: 90px; /* above bottom nav */
+            left: 16px;
+            right: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(0,122,255,0.2);
+            z-index: 300;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.98);
+            border: 1px solid rgba(0,122,255,0.3);
+            transform: translateY(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+        .floating-promo.show {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+        .floating-promo .promo-image {
+            width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            background: #f5f7fa;
+        }
+        .floating-promo .promo-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #007aff;
+            margin-bottom: 8px;
+        }
+        .floating-promo .promo-message {
+            font-size: 15px;
+            color: #1c1e24;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+        .floating-promo .promo-close {
+            background: #007aff;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(0,122,255,0.3);
+            transition: 0.2s;
+        }
+        .floating-promo .promo-close:hover {
+            background: #005bbf;
+            transform: scale(1.02);
+        }
+        .floating-promo .promo-close i {
+            font-size: 18px;
+        }
+
+        /* ===== FLOATING LOAN CALCULATOR CARD (MODAL ENHANCEMENT) ===== */
+        #calculatorModal .modal-card {
+            border-radius: 32px 32px 0 0;
+            box-shadow: 0 -20px 40px rgba(0,0,0,0.15), 0 0 0 1px rgba(0,122,255,0.2);
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.98);
+        }
+        #calculatorModal .modal-header h3 {
+            font-size: 22px;
+        }
+        #calculatorModal .form-input,
+        #calculatorModal .form-select {
+            background: #f8fafd;
+            border: 1px solid #e0e7ef;
+            border-radius: 40px;
+            padding: 14px 18px;
+        }
+        #calculatorModal .btn {
+            border-radius: 40px;
+            padding: 16px;
+            font-size: 16px;
+        }
+        #calculatorModal .calc-result {
+            border-radius: 24px;
+            background: linear-gradient(135deg, #ffffff, #f5f9ff);
+        }
     </style>
 </head>
 <body>
@@ -968,6 +1068,14 @@
         <i class="fas fa-tools" style="font-size: 54px; color: #ff3b30; margin-bottom: 18px;"></i>
         <h2>Under Maintenance</h2>
         <p>The agent app is currently disabled by the administrator. Please check back later.</p>
+    </div>
+
+    <!-- Floating Promotion Card -->
+    <div class="floating-promo" id="floatingPromo">
+        <img id="promoImage" class="promo-image" src="" alt="Promotion" style="display: none;">
+        <div class="promo-title" id="promoTitle"></div>
+        <div class="promo-message" id="promoMessage"></div>
+        <button class="promo-close" id="closeFloatingPromo"><i class="fas fa-gift"></i> Got it!</button>
     </div>
 
     <!-- Header with agent profile picture, TRUCASH AGENT and notification bell -->
@@ -1231,8 +1339,8 @@
         </div>
     </div>
 
-    <!-- Promotion Modal -->
-    <div class="modal-overlay" id="promotionModal">
+    <!-- Promotion Modal (kept for backward compatibility, but we use floating promo now) -->
+    <div class="modal-overlay" id="promotionModal" style="display:none;">
         <div class="modal-card">
             <div class="modal-header">
                 <h3 id="promotionTitle">Promotion</h3>
@@ -1727,7 +1835,7 @@
                 const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
                 if (unseen.length > 0) {
                     AppState.currentPromotionIndex = 0;
-                    UIManager.showPromotion(unseen[0]);
+                    UIManager.showFloatingPromotion(unseen[0]);
                 }
             },
             listenForPromotions() {
@@ -1736,8 +1844,8 @@
                     if (promo.active && (promo.recipients === 'all_agents' || promo.recipients === 'both')) {
                         if (!AppState.promotions.find(p => p.id === snap.key)) {
                             AppState.promotions.unshift({ id: snap.key, ...promo });
-                            if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('promotionModal').classList.contains('active')) {
-                                UIManager.showPromotion({ id: snap.key, ...promo });
+                            if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('floatingPromo').classList.contains('show')) {
+                                UIManager.showFloatingPromotion({ id: snap.key, ...promo });
                             }
                         }
                     }
@@ -1824,12 +1932,11 @@
                 this.notificationsModal = document.getElementById('notificationsModal');
                 this.notificationsList = document.getElementById('notificationsList');
                 this.markAllReadBtn = document.getElementById('markAllReadBtn');
-                this.promotionModal = document.getElementById('promotionModal');
-                this.promotionTitle = document.getElementById('promotionTitle');
-                this.promotionMessage = document.getElementById('promotionMessage');
-                this.promotionImage = document.getElementById('promotionImage');
-                this.closePromotionModal = document.getElementById('closePromotionModal');
-                this.dismissPromotionBtn = document.getElementById('dismissPromotion');
+                this.floatingPromo = document.getElementById('floatingPromo');
+                this.promoImage = document.getElementById('promoImage');
+                this.promoTitle = document.getElementById('promoTitle');
+                this.promoMessage = document.getElementById('promoMessage');
+                this.closeFloatingPromo = document.getElementById('closeFloatingPromo');
                 this.customerModal = document.getElementById('customerModal');
                 this.loanModal = document.getElementById('loanModal');
                 this.customerLoansModal = document.getElementById('customerLoansModal');
@@ -1845,8 +1952,6 @@
                 document.getElementById('closeCertificateModal').onclick = ()=> this.certificateModal.classList.remove('active');
                 document.getElementById('closeNotificationsModal').onclick = ()=> this.notificationsModal.classList.remove('active');
                 document.getElementById('closeCalculatorModal').onclick = ()=> this.calculatorModal.classList.remove('active');
-                this.closePromotionModal.onclick = ()=> this.closePromotion();
-                this.dismissPromotionBtn.onclick = ()=> this.closePromotion();
                 document.getElementById('copyAgentCode').onclick = ()=> this.copyAgentCode();
                 document.getElementById('changePasswordBtn').onclick = ()=> this.passwordModal.classList.add('active');
                 document.getElementById('submitPasswordChange').onclick = ()=> this.changePassword();
@@ -1856,6 +1961,7 @@
                 this.notificationBell.addEventListener('click', ()=> this.openNotificationsModal());
                 this.markAllReadBtn.addEventListener('click', ()=> FirebaseService.markAllAsRead());
                 this.loanFilterSelect.addEventListener('change', ()=> this.renderLoans());
+                this.closeFloatingPromo.addEventListener('click', ()=> this.closeFloatingPromotion());
                 // Export buttons
                 document.getElementById('exportCustomersBtn').addEventListener('click', ()=> this.exportCustomers());
                 document.getElementById('exportLoansBtn').addEventListener('click', ()=> this.exportLoans());
@@ -2283,34 +2389,37 @@
                 `;
                 this.certificateModal.classList.add('active');
             },
-            showPromotion(promo) {
+            // New floating promotion methods
+            showFloatingPromotion(promo) {
                 if (!promo) return;
                 if (AppState.seenPromotions.has(promo.id)) {
                     const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
-                    if (unseen.length > 0) this.showPromotion(unseen[0]);
+                    if (unseen.length > 0) this.showFloatingPromotion(unseen[0]);
                     return;
                 }
-                this.promotionTitle.textContent = promo.title || 'Promotion';
-                this.promotionMessage.textContent = promo.message || '';
+                this.promoTitle.textContent = promo.title || 'Promotion';
+                this.promoMessage.textContent = promo.message || '';
                 if (promo.imageUrl) {
-                    this.promotionImage.src = promo.imageUrl;
-                    this.promotionImage.style.display = 'block';
+                    this.promoImage.src = promo.imageUrl;
+                    this.promoImage.style.display = 'block';
                 } else {
-                    this.promotionImage.style.display = 'none';
+                    this.promoImage.style.display = 'none';
                 }
-                this.promotionModal.classList.add('active');
+                this.floatingPromo.classList.add('show');
             },
-            closePromotion() {
-                const currentPromo = AppState.promotions[AppState.currentPromotionIndex];
+            closeFloatingPromotion() {
+                // Mark current promotion as seen
+                const currentPromo = AppState.promotions.find(p => !AppState.seenPromotions.has(p.id));
                 if (currentPromo) {
                     AppState.seenPromotions.add(currentPromo.id);
                     Utils.saveSeenPromotions();
                 }
-                this.promotionModal.classList.remove('active');
+                this.floatingPromo.classList.remove('show');
+                // Check if there are more unseen promotions
                 const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
                 if (unseen.length > 0) {
                     AppState.currentPromotionIndex = 0;
-                    this.showPromotion(unseen[0]);
+                    this.showFloatingPromotion(unseen[0]);
                 } else {
                     AppState.currentPromotionIndex = 0;
                 }
