@@ -312,16 +312,25 @@
         .form-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 18px;
+            gap: 20px; /* increased spacing between grid items */
+            margin-bottom: 20px;
         }
         .full-width {
             grid-column: span 2;
         }
+        /* Individual input spacing inside form */
+        .form-group {
+            margin-bottom: 24px; /* adds space between input groups */
+        }
+        .floating-input {
+            margin-bottom: 0; /* prevent double margin */
+        }
         .file-upload-grid {
             display: grid;
             grid-template-columns: repeat(2,1fr);
-            gap: 14px;
-            margin-top: 10px;
+            gap: 18px;
+            margin-top: 12px;
+            margin-bottom: 16px;
         }
         .upload-box {
             aspect-ratio: 1;
@@ -361,9 +370,10 @@
         @media (max-width: 560px) {
             .auth-card { padding: 28px 20px; }
             .floating-input { padding: 16px 20px; font-size: 16px; }
-            .form-grid { grid-template-columns: 1fr; }
+            .form-grid { grid-template-columns: 1fr; gap: 16px; }
             .full-width { grid-column: span 1; }
             .user-type-selector { flex-direction: column; }
+            .file-upload-grid { gap: 12px; }
         }
         .hidden { display: none; }
         .text-center { text-align: center; }
@@ -464,11 +474,15 @@
                     </div>
                     <!-- Agent fields -->
                     <div id="agentFields" style="display:none">
-                        <input type="tel" id="agentPhone" class="floating-input" placeholder="Phone Number *">
+                        <div class="form-group">
+                            <input type="tel" id="agentPhone" class="floating-input" placeholder="Phone Number *">
+                        </div>
                     </div>
-                    <div class="form-grid">
-                        <div class="full-width"><input type="text" id="regResidence" class="floating-input" placeholder="Residential Address *"></div>
-                        <div class="full-width"><input type="text" id="regNRC" class="floating-input" placeholder="NRC Number (format: 123456/78/9) *"></div>
+                    <div class="form-group">
+                        <input type="text" id="regResidence" class="floating-input" placeholder="Residential Address *">
+                    </div>
+                    <div class="form-group">
+                        <input type="text" id="regNRC" class="floating-input" placeholder="NRC Number (format: 123456/78/9) *">
                     </div>
                     <div>
                         <label>Required Documents (NRC Front/Back, Profile Photo) *</label>
@@ -509,7 +523,7 @@
     </div>
 </div>
 
-<!-- Banned Account Modal (with refresh on "Understood") -->
+<!-- Banned Account Modal (stays visible until user clicks "Understood") -->
 <div id="bannedModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3>Account Suspended</h3><button class="modal-close" id="closeBannedModal"><i class="fas fa-times"></i></button></div>
@@ -646,7 +660,7 @@
         },
         async sendPasswordReset(email) { await auth.sendPasswordResetEmail(email); return { success: true }; },
         async getSystemSettings() { const snap = await db.ref('systemSettings').once('value'); return snap.val() || {}; },
-        async getPendingApplications() { /* minimal stub for admin approval, kept for completeness */ const snap = await db.ref('pendingApplications').once('value'); let apps=[]; snap.forEach(c=>apps.push({id:c.key,...c.val()})); return {success:true, applications:apps}; },
+        async getPendingApplications() { const snap = await db.ref('pendingApplications').once('value'); let apps=[]; snap.forEach(c=>apps.push({id:c.key,...c.val()})); return {success:true, applications:apps}; },
         async getAgentApplicationDetails(appId) { const snap = await db.ref('agentApplications/'+appId).once('value'); if(snap.exists()) return {success:true, application:snap.val()}; return {success:false}; },
         async approveAgentApplication(appId, creds, reviewedBy) { await db.ref('agentApplications/'+appId).update({status:'approved',reviewedAt:Date.now(),reviewedBy,assignedCredentials:creds}); await db.ref('pendingApplications/'+appId).remove(); return {success:true}; },
         async createAgentAccount(appId, creds, appData) { const userCred = await auth.createUserWithEmailAndPassword(creds.email, creds.password); const agentDoc = {...appData, uid:userCred.user.uid, email:creds.email, agentId:creds.agentId, userType:'agent', status:'active', applicationId:appId, createdAt:Date.now()}; await db.ref('users/'+userCred.user.uid).set(agentDoc); await db.ref('userEmails/'+utils.sanitizeEmail(creds.email)).set(userCred.user.uid); return {success:true}; }
@@ -718,7 +732,7 @@
                     <p><i class="fas fa-globe"></i> ${contact.website}</p>
                 `;
                 document.getElementById('bannedModal').classList.add('active');
-                return;
+                return; // Stay on page, modal open
             }
             if(res.success) {
                 let redirect = 'customer.html';
@@ -818,7 +832,7 @@
         document.getElementById('forgotModal').classList.remove('active');
     });
 
-    // Banned modal "Understood" -> refresh page
+    // Banned modal "Understood" -> refresh page (manual action)
     document.getElementById('bannedUnderstoodBtn').addEventListener('click', () => {
         window.location.reload();
     });
