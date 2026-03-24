@@ -14,9 +14,6 @@
     <!-- Cloudinary Upload Widget -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* -------------------------------------------------------------------------- */
-        /* GLOBAL RESET & VARIABLES – 15% larger for better usability                */
-        /* -------------------------------------------------------------------------- */
         * {
             margin: 0;
             padding: 0;
@@ -63,7 +60,6 @@
             to { opacity: 1; transform: translateY(0); }
         }
 
-        /* Logo area – large, curved edges, modern feel */
         .logo-area {
             text-align: center;
             margin-bottom: 48px;
@@ -87,7 +83,6 @@
         .brand-tru { color: var(--tru-red); }
         .brand-cash { color: var(--tru-blue); }
 
-        /* Main card */
         .auth-card {
             background: var(--white);
             border-radius: var(--radius-card);
@@ -96,7 +91,6 @@
             transition: var(--transition);
         }
 
-        /* Step containers */
         .step {
             transition: opacity 0.2s;
         }
@@ -104,7 +98,6 @@
             display: none;
         }
 
-        /* Floating pill inputs – increased size, subtle shadow */
         .input-group {
             margin-bottom: 28px;
         }
@@ -128,7 +121,7 @@
             color: #cbd5e1;
         }
 
-        /* Red pill buttons with loading animation (red → blue gradient) */
+        /* Pill-shaped primary buttons with red default & loading animation (red → blue) */
         .btn-primary {
             background: var(--tru-red);
             border: none;
@@ -185,7 +178,6 @@
             to { transform: rotate(360deg); }
         }
 
-        /* Inline links (Create Account, Forgot Password) */
         .inline-links {
             display: flex;
             justify-content: center;
@@ -208,7 +200,6 @@
             text-decoration: underline;
         }
 
-        /* Personalized greeting message */
         .greeting-message {
             background: #f0f9ff;
             border-radius: var(--radius-pill);
@@ -225,9 +216,7 @@
             color: var(--tru-red);
         }
 
-        /* -------------------------------------------------------------------------- */
-        /* MODAL STYLES – redesigned, consistent with modern look                     */
-        /* -------------------------------------------------------------------------- */
+        /* Modal styles (consistent with modern UI) */
         .modal {
             display: none;
             position: fixed;
@@ -253,7 +242,7 @@
         .modal-content {
             background: white;
             border-radius: 32px;
-            max-width: 700px;
+            max-width: 600px;
             width: 100%;
             max-height: 85vh;
             overflow-y: auto;
@@ -306,7 +295,7 @@
             background: #f9fafb;
         }
 
-        /* Registration form styles (agent/customer) */
+        /* Registration form: user type selector & agent info */
         .user-type-selector {
             display: flex;
             gap: 16px;
@@ -380,7 +369,7 @@
         .validation-badge.valid { color: #15803d; }
         .validation-badge.invalid { color: var(--tru-red); }
 
-        /* Banned user card – professional, distinct */
+        /* Banned modal styling */
         .banned-card {
             text-align: center;
         }
@@ -453,9 +442,7 @@
     </div>
 </div>
 
-<!-- ==================== MODALS ==================== -->
-
-<!-- Registration Modal (Full featured: agent/customer, uploads) -->
+<!-- ==================== REGISTRATION MODAL (with user type selection & agent info) ==================== -->
 <div id="registerModal" class="modal">
     <div class="modal-content">
         <div class="modal-header">
@@ -528,7 +515,10 @@
         </div>
         <div class="modal-footer">
             <button class="btn-outline" id="cancelRegisterBtn">Cancel</button>
-            <button id="submitRegisterBtn" class="btn-primary" style="width:auto; padding:12px 28px;">Create Account</button>
+            <button id="submitRegisterBtn" class="btn-primary" style="width:auto; padding:12px 28px;">
+                <span class="btn-text">Create Account</span>
+                <span class="spinner-icon"><i class="fas fa-circle-notch"></i></span>
+            </button>
         </div>
     </div>
 </div>
@@ -548,7 +538,7 @@
     </div>
 </div>
 
-<!-- Banned Account Modal (redesigned with contact details) -->
+<!-- Banned Account Modal (with contact details, refresh on close) -->
 <div id="bannedModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3>Account Suspended</h3><button class="modal-close" id="closeBannedModal"><i class="fas fa-times"></i></button></div>
@@ -562,7 +552,7 @@
     </div>
 </div>
 
-<!-- Admin Approval Modal (hidden for non-admin, but structure kept) -->
+<!-- Admin Approval Modal (optional, kept for completeness) -->
 <div id="adminApprovalModal" class="modal">
     <div class="modal-content">
         <div class="modal-header"><h3>Agent Applications</h3><button class="modal-close" id="closeAdminModal"><i class="fas fa-times"></i></button></div>
@@ -581,9 +571,7 @@
 </div>
 
 <script>
-    // =========================================================================
-    // FIREBASE CONFIGURATION (same as original)
-    // =========================================================================
+    // Firebase Config (unchanged)
     const firebaseConfig = {
         apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
         authDomain: "trucash-9fee8.firebaseapp.com",
@@ -601,45 +589,57 @@
         console.log("Firebase initialized");
     } catch(e) { console.warn(e); }
 
-    // =========================================================================
-    // UTILITIES
-    // =========================================================================
+    // Utility functions
     const utils = {
         validateEmail: email => /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email),
         validatePhone: phone => /^\+?[\d\s\-\(\)]{10,}$/.test(phone),
         validatePassword: pwd => pwd.length >= 6,
         validateNRC: nrc => /^\d{6}\/\d{2}\/\d{1}$/.test(nrc),
         sanitizeEmail: email => email.replace(/\./g, ','),
-        showNotification: (title, msg, type) => alert(`${title}: ${msg}`),
-        setButtonLoading: (btn, loadingText = "Please wait...") => {
-            if(!btn) return;
-            btn.classList.add('loading');
-            const originalText = btn.querySelector('.btn-text') ? btn.querySelector('.btn-text') : btn;
-            if(originalText && originalText.tagName) {
-                if(!btn._originalText) btn._originalText = originalText.innerText;
-                originalText.innerText = loadingText;
-            }
-            btn.disabled = true;
-        },
-        resetButton: (btn) => {
-            if(!btn) return;
-            btn.classList.remove('loading');
-            const originalText = btn.querySelector('.btn-text') ? btn.querySelector('.btn-text') : btn;
-            if(originalText && btn._originalText) {
-                originalText.innerText = btn._originalText;
-                delete btn._originalText;
-            }
-            btn.disabled = false;
-        },
         generateAgentId: () => 'AG' + Date.now().toString().slice(-6) + Math.random().toString(36).substr(2,3).toUpperCase(),
         generatePassword: (len=12) => Math.random().toString(36).slice(-len) + Math.random().toString(36).toUpperCase().slice(-2),
-        generateAgentEmail: (fullName) => `agent.${fullName.split(' ')[0].toLowerCase()}.${Date.now().toString().slice(-4)}@trucash.com`
+        generateAgentEmail: (fullName) => `agent.${fullName.split(' ')[0].toLowerCase()}.${Date.now().toString().slice(-4)}@trucash.com`,
+        showLoading: (btn) => { if(btn) btn.classList.add('loading'); },
+        hideLoading: (btn) => { if(btn) btn.classList.remove('loading'); }
     };
 
-    // =========================================================================
-    // FIREBASE SERVICE LAYER (with banned check and contact fetch)
-    // =========================================================================
     let systemSettings = {};
+    let currentEmail = '';
+    let uploadedFiles = { nrcFront: null, nrcBack: null, profile: null, additional: null };
+    let cloudinaryWidget = null;
+    let activeUploadBox = null;
+
+    // Cloudinary widget initialization
+    function initCloudinary() {
+        if(!cloudinaryWidget) {
+            cloudinaryWidget = cloudinary.createUploadWidget({
+                cloudName: 'dd3lcymrk',
+                uploadPreset: 'h3eyhc2o',
+                sources: ['local', 'camera'],
+                multiple: false,
+                maxFileSize: 5242880,
+                clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf']
+            }, (error, result) => {
+                if(error) { console.error(error); return; }
+                if(result && result.event === 'success' && activeUploadBox) {
+                    const url = result.info.secure_url;
+                    const type = activeUploadBox.dataset.type;
+                    const key = type === 'nrc-front' ? 'nrcFront' : type === 'nrc-back' ? 'nrcBack' : type === 'profile' ? 'profile' : 'additional';
+                    uploadedFiles[key] = url;
+                    activeUploadBox.innerHTML = '';
+                    const img = document.createElement('img');
+                    img.src = url;
+                    img.className = 'upload-preview';
+                    activeUploadBox.appendChild(img);
+                    activeUploadBox.classList.add('active');
+                    activeUploadBox = null;
+                }
+            });
+        }
+    }
+    initCloudinary();
+
+    // Firebase Service (includes banned check & system settings)
     const firebaseService = {
         async getSystemSettings() {
             const snap = await db.ref('systemSettings').once('value');
@@ -675,14 +675,17 @@
                     if(aSnap.exists()) { userData = aSnap.val(); userType = 'agent'; }
                 }
             }
-            // banned check for non-sudo/admin
             if(userData && userData.status === 'banned' && userType !== 'sudo' && userType !== 'admin') {
                 await auth.signOut();
-                const contact = {
+                let contact = {
                     phone: systemSettings.customerContactPhone || '+1-800-TRU-CASH',
                     email: systemSettings.customerContactEmail || 'support@trucash.com'
                 };
-                return { banned: true, userName: userData.fullName || 'User', userEmail: email, reason: userData.banReason || 'Policy violation', contact };
+                if(userType === 'agent') {
+                    contact.phone = systemSettings.agentContactPhone || '+1-800-TRU-CASH';
+                    contact.email = systemSettings.agentContactEmail || 'agents@trucash.com';
+                }
+                return { banned: true, userName: userData.fullName || 'User', reason: userData.banReason || 'Policy violation', contact };
             }
             return { success: true, user: userCred.user, userType, userData };
         },
@@ -703,113 +706,59 @@
         async sendPasswordReset(email) {
             await auth.sendPasswordResetEmail(email);
             return { success: true };
-        },
-        async getAgentApplicationDetails(appId) {
-            const snap = await db.ref('agentApplications/'+appId).once('value');
-            if(snap.exists()) return { success: true, application: snap.val() };
-            return { success: false };
-        },
-        async approveAgentApplication(appId, credentials, reviewedBy) {
-            await db.ref('agentApplications/'+appId).update({ status: 'approved', reviewedAt: Date.now(), reviewedBy, assignedCredentials: credentials });
-            await db.ref('pendingApplications/'+appId).remove();
-            return { success: true };
-        },
-        async createAgentAccount(appId, credentials, appData) {
-            const userCred = await auth.createUserWithEmailAndPassword(credentials.email, credentials.password);
-            const agentDoc = { ...appData, uid: userCred.user.uid, email: credentials.email, agentId: credentials.agentId, userType: 'agent', status: 'active', applicationId: appId, createdAt: Date.now() };
-            await db.ref('users/'+userCred.user.uid).set(agentDoc);
-            await db.ref('userEmails/'+utils.sanitizeEmail(credentials.email)).set(userCred.user.uid);
-            await db.ref('agents/'+userCred.user.uid).set({ agentId: credentials.agentId, email: credentials.email, fullName: appData.fullName });
-            return { success: true };
         }
     };
 
-    // =========================================================================
-    // CLOUDINARY UPLOAD HANDLER (unchanged functional)
-    // =========================================================================
-    let cloudinaryWidget = null;
-    let activeUploadBox = null;
-    let uploadedFiles = { nrcFront: null, nrcBack: null, profile: null, additional: null };
-    const cloudinarySvc = {
-        initWidget() {
-            if(!cloudinaryWidget) {
-                cloudinaryWidget = cloudinary.createUploadWidget({
-                    cloudName: 'dd3lcymrk',
-                    uploadPreset: 'h3eyhc2o',
-                    sources: ['local', 'camera'],
-                    multiple: false,
-                    maxFileSize: 5242880,
-                    clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf']
-                }, (error, result) => {
-                    if(error) { console.error(error); return; }
-                    if(result && result.event === 'success' && activeUploadBox) {
-                        const url = result.info.secure_url;
-                        const type = activeUploadBox.dataset.type;
-                        const key = type === 'nrc-front' ? 'nrcFront' : type === 'nrc-back' ? 'nrcBack' : type === 'profile' ? 'profile' : 'additional';
-                        uploadedFiles[key] = url;
-                        activeUploadBox.innerHTML = '';
-                        const img = document.createElement('img');
-                        img.src = url;
-                        img.className = 'upload-preview';
-                        activeUploadBox.appendChild(img);
-                        activeUploadBox.classList.add('active');
-                        activeUploadBox = null;
-                    }
-                });
-            }
-        },
-        openWidget(box) {
-            activeUploadBox = box;
-            if(cloudinaryWidget) cloudinaryWidget.open();
-        }
-    };
-    cloudinarySvc.initWidget();
+    // DOM elements
+    const stepEmailDiv = document.getElementById('stepEmail');
+    const stepPasswordDiv = document.getElementById('stepPassword');
+    const emailInput = document.getElementById('emailInput');
+    const passwordInput = document.getElementById('passwordInput');
+    const nextBtn = document.getElementById('nextBtn');
+    const loginBtn = document.getElementById('loginBtn');
+    const greetingContainer = document.getElementById('greetingContainer');
+    const greetingNameSpan = document.getElementById('greetingName');
+    const createAccBtns = [document.getElementById('createAccountFromEmail'), document.getElementById('createAccountFromPwd')];
+    const forgotPwdBtn = document.getElementById('forgotPwdLink');
 
-    // =========================================================================
-    // DOM REFERENCES AND APPLICATION LOGIC
-    // =========================================================================
-    let currentEmail = '';
-    let currentUserData = null;
+    // Modal references
+    const registerModal = document.getElementById('registerModal');
+    const forgotModal = document.getElementById('forgotModal');
+    const bannedModal = document.getElementById('bannedModal');
+    let selectedUserType = 'customer';
 
-    async function loadSystemSettings() {
-        systemSettings = await firebaseService.getSystemSettings();
-    }
-
+    // Show password step with personalized greeting
     async function showPasswordStep() {
-        const email = document.getElementById('emailInput').value.trim();
+        const email = emailInput.value.trim();
         if(!utils.validateEmail(email)) { alert('Please enter a valid email address'); return; }
-        const nextBtn = document.getElementById('nextBtn');
-        utils.setButtonLoading(nextBtn);
+        utils.showLoading(nextBtn);
         const result = await firebaseService.checkEmailExists(email);
-        utils.resetButton(nextBtn);
+        utils.hideLoading(nextBtn);
         if(result.exists) {
             let displayName = result.userData?.fullName || (result.isSudo ? 'Admin' : email.split('@')[0]);
-            document.getElementById('greetingName').innerText = displayName;
-            currentUserData = result.userData;
+            greetingNameSpan.innerText = displayName;
         } else {
-            document.getElementById('greetingName').innerText = 'Guest';
-            currentUserData = null;
+            greetingNameSpan.innerText = 'Guest';
         }
-        document.getElementById('greetingContainer').classList.remove('hidden');
+        greetingContainer.classList.remove('hidden');
         currentEmail = email;
-        document.getElementById('stepEmail').classList.add('hidden');
-        document.getElementById('stepPassword').classList.remove('hidden');
+        stepEmailDiv.classList.add('hidden');
+        stepPasswordDiv.classList.remove('hidden');
     }
 
+    // Login with banned check
     async function performLogin() {
-        const pwd = document.getElementById('passwordInput').value;
+        const pwd = passwordInput.value;
         if(!pwd) { alert('Please enter your password'); return; }
-        const loginBtn = document.getElementById('loginBtn');
-        utils.setButtonLoading(loginBtn);
+        utils.showLoading(loginBtn);
         try {
             const res = await firebaseService.signIn(currentEmail, pwd);
             if(res.banned) {
-                utils.resetButton(loginBtn);
-                const bannedDetails = document.getElementById('bannedDetails');
-                bannedDetails.innerHTML = `<p><strong>${res.userName}</strong><br/>Email: ${res.userEmail}</p><p>Reason: ${res.reason}</p>`;
-                const contactDiv = document.getElementById('bannedContact');
-                contactDiv.innerHTML = `<p><i class="fas fa-phone-alt"></i> ${res.contact.phone}<br/><i class="fas fa-envelope"></i> ${res.contact.email}</p>`;
-                document.getElementById('bannedModal').classList.add('active');
+                utils.hideLoading(loginBtn);
+                const bannedDetail = document.getElementById('bannedDetails');
+                bannedDetail.innerHTML = `<p><strong>${res.userName}</strong></p><p><strong>Reason:</strong> ${res.reason}</p>`;
+                document.getElementById('bannedContact').innerHTML = `<p><i class="fas fa-phone"></i> ${res.contact.phone}<br><i class="fas fa-envelope"></i> ${res.contact.email}</p>`;
+                bannedModal.classList.add('active');
                 return;
             }
             if(res.success) {
@@ -821,14 +770,13 @@
             } else throw new Error('Login failed');
         } catch(e) {
             alert('Invalid email or password');
-            utils.resetButton(loginBtn);
+            utils.hideLoading(loginBtn);
         }
     }
 
-    // Registration modal logic (full-featured)
-    let selectedUserType = 'customer';
+    // Registration modal handlers
     function openRegisterModal() {
-        document.getElementById('registerModal').classList.add('active');
+        registerModal.classList.add('active');
         document.getElementById('registerFormFields').style.display = 'block';
         document.getElementById('userTypeSelector').style.display = 'flex';
         document.getElementById('agentInfoBox').style.display = 'none';
@@ -837,9 +785,15 @@
         document.getElementById('regUserType').value = 'customer';
         selectedUserType = 'customer';
         uploadedFiles = { nrcFront: null, nrcBack: null, profile: null, additional: null };
-        document.querySelectorAll('.upload-box').forEach(box => { box.innerHTML = box.querySelector('i') ? box.innerHTML : box.innerHTML; box.classList.remove('active'); });
+        document.querySelectorAll('.upload-box').forEach(box => {
+            box.innerHTML = box.querySelector('i') ? box.innerHTML : box.innerHTML;
+            box.classList.remove('active');
+        });
+        document.querySelectorAll('.user-type-card').forEach(c => c.classList.remove('active'));
+        document.querySelector('.user-type-card[data-type="customer"]').classList.add('active');
     }
 
+    // User type toggle
     document.querySelectorAll('.user-type-card').forEach(card => {
         card.addEventListener('click', () => {
             document.querySelectorAll('.user-type-card').forEach(c => c.classList.remove('active'));
@@ -858,14 +812,18 @@
         });
     });
 
+    // File upload click
     document.querySelectorAll('.upload-box').forEach(box => {
         box.addEventListener('click', (e) => {
             if(e.target.closest('.remove-upload')) return;
-            cloudinarySvc.openWidget(box);
+            activeUploadBox = box;
+            if(cloudinaryWidget) cloudinaryWidget.open();
+            else console.warn('Cloudinary widget not ready');
         });
     });
 
-    async function handleRegistrationSubmit() {
+    // Registration submit
+    document.getElementById('submitRegisterBtn').addEventListener('click', async () => {
         const userType = document.getElementById('regUserType').value;
         const fullName = document.getElementById('regFullName').value.trim();
         const residence = document.getElementById('regResidence').value.trim();
@@ -883,61 +841,67 @@
             additionalDoc: uploadedFiles.additional || ''
         };
         const submitBtn = document.getElementById('submitRegisterBtn');
-        utils.setButtonLoading(submitBtn, "Creating...");
+        utils.showLoading(submitBtn);
         if(userType === 'customer') {
             const email = document.getElementById('regEmail').value.trim();
             const phone = document.getElementById('regPhone').value.trim();
             const pwd = document.getElementById('regPassword').value;
             const confirm = document.getElementById('regConfirmPassword').value;
-            if(!utils.validateEmail(email)) { alert('Valid email required'); utils.resetButton(submitBtn); return; }
-            if(!utils.validatePhone(phone)) { alert('Valid phone required (min 10 digits)'); utils.resetButton(submitBtn); return; }
-            if(!utils.validatePassword(pwd)) { alert('Password must be at least 6 characters'); utils.resetButton(submitBtn); return; }
-            if(pwd !== confirm) { alert('Passwords do not match'); utils.resetButton(submitBtn); return; }
+            if(!utils.validateEmail(email)) { alert('Valid email required'); utils.hideLoading(submitBtn); return; }
+            if(!utils.validatePhone(phone)) { alert('Valid phone required (min 10 digits)'); utils.hideLoading(submitBtn); return; }
+            if(!utils.validatePassword(pwd)) { alert('Password must be at least 6 characters'); utils.hideLoading(submitBtn); return; }
+            if(pwd !== confirm) { alert('Passwords do not match'); utils.hideLoading(submitBtn); return; }
             data.email = email; data.phone = phone; data.password = pwd;
             const res = await firebaseService.registerCustomer(data);
-            if(res.success) { alert('Registration successful! You can now log in.'); document.getElementById('registerModal').classList.remove('active'); }
+            if(res.success) { alert('Registration successful! You can now log in.'); registerModal.classList.remove('active'); }
             else alert(res.error || 'Registration failed');
         } else {
             const phone = document.getElementById('agentPhone').value.trim();
-            if(!utils.validatePhone(phone)) { alert('Valid phone number required'); utils.resetButton(submitBtn); return; }
+            if(!utils.validatePhone(phone)) { alert('Valid phone number required'); utils.hideLoading(submitBtn); return; }
             data.phone = phone;
             const res = await firebaseService.submitAgentApplication(data);
-            if(res.success) { alert('Agent application submitted. You will receive credentials after admin approval.'); document.getElementById('registerModal').classList.remove('active'); }
+            if(res.success) { alert('Agent application submitted. You will receive credentials after admin approval.'); registerModal.classList.remove('active'); }
             else alert(res.error || 'Submission failed');
         }
-        utils.resetButton(submitBtn);
-    }
+        utils.hideLoading(submitBtn);
+    });
 
-    async function sendResetLink() {
+    // Forgot password
+    document.getElementById('sendResetBtn').addEventListener('click', async () => {
         const email = document.getElementById('resetEmail').value.trim();
         if(!utils.validateEmail(email)) { alert('Enter a valid email'); return; }
-        const sendBtn = document.getElementById('sendResetBtn');
-        utils.setButtonLoading(sendBtn);
         await firebaseService.sendPasswordReset(email);
         alert('If the email exists, a reset link has been sent.');
-        utils.resetButton(sendBtn);
-        document.getElementById('forgotModal').classList.remove('active');
+        forgotModal.classList.remove('active');
+    });
+
+    // Banned modal: on "Understood" refresh page
+    function closeBannedAndRefresh() {
+        bannedModal.classList.remove('active');
+        location.reload();
     }
+    document.getElementById('bannedCloseBtn').addEventListener('click', closeBannedAndRefresh);
+    document.getElementById('closeBannedModal').addEventListener('click', closeBannedAndRefresh);
 
-    // Event binding
-    document.getElementById('nextBtn').addEventListener('click', showPasswordStep);
-    document.getElementById('loginBtn').addEventListener('click', performLogin);
-    document.getElementById('createAccountFromEmail').addEventListener('click', openRegisterModal);
-    document.getElementById('createAccountFromPwd').addEventListener('click', openRegisterModal);
-    document.getElementById('forgotPwdLink').addEventListener('click', () => document.getElementById('forgotModal').classList.add('active'));
-    document.getElementById('closeRegisterModal').addEventListener('click', () => document.getElementById('registerModal').classList.remove('active'));
-    document.getElementById('cancelRegisterBtn').addEventListener('click', () => document.getElementById('registerModal').classList.remove('active'));
-    document.getElementById('closeForgotModal').addEventListener('click', () => document.getElementById('forgotModal').classList.remove('active'));
-    document.getElementById('cancelResetBtn').addEventListener('click', () => document.getElementById('forgotModal').classList.remove('active'));
-    document.getElementById('sendResetBtn').addEventListener('click', sendResetLink);
-    document.getElementById('submitRegisterBtn').addEventListener('click', handleRegistrationSubmit);
-    document.getElementById('closeBannedModal').addEventListener('click', () => document.getElementById('bannedModal').classList.remove('active'));
-    document.getElementById('bannedCloseBtn').addEventListener('click', () => document.getElementById('bannedModal').classList.remove('active'));
+    // Close modals
+    document.getElementById('closeRegisterModal').addEventListener('click', () => registerModal.classList.remove('active'));
+    document.getElementById('cancelRegisterBtn').addEventListener('click', () => registerModal.classList.remove('active'));
+    document.getElementById('closeForgotModal').addEventListener('click', () => forgotModal.classList.remove('active'));
+    document.getElementById('cancelResetBtn').addEventListener('click', () => forgotModal.classList.remove('active'));
 
-    // Load system settings on start
-    (async () => { await loadSystemSettings(); })();
+    // Event listeners for main flow
+    nextBtn.addEventListener('click', showPasswordStep);
+    loginBtn.addEventListener('click', performLogin);
+    createAccBtns.forEach(btn => btn.addEventListener('click', openRegisterModal));
+    forgotPwdBtn.addEventListener('click', () => forgotModal.classList.add('active'));
 
-    // Auto redirect if already logged in
+    // Load system settings on init
+    (async () => {
+        systemSettings = await firebaseService.getSystemSettings();
+        console.log('System settings loaded', systemSettings);
+    })();
+
+    // Redirect if already logged in (skip banned users because they will be caught on login)
     auth.onAuthStateChanged(user => {
         if(user) {
             const email = user.email;
