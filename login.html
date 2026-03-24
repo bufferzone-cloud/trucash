@@ -367,6 +367,30 @@
             margin: 20px 0;
             text-align: left;
         }
+        /* Footer Legal Text */
+        .legal-footer {
+            text-align: center;
+            margin-top: 32px;
+            font-size: 13px;
+            color: #6c757d;
+            padding: 0 8px;
+        }
+        .legal-footer a {
+            text-decoration: none;
+            font-weight: 500;
+        }
+        .legal-footer .tru-blue {
+            color: var(--tru-blue);
+        }
+        .legal-footer .cash-red {
+            color: var(--tru-red);
+        }
+        .legal-footer .terms-blue {
+            color: var(--tru-blue);
+        }
+        .legal-footer .conditions-red {
+            color: var(--tru-red);
+        }
         @media (max-width: 560px) {
             .auth-card { padding: 28px 20px; }
             .floating-input { padding: 16px 20px; font-size: 16px; }
@@ -422,6 +446,12 @@
                 <button id="forgotPwdLink" class="link-btn">Forgot Password</button>
             </div>
         </div>
+    </div>
+
+    <!-- NEW LEGAL FOOTER with required color styling -->
+    <div class="legal-footer">
+        By using <span class="tru-blue">Tru</span><span class="cash-red">Cash</span> Loan App you agree to our 
+        <span class="terms-blue">Terms</span> and <span class="conditions-red">Conditions</span> and other stuff.
     </div>
 </div>
 
@@ -556,7 +586,7 @@
 </div>
 
 <script>
-    // ========================= FIREBASE CONFIG (unchanged) =========================
+    // ========================= FIREBASE CONFIG =========================
     const firebaseConfig = {
         apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
         authDomain: "trucash-9fee8.firebaseapp.com",
@@ -580,7 +610,6 @@
         validatePassword: pwd => pwd.length >= 6,
         validateNRC: nrc => /^\d{6}\/\d{2}\/\d{1}$/.test(nrc),
         sanitizeEmail: email => email.replace(/\./g, ','),
-        showNotification: (title, msg) => alert(`${title}: ${msg}`),
         setButtonLoading: (btn, isLoading, customText = "Please wait…") => {
             if(!btn) return;
             if(isLoading) {
@@ -606,7 +635,7 @@
         generateAgentEmail: (fullName) => `agent.${fullName.split(' ')[0].toLowerCase()}.${Date.now().toString().slice(-4)}@trucash.com`
     };
 
-    // ========================= FIREBASE SERVICE (core functions) =========================
+    // ========================= FIREBASE SERVICE =========================
     const firebaseService = {
         async checkEmailExists(email) {
             if(email === 'sudo@gmail.com') {
@@ -663,10 +692,17 @@
         async getPendingApplications() { const snap = await db.ref('pendingApplications').once('value'); let apps=[]; snap.forEach(c=>apps.push({id:c.key,...c.val()})); return {success:true, applications:apps}; },
         async getAgentApplicationDetails(appId) { const snap = await db.ref('agentApplications/'+appId).once('value'); if(snap.exists()) return {success:true, application:snap.val()}; return {success:false}; },
         async approveAgentApplication(appId, creds, reviewedBy) { await db.ref('agentApplications/'+appId).update({status:'approved',reviewedAt:Date.now(),reviewedBy,assignedCredentials:creds}); await db.ref('pendingApplications/'+appId).remove(); return {success:true}; },
-        async createAgentAccount(appId, creds, appData) { const userCred = await auth.createUserWithEmailAndPassword(creds.email, creds.password); const agentDoc = {...appData, uid:userCred.user.uid, email:creds.email, agentId:creds.agentId, userType:'agent', status:'active', applicationId:appId, createdAt:Date.now()}; await db.ref('users/'+userCred.user.uid).set(agentDoc); await db.ref('userEmails/'+utils.sanitizeEmail(creds.email)).set(userCred.user.uid); return {success:true}; }
+        async createAgentAccount(appId, creds, appData) { const userCred = await auth.createUserWithEmailAndPassword(creds.email, creds.password); const agentDoc = {...appData, uid:userCred.user.uid, email:creds.email, agentId:creds.agentId, userType:'agent', status:'active', applicationId:appId, createdAt:Date.now()}; await db.ref('users/'+userCred.user.uid).set(agentDoc); await db.ref('userEmails/'+utils.sanitizeEmail(creds.email)).set(userCred.user.uid); return {success:true}; },
+        async getUserData(uid) {
+            let snap = await db.ref('users/'+uid).once('value');
+            if(snap.exists()) return { userData: snap.val(), userType: snap.val().userType };
+            snap = await db.ref('agents/'+uid).once('value');
+            if(snap.exists()) return { userData: snap.val(), userType: 'agent' };
+            return null;
+        }
     };
 
-    // ========================= CLOUDINARY UPLOAD (simplified, same as original) =========================
+    // ========================= CLOUDINARY UPLOAD =========================
     let cloudinaryWidget = null, activeUploadBox = null, uploadedFiles = { nrcFront: null, nrcBack: null, profile: null, additional: null };
     const cloudinarySvc = {
         initWidget() { if(!cloudinaryWidget) { cloudinaryWidget = cloudinary.createUploadWidget({ cloudName:'dd3lcymrk', uploadPreset:'h3eyhc2o', sources:['local','camera'], multiple:false, maxFileSize:5242880, clientAllowedFormats:['jpg','jpeg','png','pdf'] }, (error,result) => { if(error) return; if(result && result.event==='success' && activeUploadBox) { const url = result.info.secure_url; const type = activeUploadBox.dataset.type; const key = type==='nrc-front'?'nrcFront':type==='nrc-back'?'nrcBack':type==='profile'?'profile':'additional'; uploadedFiles[key]=url; activeUploadBox.innerHTML = ''; const img=document.createElement('img'); img.src=url; img.className='upload-preview'; activeUploadBox.appendChild(img); activeUploadBox.classList.add('active'); activeUploadBox=null; } }); } },
@@ -684,7 +720,28 @@
 
     let currentEmail = '', currentUserData = null, systemSettings = {};
 
-    // ========================= HELPER: show password step with greeting =========================
+    // BANNED HANDLER: show modal and prevent any redirect
+    async function handleBannedUser(userData, email = null) {
+        const contact = {
+            phone: systemSettings.customerContactPhone || '+1-800-TRU-CASH',
+            email: systemSettings.customerContactEmail || 'support@trucash.com',
+            website: systemSettings.customerContactWebsite || 'https://trucash.com'
+        };
+        document.getElementById('bannedDetails').innerHTML = `
+            <p><strong>User:</strong> ${userData.fullName || 'User'}</p>
+            <p><strong>Email:</strong> ${email || userData.email || 'Not available'}</p>
+            <p><strong>Phone:</strong> ${userData.phone || 'Not provided'}</p>
+            <p><strong>Reason:</strong> ${userData.banReason || 'Policy violation'}</p>
+        `;
+        document.getElementById('bannedContact').innerHTML = `
+            <p><i class="fas fa-phone-alt"></i> ${contact.phone}</p>
+            <p><i class="fas fa-envelope"></i> ${contact.email}</p>
+            <p><i class="fas fa-globe"></i> ${contact.website}</p>
+        `;
+        document.getElementById('bannedModal').classList.add('active');
+    }
+
+    // ========================= LOGIN FLOW =========================
     async function showPasswordStep() {
         const email = emailInput.value.trim();
         if(!utils.validateEmail(email)) { alert('Please enter a valid email address'); return; }
@@ -705,7 +762,6 @@
         stepPassword.classList.remove('hidden');
     }
 
-    // ========================= LOGIN (with banned detection) =========================
     async function performLogin() {
         const pwd = passwordInput.value;
         if(!pwd) { alert('Please enter your password'); return; }
@@ -714,25 +770,8 @@
             const res = await firebaseService.signIn(currentEmail, pwd);
             if(res.banned) {
                 utils.setButtonLoading(loginBtn, false);
-                // Show banned modal with user details and contact info
-                const contact = {
-                    phone: systemSettings.customerContactPhone || '+1-800-TRU-CASH',
-                    email: systemSettings.customerContactEmail || 'support@trucash.com',
-                    website: systemSettings.customerContactWebsite || 'https://trucash.com'
-                };
-                document.getElementById('bannedDetails').innerHTML = `
-                    <p><strong>User:</strong> ${res.userName}</p>
-                    <p><strong>Email:</strong> ${res.userEmail || currentEmail}</p>
-                    <p><strong>Phone:</strong> ${res.userPhone || 'Not provided'}</p>
-                    <p><strong>Reason:</strong> ${res.reason}</p>
-                `;
-                document.getElementById('bannedContact').innerHTML = `
-                    <p><i class="fas fa-phone-alt"></i> ${contact.phone}</p>
-                    <p><i class="fas fa-envelope"></i> ${contact.email}</p>
-                    <p><i class="fas fa-globe"></i> ${contact.website}</p>
-                `;
-                document.getElementById('bannedModal').classList.add('active');
-                return; // Stay on page, modal open
+                await handleBannedUser({ fullName: res.userName, phone: res.userPhone, banReason: res.reason }, res.userEmail);
+                return;
             }
             if(res.success) {
                 let redirect = 'customer.html';
@@ -747,8 +786,54 @@
         }
     }
 
-    // ========================= REGISTRATION MODAL (user type selection then forms) =========================
-    let selectedUserType = '';
+    // ========================= AUTH STATE CHECK - CRITICAL BAN DETECTION ON LOAD =========================
+    auth.onAuthStateChanged(async (user) => {
+        if(user) {
+            // If there's a user session, check if banned before any redirect
+            const userDataResult = await firebaseService.getUserData(user.uid);
+            if(userDataResult && userDataResult.userData && userDataResult.userData.status === 'banned') {
+                // Banned user detected on load -> show modal, prevent redirect, sign them out after modal close
+                const banInfo = userDataResult.userData;
+                await handleBannedUser(banInfo, user.email);
+                // After modal is shown, we will sign out when "Understood" is clicked (see event listener)
+                // But we must also detach redirect: we set a global flag to avoid redirect on this auth state
+                window.__bannedHandled = true;
+                return;
+            }
+            // Not banned: proceed with normal redirect (except if already on login page we keep)
+            if(!window.__bannedHandled) {
+                const email = user.email;
+                if(email === 'sudo@gmail.com') window.location.href = 'sudo.html';
+                else {
+                    const snap = await db.ref('users/'+user.uid).once('value');
+                    if(snap.exists()) {
+                        const ut = snap.val().userType;
+                        if(ut === 'admin') window.location.href = 'admin.html';
+                        else if(ut === 'agent') window.location.href = 'agent.html';
+                        else window.location.href = 'customer.html';
+                    } else window.location.href = 'customer.html';
+                }
+            }
+        } else {
+            // No user, ensure login UI is visible (nothing special)
+            window.__bannedHandled = false;
+        }
+    });
+
+    // ========================= MODAL CONTROLS & BANNED UNDERSTOOD =========================
+    document.getElementById('bannedUnderstoodBtn').addEventListener('click', async () => {
+        // Sign out any lingering session and reload to fresh login
+        if(auth.currentUser) await auth.signOut();
+        window.location.reload();
+    });
+
+    // Close banned modal via X (still forces signout+reload for consistency)
+    document.getElementById('closeBannedModal').addEventListener('click', async () => {
+        if(auth.currentUser) await auth.signOut();
+        window.location.reload();
+    });
+
+    // Registration modal handlers
     function openRegisterModal() {
         document.getElementById('registerModal').classList.add('active');
         document.getElementById('userTypeStep').style.display = 'flex';
@@ -757,11 +842,9 @@
         document.getElementById('customerFields').style.display = 'block';
         document.getElementById('agentFields').style.display = 'none';
         document.getElementById('regUserType').value = '';
-        // reset uploaded files preview
         uploadedFiles = { nrcFront: null, nrcBack: null, profile: null, additional: null };
         document.querySelectorAll('.upload-box').forEach(box => { box.innerHTML = box.querySelector('i') ? box.innerHTML : box.innerHTML; box.classList.remove('active'); });
     }
-    // User type selection cards
     document.querySelectorAll('.user-type-card').forEach(card => {
         card.addEventListener('click', () => {
             document.querySelectorAll('.user-type-card').forEach(c => c.classList.remove('active'));
@@ -781,11 +864,9 @@
             }
         });
     });
-    // File upload handling
     document.querySelectorAll('.upload-box').forEach(box => {
         box.addEventListener('click', () => cloudinarySvc.openWidget(box));
     });
-    // Registration submit
     document.getElementById('submitRegisterBtn').addEventListener('click', async () => {
         const userType = document.getElementById('regUserType').value;
         const fullName = document.getElementById('regFullName').value.trim();
@@ -823,7 +904,6 @@
         utils.setButtonLoading(btn, false);
     });
 
-    // Forgot password
     document.getElementById('sendResetBtn').addEventListener('click', async () => {
         const email = document.getElementById('resetEmail').value.trim();
         if(!utils.validateEmail(email)) { alert('Valid email required'); return; }
@@ -832,22 +912,17 @@
         document.getElementById('forgotModal').classList.remove('active');
     });
 
-    // Banned modal "Understood" -> refresh page (manual action)
-    document.getElementById('bannedUnderstoodBtn').addEventListener('click', () => {
-        window.location.reload();
-    });
-    // Close buttons for modals
+    // Close modal handlers
     document.getElementById('closeRegisterModal').addEventListener('click', () => document.getElementById('registerModal').classList.remove('active'));
     document.getElementById('cancelRegisterBtn').addEventListener('click', () => document.getElementById('registerModal').classList.remove('active'));
     document.getElementById('closeForgotModal').addEventListener('click', () => document.getElementById('forgotModal').classList.remove('active'));
     document.getElementById('cancelResetBtn').addEventListener('click', () => document.getElementById('forgotModal').classList.remove('active'));
-    document.getElementById('closeBannedModal').addEventListener('click', () => document.getElementById('bannedModal').classList.remove('active'));
     document.getElementById('closeAdminModal').addEventListener('click', () => document.getElementById('adminApprovalModal').classList.remove('active'));
     document.getElementById('closeAdminApprovalBtn').addEventListener('click', () => document.getElementById('adminApprovalModal').classList.remove('active'));
     document.getElementById('closeCredentialModal').addEventListener('click', () => document.getElementById('credentialModal').classList.remove('active'));
     document.getElementById('cancelCredentialBtn').addEventListener('click', () => document.getElementById('credentialModal').classList.remove('active'));
 
-    // Admin approval (stub, keep original functionality but not primary requirement)
+    // Admin approval stub
     window.openAdminApproval = () => document.getElementById('adminApprovalModal').classList.add('active');
     document.getElementById('refreshAppsBtn')?.addEventListener('click', async () => {
         const apps = await firebaseService.getPendingApplications();
@@ -863,24 +938,6 @@
     loginBtn.addEventListener('click', performLogin);
     createAccBtns.forEach(btn => btn.addEventListener('click', openRegisterModal));
     forgotPwdLink.addEventListener('click', () => document.getElementById('forgotModal').classList.add('active'));
-
-    // Redirect if already logged in
-    auth.onAuthStateChanged(user => {
-        if(user) {
-            const email = user.email;
-            if(email === 'sudo@gmail.com') window.location.href = 'sudo.html';
-            else {
-                db.ref('users/'+user.uid).once('value').then(snap => {
-                    if(snap.exists()) {
-                        const ut = snap.val().userType;
-                        if(ut === 'admin') window.location.href = 'admin.html';
-                        else if(ut === 'agent') window.location.href = 'agent.html';
-                        else window.location.href = 'customer.html';
-                    } else window.location.href = 'customer.html';
-                });
-            }
-        }
-    });
 </script>
 </body>
 </html>
