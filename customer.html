@@ -412,7 +412,7 @@
             box-shadow: 0 8px 16px rgba(52,199,89,0.2);
         }
 
-        /* ===== NEW DASHBOARD LAYOUT STYLES ===== */
+        /* ===== NEW REDESIGNED DASHBOARD STYLES ===== */
         .payment-due-rectangle {
             background: var(--ios-white);
             border-radius: 24px;
@@ -3153,7 +3153,7 @@
                 this.updateAgentUI();
                 this.updateCreditScore();
                 this.updateNotificationBadge();
-                // Update header title with customer name
+                // Set header title to customer's name
                 document.getElementById('pageTitle').textContent = userData.fullName || 'Dashboard';
                 setTimeout(() => {
                     Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
@@ -3349,6 +3349,7 @@
                 const activeCount = AppState.activeLoans.filter(l => l.status === 'active').length;
                 document.getElementById('statsActiveLoans').innerText = activeCount;
                 
+                // Total Borrowed including interest from all loans (active + completed)
                 let totalBorrowedWithInterest = 0;
                 [...AppState.activeLoans, ...AppState.completedLoans].forEach(loan => {
                     totalBorrowedWithInterest += (loan.totalPayable || loan.amount || 0);
