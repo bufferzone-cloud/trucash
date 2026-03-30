@@ -3153,6 +3153,8 @@
                 this.updateAgentUI();
                 this.updateCreditScore();
                 this.updateNotificationBadge();
+                // Update header title with customer name
+                document.getElementById('pageTitle').textContent = userData.fullName || 'Dashboard';
                 setTimeout(() => {
                     Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
                 }, 1000);
@@ -3171,6 +3173,7 @@
                         this.updateAgentUI();
                         this.updateCreditScore();
                         this.updateDashboardUI();
+                        document.getElementById('pageTitle').textContent = AppState.userData.fullName || 'Dashboard';
                     }
                 });
                 AppState.realtimeListeners.push(() => userRef.off('value', userListener));
@@ -3609,7 +3612,7 @@
                 const modalBody = document.getElementById('loanDetailsModalBody');
                 let scheduleHtml = '';
                 if (loan.repaymentSchedule) {
-                    scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>';
+                    scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"> <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>';
                     loan.repaymentSchedule.forEach(inst => {
                         scheduleHtml += `<tr><td>${inst.installment}</td><td>${Utils.formatDate(inst.dueDate)}</td><td>${Utils.formatCurrency(inst.principal)}</td><td>${Utils.formatCurrency(inst.interest)}</td><td>${Utils.formatCurrency(inst.penalty || 0)}</td><td>${Utils.formatCurrency(inst.totalDue)}</td><td>${Utils.formatCurrency(inst.paidAmount || 0)}</td><td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td></tr>`;
                     });
