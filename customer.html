@@ -13,7 +13,7 @@
     <!-- Cloudinary SDK -->
     <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
     <style>
-        /* ===== iOS Optimized CSS Reset – SCALED DOWN 10% & BUTTONS INCREASED 15% ===== */
+        /* ===== iOS Optimized CSS Reset – SCALED DOWN 10% ===== */
         * {
             margin: 0;
             padding: 0;
@@ -120,6 +120,7 @@
             cursor: pointer;
             transition: var(--ios-transition);
         }
+
         .hamburger-menu:hover {
             background: var(--ios-gray-2);
             transform: scale(1.05);
@@ -217,12 +218,9 @@
         .logo-text {
             font-size: 16px;
             font-weight: 700;
+            color: var(--ios-green);
             letter-spacing: -0.3px;
         }
-
-        /* TruCash brand colors */
-        .brand-tru { color: #007aff; }
-        .brand-cash { color: #ff3b30; }
 
         .nav-menu {
             display: flex;
@@ -297,6 +295,7 @@
             border: 1px solid var(--ios-gray-2);
             transition: var(--ios-transition);
         }
+
         .profile-card:hover {
             box-shadow: var(--ios-card-shadow-hover);
         }
@@ -395,139 +394,461 @@
             box-shadow: 0 4px 8px rgba(255,59,48,0.2);
         }
 
-        /* BUTTONS INCREASED BY 15% */
-        .btn, .loan-pay-btn, .nav-item, .status-badge, .logout-btn, .modal-close, .tutorial-btn {
-            transform: scale(1.02);
-            transition: var(--ios-transition);
-        }
+        /* Buttons increased by 15% */
         .btn {
-            padding: 11px 20px;
-            font-size: 15px;
-        }
-        .btn-small {
-            padding: 7px 14px;
-            font-size: 13px;
-        }
-        .loan-pay-btn {
-            padding: 6px 14px;
-            font-size: 13px;
+            padding: 10px 18px;
+            border-radius: var(--ios-border-radius-small);
+            font-weight: 600;
+            cursor: pointer;
+            font-size: 14px;
+            transition: var(--ios-transition);
+            border: none;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            justify-content: center;
         }
 
-        /* New Dashboard Styles */
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 12px;
+        }
+
+        .btn-primary {
+            background: var(--ios-green);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: var(--ios-green-dark);
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(52, 199, 89, 0.3);
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 1px solid var(--ios-gray-3);
+            color: var(--ios-gray-6);
+        }
+
+        .btn-outline:hover {
+            background: var(--ios-gray-1);
+            border-color: var(--ios-gray-4);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+
+        .btn-red {
+            background: var(--ios-red);
+            color: white;
+        }
+
+        .btn-red:hover {
+            background: #dc2c22;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(255,59,48,0.3);
+        }
+
+        .dashboard-card, .section, .agent-validation, .loan-card, .notification-item, .document-card, .settings-card {
+            transition: var(--ios-transition);
+        }
+
+        .dashboard-card:hover, .section:hover, .agent-validation:hover, .loan-card:hover, .notification-item:hover, .document-card:hover, .settings-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--ios-card-shadow-hover);
+        }
+
+        /* Payment Due Highlight Card */
         .payment-due-card {
-            background: linear-gradient(135deg, #fff5f5, #ffffff);
-            border-radius: 28px;
+            background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
+            border-left: 5px solid var(--ios-red);
+            border-radius: var(--ios-border-radius);
             padding: 20px;
             margin-bottom: 20px;
+            box-shadow: var(--ios-card-shadow);
+            transition: var(--ios-transition);
+        }
+
+        .payment-due-card:hover {
+            transform: translateY(-2px);
             box-shadow: var(--ios-card-shadow-hover);
-            border: 1px solid var(--ios-red);
+        }
+
+        .payment-due-header {
             display: flex;
-            flex-wrap: wrap;
             justify-content: space-between;
             align-items: center;
+            margin-bottom: 12px;
         }
-        .payment-due-info { flex: 2; }
-        .payment-due-amount { font-size: 28px; font-weight: 800; color: var(--ios-red); }
-        .payment-due-date { font-size: 14px; color: var(--ios-gray-5); margin-top: 5px; }
-        .days-countdown { font-weight: 700; color: var(--ios-orange); margin-top: 8px; }
+
+        .payment-due-header h3 {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--ios-red);
+        }
+
+        .days-badge {
+            background: var(--ios-red);
+            color: white;
+            padding: 4px 12px;
+            border-radius: 30px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .payment-due-amount {
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--ios-red);
+            margin: 8px 0;
+        }
+
+        .payment-due-detail {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 12px;
+        }
+
+        .payment-due-date {
+            font-size: 14px;
+            color: var(--ios-gray-5);
+        }
+
         .pay-now-btn {
             background: var(--ios-red);
             color: white;
-            border: none;
+            padding: 8px 20px;
             border-radius: 40px;
-            padding: 12px 28px;
-            font-weight: 700;
+            font-weight: 600;
+            border: none;
             cursor: pointer;
             transition: 0.2s;
-            box-shadow: 0 4px 12px rgba(255,59,48,0.3);
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
         }
-        .pay-now-btn:hover { transform: scale(1.02); background: #e33b30; }
 
-        .dashboard-stats-grid {
+        .pay-now-btn:hover {
+            background: #dc2c22;
+            transform: scale(1.02);
+        }
+
+        /* Credit Score Row with Profile Photo */
+        .credit-score-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            flex-wrap: wrap;
+            gap: 16px;
+            background: var(--ios-white);
+            border-radius: var(--ios-border-radius);
+            padding: 16px 20px;
+            border: 1px solid var(--ios-gray-2);
+        }
+
+        .credit-profile {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .credit-profile img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--ios-green);
+        }
+
+        .credit-name {
+            font-weight: 600;
+            font-size: 16px;
+            color: var(--ios-gray-6);
+        }
+
+        .credit-score-badge-large {
+            background: var(--ios-green);
+            color: white;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-weight: 700;
+            font-size: 24px;
+            min-width: 100px;
+            text-align: center;
+        }
+
+        .credit-score-badge-large.excellent { background: var(--score-excellent); }
+        .credit-score-badge-large.good { background: var(--score-good); }
+        .credit-score-badge-large.fair { background: var(--score-fair); }
+        .credit-score-badge-large.poor { background: var(--score-poor); }
+
+        /* Agent Card (collapsible) */
+        .agent-card {
+            background: var(--ios-white);
+            border-radius: var(--ios-border-radius);
+            border: 1px solid var(--ios-gray-2);
+            overflow: hidden;
+            transition: var(--ios-transition);
+            cursor: pointer;
+        }
+
+        .agent-card-header {
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            padding: 16px;
+        }
+
+        .agent-card-header img {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            object-fit: cover;
+            border: 2px solid var(--ios-green);
+        }
+
+        .agent-card-header .agent-info {
+            flex: 1;
+        }
+
+        .agent-card-header .agent-name {
+            font-weight: 700;
+            font-size: 16px;
+        }
+
+        .agent-card-header .agent-phone {
+            font-size: 13px;
+            color: var(--ios-gray-5);
+            margin-top: 4px;
+        }
+
+        .agent-card-details {
+            max-height: 0;
+            overflow: hidden;
+            transition: max-height 0.4s ease-out;
+            background: var(--ios-gray-1);
+            border-top: 1px solid var(--ios-gray-2);
+            padding: 0 16px;
+        }
+
+        .agent-card.open .agent-card-details {
+            max-height: 500px;
+            padding: 16px;
+        }
+
+        .agent-detail-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
-            gap: 16px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 16px;
         }
-        .stat-card {
+
+        .agent-detail-item {
+            font-size: 13px;
+        }
+
+        .agent-detail-label {
+            color: var(--ios-gray-5);
+            font-size: 11px;
+            text-transform: uppercase;
+        }
+
+        .agent-detail-value {
+            font-weight: 600;
+            color: var(--ios-gray-6);
+        }
+
+        .change-agent-btn {
+            width: 100%;
+            margin-top: 12px;
+        }
+
+        /* No agent placeholder */
+        .agent-placeholder {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius);
+            padding: 20px;
+            text-align: center;
+            border: 1px dashed var(--ios-gray-3);
+        }
+
+        .agent-placeholder p {
+            margin-bottom: 12px;
+            color: var(--ios-gray-5);
+        }
+
+        /* Stats grid */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .dashboard-card {
             background: var(--ios-white);
             border-radius: var(--ios-border-radius);
             padding: 16px;
             box-shadow: var(--ios-card-shadow);
             border: 1px solid var(--ios-gray-2);
         }
-        .stat-card .card-title { font-size: 13px; font-weight: 600; color: var(--ios-gray-5); margin-bottom: 8px; }
-        .stat-card .card-value { font-size: 26px; font-weight: 700; color: var(--ios-green); }
 
-        .credit-score-flex {
+        .card-header {
             display: flex;
-            align-items: center;
-            gap: 16px;
-            flex-wrap: wrap;
             justify-content: space-between;
+            align-items: center;
+            margin-bottom: 11px;
         }
-        .credit-left { display: flex; align-items: center; gap: 12px; }
-        .credit-profile-img { width: 52px; height: 52px; border-radius: 50%; object-fit: cover; border: 2px solid var(--ios-green); }
-        .credit-name { font-weight: 600; font-size: 16px; }
-        .credit-score-badge { padding: 4px 12px; border-radius: 30px; font-size: 14px; font-weight: 600; color: white; }
-        .credit-score-number { font-size: 26px; font-weight: 800; margin-left: 8px; }
 
-        .agent-info-card {
+        .card-title {
+            font-size: 12px;
+            font-weight: 600;
+            color: var(--ios-gray-6);
+        }
+
+        .card-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--ios-green);
+            margin-bottom: 4px;
+        }
+
+        @media (min-width: 768px) {
+            .card-value {
+                font-size: 23px;
+            }
+        }
+
+        .card-subtitle {
+            font-size: 11px;
+            color: var(--ios-gray-5);
+            margin-bottom: 7px;
+        }
+
+        /* Sections */
+        .section {
             background: var(--ios-white);
             border-radius: var(--ios-border-radius);
-            padding: 16px;
-            cursor: pointer;
-            transition: 0.2s;
+            padding: 20px;
+            margin-bottom: 20px;
+            box-shadow: var(--ios-card-shadow);
             border: 1px solid var(--ios-gray-2);
         }
-        .agent-info-card:hover { background: var(--ios-gray-1); }
-        .agent-flex { display: flex; align-items: center; gap: 14px; }
-        .agent-avatar-sm { width: 48px; height: 48px; border-radius: 50%; object-fit: cover; border: 2px solid var(--ios-green); }
-        .agent-name-sm { font-weight: 600; font-size: 16px; }
-        .agent-phone-faint { font-size: 12px; color: var(--ios-gray-5); margin-top: 2px; }
-        .agent-details-expanded { margin-top: 16px; padding-top: 12px; border-top: 1px solid var(--ios-gray-2); display: none; }
-        .agent-details-expanded.show { display: block; }
-        .detail-row { margin-bottom: 8px; font-size: 14px; }
+
+        .section-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 16px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid var(--ios-gray-2);
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: var(--ios-gray-6);
+        }
 
         .quick-actions-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
             gap: 12px;
         }
-        .collateral-grid {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 12px;
+
+        .quick-actions-grid .btn {
+            width: 100%;
+            padding: 12px;
         }
 
-        /* Original component styles */
-        .section {
+        /* Collateral 2x2 grid */
+        .collateral-grid-2x2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .upload-box {
+            aspect-ratio: 1;
+            border: 2px dashed var(--ios-gray-3);
+            border-radius: var(--ios-border-radius-small);
             background: var(--ios-white);
-            border-radius: var(--ios-border-radius);
-            padding: 16px;
-            margin-bottom: 14px;
-            box-shadow: var(--ios-card-shadow);
-            border: 1px solid var(--ios-gray-2);
-        }
-        @media (min-width: 768px) {
-            .section {
-                padding: 20px;
-                margin-bottom: 18px;
-            }
-        }
-        .section-header {
             display: flex;
-            justify-content: space-between;
+            flex-direction: column;
             align-items: center;
-            margin-bottom: 14px;
-            padding-bottom: 11px;
-            border-bottom: 1px solid var(--ios-gray-2);
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--ios-transition);
+            position: relative;
+            overflow: hidden;
         }
-        .section-title {
-            font-size: 14px;
+
+        .upload-box:hover {
+            border-color: var(--ios-green);
+            background: rgba(52, 199, 89, 0.05);
+            transform: scale(1.02);
+            box-shadow: 0 6px 16px rgba(0,0,0,0.05);
+        }
+
+        .upload-box i {
+            font-size: 20px;
+            color: var(--ios-gray-4);
+            margin-bottom: 6px;
+            transition: var(--ios-transition);
+        }
+
+        .upload-box span {
+            font-size: 11px;
+            color: var(--ios-gray-5);
+            text-align: center;
+            padding: 0 4px;
+        }
+
+        .upload-preview {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: var(--ios-border-radius-small);
+        }
+
+        /* Logo styling */
+        .logo-img {
+            width: 32px;
+            height: 32px;
+            object-fit: contain;
+        }
+
+        .logo-text-colored {
+            font-weight: 700;
+            font-size: 18px;
+        }
+
+        .logo-text-colored .tru {
+            color: #007aff;
+        }
+
+        .logo-text-colored .cash {
+            color: #ff3b30;
+        }
+
+        /* Other existing styles (forms, modals, etc.) */
+        .form-group {
+            margin-bottom: 14px;
+        }
+
+        .form-label {
+            display: block;
+            font-size: 11px;
             font-weight: 600;
             color: var(--ios-gray-6);
+            margin-bottom: 5px;
+            letter-spacing: 0.3px;
         }
+
         .form-input {
             width: 100%;
             padding: 9px 11px;
@@ -539,32 +860,32 @@
             color: var(--ios-gray-6);
             line-height: 1.4;
         }
+
         .form-input:focus {
             outline: none;
             border-color: var(--ios-green);
             box-shadow: 0 0 0 3px rgba(52, 199, 89, 0.1), 0 2px 8px rgba(0,0,0,0.05);
             transform: translateY(-1px);
         }
-        .btn-primary {
-            background: var(--ios-green);
-            color: white;
-        }
-        .btn-primary:hover {
-            background: var(--ios-green-dark);
-            transform: translateY(-2px);
-            box-shadow: 0 8px 16px rgba(52, 199, 89, 0.3);
-        }
-        .btn-outline {
-            background: transparent;
-            border: 1px solid var(--ios-gray-3);
-            color: var(--ios-gray-6);
-        }
-        .btn-outline:hover {
+
+        .form-input:disabled {
             background: var(--ios-gray-1);
-            border-color: var(--ios-gray-4);
-            transform: translateY(-2px);
-            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+            cursor: not-allowed;
         }
+
+        .form-row {
+            display: grid;
+            grid-template-columns: 1fr;
+            gap: 11px;
+            margin-bottom: 11px;
+        }
+
+        @media (min-width: 640px) {
+            .form-row {
+                grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            }
+        }
+
         .modal {
             display: none;
             position: fixed;
@@ -582,10 +903,12 @@
             opacity: 0;
             transition: opacity 0.3s ease;
         }
+
         .modal.active {
             display: flex;
             opacity: 1;
         }
+
         .modal-content {
             background: var(--ios-white);
             border-radius: var(--ios-border-radius-large);
@@ -597,9 +920,30 @@
             animation: modalSlideIn 0.3s ease;
             -webkit-overflow-scrolling: touch;
         }
+
         .modal-content.large {
             max-width: 800px;
         }
+
+        .promotion-modal-content {
+            max-width: 350px;
+            border-radius: 20px;
+            overflow: hidden;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+            background: white;
+        }
+
+        @keyframes modalSlideIn {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.95);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+
         .modal-header {
             padding: 14px 18px;
             border-bottom: 1px solid var(--ios-gray-2);
@@ -611,14 +955,13 @@
             background: var(--ios-white);
             z-index: 10;
         }
+
         .modal-title {
             font-size: 16px;
             font-weight: 600;
             color: var(--ios-gray-6);
-            display: flex;
-            align-items: center;
-            gap: 8px;
         }
+
         .modal-close {
             background: var(--ios-gray-1);
             border: none;
@@ -633,31 +976,63 @@
             justify-content: center;
             transition: var(--ios-transition);
         }
-        .loan-card {
-            background: var(--ios-white);
-            border-radius: var(--ios-border-radius);
-            padding: 14px;
-            margin-bottom: 11px;
-            border: 1px solid var(--ios-gray-2);
-            transition: var(--ios-transition);
-            cursor: pointer;
-            position: relative;
+
+        .modal-close:hover {
+            background: var(--ios-gray-2);
+            transform: rotate(90deg);
         }
-        .loan-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--ios-card-shadow-hover);
+
+        .modal-body {
+            padding: 18px;
         }
-        .loan-pay-btn {
-            position: absolute;
-            bottom: 11px;
-            right: 14px;
-            background: var(--ios-red);
-            color: white;
-            border: none;
-            border-radius: 40px;
-            font-weight: 600;
-            cursor: pointer;
+
+        .modal-footer {
+            padding: 14px 18px;
+            border-top: 1px solid var(--ios-gray-2);
+            display: flex;
+            justify-content: flex-end;
+            gap: 9px;
         }
+
+        .loading-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            display: none;
+            justify-content: center;
+            align-items: center;
+            z-index: 3000;
+            flex-direction: column;
+            gap: 14px;
+        }
+
+        .loading-overlay.active {
+            display: flex;
+        }
+
+        .loading-spinner {
+            width: 36px;
+            height: 36px;
+            border: 3px solid var(--ios-gray-2);
+            border-top-color: var(--ios-green);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        .loading-text {
+            font-size: 13px;
+            color: var(--ios-gray-6);
+            font-weight: 500;
+        }
+
         .toast-container {
             position: fixed;
             top: 18px;
@@ -665,6 +1040,7 @@
             z-index: 4000;
             max-width: 350px;
         }
+
         .toast {
             background: var(--ios-white);
             border-radius: var(--ios-border-radius);
@@ -676,90 +1052,82 @@
             align-items: flex-start;
             gap: 11px;
             animation: slideInRight 0.3s ease;
+            transform-origin: top right;
         }
-        @keyframes slideInRight {
-            from { opacity: 0; transform: translateX(100%); }
-            to { opacity: 1; transform: translateX(0); }
-        }
-        .d-none { display: none; }
-        .text-success { color: var(--ios-green) !important; }
-        .text-danger { color: var(--ios-red) !important; }
-        .text-muted { color: var(--ios-gray-5) !important; }
-        .mb-2 { margin-bottom: 7px; }
-        .mt-2 { margin-top: 7px; }
-        .mt-3 { margin-top: 11px; }
-        .w-100 { width: 100%; }
-        .gap-2 { gap: 8px; }
-        .d-flex { display: flex; }
-        .flex-wrap { flex-wrap: wrap; }
-        .justify-between { justify-content: space-between; }
-        .align-center { align-items: center; }
 
-        /* Signature pad */
-        .signature-container {
-            border: 1px solid var(--ios-gray-3);
-            border-radius: var(--ios-border-radius-small);
-            background: var(--ios-white);
-            margin-bottom: 14px;
+        .toast.error {
+            border-left-color: var(--ios-red);
         }
-        .signature-canvas {
-            width: 100%;
-            height: 135px;
-            display: block;
-            cursor: crosshair;
-            touch-action: none;
-            background: white;
-            border-radius: var(--ios-border-radius-small) var(--ios-border-radius-small) 0 0;
+
+        .toast.warning {
+            border-left-color: var(--ios-orange);
         }
-        .upload-box {
-            aspect-ratio: 1;
-            border: 2px dashed var(--ios-gray-3);
-            border-radius: var(--ios-border-radius-small);
-            background: var(--ios-white);
+
+        .toast.info {
+            border-left-color: var(--ios-blue);
+        }
+
+        .toast.reminder {
+            border-left-color: var(--ios-red);
+            background: #fff0f0;
+        }
+
+        .toast.notification {
+            border-left-color: var(--ios-green);
+            background: #f0fff0;
+        }
+
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+
+        .toast-icon {
+            font-size: 16px;
+            color: var(--ios-green);
+            margin-top: 2px;
+        }
+
+        .toast.error .toast-icon {
+            color: var(--ios-red);
+        }
+
+        .toast-content {
+            flex: 1;
+        }
+
+        .toast-title {
+            font-weight: 700;
+            margin-bottom: 4px;
+            color: var(--ios-gray-6);
+            font-size: 14px;
+        }
+
+        .toast-message {
+            font-size: 12px;
+            color: var(--ios-gray-5);
+        }
+
+        .toast-close {
+            background: none;
+            border: none;
+            color: var(--ios-gray-4);
+            cursor: pointer;
+            font-size: 13px;
+            padding: 0;
+            width: 18px;
+            height: 18px;
             display: flex;
-            flex-direction: column;
             align-items: center;
             justify-content: center;
-            cursor: pointer;
-            transition: var(--ios-transition);
-            position: relative;
-            overflow: hidden;
         }
-        .upload-preview {
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            border-radius: var(--ios-border-radius-small);
-        }
-        .floating-promo {
-            position: fixed;
-            bottom: 90px;
-            left: 16px;
-            right: 16px;
-            max-width: 400px;
-            margin: 0 auto;
-            background: white;
-            border-radius: 24px;
-            box-shadow: 0 10px 40px rgba(0,0,0,0.2);
-            z-index: 300;
-            padding: 20px;
-            display: none;
-        }
-        .floating-promo.show { display: block; }
-        .tutorial-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0, 0, 0, 0.35);
-            z-index: 10000;
-            display: none;
-        }
-        .tutorial-overlay.active { display: flex; flex-direction: column; justify-content: flex-end; align-items: center; }
+
         .mobile-bottom-nav {
             display: none;
             position: fixed;
@@ -768,17 +1136,20 @@
             width: 100%;
             background: rgba(255, 255, 255, 0.98);
             backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             border-top: 1px solid var(--ios-gray-2);
             padding: 9px 14px;
             z-index: 100;
             padding-bottom: calc(9px + var(--ios-safe-area-inset-bottom));
         }
+
         @media (max-width: 768px) {
             .mobile-bottom-nav {
                 display: flex;
                 justify-content: space-around;
             }
         }
+
         .mobile-nav-item {
             display: flex;
             flex-direction: column;
@@ -792,28 +1163,705 @@
             border-radius: 7px;
             min-width: 54px;
         }
+
         .mobile-nav-item.active {
             color: var(--ios-green);
             background: rgba(52, 199, 89, 0.1);
             transform: translateY(-2px);
         }
+
+        .mobile-nav-item i {
+            font-size: 16px;
+        }
+
+        .text-success {
+            color: var(--ios-green) !important;
+        }
+
+        .text-danger {
+            color: var(--ios-red) !important;
+        }
+
+        .text-warning {
+            color: var(--ios-orange) !important;
+        }
+
+        .text-muted {
+            color: var(--ios-gray-5) !important;
+        }
+
+        .mb-2 { margin-bottom: 7px; }
+        .mb-3 { margin-bottom: 11px; }
+        .mb-4 { margin-bottom: 14px; }
+        .mt-2 { margin-top: 7px; }
+        .mt-3 { margin-top: 11px; }
+        .mt-4 { margin-top: 14px; }
+        .d-none { display: none; }
+        .d-flex { display: flex; }
+        .d-block { display: block; }
+        .w-100 { width: 100%; }
+        .text-center { text-align: center; }
+        .text-right { text-align: right; }
+        .gap-2 { gap: 8px; }
+
+        ::-webkit-scrollbar {
+            width: 5px;
+            height: 5px;
+        }
+
+        ::-webkit-scrollbar-track {
+            background: var(--ios-gray-1);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb {
+            background: var(--ios-gray-3);
+            border-radius: 3px;
+        }
+
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--ios-gray-4);
+        }
+
+        /* Loan Tabs */
+        .loan-tabs {
+            display: flex;
+            gap: 7px;
+            margin-bottom: 18px;
+            flex-wrap: wrap;
+        }
+
+        .loan-tab {
+            padding: 7px 14px;
+            background: var(--ios-gray-1);
+            border-radius: 18px;
+            font-size: 12px;
+            cursor: pointer;
+            transition: var(--ios-transition);
+        }
+
+        .loan-tab.active {
+            background: var(--ios-green);
+            color: white;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52,199,89,0.3);
+        }
+
+        /* Loan Cards */
+        .loan-card {
+            background: var(--ios-white);
+            border-radius: var(--ios-border-radius);
+            padding: 14px;
+            margin-bottom: 11px;
+            border: 1px solid var(--ios-gray-2);
+            transition: var(--ios-transition);
+            cursor: pointer;
+            position: relative;
+        }
+
+        .loan-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--ios-card-shadow-hover);
+        }
+
+        .loan-card-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 9px;
+        }
+
+        .loan-id {
+            font-weight: 600;
+            color: var(--ios-gray-6);
+        }
+
+        .loan-amount {
+            font-size: 16px;
+            font-weight: 700;
+            color: var(--ios-green);
+        }
+
+        .loan-dates {
+            display: flex;
+            justify-content: space-between;
+            font-size: 11px;
+            color: var(--ios-gray-5);
+            margin-top: 7px;
+        }
+
+        .loan-pay-btn {
+            position: absolute;
+            bottom: 11px;
+            right: 14px;
+            padding: 4px 11px;
+            font-size: 11px;
+            background: var(--ios-green);
+            color: white;
+            border: none;
+            border-radius: var(--ios-border-radius-small);
+            cursor: pointer;
+            z-index: 5;
+        }
+
+        .loan-pay-btn:hover {
+            background: var(--ios-green-dark);
+            transform: scale(1.05);
+        }
+
+        /* Loan Details Card */
+        .loan-detail-card {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius-small);
+            padding: 14px;
+            margin-top: 14px;
+        }
+
+        .loan-detail-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(135px, 1fr));
+            gap: 11px;
+        }
+
+        .loan-detail-item {
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .loan-detail-label {
+            font-size: 10px;
+            color: var(--ios-gray-5);
+            text-transform: uppercase;
+        }
+
+        .loan-detail-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--ios-gray-6);
+        }
+
+        /* Document Grid 2x2 */
+        .document-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 14px;
+        }
+
+        .document-card {
+            background: var(--ios-white);
+            border: 1px solid var(--ios-gray-2);
+            border-radius: var(--ios-border-radius-small);
+            padding: 11px;
+            text-align: center;
+            transition: var(--ios-transition);
+        }
+
+        .document-card:hover {
+            transform: translateY(-4px);
+            box-shadow: var(--ios-card-shadow-hover);
+        }
+
+        .document-thumb {
+            width: 72px;
+            height: 72px;
+            object-fit: cover;
+            border-radius: 7px;
+            margin: 0 auto 9px;
+            border: 1px solid var(--ios-gray-3);
+        }
+
+        .document-name {
+            font-weight: 600;
+            font-size: 12px;
+        }
+
+        .document-status {
+            font-size: 10px;
+            margin-bottom: 7px;
+        }
+
+        /* Settings Cards */
+        .settings-card {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius-small);
+            padding: 14px;
+            margin-bottom: 14px;
+        }
+
+        .settings-card .form-check {
+            margin-bottom: 9px;
+        }
+
+        /* Duration Unit Selector */
+        .duration-unit-group {
+            display: flex;
+            gap: 9px;
+            margin-top: 4px;
+        }
+
+        .duration-unit-option {
+            flex: 1;
+            text-align: center;
+            padding: 7px;
+            border: 1px solid var(--ios-gray-3);
+            border-radius: var(--ios-border-radius-small);
+            cursor: pointer;
+            transition: var(--ios-transition);
+        }
+
+        .duration-unit-option.active {
+            background: var(--ios-green);
+            color: white;
+            border-color: var(--ios-green);
+            transform: translateY(-2px);
+            box-shadow: 0 4px 8px rgba(52,199,89,0.2);
+        }
+
+        /* Agreement Styles */
+        .agreement-wrapper {
+            font-family: 'Times New Roman', serif;
+            background: #fefefe;
+            padding: 27px;
+            border-radius: 7px;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.1);
+            color: #2c3e50;
+        }
+
+        .agreement-wrapper h1, .agreement-wrapper h2 {
+            text-align: center;
+            color: #1a5276;
+            margin-bottom: 9px;
+        }
+
+        .agreement-wrapper h3 {
+            background: #1a5276;
+            color: white;
+            padding: 7px 11px;
+            border-radius: 4px;
+            margin: 18px 0 9px;
+        }
+
+        .agreement-wrapper .detail {
+            margin: 7px 0;
+            display: flex;
+            flex-wrap: wrap;
+        }
+
+        .agreement-wrapper .label {
+            font-weight: bold;
+            width: 180px;
+            color: #1a5276;
+        }
+
+        .agreement-wrapper .value {
+            flex: 1;
+        }
+
+        .agreement-wrapper .signature-line {
+            border-bottom: 1px solid #000;
+            width: 225px;
+            margin: 4px 0;
+        }
+
+        .agreement-wrapper .logo {
+            text-align: center;
+            margin-bottom: 18px;
+        }
+
+        .agreement-wrapper .logo img {
+            max-width: 135px;
+        }
+
+        /* Signature Pad Styles */
+        .signature-container {
+            border: 1px solid var(--ios-gray-3);
+            border-radius: var(--ios-border-radius-small);
+            background: var(--ios-white);
+            margin-bottom: 14px;
+        }
+
+        .signature-canvas {
+            width: 100%;
+            height: 135px;
+            display: block;
+            cursor: crosshair;
+            touch-action: none;
+            background: white;
+            border-radius: var(--ios-border-radius-small) var(--ios-border-radius-small) 0 0;
+        }
+
+        .signature-tools {
+            display: flex;
+            gap: 7px;
+            padding: 7px;
+            border-top: 1px solid var(--ios-gray-2);
+            background: var(--ios-gray-1);
+            border-radius: 0 0 var(--ios-border-radius-small) var(--ios-border-radius-small);
+        }
+
+        /* Interest preview */
+        .interest-preview {
+            background: var(--ios-gray-1);
+            border-radius: var(--ios-border-radius-small);
+            padding: 12px;
+            margin: 12px 0;
+            border: 1px solid var(--ios-gray-2);
+        }
+
+        .interest-row {
+            display: flex;
+            justify-content: space-between;
+            font-size: 13px;
+            margin-bottom: 6px;
+        }
+
+        .interest-row .label {
+            color: var(--ios-gray-5);
+        }
+
+        .interest-row .value {
+            font-weight: 600;
+            color: var(--ios-green);
+        }
+
+        .interest-total {
+            border-top: 1px solid var(--ios-gray-3);
+            padding-top: 8px;
+            margin-top: 8px;
+            font-weight: 700;
+        }
+
+        /* Progress bar for loan repayment */
+        .progress-container {
+            width: 100%;
+            background-color: var(--ios-gray-2);
+            border-radius: 20px;
+            height: 8px;
+            margin: 8px 0;
+            overflow: hidden;
+        }
+
+        .progress-bar {
+            height: 100%;
+            background: linear-gradient(90deg, var(--ios-blue), var(--ios-purple));
+            border-radius: 20px;
+            transition: width 0.3s ease;
+        }
+
+        .progress-label {
+            font-size: 10px;
+            color: var(--ios-gray-5);
+            margin-top: 2px;
+        }
+
+        /* Floating promotion card */
+        .floating-promo {
+            position: fixed;
+            bottom: 90px;
+            left: 16px;
+            right: 16px;
+            max-width: 400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 24px;
+            box-shadow: 0 10px 40px rgba(0,0,0,0.2), 0 0 0 1px rgba(52,199,89,0.2);
+            z-index: 300;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            background: rgba(255,255,255,0.98);
+            border: 1px solid rgba(52,199,89,0.3);
+            transform: translateY(20px);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            pointer-events: none;
+        }
+
+        .floating-promo.show {
+            transform: translateY(0);
+            opacity: 1;
+            visibility: visible;
+            pointer-events: all;
+        }
+
+        .floating-promo .promo-image {
+            width: 100%;
+            max-height: 180px;
+            object-fit: contain;
+            border-radius: 16px;
+            margin-bottom: 16px;
+            background: #f5f7fa;
+        }
+
+        .floating-promo .promo-title {
+            font-size: 20px;
+            font-weight: 700;
+            color: #34c759;
+            margin-bottom: 8px;
+        }
+
+        .floating-promo .promo-message {
+            font-size: 15px;
+            color: #1c1e24;
+            margin-bottom: 20px;
+            line-height: 1.5;
+        }
+
+        .floating-promo .promo-close {
+            background: #34c759;
+            color: white;
+            border: none;
+            border-radius: 30px;
+            padding: 12px 24px;
+            font-size: 16px;
+            font-weight: 600;
+            width: 100%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            box-shadow: 0 5px 15px rgba(52,199,89,0.3);
+            transition: 0.2s;
+        }
+
+        .floating-promo .promo-close:hover {
+            background: #248a3d;
+            transform: scale(1.02);
+        }
+
+        /* First time user tutorial overlay */
+        .tutorial-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.35);
+            z-index: 10000;
+            display: none;
+            flex-direction: column;
+            justify-content: flex-end;
+            align-items: center;
+            pointer-events: none;
+            transition: opacity 0.3s;
+        }
+
+        .tutorial-overlay.active {
+            display: flex;
+            pointer-events: all;
+        }
+
+        .tutorial-highlight {
+            position: absolute;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            box-shadow: 0 0 0 4px rgba(255, 255, 255, 0.8), 0 0 20px rgba(255, 255, 255, 0.5);
+            animation: pulse 1.5s infinite;
+            pointer-events: none;
+            z-index: 10001;
+            transition: all 0.3s ease;
+        }
+
+        @keyframes pulse {
+            0% { transform: scale(1); opacity: 1; }
+            50% { transform: scale(1.1); opacity: 0.8; }
+            100% { transform: scale(1); opacity: 1; }
+        }
+
+        .tutorial-tooltip {
+            position: absolute;
+            background: white;
+            color: #333;
+            padding: 14px 20px;
+            border-radius: 20px;
+            max-width: 280px;
+            font-size: 14px;
+            font-weight: 500;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+            z-index: 10002;
+            text-align: center;
+            border: 1px solid var(--ios-green);
+            bottom: 120px;
+            left: 50%;
+            transform: translateX(-50%);
+        }
+
+        .tutorial-tooltip::after {
+            content: '';
+            position: absolute;
+            bottom: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 0;
+            height: 0;
+            border-left: 10px solid transparent;
+            border-right: 10px solid transparent;
+            border-top: 10px solid white;
+        }
+
+        .tutorial-controls {
+            position: absolute;
+            bottom: 30px;
+            left: 0;
+            right: 0;
+            display: flex;
+            justify-content: center;
+            gap: 20px;
+            z-index: 10003;
+            padding: 0 20px;
+        }
+
+        .tutorial-btn {
+            background: white;
+            color: #34c759;
+            border: 1px solid #34c759;
+            padding: 12px 24px;
+            border-radius: 30px;
+            font-weight: 600;
+            font-size: 16px;
+            cursor: pointer;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            transition: 0.2s;
+            min-width: 120px;
+        }
+
+        .tutorial-btn.primary {
+            background: #34c759;
+            color: white;
+            border: none;
+        }
+
+        .tutorial-btn:hover {
+            transform: scale(1.05);
+        }
+
+        .tutorial-skip {
+            position: absolute;
+            top: 50px;
+            right: 20px;
+            background: rgba(255,255,255,0.9);
+            color: #333;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 40px;
+            font-weight: 500;
+            font-size: 14px;
+            z-index: 10003;
+            cursor: pointer;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+        }
+
+        .tutorial-skip:hover {
+            background: white;
+        }
+
+        /* Maintenance and ban overlays */
+        .maintenance-overlay, .ban-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(255,255,255,0.95);
+            backdrop-filter: blur(10px);
+            z-index: 5000;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+            padding: 18px;
+        }
+
+        .maintenance-overlay h2, .ban-overlay h2 {
+            color: var(--ios-red);
+            margin-bottom: 9px;
+        }
+
+        /* Additional spacing for mobile */
+        @media (max-width: 768px) {
+            .main-content {
+                padding-bottom: 72px;
+            }
+            .quick-actions-grid {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        /* Badge container */
+        .badge-container {
+            position: relative;
+            cursor: pointer;
+        }
+
+        .badge-container i {
+            font-size: 22px;
+            color: #2d3a4a;
+        }
+
+        .unread-badge {
+            position: absolute;
+            top: -5px;
+            right: -7px;
+            background: #ff3b30;
+            color: white;
+            border-radius: 20px;
+            padding: 2px 7px;
+            font-size: 10px;
+            font-weight: 600;
+            box-shadow: 0 4px 8px rgba(255,59,48,0.3);
+        }
+
+        .notification-item {
+            background: #f8fafd;
+            border-radius: 14px;
+            padding: 14px;
+            margin-bottom: 9px;
+            border-left: 4px solid #007aff;
+        }
+
+        .notification-item.unread {
+            background: #eef5ff;
+            border-left-color: #ff3b30;
+        }
+
+        .notification-message {
+            font-weight: 500;
+            margin-bottom: 5px;
+        }
+
+        .notification-time {
+            font-size: 11px;
+            color: #7e8c9c;
+        }
+
+        .mark-read-btn {
+            background: none;
+            border: none;
+            color: #007aff;
+            font-size: 11px;
+            cursor: pointer;
+            margin-top: 5px;
+        }
     </style>
 </head>
 <body>
     <!-- Loading Overlay -->
-    <div class="loading-overlay" id="loadingOverlay" style="display: none;">
+    <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
         <div class="loading-text">Loading Dashboard...</div>
     </div>
 
-    <!-- Maintenance Overlay -->
+    <!-- Maintenance Overlay (shown when app disabled) -->
     <div class="maintenance-overlay" id="maintenanceOverlay" style="display: none;">
         <i class="fas fa-tools" style="font-size: 60px; color: var(--ios-red); margin-bottom: 20px;"></i>
         <h2>Under Maintenance</h2>
         <p>The customer app is currently disabled by the administrator. Please check back later.</p>
     </div>
 
-    <!-- Ban Overlay -->
+    <!-- Ban Overlay (shown when user banned) -->
     <div class="ban-overlay" id="banOverlay" style="display: none;">
         <i class="fas fa-ban" style="font-size: 60px; color: var(--ios-red); margin-bottom: 20px;"></i>
         <h2 id="banMessage">Access Denied</h2>
@@ -828,16 +1876,17 @@
         <button class="promo-close" id="closeFloatingPromo"><i class="fas fa-gift"></i> Got it!</button>
     </div>
 
+    <!-- Toast Container -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Mobile Header -->
+    <!-- Mobile Header with notification bell -->
     <div class="mobile-header">
         <button class="hamburger-menu" id="menuToggle">
             <i class="fas fa-bars"></i>
         </button>
         <div class="mobile-logo">
-            <img src="logo.png" alt="Logo" style="width:28px; height:28px;">
-            <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span>
+            <img src="logo.png" alt="TruCash" class="logo-img" onerror="this.style.display='none'">
+            <span class="logo-text-colored"><span class="tru">Tru</span><span class="cash">Cash</span></span>
         </div>
         <div class="badge-container" id="mobileNotificationBell">
             <i class="fas fa-bell"></i>
@@ -850,20 +1899,50 @@
         <!-- Sidebar -->
         <aside class="sidebar" id="sidebar">
             <div class="logo-container">
-                <img src="logo.png" alt="Logo" style="width:28px; height:28px;">
-                <div class="logo-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></div>
+                <img src="logo.png" alt="TruCash" class="logo-img" onerror="this.style.display='none'">
+                <div class="logo-text-colored"><span class="tru">Tru</span><span class="cash">Cash</span></div>
             </div>
+
             <nav class="nav-menu">
-                <a href="#" class="nav-item active" data-section="dashboard"><i class="fas fa-home"></i><span>Dashboard</span></a>
-                <a href="#" class="nav-item" data-section="profile"><i class="fas fa-user"></i><span>My Profile</span></a>
-                <a href="#" class="nav-item" data-section="apply"><i class="fas fa-file-contract"></i><span>Apply for Loan</span></a>
-                <a href="#" class="nav-item" data-section="loans"><i class="fas fa-hand-holding-usd"></i><span>My Loans</span></a>
-                <a href="#" class="nav-item" data-section="payments"><i class="fas fa-credit-card"></i><span>Payments</span></a>
-                <a href="#" class="nav-item" data-section="notifications"><i class="fas fa-bell"></i><span>Notifications</span><span class="notification-badge" id="notificationCount" style="display: none;">0</span></a>
-                <a href="#" class="nav-item" data-section="history"><i class="fas fa-history"></i><span>Loan History</span></a>
-                <a href="#" class="nav-item" data-section="about"><i class="fas fa-info-circle"></i><span>About Us</span></a>
-                <a href="#" class="nav-item" data-section="settings"><i class="fas fa-cog"></i><span>Settings</span></a>
+                <a href="#" class="nav-item active" data-section="dashboard">
+                    <i class="fas fa-home"></i>
+                    <span>Dashboard</span>
+                </a>
+                <a href="#" class="nav-item" data-section="profile">
+                    <i class="fas fa-user"></i>
+                    <span>My Profile</span>
+                </a>
+                <a href="#" class="nav-item" data-section="apply">
+                    <i class="fas fa-file-contract"></i>
+                    <span>Apply for Loan</span>
+                </a>
+                <a href="#" class="nav-item" data-section="loans">
+                    <i class="fas fa-hand-holding-usd"></i>
+                    <span>My Loans</span>
+                </a>
+                <a href="#" class="nav-item" data-section="payments">
+                    <i class="fas fa-credit-card"></i>
+                    <span>Payments</span>
+                </a>
+                <a href="#" class="nav-item" data-section="notifications">
+                    <i class="fas fa-bell"></i>
+                    <span>Notifications</span>
+                    <span class="notification-badge" id="notificationCount" style="display: none;">0</span>
+                </a>
+                <a href="#" class="nav-item" data-section="history">
+                    <i class="fas fa-history"></i>
+                    <span>Loan History</span>
+                </a>
+                <a href="#" class="nav-item" data-section="about">
+                    <i class="fas fa-info-circle"></i>
+                    <span>About Us</span>
+                </a>
+                <a href="#" class="nav-item" data-section="settings">
+                    <i class="fas fa-cog"></i>
+                    <span>Settings</span>
+                </a>
             </nav>
+
             <div class="user-profile">
                 <div class="profile-card">
                     <img src="" alt="Profile" class="profile-avatar" id="profileAvatar" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>U</text></svg>'">
@@ -871,7 +1950,9 @@
                         <div class="profile-name" id="profileName">Loading...</div>
                         <div class="profile-role">Customer</div>
                     </div>
-                    <button class="logout-btn btn-small" id="sidebarLogoutBtn"><i class="fas fa-sign-out-alt"></i></button>
+                    <button class="logout-btn btn-small" id="sidebarLogoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                    </button>
                 </div>
             </div>
         </aside>
@@ -881,89 +1962,129 @@
             <header class="header">
                 <div class="header-title" id="pageTitle">Customer Dashboard</div>
                 <div class="header-actions">
-                    <div class="status-badge"><i class="fas fa-circle"></i><span id="desktopConnectionStatus">Online</span></div>
-                    <button class="logout-btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
+                    <div class="status-badge">
+                        <i class="fas fa-circle"></i>
+                        <span id="desktopConnectionStatus">Online</span>
+                    </div>
+                    <button class="logout-btn" id="logoutBtn">
+                        <i class="fas fa-sign-out-alt"></i>
+                        Logout
+                    </button>
                 </div>
             </header>
 
+            <!-- Content Area -->
             <div id="contentArea">
-                <!-- Dashboard Section (REDESIGNED) -->
+                <!-- Dashboard Section -->
                 <section id="dashboardSection" class="content-section">
-                    <!-- Payment Due Card -->
-                    <div class="payment-due-card" id="paymentDueCard">
-                        <div class="payment-due-info">
-                            <div class="payment-due-amount" id="paymentDueAmount">K0.00</div>
-                            <div class="payment-due-date" id="paymentDueDate">No payment due</div>
-                            <div class="days-countdown" id="daysCountdown"></div>
+                    <!-- Payment Due Card (top) -->
+                    <div id="paymentDueCard" class="payment-due-card" style="display: none;">
+                        <div class="payment-due-header">
+                            <h3><i class="fas fa-exclamation-triangle"></i> Payment Due</h3>
+                            <span class="days-badge" id="daysRemainingBadge">0 days remaining</span>
                         </div>
-                        <button class="pay-now-btn" id="payNowBtn"><i class="fas fa-credit-card"></i> Pay Now</button>
+                        <div class="payment-due-amount" id="dueAmount">K0.00</div>
+                        <div class="payment-due-detail">
+                            <div class="payment-due-date" id="dueDateText">Due: --</div>
+                            <button class="pay-now-btn" id="payNowFromCard"><i class="fas fa-credit-card"></i> Pay Now</button>
+                        </div>
                     </div>
 
-                    <!-- Stats Grid 2x2 -->
-                    <div class="dashboard-stats-grid">
-                        <div class="stat-card"><div class="card-title">Active Loans</div><div class="card-value" id="activeLoansCount">0</div></div>
-                        <div class="stat-card"><div class="card-title">Total Borrowed</div><div class="card-value" id="totalBorrowed">K0.00</div></div>
-                        <div class="stat-card"><div class="card-title">Current Balance</div><div class="card-value" id="currentBalance">K0.00</div></div>
-                        <div class="stat-card"><div class="card-title">Total Loans</div><div class="card-value" id="totalLoansCount">0</div></div>
+                    <!-- Stats Grid: Active Loans, Total Borrowed, Current Balance, Total Loans -->
+                    <div class="stats-grid">
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Active Loans</div>
+                                <i class="fas fa-hand-holding-usd" style="color: var(--ios-green);"></i>
+                            </div>
+                            <div class="card-value" id="activeLoansCount">0</div>
+                            <div class="card-subtitle">Currently active loans</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Total Borrowed</div>
+                                <i class="fas fa-coins" style="color: var(--ios-green);"></i>
+                            </div>
+                            <div class="card-value" id="totalBorrowed">K0.00</div>
+                            <div class="card-subtitle">Lifetime borrowed amount</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Current Balance</div>
+                                <i class="fas fa-balance-scale" style="color: var(--ios-green);"></i>
+                            </div>
+                            <div class="card-value" id="currentBalance">K0.00</div>
+                            <div class="card-subtitle">Outstanding (active + approved)</div>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="card-header">
+                                <div class="card-title">Total Loans</div>
+                                <i class="fas fa-chart-line" style="color: var(--ios-green);"></i>
+                            </div>
+                            <div class="card-value" id="totalLoansCount">0</div>
+                            <div class="card-subtitle">All loans (active, pending, completed)</div>
+                        </div>
                     </div>
 
-                    <!-- Credit Score Section -->
+                    <!-- Credit Score Row -->
                     <div class="section">
-                        <div class="section-header"><div class="section-title">Your Credit Score</div></div>
-                        <div class="credit-score-flex">
-                            <div class="credit-left">
-                                <img src="" id="creditProfileImg" class="credit-profile-img" alt="Profile">
-                                <span class="credit-name" id="creditCustomerName">Loading...</span>
+                        <div class="section-header">
+                            <div class="section-title">Your Credit Score</div>
+                        </div>
+                        <div class="credit-score-row">
+                            <div class="credit-profile">
+                                <img src="" id="creditScoreAvatar" alt="Profile">
+                                <div class="credit-name" id="creditScoreName">Loading...</div>
                             </div>
-                            <div><span class="credit-score-badge" id="creditScoreGrade">Good</span><span class="credit-score-number" id="creditScoreValue">0</span></div>
+                            <div class="credit-score-badge-large" id="creditScoreGrade">Good</div>
                         </div>
                     </div>
 
-                    <!-- Agent Information -->
-                    <div class="section" id="agentInfoSection">
-                        <div class="section-header"><div class="section-title">Agent Information</div></div>
-                        <div class="agent-info-card" id="agentInfoCard">
-                            <div class="agent-flex">
-                                <img src="" id="agentAvatarSm" class="agent-avatar-sm" style="display:none;">
-                                <div id="agentPlaceholderIcon" style="width:48px;height:48px;background:var(--ios-gray-2);border-radius:50%;display:flex;align-items:center;justify-content:center;"><i class="fas fa-user"></i></div>
-                                <div><div class="agent-name-sm" id="agentNameSm">No agent assigned</div><div class="agent-phone-faint" id="agentPhoneFaint"></div></div>
-                            </div>
-                            <div class="agent-details-expanded" id="agentDetailsExpanded">
-                                <div class="detail-row"><strong>Full Name:</strong> <span id="expAgentName"></span></div>
-                                <div class="detail-row"><strong>NRC:</strong> <span id="expAgentNrc"></span></div>
-                                <div class="detail-row"><strong>Agent ID:</strong> <span id="expAgentId"></span></div>
-                                <div class="detail-row"><strong>Phone:</strong> <span id="expAgentPhone"></span></div>
-                                <div class="detail-row"><strong>Email:</strong> <span id="expAgentEmail"></span></div>
-                                <div class="detail-row"><strong>Date Assigned:</strong> <span id="expAgentAssigned"></span></div>
-                                <div class="d-flex gap-2 mt-3">
-                                    <button class="btn btn-outline btn-small" id="contactAgentExpBtn"><i class="fas fa-phone"></i> Contact</button>
-                                    <button class="btn btn-outline btn-small" id="emailAgentExpBtn"><i class="fas fa-envelope"></i> Email</button>
-                                </div>
-                                <button class="btn btn-outline w-100 mt-3" id="changeAgentBtnExpanded">Change Agent</button>
-                            </div>
+                    <!-- Agent Information (Collapsible) -->
+                    <div class="section">
+                        <div class="section-header">
+                            <div class="section-title">Agent Information</div>
                         </div>
-                        <div id="noAgentMessage" class="text-muted mt-2" style="display:none;">Please enter agent ID to apply for loan or click Support for further assistance.</div>
+                        <div id="agentInfoContainer"></div>
                     </div>
 
                     <!-- Quick Actions 2x2 -->
                     <div class="section">
-                        <div class="section-header"><div class="section-title">Quick Actions</div></div>
+                        <div class="section-header">
+                            <div class="section-title">Quick Actions</div>
+                        </div>
                         <div class="quick-actions-grid">
-                            <button class="btn btn-primary" id="applyLoanBtn"><i class="fas fa-plus-circle"></i> Apply for Loan</button>
-                            <button class="btn btn-outline" id="makePaymentBtn"><i class="fas fa-credit-card"></i> Make Payment</button>
-                            <button class="btn btn-outline" id="viewStatementBtn"><i class="fas fa-file-invoice"></i> View Statement</button>
-                            <button class="btn btn-outline" id="contactSupportBtn"><i class="fas fa-headset"></i> Support</button>
+                            <button class="btn btn-primary" id="applyLoanBtn">
+                                <i class="fas fa-plus-circle"></i>
+                                Apply for New Loan
+                            </button>
+                            <button class="btn btn-outline" id="makePaymentBtn">
+                                <i class="fas fa-credit-card"></i>
+                                Make Payment
+                            </button>
+                            <button class="btn btn-outline" id="viewStatementBtn">
+                                <i class="fas fa-file-invoice"></i>
+                                View Statement
+                            </button>
+                            <button class="btn btn-outline" id="contactSupportBtn">
+                                <i class="fas fa-headset"></i>
+                                Support
+                            </button>
                         </div>
                     </div>
                 </section>
 
-                <!-- Profile Section (unchanged) -->
+                <!-- Profile Section -->
                 <section id="profileSection" class="content-section d-none">
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">My Profile</div>
-                            <button class="btn btn-outline btn-small" id="editProfileBtn"><i class="fas fa-edit"></i> Edit Profile</button>
+                            <button class="btn btn-outline btn-small" id="editProfileBtn">
+                                <i class="fas fa-edit"></i>
+                                Edit Profile
+                            </button>
                         </div>
+                        
                         <div class="profile-display">
                             <div class="form-row">
                                 <div class="form-group">
@@ -975,6 +2096,7 @@
                                     <div class="form-input disabled" id="profileEmail">Loading...</div>
                                 </div>
                             </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">Phone Number</label>
@@ -985,10 +2107,12 @@
                                     <div class="form-input disabled" id="profileNRC">Loading...</div>
                                 </div>
                             </div>
+                            
                             <div class="form-group">
                                 <label class="form-label">Residential Address</label>
                                 <div class="form-input disabled" id="profileAddress">Loading...</div>
                             </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label class="form-label">House Number</label>
@@ -999,39 +2123,56 @@
                                     <div class="form-input disabled" id="profileAgentId">Not assigned</div>
                                 </div>
                             </div>
+                            
+                            <div class="form-group">
+                                <label class="form-label">Credit Score</label>
+                                <div class="d-flex align-center">
+                                    <span class="credit-score-badge" id="profileCreditScoreGrade">Good</span>
+                                    <span class="card-value" id="profileCreditScoreValue" style="font-size: 24px; margin-left: 12px;">0</span>
+                                </div>
+                            </div>
+
                             <div class="form-group">
                                 <label class="form-label">Profile Photo</label>
                                 <div class="profile-photo-container text-center">
-                                    <img src="" alt="Profile Photo" id="profilePhoto" class="profile-avatar" style="width:80px;height:80px;">
+                                    <img src="" alt="Profile Photo" id="profilePhoto" class="profile-avatar" style="width: 80px; height: 80px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>U</text></svg>'">
                                 </div>
                             </div>
                         </div>
                     </div>
+                    
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Account Documents</div>
                         </div>
-                        <div class="document-grid" id="documentGrid"></div>
+                        <div class="document-grid" id="documentGrid">
+                            <!-- Dynamic content will be injected -->
+                        </div>
                     </div>
                 </section>
 
-                <!-- Apply for Loan Section (collateral grid 2x2) -->
+                <!-- Apply for Loan Section -->
                 <section id="applySection" class="content-section d-none">
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Apply for New Loan</div>
                             <div class="section-subtitle text-success" id="loanLimitInfo">Checking eligibility...</div>
                         </div>
+                        
+                        <!-- Loan Application Form -->
                         <div id="loanApplicationForm">
                             <div class="form-group">
                                 <label for="loanAmount" class="form-label">Loan Amount (Kwacha)</label>
-                                <input type="number" id="loanAmount" class="form-input" placeholder="Enter amount" min="100" step="100">
-                                <div class="form-text text-muted" id="amountValidation"></div>
+                                <input type="number" id="loanAmount" class="form-input" placeholder="Enter amount" min="100" step="100" oninput="validateLoanAmount(); updateInterestPreview();">
+                                <div class="form-text text-muted" id="amountValidation" style="font-size: 11px;"></div>
                             </div>
+                            
                             <div class="form-row">
                                 <div class="form-group">
                                     <label for="loanDuration" class="form-label">Loan Duration</label>
-                                    <select id="loanDuration" class="form-input"></select>
+                                    <select id="loanDuration" class="form-input" onchange="updateInterestPreview()">
+                                        <!-- Options populated by JS depending on unit -->
+                                    </select>
                                 </div>
                                 <div class="form-group">
                                     <label class="form-label">Duration Unit</label>
@@ -1123,7 +2264,7 @@
                                 
                                 <div class="form-group">
                                     <label class="form-label">Collateral Images (Minimum 3 required)</label>
-                                    <div class="collateral-grid">
+                                    <div class="collateral-grid-2x2">
                                         <div class="upload-box" data-type="collateral-1" onclick="openCloudinaryWidget(this)">
                                             <i class="fas fa-camera"></i>
                                             <span>Front View</span>
@@ -1199,6 +2340,7 @@
                             <p class="text-muted text-center py-4">No loans found.</p>
                         </div>
                     </div>
+                    
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Loan Details</div>
@@ -1209,19 +2351,24 @@
                     </div>
                 </section>
 
-                <!-- Payments Section -->
+                <!-- Payments Section (with improved history) -->
                 <section id="paymentsSection" class="content-section d-none">
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Make Payment</div>
                         </div>
-                        <div id="paymentFormContainer"></div>
+                        <div id="paymentFormContainer">
+                            <!-- Will be populated dynamically with loan selection and proof upload -->
+                        </div>
                     </div>
+                    
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Payment History</div>
                         </div>
-                        <div id="paymentHistory"></div>
+                        <div id="paymentHistory">
+                            <!-- Will be populated with cards showing proof thumbnails -->
+                        </div>
                     </div>
                 </section>
 
@@ -1230,19 +2377,32 @@
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Notifications</div>
-                            <button class="btn btn-outline btn-small" id="markAllReadBtn"><i class="fas fa-check-double"></i> Mark All Read</button>
+                            <button class="btn btn-outline btn-small" id="markAllReadBtn">
+                                <i class="fas fa-check-double"></i>
+                                Mark All Read
+                            </button>
                         </div>
-                        <div class="notifications-list" id="notificationsList"></div>
+                        <div class="notifications-list" id="notificationsList">
+                            <div class="text-center py-4">
+                                <i class="fas fa-bell" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
+                                <p class="text-muted">No notifications yet</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
-                <!-- Loan History Section -->
+                <!-- Loan History Section (completed loans) -->
                 <section id="historySection" class="content-section d-none">
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">Completed & Historical Loans</div>
                         </div>
-                        <div id="loanHistoryList"></div>
+                        <div id="loanHistoryList">
+                            <div class="text-center py-4">
+                                <i class="fas fa-file-alt" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
+                                <p class="text-muted">No loan history found</p>
+                            </div>
+                        </div>
                     </div>
                 </section>
 
@@ -1251,7 +2411,10 @@
                     <div class="section">
                         <div class="section-header">
                             <div class="section-title">About TruCash</div>
-                            <button class="btn btn-primary" id="showCertificateBtn"><i class="fas fa-file-pdf"></i> Our Verified Docx</button>
+                            <button class="btn btn-primary" id="showCertificateBtn">
+                                <i class="fas fa-file-pdf"></i>
+                                Our Verified Docx
+                            </button>
                         </div>
                         <div class="about-content">
                             <h3>Who We Are</h3>
@@ -1264,18 +2427,29 @@
                         <div class="certificate-container" id="certificateContainer" style="display: none;">
                             <h1>Tax Registration Certificate</h1>
                             <p>This is to certify that the taxpayer shown herein has been registered with Zambia Revenue Authority.</p>
+
                             <div class="section-title">Section A - Taxpayer Information</div>
                             <div class="detail"><span class="label">Taxpayer Identification Number:</span> 1016635011</div>
                             <div class="detail"><span class="label">Taxpayer Name:</span> Moses Ilunga</div>
                             <div class="detail"><span class="label">Trading Name:</span> Moses Ilunga</div>
                             <div class="detail"><span class="label">NRC Number:</span> 307450681</div>
-                            <div class="detail"><span class="label">Physical Address:</span><br>5230, Hillcrest Extension, Richard Mwanza,<br>Ndola, Copperbelt Province,<br>Zambia</div>
+
+                            <div class="detail">
+                                <span class="label">Physical Address:</span><br>
+                                5230, Hillcrest Extension, Richard Mwanza,<br>
+                                Ndola, Copperbelt Province,<br>
+                                Zambia
+                            </div>
+
                             <div class="section-title">Section B - Registration Details</div>
+
                             <div class="detail"><span class="label">Type of Registration:</span> Taxpayer Identification Number</div>
                             <div class="detail"><span class="label">Effective Date:</span> 17/07/2018</div>
                             <div class="detail"><span class="label">Issue Date:</span> 17/07/2018</div>
                             <div class="detail"><span class="label">Commissioner – Domestic Taxes:</span> MOSES SHUKO</div>
+
                             <p style="margin-top:20px;">This certificate will remain in force until it is cancelled by ZRA.</p>
+
                             <div class="section-title">Scanned Certificate Copy</div>
                             <div class="pdf-viewer">
                                 <iframe src="Scan.pdf"></iframe>
@@ -1307,6 +2481,7 @@
                             <label class="form-check-label" for="notifyPenalty">Penalty applied notifications</label>
                         </div>
                     </div>
+                    
                     <div class="settings-card">
                         <div class="section-header">
                             <div class="section-title">Security</div>
@@ -1316,6 +2491,7 @@
                             Change Password
                         </button>
                     </div>
+                    
                     <div class="settings-card">
                         <div class="section-header">
                             <div class="section-title">Account Data</div>
@@ -1338,74 +2514,125 @@
 
     <!-- Mobile Bottom Navigation -->
     <nav class="mobile-bottom-nav">
-        <a href="#" class="mobile-nav-item active" data-section="dashboard"><i class="fas fa-home"></i><span>Home</span></a>
-        <a href="#" class="mobile-nav-item" data-section="apply"><i class="fas fa-file-contract"></i><span>Apply</span></a>
-        <a href="#" class="mobile-nav-item" data-section="loans"><i class="fas fa-hand-holding-usd"></i><span>Loans</span></a>
-        <a href="#" class="mobile-nav-item" data-section="payments"><i class="fas fa-credit-card"></i><span>Pay</span></a>
-        <a href="#" class="mobile-nav-item" data-section="profile"><i class="fas fa-user"></i><span>Profile</span></a>
+        <a href="#" class="mobile-nav-item active" data-section="dashboard">
+            <i class="fas fa-home"></i>
+            <span>Home</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="apply">
+            <i class="fas fa-file-contract"></i>
+            <span>Apply</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="loans">
+            <i class="fas fa-hand-holding-usd"></i>
+            <span>Loans</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="payments">
+            <i class="fas fa-credit-card"></i>
+            <span>Pay</span>
+        </a>
+        <a href="#" class="mobile-nav-item" data-section="profile">
+            <i class="fas fa-user"></i>
+            <span>Profile</span>
+        </a>
     </nav>
 
     <!-- Modals -->
+
+    <!-- Payment Modal with proof upload -->
     <div class="modal" id="paymentModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Make Payment
-                </div>
-                <button class="modal-close" id="closePaymentModal"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title">Make Payment</h3>
+                <button class="modal-close" id="closePaymentModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body" id="paymentModalContent"></div>
+            <div class="modal-body">
+                <div id="paymentModalContent">
+                    <!-- Dynamic payment form -->
+                </div>
+            </div>
         </div>
     </div>
 
-    <div class="modal" id="loanAgreementModal">
-        <div class="modal-content large">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Loan Agreement
-                </div>
-                <button class="modal-close" id="closeLoanAgreementModal"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body" id="loanAgreementBody"></div>
-        </div>
-    </div>
-
-    <div class="modal" id="supportModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Customer Support
-                </div>
-                <button class="modal-close" id="closeSupportModal"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body" id="supportModalBody"></div>
-        </div>
-    </div>
-
+    <!-- Statement Modal -->
     <div class="modal" id="statementModal">
         <div class="modal-content large">
             <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Loan Statement
-                </div>
-                <button class="modal-close" id="closeStatementModal"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title">Loan Statement</h3>
+                <button class="modal-close" id="closeStatementModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body" id="statementContent"></div>
+            <div class="modal-body" id="statementContent">
+                <div class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3">Loading statement...</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Support Modal (dynamic contact) -->
+    <div class="modal" id="supportModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Customer Support</h3>
+                <button class="modal-close" id="closeSupportModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p><i class="fas fa-phone"></i> Call: <span id="supportPhone">+260 123 456 789</span></p>
+                <p><i class="fas fa-envelope"></i> Email: <span id="supportEmail">support@trucash.zm</span></p>
+                <p><i class="fas fa-globe"></i> Website: <span id="supportWebsite">https://trucash.zm</span></p>
+                <hr>
+                <p>Our agents are available Monday–Friday, 8:00–17:00.</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Agent Profile Modal -->
+    <div class="modal" id="agentProfileModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Agent Profile</h3>
+                <button class="modal-close" id="closeAgentProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <div id="agentProfileContent" class="text-center">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3">Loading agent details...</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Modal -->
+    <div class="modal" id="documentModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3 class="modal-title">Document View</h3>
+                <button class="modal-close" id="closeDocumentModal">
+                    <i class="fas fa-times"></i>
+                </button>
+            </div>
+            <div class="modal-body">
+                <img src="" alt="Document" id="documentImage" class="w-100 rounded" style="max-height: 60vh; object-fit: contain;">
+            </div>
+        </div>
+    </div>
+
+    <!-- Change Password Modal -->
     <div class="modal" id="changePasswordModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Change Password
-                </div>
-                <button class="modal-close" id="closePasswordModal"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title">Change Password</h3>
+                <button class="modal-close" id="closePasswordModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -1429,14 +2656,14 @@
         </div>
     </div>
 
+    <!-- Edit Profile Modal -->
     <div class="modal" id="editProfileModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Edit Profile
-                </div>
-                <button class="modal-close" id="closeEditProfileModal"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title">Edit Profile</h3>
+                <button class="modal-close" id="closeEditProfileModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
                 <div class="form-group">
@@ -1462,7 +2689,7 @@
                 <div class="form-group">
                     <label class="form-label">Profile Photo</label>
                     <div class="text-center mb-3">
-                        <img src="" id="currentProfilePhoto" class="profile-avatar" style="width:80px;height:80px;">
+                        <img src="" alt="Current Photo" id="currentProfilePhoto" class="profile-avatar" style="width: 80px; height: 80px;" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>U</text></svg>'">
                     </div>
                     <button class="btn btn-outline w-100" id="uploadProfilePhotoBtn">
                         <i class="fas fa-camera"></i>
@@ -1477,58 +2704,53 @@
         </div>
     </div>
 
-    <div class="modal" id="agentProfileModal">
-        <div class="modal-content">
+    <!-- Loan Agreement Modal -->
+    <div class="modal" id="loanAgreementModal">
+        <div class="modal-content large">
             <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Agent Profile
-                </div>
-                <button class="modal-close" id="closeAgentProfileModal"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title">Loan Agreement</h3>
+                <button class="modal-close" id="closeLoanAgreementModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body" id="agentProfileContent"></div>
-        </div>
-    </div>
-
-    <div class="modal" id="documentModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Document View
+            <div class="modal-body" id="loanAgreementBody">
+                <div class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3">Preparing agreement...</p>
                 </div>
-                <button class="modal-close" id="closeDocumentModal"><i class="fas fa-times"></i></button>
-            </div>
-            <div class="modal-body">
-                <img src="" alt="Document" id="documentImage" class="w-100 rounded" style="max-height:60vh;object-fit:contain;">
             </div>
         </div>
     </div>
 
+    <!-- Loan Details Modal -->
     <div class="modal" id="loanDetailsModal">
         <div class="modal-content large">
             <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Loan Details
-                </div>
-                <button class="modal-close" id="closeLoanDetailsModal"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title">Loan Details</h3>
+                <button class="modal-close" id="closeLoanDetailsModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
-            <div class="modal-body" id="loanDetailsModalBody"></div>
+            <div class="modal-body" id="loanDetailsModalBody">
+                <div class="text-center py-4">
+                    <div class="loading-spinner"></div>
+                    <p class="mt-3">Loading...</p>
+                </div>
+            </div>
         </div>
     </div>
 
+    <!-- Notifications Modal (for quick view) -->
     <div class="modal" id="notificationsModal">
         <div class="modal-content">
             <div class="modal-header">
-                <div class="modal-title">
-                    <img src="logo.png" style="width:24px;">
-                    <span class="brand-text"><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span></span> Notifications
-                </div>
-                <button class="modal-close" id="closeNotificationsModal"><i class="fas fa-times"></i></button>
+                <h3 class="modal-title">Notifications</h3>
+                <button class="modal-close" id="closeNotificationsModal">
+                    <i class="fas fa-times"></i>
+                </button>
             </div>
             <div class="modal-body">
-                <div style="display:flex;justify-content:flex-end;margin-bottom:10px;">
+                <div style="display: flex; justify-content: flex-end; margin-bottom: 10px;">
                     <button class="btn-small btn-outline" id="markAllReadModalBtn">Mark all as read</button>
                 </div>
                 <div id="notificationsModalList"></div>
@@ -1536,7 +2758,22 @@
         </div>
     </div>
 
-    <!-- Tutorial Overlay -->
+    <!-- Promotion Modal (kept for compatibility but hidden) -->
+    <div class="modal" id="promotionModal" style="display:none;">
+        <div class="modal-content promotion-modal-content">
+            <div class="modal-header" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); color: white; border-radius: 14px 14px 0 0;">
+                <h3 class="modal-title" id="promotionTitle" style="color: white;">🎉 Special Offer!</h3>
+                <button class="modal-close" id="closePromotionModal" style="background: rgba(255,255,255,0.2); color: white;"><i class="fas fa-times"></i></button>
+            </div>
+            <div class="modal-body" id="promotionBody" style="text-align: center;">
+                <img id="promotionImage" src="" alt="Promotion" style="max-width:100%; border-radius:12px; margin-bottom:15px; display:none;">
+                <p id="promotionMessage" style="font-size: 16px; color: #333; margin-bottom: 20px;"></p>
+                <button class="btn btn-primary" id="dismissPromotion" style="background: linear-gradient(135deg, #667eea 0%, #764ba2 100%); border: none; padding: 12px 30px; border-radius: 50px; font-weight: bold;">Grab It Now</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- ===== FIRST TIME USER TUTORIAL OVERLAY ===== -->
     <div class="tutorial-overlay" id="tutorialOverlay">
         <div class="tutorial-highlight" id="tutorialHighlight"></div>
         <div class="tutorial-tooltip" id="tutorialTooltip"></div>
@@ -1548,6 +2785,7 @@
         <button class="tutorial-skip" id="tutorialSkipTop">Skip Tour</button>
     </div>
 
+    <!-- JavaScript -->
     <script>
         // ===== Firebase Configuration =====
         const firebaseConfig = {
@@ -1560,6 +2798,7 @@
             appId: "1:622416212225:web:07418a9b16f955c330ab00"
         };
 
+        // ===== Cloudinary Configuration =====
         const cloudinaryConfig = {
             cloudName: 'dd3lcymrk',
             uploadPreset: 'h3eyhc2o',
@@ -1567,18 +2806,25 @@
             maxFileSize: 10485760,
             allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
             multiple: false,
-            theme: 'white'
+            theme: 'white',
+            styles: {
+                palette: {
+                    window: "#FFFFFF",
+                    windowBorder: "#90A0B3",
+                    tabIcon: "#007AFF",
+                    menuIcons: "#5A616A",
+                    textDark: "#000000",
+                    textLight: "#FFFFFF",
+                    link: "#007AFF",
+                    action: "#FF620C",
+                    inactiveTabIcon: "#0E2F5A",
+                    error: "#F44235",
+                    inProgress: "#007AFF",
+                    complete: "#20B832",
+                    sourceBg: "#E4EBF1"
+                }
+            }
         };
-
-        let firebaseApp, auth, db;
-        try {
-            firebaseApp = firebase.initializeApp(firebaseConfig);
-            auth = firebase.auth();
-            db = firebase.database();
-            console.log("✅ Firebase initialized successfully");
-        } catch (error) {
-            console.error("❌ Firebase initialization error:", error);
-        }
 
         // ===== Application State =====
         const AppState = {
@@ -1612,16 +2858,29 @@
             if (stored) AppState.shownNotifications = new Set(JSON.parse(stored));
         } catch(e) {}
 
-        // ===== Utility Functions =====
+        // ===== Initialize Firebase =====
+        let firebaseApp, auth, db;
+        try {
+            firebaseApp = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.database();
+            console.log("✅ Firebase initialized successfully");
+        } catch (error) {
+            console.error("❌ Firebase initialization error:", error);
+            showToast('System Error', 'Failed to initialize application', 'error');
+        }
+
+        // ===== Enhanced Utility Functions =====
         const Utils = {
             showLoading(message = 'Loading...') {
                 const overlay = document.getElementById('loadingOverlay');
                 const text = overlay.querySelector('.loading-text');
                 text.textContent = message;
-                overlay.style.display = 'flex';
+                overlay.classList.add('active');
             },
             hideLoading() {
-                document.getElementById('loadingOverlay').style.display = 'none';
+                const overlay = document.getElementById('loadingOverlay');
+                overlay.classList.remove('active');
             },
             showToast(title, message, type = 'info', duration = 5000, id = null) {
                 if (id && AppState.shownNotifications.has(id)) return;
@@ -1684,23 +2943,46 @@
                     minute: '2-digit'
                 });
             },
+            validateEmail(email) {
+                const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+                return re.test(email);
+            },
+            validatePhone(phone) {
+                const re = /^\+?[\d\s\-\(\)]{10,}$/;
+                return re.test(phone);
+            },
+            validateNRC(nrc) {
+                const re = /^\d{6}\/\d{2}\/\d{1}$/;
+                return re.test(nrc);
+            },
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
+                };
+            },
             generateLoanId() {
                 return 'LN' + Date.now() + Math.random().toString(36).substr(2, 9).toUpperCase();
-            },
-            calculateTotalInterest(principal, rate, periods, isWeekly = false) {
-                const totalPayable = principal * Math.pow(1 + rate, periods);
-                return totalPayable - principal;
-            },
-            calculateWeeklyPayment(principal, rate, weeks) {
-                if (rate === 0) return principal / weeks;
-                const factor = Math.pow(1 + rate, weeks);
-                return principal * rate * factor / (factor - 1);
             },
             calculateMonthlyPayment(principal, annualRate, months) {
                 const monthlyRate = annualRate / 12;
                 if (monthlyRate === 0) return principal / months;
                 const factor = Math.pow(1 + monthlyRate, months);
                 return principal * monthlyRate * factor / (factor - 1);
+            },
+            calculateWeeklyPayment(principal, weeklyRate, weeks) {
+                if (weeklyRate === 0) return principal / weeks;
+                const factor = Math.pow(1 + weeklyRate, weeks);
+                return principal * weeklyRate * factor / (factor - 1);
+            },
+            calculateTotalInterest(principal, rate, periods, isWeekly = false) {
+                const totalPayable = principal * Math.pow(1 + rate, periods);
+                return totalPayable - principal;
             },
             generateRepaymentSchedule(principal, rate, periods, isWeekly = false) {
                 const schedule = [];
@@ -1732,6 +3014,32 @@
                     });
                 }
                 return schedule;
+            },
+            safeParseJSON(str) {
+                try {
+                    return JSON.parse(str);
+                } catch (e) {
+                    return null;
+                }
+            },
+            loadSeenPromotions() {
+                try {
+                    const seen = localStorage.getItem('trucash_seen_promotions');
+                    if (seen) {
+                        const ids = JSON.parse(seen);
+                        AppState.seenPromotions = new Set(ids);
+                    }
+                } catch (e) {
+                    console.warn('Failed to load seen promotions', e);
+                }
+            },
+            saveSeenPromotions() {
+                try {
+                    const ids = Array.from(AppState.seenPromotions);
+                    localStorage.setItem('trucash_seen_promotions', JSON.stringify(ids));
+                } catch (e) {
+                    console.warn('Failed to save seen promotions', e);
+                }
             },
             calculateCreditScore(customerId, loans, payments) {
                 const customerLoans = loans.filter(l => l.customerId === customerId);
@@ -1827,6 +3135,7 @@
                     croppingDefaultSelectionRatio: 0.9,
                     croppingShowDimensions: true,
                     theme: cloudinaryConfig.theme,
+                    styles: cloudinaryConfig.styles,
                     folder: cloudinaryConfig.folder,
                     showPoweredBy: false,
                     autoMinimize: true
@@ -1923,6 +3232,7 @@
                     croppingDefaultSelectionRatio: 0.9,
                     showAdvancedOptions: false,
                     theme: cloudinaryConfig.theme,
+                    styles: cloudinaryConfig.styles,
                     folder: cloudinaryConfig.folder + '/profile_photos',
                     showPoweredBy: false
                 }, (error, result) => {
@@ -1967,6 +3277,7 @@
                     croppingDefaultSelectionRatio: 0.9,
                     showAdvancedOptions: false,
                     theme: cloudinaryConfig.theme,
+                    styles: cloudinaryConfig.styles,
                     folder: cloudinaryConfig.folder + '/payment_proofs',
                     showPoweredBy: false
                 }, (error, result) => {
@@ -2486,7 +3797,7 @@
             },
             async addMessage(recipientId, message, type = 'system') {
                 try {
-                    const msgRef = db.ref('messages/' + Utils.generateLoanId());
+                    const msgRef = db.ref('messages/' + Utils.generateId('MSG'));
                     await msgRef.set({
                         recipientId,
                         message,
@@ -2875,6 +4186,17 @@
                 this.creditScoreValue = document.getElementById('creditScoreValue');
                 this.profileCreditScoreGrade = document.getElementById('profileCreditScoreGrade');
                 this.profileCreditScoreValue = document.getElementById('profileCreditScoreValue');
+                // New elements
+                this.paymentDueCard = document.getElementById('paymentDueCard');
+                this.daysRemainingBadge = document.getElementById('daysRemainingBadge');
+                this.dueAmount = document.getElementById('dueAmount');
+                this.dueDateText = document.getElementById('dueDateText');
+                this.payNowFromCard = document.getElementById('payNowFromCard');
+                this.creditScoreAvatar = document.getElementById('creditScoreAvatar');
+                this.creditScoreName = document.getElementById('creditScoreName');
+                this.agentInfoContainer = document.getElementById('agentInfoContainer');
+                this.totalLoansCount = document.getElementById('totalLoansCount');
+                this.nearestDueLoan = null;
             },
             bindEvents() {
                 this.menuToggle?.addEventListener('click', () => {
@@ -2910,30 +4232,60 @@
                         document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
                     });
                 });
-                this.verifyAgentBtn.addEventListener('click', () => this.verifyAgent());
-                this.agentIdInput.addEventListener('keyup', (e) => {
-                    if (e.key === 'Enter') this.verifyAgent();
-                });
-                this.changeAgentBtn.addEventListener('click', () => {
-                    this.agentIdInput.value = '';
-                    this.agentIdInput.focus();
-                    this.agentValidationMessage.textContent = 'Enter new Agent ID';
-                    this.agentValidationMessage.className = 'text-muted';
-                });
-                this.contactAgentBtn.addEventListener('click', () => this.contactAgent());
-                this.viewAgentProfileBtn.addEventListener('click', () => this.showAgentProfileModal());
-                this.applyLoanBtn.addEventListener('click', () => {
-                    this.showSection('apply');
-                });
-                this.makePaymentBtn.addEventListener('click', () => this.showPaymentModal());
-                this.viewStatementBtn.addEventListener('click', () => this.showStatementModal());
-                this.contactSupportBtn.addEventListener('click', () => this.showSupportModal());
-                this.submitLoanBtn.addEventListener('click', () => this.prepareLoanAgreement());
-                this.acceptTerms.addEventListener('change', () => this.validateLoanForm());
-                this.loanAmount.addEventListener('input', () => this.validateLoanForm());
-                this.editProfileBtn.addEventListener('click', () => this.showEditProfileModal());
-                this.logoutBtn.addEventListener('click', () => FirebaseService.signOut());
-                this.sidebarLogoutBtn.addEventListener('click', () => FirebaseService.signOut());
+                if (this.verifyAgentBtn) {
+                    this.verifyAgentBtn.addEventListener('click', () => this.verifyAgent());
+                }
+                if (this.agentIdInput) {
+                    this.agentIdInput.addEventListener('keyup', (e) => {
+                        if (e.key === 'Enter') this.verifyAgent();
+                    });
+                }
+                if (this.changeAgentBtn) {
+                    this.changeAgentBtn.addEventListener('click', () => {
+                        this.agentIdInput.value = '';
+                        this.agentIdInput.focus();
+                        this.agentValidationMessage.textContent = 'Enter new Agent ID';
+                        this.agentValidationMessage.className = 'text-muted';
+                    });
+                }
+                if (this.contactAgentBtn) {
+                    this.contactAgentBtn.addEventListener('click', () => this.contactAgent());
+                }
+                if (this.viewAgentProfileBtn) {
+                    this.viewAgentProfileBtn.addEventListener('click', () => this.showAgentProfileModal());
+                }
+                if (this.applyLoanBtn) {
+                    this.applyLoanBtn.addEventListener('click', () => {
+                        this.showSection('apply');
+                    });
+                }
+                if (this.makePaymentBtn) {
+                    this.makePaymentBtn.addEventListener('click', () => this.showPaymentModal());
+                }
+                if (this.viewStatementBtn) {
+                    this.viewStatementBtn.addEventListener('click', () => this.showStatementModal());
+                }
+                if (this.contactSupportBtn) {
+                    this.contactSupportBtn.addEventListener('click', () => this.showSupportModal());
+                }
+                if (this.submitLoanBtn) {
+                    this.submitLoanBtn.addEventListener('click', () => this.prepareLoanAgreement());
+                }
+                if (this.acceptTerms) {
+                    this.acceptTerms.addEventListener('change', () => this.validateLoanForm());
+                }
+                if (this.loanAmount) {
+                    this.loanAmount.addEventListener('input', () => this.validateLoanForm());
+                }
+                if (this.editProfileBtn) {
+                    this.editProfileBtn.addEventListener('click', () => this.showEditProfileModal());
+                }
+                if (this.logoutBtn) {
+                    this.logoutBtn.addEventListener('click', () => FirebaseService.signOut());
+                }
+                if (this.sidebarLogoutBtn) {
+                    this.sidebarLogoutBtn.addEventListener('click', () => FirebaseService.signOut());
+                }
                 document.getElementById('closePaymentModal')?.addEventListener('click', () => {
                     this.paymentModal.classList.remove('active');
                 });
@@ -2990,19 +4342,25 @@
                         }
                     }
                 });
-                this.showCertificateBtn?.addEventListener('click', () => {
-                    if (this.certificateContainer.style.display === 'none') {
-                        this.certificateContainer.style.display = 'block';
-                    } else {
-                        this.certificateContainer.style.display = 'none';
-                    }
-                });
-                this.closeLoanAgreementModal?.addEventListener('click', () => {
-                    this.loanAgreementModal.classList.remove('active');
-                });
-                this.closeLoanDetailsModal?.addEventListener('click', () => {
-                    this.loanDetailsModal.classList.remove('active');
-                });
+                if (this.showCertificateBtn) {
+                    this.showCertificateBtn.addEventListener('click', () => {
+                        if (this.certificateContainer.style.display === 'none') {
+                            this.certificateContainer.style.display = 'block';
+                        } else {
+                            this.certificateContainer.style.display = 'none';
+                        }
+                    });
+                }
+                if (this.closeLoanAgreementModal) {
+                    this.closeLoanAgreementModal.addEventListener('click', () => {
+                        this.loanAgreementModal.classList.remove('active');
+                    });
+                }
+                if (this.closeLoanDetailsModal) {
+                    this.closeLoanDetailsModal.addEventListener('click', () => {
+                        this.loanDetailsModal.classList.remove('active');
+                    });
+                }
                 this.loanTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         const status = tab.dataset.status;
@@ -3023,12 +4381,25 @@
                         updateInterestPreview();
                     });
                 });
-                this.mobileNotificationBell.addEventListener('click', () => this.openNotificationsModal());
-                
-                this.markAllReadBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
-                this.markAllReadModalBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
-
-                this.closeFloatingPromo.addEventListener('click', () => this.closeFloatingPromotion());
+                if (this.mobileNotificationBell) {
+                    this.mobileNotificationBell.addEventListener('click', () => this.openNotificationsModal());
+                }
+                if (this.markAllReadBtn) {
+                    this.markAllReadBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
+                }
+                if (this.markAllReadModalBtn) {
+                    this.markAllReadModalBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
+                }
+                if (this.closeFloatingPromo) {
+                    this.closeFloatingPromo.addEventListener('click', () => this.closeFloatingPromotion());
+                }
+                if (this.payNowFromCard) {
+                    this.payNowFromCard.addEventListener('click', () => {
+                        if (this.nearestDueLoan) {
+                            this.preparePaymentForLoan(this.nearestDueLoan.id);
+                        }
+                    });
+                }
             },
             populateDurationOptions() {
                 const select = document.getElementById('loanDuration');
@@ -3064,13 +4435,13 @@
                 this.updateProfileUI();
                 this.updateDashboardUI();
                 this.updateAgentUI();
-                this.updateCreditScore();
+                this.updateCreditScoreUI();
                 this.updateNotificationBadge();
                 setTimeout(() => {
                     Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
                 }, 1000);
                 Utils.hideLoading();
-
+                // First time user tutorial trigger
                 if (userData && userData.tutorialCompleted !== true) {
                     setTimeout(() => {
                         TutorialManager.startTour();
@@ -3085,7 +4456,8 @@
                         AppState.userData = snapshot.val();
                         this.updateProfileUI();
                         this.updateAgentUI();
-                        this.updateCreditScore();
+                        this.updateCreditScoreUI();
+                        this.updatePageTitle(AppState.userData.fullName);
                     }
                 });
                 AppState.realtimeListeners.push(() => userRef.off('value', userListener));
@@ -3109,7 +4481,7 @@
                         loan.status === 'rejected'
                     );
                     this.updateDashboardUI();
-                    this.updateCreditScore();
+                    this.updateCreditScoreUI();
                     if (AppState.currentSection === 'loans') {
                         this.updateLoansUI();
                     }
@@ -3133,10 +4505,9 @@
                         this.updatePaymentsUI();
                     }
                     this.updateDashboardUI();
-                    this.updateCreditScore();
+                    this.updateCreditScoreUI();
                 });
                 AppState.realtimeListeners.push(() => paymentsRef.off('value', paymentsListener));
-
                 const settingsRef = db.ref('systemSettings');
                 const settingsListener = settingsRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
@@ -3169,6 +4540,9 @@
                     settings: 'Settings'
                 };
                 title.textContent = titles[sectionId] || 'Dashboard';
+                if (sectionId === 'dashboard' && AppState.userData) {
+                    this.updatePageTitle(AppState.userData.fullName);
+                }
                 switch(sectionId) {
                     case 'profile':
                         this.updateProfileUI();
@@ -3190,6 +4564,10 @@
                         this.updateLoanHistoryUI();
                         break;
                 }
+            },
+            updatePageTitle(name) {
+                const titleEl = document.getElementById('pageTitle');
+                if (titleEl && name) titleEl.textContent = `${name}'s Dashboard`;
             },
             openNotificationsModal() {
                 this.renderNotificationsModal();
@@ -3234,12 +4612,15 @@
                     }
                 });
             },
-            updateCreditScore() {
-                const credit = Utils.calculateCreditScore(AppState.currentUser.uid, AppState.activeLoans.concat(AppState.completedLoans), AppState.payments);
+            updateCreditScoreUI() {
+                if (AppState.userData) {
+                    this.creditScoreAvatar.src = AppState.userData.profilePhoto || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2334c759"/><text x="50" y="50" font-size="50" text-anchor="middle" dy=".3em" fill="white">U</text></svg>';
+                    this.creditScoreName.textContent = AppState.userData.fullName || 'Customer';
+                }
+                const credit = Utils.calculateCreditScore(AppState.currentUser?.uid, [...AppState.activeLoans, ...AppState.completedLoans], AppState.payments);
                 if (this.creditScoreGrade) {
                     this.creditScoreGrade.textContent = credit.grade;
-                    this.creditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`;
-                    this.creditScoreValue.textContent = credit.score;
+                    this.creditScoreGrade.className = `credit-score-badge-large ${credit.grade.toLowerCase()}`;
                 }
                 if (this.profileCreditScoreGrade) {
                     this.profileCreditScoreGrade.textContent = credit.grade;
@@ -3247,134 +4628,239 @@
                     this.profileCreditScoreValue.textContent = credit.score;
                 }
             },
-            updateDocumentGrid() {
-                const grid = document.getElementById('documentGrid');
-                if (!grid || !AppState.userData) return;
-                const docs = [
-                    { name: 'NRC Front', type: 'nrcFront', url: AppState.userData.nrcFront },
-                    { name: 'NRC Back', type: 'nrcBack', url: AppState.userData.nrcBack },
-                    { name: 'Profile Photo', type: 'profilePhoto', url: AppState.userData.profilePhoto },
-                    { name: 'Other', type: 'other', url: null }
-                ];
-                grid.innerHTML = docs.map(doc => `
-                    <div class="document-card">
-                        ${doc.url ? `<img src="${doc.url}" class="document-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23ccc%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>?</text></svg>'">` 
-                            : `<div class="document-thumb d-flex align-items-center justify-content-center" style="background:var(--ios-gray-2);"><i class="fas fa-file-image" style="font-size:30px; color:var(--ios-gray-5);"></i></div>`}
-                        <div class="document-name">${doc.name}</div>
-                        <div class="document-status ${doc.url ? 'text-success' : 'text-muted'}">${doc.url ? 'Uploaded' : 'Not uploaded'}</div>
-                        <button class="btn btn-outline btn-small mt-2" onclick="viewDocument('${doc.type}')" ${!doc.url ? 'disabled' : ''}>
-                            <i class="fas fa-eye"></i> View
-                        </button>
-                    </div>
-                `).join('');
-            },
-            updateProfileUI() {
-                if (!AppState.userData) return;
-                const user = AppState.userData;
-                this.profileName.textContent = user.fullName || 'Not set';
-                this.profileFullName.textContent = user.fullName || 'Not set';
-                this.profileEmail.textContent = AppState.currentUser?.email || 'Not set';
-                this.profilePhone.textContent = user.phone || 'Not set';
-                this.profileNRC.textContent = user.nrc || 'Not set';
-                this.profileAddress.textContent = user.residence || 'Not set';
-                this.profileHouseNumber.textContent = user.houseNumber || 'Not set';
-                this.profileAgentId.textContent = user.assignedAgentId || 'Not assigned';
-                if (user.profilePhoto) {
-                    this.profilePhoto.src = user.profilePhoto;
-                    this.profileAvatar.src = user.profilePhoto;
-                }
-                this.updateDocumentGrid();
-                this.updateCreditScore();
-                document.getElementById('pageTitle').innerHTML = `${user.fullName || 'Customer'}'s Dashboard`;
-            },
             updateDashboardUI() {
-                const active = AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved');
-                const allLoans = [...AppState.activeLoans, ...AppState.completedLoans];
-                const totalBorrowed = allLoans.reduce((s,l)=>s+(l.amount||0),0);
-                const totalPaid = AppState.payments.filter(p=>p.status==='verified').reduce((s,p)=>s+(p.amount||0),0);
-                const outstanding = active.reduce((s,l)=>s+((l.totalPayable||l.amount)-(l.totalPaid||0)),0);
-                document.getElementById('activeLoansCount').innerText = active.length;
-                document.getElementById('totalBorrowed').innerHTML = Utils.formatCurrency(totalBorrowed);
-                document.getElementById('currentBalance').innerHTML = Utils.formatCurrency(outstanding);
-                document.getElementById('totalLoansCount').innerText = allLoans.length;
-
-                // Payment due calculation
-                let nextPayment = null, nextLoan = null;
-                for(let loan of active) {
-                    if(loan.repaymentSchedule) {
-                        const pending = loan.repaymentSchedule.find(i=>i.status !== 'paid');
-                        if(pending && (!nextPayment || pending.dueDate < nextPayment.dueDate)) { nextPayment = pending; nextLoan = loan; }
+                const activeLoans = AppState.activeLoans.filter(l => l.status === 'active');
+                const approvedLoans = AppState.activeLoans.filter(l => l.status === 'approved');
+                const pendingLoans = AppState.activeLoans.filter(l => l.status === 'pending');
+                const completedLoans = AppState.completedLoans.filter(l => l.status === 'completed');
+                const totalLoans = activeLoans.length + approvedLoans.length + pendingLoans.length + completedLoans.length;
+                if (this.totalLoansCount) this.totalLoansCount.textContent = totalLoans;
+                let currentBalance = 0;
+                [...activeLoans, ...approvedLoans].forEach(loan => {
+                    const payable = loan.totalPayable || loan.amount;
+                    const paid = loan.totalPaid || 0;
+                    currentBalance += (payable - paid);
+                });
+                if (this.currentBalance) this.currentBalance.textContent = Utils.formatCurrency(currentBalance);
+                const totalBorrowed = (AppState.activeLoans || []).reduce((sum, loan) => sum + (loan.amount || 0), 0);
+                if (this.totalBorrowed) this.totalBorrowed.textContent = Utils.formatCurrency(totalBorrowed);
+                if (this.activeLoansCount) this.activeLoansCount.textContent = activeLoans.length;
+                this.updatePaymentDueCard();
+                const maxAmount = AppState.systemSettings?.maxLoanAmount || 50000;
+                const limitInfo = document.getElementById('loanLimitInfo');
+                if (limitInfo) limitInfo.textContent = `Maximum loan amount: ${Utils.formatCurrency(maxAmount)}`;
+                this.updateCreditScoreUI();
+            },
+            updatePaymentDueCard() {
+                const loansWithSchedule = [...AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved')];
+                let nearestDue = null;
+                let nearestLoan = null;
+                for (const loan of loansWithSchedule) {
+                    if (loan.repaymentSchedule) {
+                        const pending = loan.repaymentSchedule.filter(inst => inst.status === 'pending');
+                        for (const inst of pending) {
+                            if (!nearestDue || inst.dueDate < nearestDue) {
+                                nearestDue = inst.dueDate;
+                                nearestLoan = { loan, installment: inst };
+                            }
+                        }
                     }
                 }
-                if(nextPayment && nextLoan) {
-                    const dueDate = new Date(nextPayment.dueDate);
-                    const daysRemaining = Math.ceil((dueDate - new Date())/(1000*60*60*24));
-                    document.getElementById('paymentDueAmount').innerHTML = Utils.formatCurrency(nextPayment.totalDue);
-                    document.getElementById('paymentDueDate').innerHTML = `Due: ${Utils.formatDate(nextPayment.dueDate)}`;
-                    document.getElementById('daysCountdown').innerHTML = daysRemaining > 0 ? `${daysRemaining} days remaining` : (daysRemaining===0 ? 'Due today' : 'Overdue');
-                    document.getElementById('payNowBtn').onclick = () => { AppState.selectedLoanForPayment = nextLoan.id; this.showPaymentModal(); };
+                if (nearestDue && nearestLoan) {
+                    const today = Date.now();
+                    const daysRemaining = Math.ceil((nearestDue - today) / (1000 * 60 * 60 * 24));
+                    if (this.daysRemainingBadge) {
+                        this.daysRemainingBadge.textContent = daysRemaining > 0 ? `${daysRemaining} days remaining` : 'Overdue';
+                    }
+                    if (this.dueAmount) this.dueAmount.textContent = Utils.formatCurrency(nearestLoan.installment.totalDue);
+                    if (this.dueDateText) this.dueDateText.textContent = `Due: ${Utils.formatDate(nearestDue)}`;
+                    if (this.paymentDueCard) this.paymentDueCard.style.display = 'block';
+                    this.nearestDueLoan = { id: nearestLoan.loan.id, installment: nearestLoan.installment };
                 } else {
-                    document.getElementById('paymentDueAmount').innerHTML = 'K0.00';
-                    document.getElementById('paymentDueDate').innerHTML = 'No payment due';
-                    document.getElementById('daysCountdown').innerHTML = '';
+                    if (this.paymentDueCard) this.paymentDueCard.style.display = 'none';
+                    this.nearestDueLoan = null;
                 }
-
-                // Credit Score
-                const credit = Utils.calculateCreditScore(AppState.currentUser.uid, allLoans, AppState.payments);
-                document.getElementById('creditProfileImg').src = AppState.userData?.profilePhoto || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%2334c759"/%3E%3Ctext x="50" y="50" font-size="50" text-anchor="middle" dy=".3em" fill="white"%3EU%3C/text%3E%3C/svg%3E';
-                document.getElementById('creditCustomerName').innerText = AppState.userData?.fullName || 'Customer';
-                document.getElementById('creditScoreGrade').innerText = credit.grade;
-                document.getElementById('creditScoreGrade').className = `credit-score-badge ${credit.grade.toLowerCase()}`;
-                document.getElementById('creditScoreValue').innerText = credit.score;
             },
             updateAgentUI() {
+                const container = this.agentInfoContainer;
+                if (!container) return;
+                const user = AppState.userData;
                 const agent = AppState.agentData;
-                const noMsg = document.getElementById('noAgentMessage');
-                const expandedDiv = document.getElementById('agentDetailsExpanded');
-                if(agent && AppState.userData?.assignedAgentId) {
-                    noMsg.style.display = 'none';
-                    document.getElementById('agentAvatarSm').src = agent.profilePhoto || 'data:image/svg+xml,%3Csvg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"%3E%3Crect width="100" height="100" fill="%2334c759"/%3E%3Ctext x="50" y="50" font-size="50" text-anchor="middle" dy=".3em" fill="white"%3EA%3C/text%3E%3C/svg%3E';
-                    document.getElementById('agentAvatarSm').style.display = 'block';
-                    document.getElementById('agentPlaceholderIcon').style.display = 'none';
-                    document.getElementById('agentNameSm').innerText = agent.fullName || 'Agent';
-                    document.getElementById('agentPhoneFaint').innerText = agent.phone || '';
-                    document.getElementById('expAgentName').innerText = agent.fullName || '';
-                    document.getElementById('expAgentNrc').innerText = agent.nrc || 'N/A';
-                    document.getElementById('expAgentId').innerText = AppState.userData.assignedAgentId;
-                    document.getElementById('expAgentPhone').innerText = agent.phone || '';
-                    document.getElementById('expAgentEmail').innerText = agent.email || '';
-                    document.getElementById('expAgentAssigned').innerText = Utils.formatDate(AppState.userData.agentAssignedAt);
-                    document.getElementById('contactAgentExpBtn').onclick = () => window.location.href = `tel:${agent.phone}`;
-                    document.getElementById('emailAgentExpBtn').onclick = () => window.location.href = `mailto:${agent.email}`;
-                    document.getElementById('changeAgentBtnExpanded').onclick = () => { document.getElementById('agentIdInput').focus(); };
-                    document.getElementById('agentInfoCard').onclick = (e) => { if(e.target.tagName!=='BUTTON') expandedDiv.classList.toggle('show'); };
+                if (user.assignedAgentId && agent) {
+                    container.innerHTML = `
+                        <div class="agent-card" id="agentCard">
+                            <div class="agent-card-header">
+                                <img src="${agent.profilePhoto || 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2334c759"/><text x="50" y="50" font-size="50" text-anchor="middle" dy=".3em" fill="white">A</text></svg>'}" alt="Agent">
+                                <div class="agent-info">
+                                    <div class="agent-name">${agent.fullName || 'Agent'}</div>
+                                    <div class="agent-phone">${agent.phone || 'No phone'}</div>
+                                </div>
+                                <i class="fas fa-chevron-down" style="margin-left: auto;"></i>
+                            </div>
+                            <div class="agent-card-details">
+                                <div class="agent-detail-grid">
+                                    <div class="agent-detail-item"><span class="agent-detail-label">Agent ID</span><span class="agent-detail-value">${user.assignedAgentId}</span></div>
+                                    <div class="agent-detail-item"><span class="agent-detail-label">NRC</span><span class="agent-detail-value">${agent.nrc || '-'}</span></div>
+                                    <div class="agent-detail-item"><span class="agent-detail-label">Assigned Date</span><span class="agent-detail-value">${Utils.formatDate(user.agentAssignedAt)}</span></div>
+                                    <div class="agent-detail-item"><span class="agent-detail-label">Email</span><span class="agent-detail-value">${agent.email || '-'}</span></div>
+                                    <div class="agent-detail-item"><span class="agent-detail-label">Phone</span><span class="agent-detail-value">${agent.phone || '-'}</span></div>
+                                </div>
+                                <div class="d-flex gap-2 mt-2">
+                                    <button class="btn btn-outline btn-small" id="contactAgentBtn"><i class="fas fa-phone"></i> Contact</button>
+                                    <button class="btn btn-outline btn-small" id="emailAgentBtn"><i class="fas fa-envelope"></i> Email</button>
+                                </div>
+                                <button class="btn btn-outline change-agent-btn" id="changeAgentBtn"><i class="fas fa-exchange-alt"></i> Change Agent</button>
+                            </div>
+                        </div>
+                    `;
+                    const card = document.getElementById('agentCard');
+                    const header = card.querySelector('.agent-card-header');
+                    header.addEventListener('click', (e) => {
+                        if (e.target.closest('.change-agent-btn') || e.target.closest('#contactAgentBtn') || e.target.closest('#emailAgentBtn')) return;
+                        card.classList.toggle('open');
+                        const icon = header.querySelector('i');
+                        icon.className = card.classList.contains('open') ? 'fas fa-chevron-up' : 'fas fa-chevron-down';
+                    });
+                    document.getElementById('contactAgentBtn')?.addEventListener('click', () => this.contactAgent());
+                    document.getElementById('emailAgentBtn')?.addEventListener('click', () => window.open(`mailto:${agent.email}`));
+                    document.getElementById('changeAgentBtn')?.addEventListener('click', () => {
+                        document.getElementById('agentIdInput').value = '';
+                        document.getElementById('agentIdInput').focus();
+                    });
                 } else {
-                    noMsg.style.display = 'block';
-                    document.getElementById('agentAvatarSm').style.display = 'none';
-                    document.getElementById('agentPlaceholderIcon').style.display = 'flex';
-                    document.getElementById('agentNameSm').innerText = 'No agent assigned';
-                    document.getElementById('agentPhoneFaint').innerText = 'Please enter agent ID to apply';
-                    expandedDiv.classList.remove('show');
+                    container.innerHTML = `
+                        <div class="agent-placeholder">
+                            <i class="fas fa-user-circle" style="font-size: 48px; color: var(--ios-gray-4); margin-bottom: 12px;"></i>
+                            <p>No agent assigned yet.</p>
+                            <p class="text-muted small">Please enter an Agent ID to verify and be able to apply for loans, or click Support for assistance.</p>
+                            <div class="input-group mt-3">
+                                <input type="text" id="agentIdInput" class="form-input" placeholder="Enter agent's unique ID">
+                                <button class="btn btn-primary" id="verifyAgentBtn">Verify</button>
+                            </div>
+                            <div id="agentValidationMessage" class="mt-2 text-muted small"></div>
+                        </div>
+                    `;
+                    document.getElementById('verifyAgentBtn')?.addEventListener('click', () => this.verifyAgent());
+                    document.getElementById('agentIdInput')?.addEventListener('keyup', (e) => { if (e.key === 'Enter') this.verifyAgent(); });
                 }
+            },
+            async verifyAgent() {
+                const agentId = document.getElementById('agentIdInput')?.value.trim();
+                const messageEl = document.getElementById('agentValidationMessage');
+                if (!agentId) {
+                    if (messageEl) {
+                        messageEl.textContent = 'Please enter Agent ID';
+                        messageEl.className = 'text-danger';
+                    }
+                    return;
+                }
+                if (AppState.userData.assignedAgentId === agentId) {
+                    if (messageEl) {
+                        messageEl.textContent = 'This agent is already assigned to you';
+                        messageEl.className = 'text-warning';
+                    }
+                    return;
+                }
+                const result = await FirebaseService.verifyAgentId(agentId);
+                if (result.success) {
+                    if (messageEl) {
+                        messageEl.textContent = result.message || 'Agent verified successfully';
+                        messageEl.className = 'text-success';
+                    }
+                    Utils.showToast('Agent Verified', result.message || 'Agent has been assigned to you', 'info');
+                    this.updateAgentUI();
+                    this.updateLoanApplicationUI();
+                } else {
+                    if (messageEl) {
+                        messageEl.textContent = result.error || 'Verification failed';
+                        messageEl.className = 'text-danger';
+                    }
+                    Utils.showToast('Verification Failed', result.error || 'Failed to verify agent', 'error');
+                }
+            },
+            contactAgent() {
+                if (!AppState.agentData || !AppState.agentData.phone) {
+                    Utils.showToast('Contact Agent', 'Agent phone number not available', 'warning');
+                    return;
+                }
+                const phoneNumber = AppState.agentData.phone;
+                window.open(`tel:${phoneNumber}`, '_blank');
+            },
+            async showAgentProfileModal() {
+                if (!AppState.agentData) {
+                    Utils.showToast('Agent Profile', 'Agent data not available', 'warning');
+                    return;
+                }
+                const modal = document.getElementById('agentProfileModal');
+                const content = document.getElementById('agentProfileContent');
+                const agent = AppState.agentData;
+                content.innerHTML = `
+                    <div class="text-center mb-4">
+                        ${agent.profilePhoto ? 
+                            `<img src="${agent.profilePhoto}" class="agent-avatar mb-3" alt="Agent Photo">` : 
+                            `<div class="agent-avatar mb-3 d-flex align-items-center justify-content-center" style="background: var(--ios-green); color: white; font-size: 24px;">
+                                <i class="fas fa-user"></i>
+                            </div>`
+                        }
+                        <h4 class="mb-1">${agent.fullName || 'Agent'}</h4>
+                        <p class="text-muted mb-3">${agent.branch || 'Main Branch'}</p>
+                    </div>
+                    <div class="agent-details-grid mb-4">
+                        <div class="agent-detail-item">
+                            <span class="agent-detail-label">Agent ID</span>
+                            <span class="agent-detail-value">${AppState.userData.assignedAgentId}</span>
+                        </div>
+                        <div class="agent-detail-item">
+                            <span class="agent-detail-label">Status</span>
+                            <span class="agent-detail-value ${agent.status === 'active' ? 'text-success' : 'text-warning'}">
+                                ${agent.status === 'active' ? 'Active' : 'Inactive'}
+                            </span>
+                        </div>
+                        <div class="agent-detail-item">
+                            <span class="agent-detail-label">Phone</span>
+                            <span class="agent-detail-value">${agent.phone || '-'}</span>
+                        </div>
+                        <div class="agent-detail-item">
+                            <span class="agent-detail-label">Email</span>
+                            <span class="agent-detail-value">${agent.email || '-'}</span>
+                        </div>
+                    </div>
+                    ${agent.assignedAt ? `
+                        <div class="text-center text-muted mb-3" style="font-size: 12px;">
+                            Assigned on ${Utils.formatDate(agent.assignedAt)}
+                        </div>
+                    ` : ''}
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-primary flex-grow-1" onclick="UIManager.contactAgent()">
+                            <i class="fas fa-phone"></i>
+                            Call Agent
+                        </button>
+                        <button class="btn btn-outline flex-grow-1" onclick="window.open('mailto:${agent.email || ''}', '_blank')">
+                            <i class="fas fa-envelope"></i>
+                            Email
+                        </button>
+                    </div>
+                `;
+                modal.classList.add('active');
             },
             updateLoanApplicationUI() {
                 const hasAgent = AppState.userData?.assignedAgentId && AppState.agentData;
-                if (!hasAgent) {
-                    const form = document.getElementById('loanApplicationForm');
-                    if (form) {
-                        form.innerHTML = `
-                            <div class="text-center py-4">
-                                <i class="fas fa-user-shield" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
-                                <h5 class="mb-2">Agent Required</h5>
-                                <p class="text-muted mb-4">You need to verify an agent before applying for a loan.</p>
-                                <button class="btn btn-primary" onclick="UIManager.showSection('dashboard')">
-                                    <i class="fas fa-arrow-right"></i>
-                                    Go to Agent Verification
-                                </button>
-                            </div>
-                        `;
-                    }
-                } else {
+                const form = document.getElementById('loanApplicationForm');
+                if (!hasAgent && form) {
+                    form.innerHTML = `
+                        <div class="text-center py-4">
+                            <i class="fas fa-user-shield" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
+                            <h5 class="mb-2">Agent Required</h5>
+                            <p class="text-muted mb-4">You need to verify an agent before applying for a loan.</p>
+                            <button class="btn btn-primary" onclick="UIManager.showSection('dashboard')">
+                                <i class="fas fa-arrow-right"></i>
+                                Go to Agent Verification
+                            </button>
+                        </div>
+                    `;
+                } else if (form && hasAgent) {
+                    // Ensure form content is restored (should already be there, but we can keep as is)
+                    // We'll just re-validate the form
                     this.validateLoanForm();
                 }
             },
@@ -3451,15 +4937,16 @@
                 const agreementHTML = `
                     <div class="agreement-wrapper">
                         <div class="logo">
-                            <img src="logo.png" style="width:40px;">
-                            <h1><span class="brand-tru">Tru</span><span class="brand-cash">Cash</span> Money Lender Firm</h1>
+                            <img src="logo.png" alt="TruCash" style="max-width: 80px;" onerror="this.style.display='none'">
+                            <span class="logo-text-colored" style="font-size: 24px;"><span class="tru">Tru</span><span class="cash">Cash</span></span>
+                            <h1>TrueCash Money Lender Firm</h1>
                         </div>
                         <h2>Loan Agreement Form</h2>
                         <p>This Loan Agreement ("Agreement") is made and entered into on this 
                         ${day} day of ${month}, ${year}.</p>
                         
                         <h3>1. Lender Details</h3>
-                        <div class="detail"><span class="label">Lending Firm:</span> TruCash Money Lender</div>
+                        <div class="detail"><span class="label">Lending Firm:</span> TrueCash Money Lender</div>
                         <div class="detail"><span class="label">Representatives:</span> Eng. Hambayi, Dr. Ilunga, Mr. Mukandawire</div>
                         
                         <h3>2. Borrower Details</h3>
@@ -3598,7 +5085,10 @@
                     </style>
                     </head>
                     <body>
-                        <h1><span style="color:#007aff;">Tru</span><span style="color:#ff3b30;">Cash</span> Money Lender Firm</h1>
+                        <div style="text-align:center; margin-bottom:20px;">
+                            <img src="logo.png" alt="TruCash" style="max-width:80px;">
+                            <h1><span style="color:#007aff;">Tru</span><span style="color:#ff3b30;">Cash</span> Money Lender Firm</h1>
+                        </div>
                         <h2>Loan Agreement Form</h2>
                         <p>This Loan Agreement is made and entered into on this ${day} day of ${month}, ${year}.</p>
                         
@@ -3768,7 +5258,7 @@
                             <p><strong>Value:</strong> ${Utils.formatCurrency(loan.collateral.value)}</p>
                             <p><strong>Location:</strong> ${loan.collateral.location}</p>
                             ${loan.collateral.images && loan.collateral.images.length ? `
-                                <div class="collateral-grid mt-2">
+                                <div class="collateral-grid-2x2 mt-2">
                                     ${loan.collateral.images.map(img => `<img src="${img}" class="upload-preview" style="position:relative; width:100%; height:80px; object-fit:cover; border-radius:6px;">`).join('')}
                                 </div>
                             ` : ''}
@@ -3833,13 +5323,12 @@
                             </div>
                             <div id="paymentProofUrl" class="d-none"></div>
                         </div>
-                        <button class="btn btn-primary w-100" id="submitPaymentBtn">Submit Payment</button>
+                        <button class="btn btn-primary w-100" onclick="UIManager.submitPayment()">Submit Payment</button>
                     `;
                     if (AppState.selectedLoanForPayment) {
                         document.getElementById('paymentLoanSelect').value = AppState.selectedLoanForPayment;
                     }
                     window.paymentProofUrl = null;
-                    document.getElementById('submitPaymentBtn').onclick = () => this.submitPayment();
                 }
 
                 const historyEl = document.getElementById('paymentHistory');
@@ -4051,6 +5540,46 @@
                 });
                 container.innerHTML = html;
             },
+            updateDocumentGrid() {
+                const grid = document.getElementById('documentGrid');
+                if (!grid || !AppState.userData) return;
+                const docs = [
+                    { name: 'NRC Front', type: 'nrcFront', url: AppState.userData.nrcFront },
+                    { name: 'NRC Back', type: 'nrcBack', url: AppState.userData.nrcBack },
+                    { name: 'Profile Photo', type: 'profilePhoto', url: AppState.userData.profilePhoto },
+                    { name: 'Other', type: 'other', url: null }
+                ];
+                grid.innerHTML = docs.map(doc => `
+                    <div class="document-card">
+                        ${doc.url ? `<img src="${doc.url}" class="document-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23ccc%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>?</text></svg>'">` 
+                            : `<div class="document-thumb d-flex align-items-center justify-content-center" style="background:var(--ios-gray-2);"><i class="fas fa-file-image" style="font-size:30px; color:var(--ios-gray-5);"></i></div>`}
+                        <div class="document-name">${doc.name}</div>
+                        <div class="document-status ${doc.url ? 'text-success' : 'text-muted'}">${doc.url ? 'Uploaded' : 'Not uploaded'}</div>
+                        <button class="btn btn-outline btn-small mt-2" onclick="viewDocument('${doc.type}')" ${!doc.url ? 'disabled' : ''}>
+                            <i class="fas fa-eye"></i> View
+                        </button>
+                    </div>
+                `).join('');
+            },
+            updateProfileUI() {
+                if (!AppState.userData) return;
+                const user = AppState.userData;
+                this.profileName.textContent = user.fullName || 'Not set';
+                this.profileFullName.textContent = user.fullName || 'Not set';
+                this.profileEmail.textContent = AppState.currentUser?.email || 'Not set';
+                this.profilePhone.textContent = user.phone || 'Not set';
+                this.profileNRC.textContent = user.nrc || 'Not set';
+                this.profileAddress.textContent = user.residence || 'Not set';
+                this.profileHouseNumber.textContent = user.houseNumber || 'Not set';
+                this.profileAgentId.textContent = user.assignedAgentId || 'Not assigned';
+                if (user.profilePhoto) {
+                    this.profilePhoto.src = user.profilePhoto;
+                    this.profileAvatar.src = user.profilePhoto;
+                }
+                this.updateDocumentGrid();
+                this.updateCreditScoreUI();
+                this.updatePageTitle(user.fullName);
+            },
             showFloatingPromotion(promo) {
                 if (!promo) return;
                 if (AppState.seenPromotions.has(promo.id)) {
@@ -4122,7 +5651,6 @@
             UIManager.validateLoanForm();
             updateInterestPreview();
         }
-
         function updateInterestPreview() {
             const amount = parseFloat(document.getElementById('loanAmount')?.value) || 0;
             const duration = parseInt(document.getElementById('loanDuration')?.value) || 6;
@@ -4148,7 +5676,6 @@
             document.getElementById('previewPeriodic').textContent = Utils.formatCurrency(periodicPayment);
             document.getElementById('interestPreview').style.display = 'block';
         }
-
         function setDurationUnit(unit) {
             AppState.durationUnit = unit;
             document.querySelectorAll('.duration-unit-option').forEach(opt => {
@@ -4167,6 +5694,18 @@
             document.getElementById('desktopConnectionStatus').textContent = 'Offline';
             Utils.showToast('Connection Lost', 'Please check your internet connection', 'error');
         });
+
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('/service-worker.js')
+                    .then(registration => {
+                        console.log('ServiceWorker registered:', registration);
+                    })
+                    .catch(error => {
+                        console.log('ServiceWorker registration failed:', error);
+                    });
+            });
+        }
 
         let lastTouchEnd = 0;
         document.addEventListener('touchend', (event) => {
@@ -4204,7 +5743,6 @@
             prevBtn: document.getElementById('tutorialPrevBtn'),
             skipBtn: document.getElementById('tutorialSkipBtn'),
             skipTop: document.getElementById('tutorialSkipTop'),
-
             startTour() {
                 if (!AppState.userData) return;
                 this.currentStep = 0;
@@ -4212,7 +5750,6 @@
                 this.showStep(0);
                 this.bindControls();
             },
-
             showStep(index) {
                 const step = this.steps[index];
                 if (!step) return;
@@ -4235,7 +5772,6 @@
                 this.prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
                 this.nextBtn.textContent = index === this.steps.length - 1 ? 'Finish' : 'Next';
             },
-
             nextStep() {
                 if (this.currentStep < this.steps.length - 1) {
                     this.currentStep++;
@@ -4244,25 +5780,21 @@
                     this.finishTour();
                 }
             },
-
             prevStep() {
                 if (this.currentStep > 0) {
                     this.currentStep--;
                     this.showStep(this.currentStep);
                 }
             },
-
             finishTour() {
                 this.overlay.classList.remove('active');
                 if (AppState.currentUser) {
                     db.ref('users/' + AppState.currentUser.uid).update({ tutorialCompleted: true });
                 }
             },
-
             skipTour() {
                 this.finishTour();
             },
-
             bindControls() {
                 this.nextBtn.onclick = () => this.nextStep();
                 this.prevBtn.onclick = () => this.prevStep();
@@ -4275,9 +5807,6 @@
         };
 
         window.UIManager = UIManager;
-        window.updateInterestPreview = updateInterestPreview;
-        window.setDurationUnit = setDurationUnit;
-        window.validateLoanAmount = validateLoanAmount;
 
         document.addEventListener('DOMContentLoaded', () => {
             UIManager.init();
