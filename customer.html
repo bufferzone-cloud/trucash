@@ -1832,98 +1832,6 @@
         .tutorial-skip:hover {
             background: white;
         }
-        .payment-due-rectangle {
-    background: var(--ios-white);
-    border-radius: 20px;
-    padding: 16px 20px;
-    margin-bottom: 20px;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    flex-wrap: wrap;
-    box-shadow: var(--ios-card-shadow);
-}
-.payment-due-info { flex: 1; }
-.payment-due-label { font-size: 13px; color: var(--ios-gray-5); }
-.payment-due-amount { font-size: 28px; font-weight: 700; color: var(--ios-red); }
-.pay-now-pill {
-    background: var(--ios-red);
-    color: white;
-    border: none;
-    border-radius: 40px;
-    padding: 12px 24px;
-    font-weight: 600;
-    cursor: pointer;
-}
-.quick-actions-2x2 {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 12px;
-    margin: 16px 0;
-}
-.quick-action-btn {
-    background: var(--ios-white);
-    border: 1px solid var(--ios-gray-2);
-    border-radius: 16px;
-    padding: 14px 8px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 8px;
-    cursor: pointer;
-}
-.credit-score-row {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    background: var(--ios-white);
-    border-radius: 20px;
-    padding: 12px 16px;
-    margin-bottom: 20px;
-}
-.profile-avatar-lg {
-    width: 56px;
-    height: 56px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.agent-dropdown {
-    background: white;
-    border-radius: 16px;
-    border: 1px solid var(--ios-gray-2);
-    overflow: hidden;
-}
-.agent-dropdown-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 12px 16px;
-    cursor: pointer;
-    background: var(--ios-gray-1);
-}
-.agent-avatar-small {
-    width: 44px;
-    height: 44px;
-    border-radius: 50%;
-    object-fit: cover;
-}
-.agent-dropdown-body {
-    display: none;
-    padding: 16px;
-    border-top: 1px solid var(--ios-gray-2);
-}
-.agent-dropdown.open .agent-dropdown-body {
-    display: block;
-}
-.agent-dropdown.open .agent-dropdown-icon {
-    transform: rotate(180deg);
-}
-.agent-detail-row {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
-    font-size: 13px;
-}
     </style>
 </head>
 <body>
@@ -3227,50 +3135,37 @@
             },
             // Check for overdue and upcoming payments, show daily reminders
             checkPaymentReminders(loans) {
-    const now = Date.now();
-    const lastPopupKey = 'trucash_last_overdue_popup_date';
-    const lastPopup = localStorage.getItem(lastPopupKey);
-    const todayMidnight = new Date().setHours(0,0,0,0);
-    
-    loans.forEach(loan => {
-        if (loan.status !== 'active' && loan.status !== 'approved') return;
-        if (!loan.repaymentSchedule) return;
-        
-        loan.repaymentSchedule.forEach((inst, index) => {
-            if (inst.status === 'paid') return;
-            const dueDate = inst.dueDate;
-            const graceEnd = dueDate + AppState.GRACE_DAYS * 24 * 60 * 60 * 1000;
-            
-            // Upcoming reminder (5 days before)
-            if (now < dueDate) {
-                const daysLeft = Math.ceil((dueDate - now) / (24*60*60*1000));
-                if (daysLeft <= 5 && daysLeft > 0) {
-                    const reminderId = `upcoming_${loan.id}_${index}_day${daysLeft}`;
-                    const message = `Your payment of ${Utils.formatCurrency(inst.totalDue)} for loan ${loan.id.substring(0,8)} is due in ${daysLeft} day(s).`;
-                    Utils.showToast('📅 Upcoming Payment', message, 'info', 8000, reminderId);
-                }
+                const now = Date.now();
+                loans.forEach(loan => {
+                    if (loan.status !== 'active' && loan.status !== 'approved') return;
+                    if (!loan.repaymentSchedule) return;
+                    loan.repaymentSchedule.forEach((inst, index) => {
+                        if (inst.status === 'paid') return;
+                        const dueDate = inst.dueDate;
+                        const graceEnd = dueDate + AppState.GRACE_DAYS * 24 * 60 * 60 * 1000;
+                        if (now > graceEnd) {
+                            const overdueMs = now - graceEnd;
+                            const overdueDays = Math.floor(overdueMs / (24 * 60 * 60 * 1000));
+                            if (overdueDays >= 1) {
+                                // Daily reminder for each day after grace
+                                const reminderId = `reminder_${loan.id}_${index}_day${overdueDays}`;
+                                const penaltyPerDay = (loan.totalPayable || loan.amount) * AppState.PENALTY_RATE;
+                                const totalPenalty = penaltyPerDay * overdueDays;
+                                const message = `Your loan ${loan.id.substring(0,8)} is ${overdueDays} day(s) overdue. Penalty added: ${Utils.formatCurrency(penaltyPerDay)} per day. Total penalty so far: ${Utils.formatCurrency(totalPenalty)}. Please pay immediately to avoid further penalties and protect your credit score.`;
+                                Utils.showToast('⚠️ URGENT: Payment Overdue', message, 'reminder', 10000, reminderId);
+                            }
+                        } else if (now < dueDate) {
+                            const daysLeft = Math.ceil((dueDate - now) / (24*60*60*1000));
+                            if (daysLeft <= 5 && daysLeft > 0) {
+                                const reminderId = `upcoming_${loan.id}_${index}_day${daysLeft}`;
+                                const message = `Your payment of ${Utils.formatCurrency(inst.totalDue)} for loan ${loan.id.substring(0,8)} is due in ${daysLeft} day(s). Please prepare your payment.`;
+                                Utils.showToast('📅 Upcoming Payment', message, 'info', 8000, reminderId);
+                            }
+                        }
+                    });
+                });
             }
-            // Overdue with popup
-            else if (now > graceEnd) {
-                const overdueMs = now - graceEnd;
-                const overdueDays = Math.floor(overdueMs / (24*60*60*1000)) + 1;
-                const penaltyPerDay = (loan.totalPayable || loan.amount) * AppState.PENALTY_RATE;
-                const totalPenalty = penaltyPerDay * overdueDays;
-                
-                // Show toast reminder (daily)
-                const reminderId = `reminder_${loan.id}_${index}_day${overdueDays}`;
-                const message = `⚠️ Loan ${loan.id.substring(0,8)} is ${overdueDays} day(s) overdue. Penalty: ${Utils.formatCurrency(totalPenalty)}. Pay now to avoid litigation.`;
-                Utils.showToast('URGENT: Payment Overdue', message, 'reminder', 10000, reminderId);
-                
-                // Show popup twice a day (check if popup already shown today)
-                if (lastPopup !== String(todayMidnight)) {
-                    this.showOverduePopup(loan, inst, totalPenalty, overdueDays);
-                    localStorage.setItem(lastPopupKey, todayMidnight);
-                }
-            }
-        });
-    });
-},
+        };
 
         // ===== Cloudinary Service =====
         const CloudinaryService = {
@@ -4533,10 +4428,6 @@
                 CloudinaryService.initUploadWidget();
                 this.updateProfileUI();
                 this.updateDashboardUI();
-                // After this.updateDashboardUI(); add:
-document.getElementById('pageTitle').textContent = userData.fullName || 'Dashboard';
-this.renderQuickActions();
-this.updateCreditScore(); // will show profile+name
                 this.updateAgentUI();
                 this.updateCreditScore();
                 this.updateNotificationBadge();
@@ -4629,7 +4520,6 @@ this.updateCreditScore(); // will show profile+name
                 this.contentSections.forEach(section => {
                     section.classList.add('d-none');
                 });
-                
                 const section = document.getElementById(sectionId + 'Section');
                 if (section) {
                     section.classList.remove('d-none');
@@ -4648,10 +4538,6 @@ this.updateCreditScore(); // will show profile+name
                 };
                 title.textContent = titles[sectionId] || 'Dashboard';
                 switch(sectionId) {
-                    case 'dashboard':
-    this.updateDashboardUI();
-    document.getElementById('pageTitle').textContent = AppState.userData?.fullName || 'Dashboard';
-    break;
                     case 'profile':
                         this.updateProfileUI();
                         this.updateDocumentGrid();
@@ -4716,32 +4602,19 @@ this.updateCreditScore(); // will show profile+name
                     }
                 });
             },
-           updateCreditScore() {
-    const credit = Utils.calculateCreditScore(AppState.currentUser.uid, AppState.activeLoans.concat(AppState.completedLoans), AppState.payments);
-    const user = AppState.userData;
-    const profilePhoto = user?.profilePhoto || '';
-    const fullName = user?.fullName || 'Customer';
-    
-    const creditScoreContainer = document.getElementById('creditScoreContainer');
-    if (creditScoreContainer) {
-        creditScoreContainer.innerHTML = `
-            <div class="credit-score-row">
-                <img src="${profilePhoto}" class="profile-avatar-lg" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/%3E%3Ctext x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3E${fullName.charAt(0)}%3C/text%3E%3C/svg%3E'">
-                <div style="flex:1">
-                    <div style="font-weight:600; font-size:16px;">${fullName}</div>
-                    <div>Credit Score: <span class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.score} (${credit.grade})</span></div>
-                </div>
-            </div>
-        `;
-    }
-    
-    // Also update profile page credit score
-    if (this.profileCreditScoreGrade) {
-        this.profileCreditScoreGrade.textContent = credit.grade;
-        this.profileCreditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`;
-        this.profileCreditScoreValue.textContent = credit.score;
-    }
-},
+            updateCreditScore() {
+                const credit = Utils.calculateCreditScore(AppState.currentUser.uid, AppState.activeLoans.concat(AppState.completedLoans), AppState.payments);
+                if (this.creditScoreGrade) {
+                    this.creditScoreGrade.textContent = credit.grade;
+                    this.creditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`;
+                    this.creditScoreValue.textContent = credit.score;
+                }
+                if (this.profileCreditScoreGrade) {
+                    this.profileCreditScoreGrade.textContent = credit.grade;
+                    this.profileCreditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`;
+                    this.profileCreditScoreValue.textContent = credit.score;
+                }
+            },
             updateDocumentGrid() {
                 const grid = document.getElementById('documentGrid');
                 if (!grid || !AppState.userData) return;
@@ -4782,173 +4655,85 @@ this.updateCreditScore(); // will show profile+name
                 this.updateCreditScore();
             },
             updateDashboardUI() {
-    const activeLoans = AppState.activeLoans || [];
-    const allLoans = AppState.activeLoans.concat(AppState.completedLoans);
-    
-    // Lifetime borrowed includes interest and ALL loans (pending, active, completed)
-    let totalBorrowedWithInterest = 0;
-    allLoans.forEach(loan => {
-        totalBorrowedWithInterest += (loan.totalPayable || loan.amount || 0);
-    });
-    
-    const totalPaid = (AppState.payments || [])
-        .filter(p => p.status === 'verified')
-        .reduce((sum, payment) => sum + (payment.amount || 0), 0);
-    const currentBalance = Math.max(0, totalBorrowedWithInterest - totalPaid);
-    
-    let nextPaymentAmount = 0;
-    let nextDueDate = null;
-    let daysLeft = null;
-    
-    if (activeLoans.length > 0) {
-        const activeLoan = activeLoans[0];
-        if (activeLoan.repaymentSchedule) {
-            const nextInst = activeLoan.repaymentSchedule.find(inst => inst.status === 'pending');
-            if (nextInst) {
-                nextPaymentAmount = nextInst.totalDue;
-                nextDueDate = nextInst.dueDate;
-                const now = Date.now();
-                daysLeft = Math.ceil((nextDueDate - now) / (1000 * 60 * 60 * 24));
-            }
-        }
-    }
-    
-    // Update stats (for the blue cards)
-    document.getElementById('activeLoansCount').textContent = activeLoans.length;
-    document.getElementById('totalBorrowed').textContent = Utils.formatCurrency(totalBorrowedWithInterest);
-    document.getElementById('currentBalance').textContent = Utils.formatCurrency(currentBalance);
-    
-    // Render the payment due rectangle at the top of dashboard
-    this.renderPaymentDueRectangle(nextPaymentAmount, nextDueDate, daysLeft);
-    
-    // Update credit score (will also show profile picture and name)
-    this.updateCreditScore();
-    
-    // Update agent dropdown
-    this.updateAgentUI();
-},
-            renderPaymentDueRectangle(amount, dueDate, daysLeft) {
-    const dashboardSection = document.getElementById('dashboardSection');
-    let rectangle = document.getElementById('paymentDueRectangle');
-    
-    if (!rectangle) {
-        rectangle = document.createElement('div');
-        rectangle.id = 'paymentDueRectangle';
-        rectangle.className = 'payment-due-rectangle';
-        dashboardSection.insertBefore(rectangle, dashboardSection.firstChild);
-    }
-    
-    const amountFormatted = Utils.formatCurrency(amount);
-    let dueText = 'No payment due';
-    if (dueDate && amount > 0) {
-        dueText = `Due in ${daysLeft} day${daysLeft !== 1 ? 's' : ''} (${Utils.formatDate(dueDate)})`;
-        if (daysLeft < 0) dueText = `OVERDUE by ${Math.abs(daysLeft)} days`;
-    }
-    
-    rectangle.innerHTML = `
-        <div class="payment-due-info">
-            <div class="payment-due-label">Payment Due</div>
-            <div class="payment-due-amount">${amountFormatted}</div>
-            <div class="payment-due-label" style="font-size: 11px; margin-top: 4px;">${dueText}</div>
-        </div>
-        <button class="pay-now-pill" id="payNowFromRectangle">
-            <i class="fas fa-credit-card"></i> Pay Now
-        </button>
-    `;
-    
-    const payBtn = document.getElementById('payNowFromRectangle');
-    if (payBtn) {
-        payBtn.onclick = () => {
-            if (AppState.activeLoans.length > 0) {
-                this.preparePaymentForLoan(AppState.activeLoans[0].id);
-                this.showPaymentModal();
-            } else {
-                Utils.showToast('No Active Loans', 'You have no active loans to pay', 'warning');
-            }
-        };
-    }
-},
+                const activeLoans = AppState.activeLoans || [];
+                const totalBorrowed = (AppState.activeLoans || []).reduce((sum, loan) => sum + (loan.amount || 0), 0);
+                const totalPaid = (AppState.payments || [])
+                    .filter(p => p.status === 'verified')
+                    .reduce((sum, payment) => sum + (payment.amount || 0), 0);
+                const currentBalance = Math.max(0, totalBorrowed - totalPaid);
+                let nextPayment = 0;
+                let nextDueDate = null;
+                let activeLoanInfo = 'No active loans';
+                if (activeLoans.length > 0) {
+                    const activeLoan = activeLoans[0];
+                    activeLoanInfo = `${Utils.formatCurrency(activeLoan.amount)} - ${activeLoan.status}`;
+                    if (activeLoan.periodicPayment) {
+                        nextPayment = activeLoan.periodicPayment;
+                    }
+                    if (activeLoan.repaymentSchedule) {
+                        const nextInstallment = activeLoan.repaymentSchedule.find(inst => inst.status === 'pending');
+                        if (nextInstallment) {
+                            nextPayment = nextInstallment.totalDue;
+                            nextDueDate = Utils.formatDate(nextInstallment.dueDate);
+                        }
+                    }
+                }
+                this.activeLoansCount.textContent = activeLoans.length;
+                this.totalBorrowed.textContent = Utils.formatCurrency(totalBorrowed);
+                this.currentBalance.textContent = Utils.formatCurrency(currentBalance);
+                this.paymentDue.textContent = Utils.formatCurrency(nextPayment);
+                this.activeLoanInfo.textContent = activeLoanInfo;
+                this.nextPaymentInfo.textContent = nextPayment > 0 ? `Next payment: ${Utils.formatCurrency(nextPayment)}` : 'No payment due';
+                this.dueDateInfo.textContent = nextDueDate ? `Due: ${nextDueDate}` : 'No due date';
+                const maxAmount = AppState.systemSettings?.maxLoanAmount || 50000;
+                document.getElementById('loanLimitInfo').textContent = `Maximum loan amount: ${Utils.formatCurrency(maxAmount)}`;
+                this.updateCreditScore();
+            },
             updateAgentUI() {
-    const user = AppState.userData;
-    const agentData = AppState.agentData;
-    const container = document.getElementById('agentValidation');
-    if (!container) return;
-    
-    let agentName = 'No agent assigned';
-    let agentAvatar = '';
-    let agentPhone = '-';
-    let agentBranchName = '-';
-    let agentStatus = '-';
-    let agentAssignedDate = '-';
-    let agentEmail = '-';
-    let agentId = '';
-    
-    if (user.assignedAgentId && agentData) {
-        agentName = agentData.fullName || 'Agent';
-        agentAvatar = agentData.profilePhoto || '';
-        agentPhone = agentData.phone || '-';
-        agentBranchName = agentData.branch || '-';
-        agentStatus = agentData.status === 'active' ? 'Active' : 'Inactive';
-        agentAssignedDate = user.agentAssignedAt ? Utils.formatDate(user.agentAssignedAt) : '-';
-        agentEmail = agentData.email || '-';
-        agentId = user.assignedAgentId;
-    }
-    
-    const avatarHtml = agentAvatar ? 
-        `<img src="${agentAvatar}" class="agent-avatar-small" onerror="this.src='data:image/svg+xml,%3Csvg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22%3E%3Crect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/%3E%3Ctext x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22%3EA%3C/text%3E%3C/svg%3E'">` :
-        `<div class="agent-avatar-small" style="background: var(--ios-green); display: flex; align-items: center; justify-content: center; color: white;"><i class="fas fa-user"></i></div>`;
-    
-    container.innerHTML = `
-        <div class="agent-dropdown" id="agentDropdown">
-            <div class="agent-dropdown-header" id="agentDropdownHeader">
-                ${avatarHtml}
-                <div class="agent-name-small">${agentName}</div>
-                <i class="fas fa-chevron-down agent-dropdown-icon"></i>
-            </div>
-            <div class="agent-dropdown-body">
-                <div class="agent-detail-row"><span class="label">Phone:</span><span>${agentPhone}</span></div>
-                <div class="agent-detail-row"><span class="label">Branch:</span><span>${agentBranchName}</span></div>
-                <div class="agent-detail-row"><span class="label">Status:</span><span class="${agentStatus === 'Active' ? 'text-success' : 'text-danger'}">${agentStatus}</span></div>
-                <div class="agent-detail-row"><span class="label">Assigned:</span><span>${agentAssignedDate}</span></div>
-                <div class="agent-detail-row"><span class="label">Email:</span><span>${agentEmail}</span></div>
-                <div class="d-flex gap-2 mt-3">
-                    <button class="btn btn-outline btn-small flex-grow-1" id="contactAgentBtnDropdown"><i class="fas fa-phone"></i> Call</button>
-                    <button class="btn btn-outline btn-small flex-grow-1" id="emailAgentBtnDropdown"><i class="fas fa-envelope"></i> Email</button>
-                </div>
-                <div class="form-group mt-3">
-                    <label class="form-label">Change Agent ID</label>
-                    <div class="input-group d-flex">
-                        <input type="text" id="agentIdInput" class="form-input" placeholder="Enter new agent ID" style="flex:1">
-                        <button class="btn btn-primary" id="verifyAgentBtn" style="white-space: nowrap;">Verify</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-    `;
-    
-    // Bind dropdown toggle
-    const dropdown = document.getElementById('agentDropdown');
-    const header = document.getElementById('agentDropdownHeader');
-    if (header) {
-        header.onclick = (e) => {
-            e.stopPropagation();
-            dropdown.classList.toggle('open');
-        };
-    }
-    
-    // Bind buttons
-    const contactBtn = document.getElementById('contactAgentBtnDropdown');
-    if (contactBtn) contactBtn.onclick = () => this.contactAgent();
-    const emailBtn = document.getElementById('emailAgentBtnDropdown');
-    if (emailBtn) emailBtn.onclick = () => window.open(`mailto:${agentEmail}`, '_blank');
-    
-    const verifyBtn = document.getElementById('verifyAgentBtn');
-    const agentIdInput = document.getElementById('agentIdInput');
-    if (verifyBtn && agentIdInput) {
-        verifyBtn.onclick = () => this.verifyAgent();
-        agentIdInput.onkeyup = (e) => { if (e.key === 'Enter') this.verifyAgent(); };
-    }
-},
+                if (!AppState.userData) return;
+                const user = AppState.userData;
+                const agentData = AppState.agentData;
+                if (user.assignedAgentId && agentData) {
+                    this.agentIdInput.value = user.assignedAgentId;
+                    this.agentName.textContent = agentData.fullName || 'Agent';
+                    this.agentBranch.textContent = agentData.branch || 'Main Branch';
+                    this.agentDetailsContainer.classList.remove('d-none');
+                    this.agentPhone.textContent = agentData.phone || '-';
+                    this.agentBranchName.textContent = agentData.branch || '-';
+                    this.agentStatus.textContent = agentData.status === 'active' ? 'Active' : 'Inactive';
+                    this.agentStatus.className = agentData.status === 'active' ? 'agent-detail-value text-success' : 'agent-detail-value text-warning';
+                    if (user.agentAssignedAt) {
+                        this.agentAssignedDate.textContent = Utils.formatDate(user.agentAssignedAt);
+                    }
+                    const icon = this.agentStatusIcon.querySelector('i');
+                    icon.className = agentData.status === 'active' ? 'fas fa-user-check' : 'fas fa-user-times';
+                    this.agentStatusIcon.style.background = agentData.status === 'active' ? 'var(--ios-green)' : 'var(--ios-orange)';
+                    icon.style.color = 'white';
+                    this.agentValidationMessage.textContent = `Verified on ${Utils.formatDate(user.agentAssignedAt)}`;
+                    this.agentValidationMessage.className = 'text-success';
+                } else if (user.assignedAgentId) {
+                    this.agentName.textContent = `Agent ID: ${user.assignedAgentId}`;
+                    this.agentBranch.textContent = 'Loading agent details...';
+                    this.agentDetailsContainer.classList.add('d-none');
+                    this.agentValidationMessage.textContent = 'Agent details loading...';
+                    this.agentValidationMessage.className = 'text-warning';
+                    FirebaseService.loadAgentData(user.assignedAgentId).then(result => {
+                        if (result.success) {
+                            AppState.agentData = result.data;
+                            this.updateAgentUI();
+                        }
+                    });
+                } else {
+                    this.agentName.textContent = 'No agent assigned';
+                    this.agentBranch.textContent = 'Enter Agent ID to verify';
+                    this.agentDetailsContainer.classList.add('d-none');
+                    this.agentValidationMessage.textContent = '';
+                    const icon = this.agentStatusIcon.querySelector('i');
+                    icon.className = 'fas fa-user';
+                    this.agentStatusIcon.style.background = 'var(--ios-gray-2)';
+                    icon.style.color = 'var(--ios-gray-5)';
+                }
+            },
             async verifyAgent() {
                 const agentId = this.agentIdInput.value.trim();
                 if (!agentId) {
@@ -4982,25 +4767,6 @@ this.updateCreditScore(); // will show profile+name
                 const phoneNumber = AppState.agentData.phone;
                 window.open(`tel:${phoneNumber}`, '_blank');
             },
-
-            renderQuickActions() {
-    const quickActionsContainer = document.getElementById('quickActionsContainer');
-    if (!quickActionsContainer) return;
-    
-    quickActionsContainer.innerHTML = `
-        <div class="quick-actions-2x2">
-            <button class="quick-action-btn" id="qaApplyLoan"><i class="fas fa-plus-circle"></i> Apply Loan</button>
-            <button class="quick-action-btn" id="qaMakePayment"><i class="fas fa-credit-card"></i> Make Payment</button>
-            <button class="quick-action-btn" id="qaStatement"><i class="fas fa-file-invoice"></i> Statement</button>
-            <button class="quick-action-btn" id="qaSupport"><i class="fas fa-headset"></i> Support</button>
-        </div>
-    `;
-    
-    document.getElementById('qaApplyLoan')?.addEventListener('click', () => this.showSection('apply'));
-    document.getElementById('qaMakePayment')?.addEventListener('click', () => this.showPaymentModal());
-    document.getElementById('qaStatement')?.addEventListener('click', () => this.showStatementModal());
-    document.getElementById('qaSupport')?.addEventListener('click', () => this.showSupportModal());
-},
             async showAgentProfileModal() {
                 if (!AppState.agentData) {
                     Utils.showToast('Agent Profile', 'Agent data not available', 'warning');
@@ -5427,79 +5193,6 @@ this.updateCreditScore(); // will show profile+name
                 });
                 loansList.innerHTML = html;
             },
-            showOverduePopup(loan, installment, totalPenalty, overdueDays) {
-    // Remove any existing popup
-    const existing = document.getElementById('overduePopupOverlay');
-    if (existing) existing.remove();
-    
-    const overlay = document.createElement('div');
-    overlay.id = 'overduePopupOverlay';
-    overlay.style.cssText = `
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        background: rgba(0,0,0,0.4);
-        backdrop-filter: blur(5px);
-        z-index: 10000;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-    `;
-    
-    const popup = document.createElement('div');
-    popup.style.cssText = `
-        background: white;
-        border-radius: 24px;
-        border: 2px solid var(--ios-red);
-        max-width: 320px;
-        width: 90%;
-        padding: 24px 20px;
-        text-align: center;
-        box-shadow: 0 20px 40px rgba(0,0,0,0.2);
-        animation: fadeInUp 0.3s ease;
-    `;
-    
-    popup.innerHTML = `
-        <div style="background: var(--ios-red); width: 50px; height: 50px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 16px;">
-            <i class="fas fa-exclamation-triangle" style="font-size: 28px; color: white;"></i>
-        </div>
-        <h3 style="color: var(--ios-red); margin-bottom: 12px;">PAYMENT OVERDUE!</h3>
-        <p style="margin-bottom: 8px;"><strong>Loan:</strong> ${loan.id.substring(0,8)}</p>
-        <p style="margin-bottom: 8px;"><strong>Installment #${installment.installment}</strong></p>
-        <p style="margin-bottom: 8px;"><strong>Amount Due:</strong> ${Utils.formatCurrency(installment.totalDue)}</p>
-        <p style="margin-bottom: 8px; color: var(--ios-red);"><strong>Penalty Added:</strong> ${Utils.formatCurrency(totalPenalty)}</p>
-        <p style="margin-bottom: 8px;"><strong>Overdue by:</strong> ${overdueDays} day(s)</p>
-        <hr style="margin: 16px 0;">
-        <p style="color: #b91c1c; font-weight: 600;">⚠️ Legal Warning: Continued non-payment may result in litigation and asset seizure.</p>
-        <div style="display: flex; gap: 12px; margin-top: 24px;">
-            <button id="popupPayNow" style="flex:1; background: var(--ios-red); color: white; border: none; border-radius: 40px; padding: 12px; font-weight: 600;">Pay Now</button>
-            <button id="popupClose" style="flex:1; background: var(--ios-gray-2); color: #333; border: none; border-radius: 40px; padding: 12px;">Remind Later</button>
-        </div>
-    `;
-    
-    overlay.appendChild(popup);
-    document.body.appendChild(overlay);
-    
-    document.getElementById('popupPayNow')?.addEventListener('click', () => {
-        overlay.remove();
-        if (window.UIManager) {
-            window.UIManager.preparePaymentForLoan(loan.id);
-            window.UIManager.showPaymentModal();
-        }
-    });
-    document.getElementById('popupClose')?.addEventListener('click', () => overlay.remove());
-    
-    // Add keyframe animation if not exists
-    if (!document.querySelector('#popupKeyframeStyle')) {
-        const style = document.createElement('style');
-        style.id = 'popupKeyframeStyle';
-        style.textContent = `@keyframes fadeInUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: translateY(0); } }`;
-        document.head.appendChild(style);
-    }
-},
             async showLoanDetails(loanId) {
                 const loan = AppState.activeLoans.find(l => l.id === loanId) || AppState.completedLoans.find(l => l.id === loanId);
                 if (!loan) return;
