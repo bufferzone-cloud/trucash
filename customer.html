@@ -449,16 +449,7 @@
             box-shadow: 0 8px 16px rgba(255,59,48,0.3);
         }
 
-        .dashboard-card, .section, .agent-validation, .loan-card, .notification-item, .document-card, .settings-card {
-            transition: var(--ios-transition);
-        }
-
-        .dashboard-card:hover, .section:hover, .agent-validation:hover, .loan-card:hover, .notification-item:hover, .document-card:hover, .settings-card:hover {
-            transform: translateY(-4px);
-            box-shadow: var(--ios-card-shadow-hover);
-        }
-
-        /* Payment Due Highlight Card */
+        /* Payment Due Card */
         .payment-due-card {
             background: linear-gradient(135deg, #fff5f5 0%, #ffe6e6 100%);
             border-left: 5px solid var(--ios-red);
@@ -1845,6 +1836,64 @@
             cursor: pointer;
             margin-top: 5px;
         }
+
+        /* Overdue Reminder Modal */
+        .overdue-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.6);
+            backdrop-filter: blur(8px);
+            z-index: 6000;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+        }
+
+        .overdue-modal.active {
+            display: flex;
+        }
+
+        .overdue-modal-content {
+            background: white;
+            border-radius: 24px;
+            max-width: 500px;
+            width: 100%;
+            padding: 24px;
+            border-left: 6px solid var(--ios-red);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+
+        .overdue-modal-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .overdue-modal-header i {
+            font-size: 32px;
+            color: var(--ios-red);
+        }
+
+        .overdue-modal-header h3 {
+            font-size: 20px;
+            color: var(--ios-red);
+        }
+
+        .overdue-list {
+            max-height: 300px;
+            overflow-y: auto;
+            margin: 16px 0;
+        }
+
+        .overdue-item {
+            padding: 12px;
+            border-bottom: 1px solid var(--ios-gray-2);
+        }
     </style>
 </head>
 <body>
@@ -1866,6 +1915,18 @@
         <i class="fas fa-ban" style="font-size: 60px; color: var(--ios-red); margin-bottom: 20px;"></i>
         <h2 id="banMessage">Access Denied</h2>
         <p id="banDetails">You have been banned from TruCash. For more inquiries, contact support@trucash.zm or call +260 123 456 789.</p>
+    </div>
+
+    <!-- Overdue Reminder Modal -->
+    <div class="overdue-modal" id="overdueModal">
+        <div class="overdue-modal-content">
+            <div class="overdue-modal-header">
+                <i class="fas fa-exclamation-triangle"></i>
+                <h3>⚠️ Overdue Payments</h3>
+            </div>
+            <div id="overdueModalList"></div>
+            <button class="btn btn-red w-100" id="closeOverdueModal">I Understand</button>
+        </div>
     </div>
 
     <!-- Floating Promotion Card -->
@@ -2542,6 +2603,7 @@
     <div class="modal" id="paymentModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Make Payment</h3>
                 <button class="modal-close" id="closePaymentModal">
                     <i class="fas fa-times"></i>
@@ -2559,6 +2621,7 @@
     <div class="modal" id="statementModal">
         <div class="modal-content large">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Loan Statement</h3>
                 <button class="modal-close" id="closeStatementModal">
                     <i class="fas fa-times"></i>
@@ -2577,6 +2640,7 @@
     <div class="modal" id="supportModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Customer Support</h3>
                 <button class="modal-close" id="closeSupportModal">
                     <i class="fas fa-times"></i>
@@ -2596,6 +2660,7 @@
     <div class="modal" id="agentProfileModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Agent Profile</h3>
                 <button class="modal-close" id="closeAgentProfileModal">
                     <i class="fas fa-times"></i>
@@ -2614,6 +2679,7 @@
     <div class="modal" id="documentModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Document View</h3>
                 <button class="modal-close" id="closeDocumentModal">
                     <i class="fas fa-times"></i>
@@ -2629,6 +2695,7 @@
     <div class="modal" id="changePasswordModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Change Password</h3>
                 <button class="modal-close" id="closePasswordModal">
                     <i class="fas fa-times"></i>
@@ -2660,6 +2727,7 @@
     <div class="modal" id="editProfileModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Edit Profile</h3>
                 <button class="modal-close" id="closeEditProfileModal">
                     <i class="fas fa-times"></i>
@@ -2708,6 +2776,7 @@
     <div class="modal" id="loanAgreementModal">
         <div class="modal-content large">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Loan Agreement</h3>
                 <button class="modal-close" id="closeLoanAgreementModal">
                     <i class="fas fa-times"></i>
@@ -2726,6 +2795,7 @@
     <div class="modal" id="loanDetailsModal">
         <div class="modal-content large">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Loan Details</h3>
                 <button class="modal-close" id="closeLoanDetailsModal">
                     <i class="fas fa-times"></i>
@@ -2744,6 +2814,7 @@
     <div class="modal" id="notificationsModal">
         <div class="modal-content">
             <div class="modal-header">
+                <img src="logo.png" class="logo-img" style="width:28px;" onerror="this.style.display='none'">
                 <h3 class="modal-title">Notifications</h3>
                 <button class="modal-close" id="closeNotificationsModal">
                     <i class="fas fa-times"></i>
@@ -2849,7 +2920,8 @@
             seenPromotions: new Set(),
             shownNotifications: new Set(),
             GRACE_DAYS: 5,
-            PENALTY_RATE: 0.02
+            PENALTY_RATE: 0.02,
+            lastOverdueCheck: 0
         };
 
         // Load shown notifications from localStorage
@@ -3114,10 +3186,54 @@
                         }
                     });
                 });
+            },
+            getOverdueInstallments() {
+                const now = Date.now();
+                const overdue = [];
+                const active = AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved');
+                active.forEach(loan => {
+                    if (loan.repaymentSchedule) {
+                        loan.repaymentSchedule.forEach(inst => {
+                            if (inst.status !== 'paid' && inst.dueDate < now - AppState.GRACE_DAYS * 24 * 60 * 60 * 1000) {
+                                const daysOverdue = Math.floor((now - inst.dueDate) / (24*60*60*1000));
+                                overdue.push({
+                                    loanId: loan.id,
+                                    amount: inst.totalDue,
+                                    dueDate: inst.dueDate,
+                                    daysOverdue,
+                                    penalty: inst.penalty || 0,
+                                    loan
+                                });
+                            }
+                        });
+                    }
+                });
+                return overdue;
+            },
+            showOverdueReminder() {
+                const overdue = this.getOverdueInstallments();
+                if (overdue.length === 0) return;
+                const modal = document.getElementById('overdueModal');
+                const listDiv = document.getElementById('overdueModalList');
+                if (!modal || !listDiv) return;
+                let html = '<div class="overdue-list">';
+                overdue.forEach(item => {
+                    html += `
+                        <div class="overdue-item">
+                            <strong>Loan: ${item.loanId.substring(0,8)}</strong><br>
+                            Amount Due: ${Utils.formatCurrency(item.amount)}<br>
+                            Overdue by: ${item.daysOverdue} days<br>
+                            Penalty: ${Utils.formatCurrency(item.penalty)}
+                        </div>
+                    `;
+                });
+                html += '</div><p class="mt-2 text-muted">Please make payment immediately to avoid further penalties.</p>';
+                listDiv.innerHTML = html;
+                modal.classList.add('active');
             }
         };
 
-        // ===== Cloudinary Service =====
+        // ===== Cloudinary Service (unchanged) =====
         const CloudinaryService = {
             widget: null,
             initUploadWidget() {
@@ -3321,7 +3437,7 @@
             }
         };
 
-        // ===== Signature Pad Handler =====
+        // ===== Signature Pad Handler (unchanged) =====
         const SignaturePad = {
             init(canvasId, clearBtnId) {
                 const canvas = document.getElementById(canvasId);
@@ -3440,7 +3556,6 @@
                             AppState.userData = userData;
                             await this.loadSystemSettings();
 
-                            // Check if user is banned
                             if (userData.banned === true) {
                                 document.getElementById('maintenanceOverlay').style.display = 'none';
                                 const banOverlay = document.getElementById('banOverlay');
@@ -4103,6 +4218,7 @@
                 this.signaturePadBorrower = null;
                 this.signaturePadWitness = null;
                 this.populateDurationOptions();
+                this.setupOverdueReminder();
             },
             cacheElements() {
                 this.navItems = document.querySelectorAll('.nav-item');
@@ -4186,7 +4302,6 @@
                 this.creditScoreValue = document.getElementById('creditScoreValue');
                 this.profileCreditScoreGrade = document.getElementById('profileCreditScoreGrade');
                 this.profileCreditScoreValue = document.getElementById('profileCreditScoreValue');
-                // New elements
                 this.paymentDueCard = document.getElementById('paymentDueCard');
                 this.daysRemainingBadge = document.getElementById('daysRemainingBadge');
                 this.dueAmount = document.getElementById('dueAmount');
@@ -4197,6 +4312,8 @@
                 this.agentInfoContainer = document.getElementById('agentInfoContainer');
                 this.totalLoansCount = document.getElementById('totalLoansCount');
                 this.nearestDueLoan = null;
+                this.overdueModal = document.getElementById('overdueModal');
+                this.closeOverdueModal = document.getElementById('closeOverdueModal');
             },
             bindEvents() {
                 this.menuToggle?.addEventListener('click', () => {
@@ -4400,6 +4517,11 @@
                         }
                     });
                 }
+                if (this.closeOverdueModal) {
+                    this.closeOverdueModal.addEventListener('click', () => {
+                        this.overdueModal.classList.remove('active');
+                    });
+                }
             },
             populateDurationOptions() {
                 const select = document.getElementById('loanDuration');
@@ -4441,11 +4563,26 @@
                     Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
                 }, 1000);
                 Utils.hideLoading();
-                // First time user tutorial trigger
                 if (userData && userData.tutorialCompleted !== true) {
                     setTimeout(() => {
                         TutorialManager.startTour();
                     }, 1500);
+                }
+                // Check for overdue payments on load
+                this.checkOverdueAndRemind();
+                // Set up periodic overdue check every 12 hours
+                setInterval(() => this.checkOverdueAndRemind(), 12 * 60 * 60 * 1000);
+            },
+            setupOverdueReminder() {
+                // No additional setup needed; called on init
+            },
+            checkOverdueAndRemind() {
+                const now = Date.now();
+                if (now - AppState.lastOverdueCheck < 12 * 60 * 60 * 1000) return;
+                AppState.lastOverdueCheck = now;
+                const overdue = Utils.getOverdueInstallments();
+                if (overdue.length > 0) {
+                    Utils.showOverdueReminder();
                 }
             },
             setupRealtimeListeners() {
@@ -4489,6 +4626,7 @@
                         this.updateLoanHistoryUI();
                     }
                     Utils.checkPaymentReminders(AppState.activeLoans);
+                    this.checkOverdueAndRemind();
                 });
                 AppState.realtimeListeners.push(() => loansRef.off('value', loansListener));
                 const paymentsRef = db.ref('payments').orderByChild('customerId').equalTo(AppState.currentUser.uid);
@@ -4859,8 +4997,6 @@
                         </div>
                     `;
                 } else if (form && hasAgent) {
-                    // Ensure form content is restored (should already be there, but we can keep as is)
-                    // We'll just re-validate the form
                     this.validateLoanForm();
                 }
             },
@@ -5221,7 +5357,8 @@
                 const modalBody = document.getElementById('loanDetailsModalBody');
                 let scheduleHtml = '';
                 if (loan.repaymentSchedule) {
-                    scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>';
+                    scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table">\
+                        <tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>';
                     loan.repaymentSchedule.forEach(inst => {
                         scheduleHtml += `<tr>
                             <td>${inst.installment}</td>
@@ -5275,16 +5412,16 @@
                 `;
                 this.loanDetailsModal.classList.add('active');
             },
-            preparePaymentForLoan(loanId) {
+            preparePaymentForLoan(loanId, prefillAmount = null) {
                 this.loanDetailsModal.classList.remove('active');
                 AppState.selectedLoanForPayment = loanId;
-                this.showPaymentModal();
+                this.showPaymentModal(prefillAmount);
             },
-            showPaymentModal() {
+            showPaymentModal(prefillAmount = null) {
                 this.paymentModal.classList.add('active');
-                this.updatePaymentsUI();
+                this.updatePaymentsUI(prefillAmount);
             },
-            updatePaymentsUI() {
+            updatePaymentsUI(prefillAmount = null) {
                 const container = document.getElementById('paymentModalContent');
                 const activeLoans = AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved');
                 if (activeLoans.length === 0) {
@@ -5294,6 +5431,15 @@
                     activeLoans.forEach(loan => {
                         options += `<option value="${loan.id}">${loan.id} - ${Utils.formatCurrency(loan.amount)} (Due: ${Utils.formatCurrency(loan.periodicPayment)})</option>`;
                     });
+                    let amountValue = '';
+                    if (prefillAmount && !isNaN(prefillAmount)) {
+                        amountValue = `value="${prefillAmount}"`;
+                    } else if (AppState.selectedLoanForPayment) {
+                        const selectedLoan = activeLoans.find(l => l.id === AppState.selectedLoanForPayment);
+                        if (selectedLoan && selectedLoan.periodicPayment) {
+                            amountValue = `value="${selectedLoan.periodicPayment}"`;
+                        }
+                    }
                     container.innerHTML = `
                         <div class="form-group">
                             <label class="form-label">Select Loan</label>
@@ -5301,7 +5447,7 @@
                         </div>
                         <div class="form-group">
                             <label class="form-label">Amount (Kwacha)</label>
-                            <input type="number" id="paymentAmount" class="form-input" placeholder="Enter amount">
+                            <input type="number" id="paymentAmount" class="form-input" placeholder="Enter amount" ${amountValue}>
                         </div>
                         <div class="form-group">
                             <label class="form-label">Payment Method</label>
@@ -5402,7 +5548,8 @@
                 this.statementModal.classList.add('active');
                 const content = document.getElementById('statementContent');
                 let html = '<h3>Loan Statement</h3>';
-                html += '<table class="data-table"><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr>';
+                html += '<table class="data-table">\
+                    <tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr>';
                 let balance = 0;
                 const transactions = [];
                 AppState.activeLoans.concat(AppState.completedLoans).forEach(loan => {
