@@ -1845,6 +1845,25 @@
 #paymentDueCard .fa-calendar-alt {
     color: #ff3b30 !important;
 }
+
+    .italic-text {
+    font-style: italic;
+    font-size: 12px;
+    color: var(--ios-gray-5);
+}
+
+@media (max-width: 640px) {
+    .section .section-header {
+        flex-wrap: wrap;
+        gap: 8px;
+    }
+    .section .section-header .profile-avatar {
+        order: 2;
+    }
+    .section .section-header .section-title {
+        order: 1;
+    }
+}
     </style>
 </head>
 <body>
@@ -2024,19 +2043,22 @@
 </div>
                     </div>
 
-                    <!-- Credit Score Card -->
-                    <div class="section">
-                        <div class="section-header">
-                            <div class="section-title">Your Credit Score</div>
-                        </div>
-                        <div class="d-flex align-center justify-between">
-                            <div>
-                                <span class="credit-score-badge" id="creditScoreGrade">Good</span>
-                                <span class="card-value" id="creditScoreValue" style="font-size: 24px;">0</span>
-                            </div>
-                            <div class="text-muted"></div>
-                        </div>
-                    </div>
+                   <!-- Credit Score Card -->
+<div class="section">
+    <div class="section-header">
+        <div class="section-title">Your Credit Score</div>
+        <img src="" alt="Profile" class="profile-avatar" id="creditScoreProfilePic" style="width: 40px; height: 40px; border-radius: 50%; object-fit: cover;">
+    </div>
+    <div class="d-flex align-center justify-between" style="flex-wrap: wrap; gap: 10px;">
+        <div>
+            <span class="credit-score-badge" id="creditScoreGrade">Good</span>
+            <span class="card-value" id="creditScoreValue" style="font-size: 24px;">0</span>
+        </div>
+        <div class="text-muted italic-text" style="font-style: italic; font-size: 12px; color: var(--ios-gray-5);">
+            Repay your loans timely to improve credit score
+        </div>
+    </div>
+</div>
 
                     <!-- Enhanced Agent Validation -->
                     <div class="section">
@@ -4668,6 +4690,12 @@
                 this.updateDocumentGrid();
                 this.updateCreditScore();
                 this.updatePageTitleWithUserName();
+                 const creditScoreProfilePic = document.getElementById('creditScoreProfilePic');
+    if (creditScoreProfilePic && AppState.userData.profilePhoto) {
+        creditScoreProfilePic.src = AppState.userData.profilePhoto;
+    } else if (creditScoreProfilePic) {
+        creditScoreProfilePic.src = 'data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="%2334c759"/><text x="50" y="50" font-size="50" text-anchor="middle" dy=".3em" fill="white">U</text></svg>';
+    }
             },
             // Add this method to UIManager
 updatePageTitleWithUserName() {
@@ -4688,22 +4716,37 @@ updatePageTitleWithUserName() {
                     .reduce((sum, payment) => sum + (payment.amount || 0), 0);
                 const currentBalance = Math.max(0, totalBorrowed - totalPaid);
                 let nextPayment = 0;
-                let nextDueDate = null;
-                let activeLoanInfo = 'No active loans';
-                if (activeLoans.length > 0) {
-                    const activeLoan = activeLoans[0];
-                    activeLoanInfo = `${Utils.formatCurrency(activeLoan.amount)} - ${activeLoan.status}`;
-                    if (activeLoan.periodicPayment) {
-                        nextPayment = activeLoan.periodicPayment;
-                    }
-                    if (activeLoan.repaymentSchedule) {
-                        const nextInstallment = activeLoan.repaymentSchedule.find(inst => inst.status === 'pending');
-                        if (nextInstallment) {
-                            nextPayment = nextInstallment.totalDue;
-                            nextDueDate = Utils.formatDate(nextInstallment.dueDate);
-                        }
-                    }
+let nextDueDate = null;
+let activeLoanInfo = 'No active loans';
+// Consider both 'active' and 'approved' loans
+const eligibleLoans = activeLoans.filter(loan => loan.status === 'active' || loan.status === 'approved');
+if (eligibleLoans.length > 0) {
+    // Find the loan with the earliest pending installment due date
+    let earliestInstallment = null;
+    let earliestLoan = null;
+    for (const loan of eligibleLoans) {
+        if (loan.repaymentSchedule) {
+            const pendingInstallment = loan.repaymentSchedule.find(inst => inst.status === 'pending');
+            if (pendingInstallment) {
+                if (!earliestInstallment || pendingInstallment.dueDate < earliestInstallment.dueDate) {
+                    earliestInstallment = pendingInstallment;
+                    earliestLoan = loan;
                 }
+            }
+        }
+    }
+    if (earliestInstallment) {
+        nextPayment = earliestInstallment.totalDue;
+        nextDueDate = Utils.formatDate(earliestInstallment.dueDate);
+        activeLoanInfo = `${Utils.formatCurrency(earliestLoan.amount)} - ${earliestLoan.status}`;
+    } else {
+        // If no pending installment (all paid), show first loan info
+        const firstLoan = eligibleLoans[0];
+        activeLoanInfo = `${Utils.formatCurrency(firstLoan.amount)} - ${firstLoan.status}`;
+        nextPayment = 0;
+        nextDueDate = null;
+    }
+}
                 this.activeLoansCount.textContent = activeLoans.length;
                 this.totalBorrowed.textContent = Utils.formatCurrency(totalBorrowed);
                 this.currentBalance.textContent = Utils.formatCurrency(currentBalance);
