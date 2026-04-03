@@ -1829,6 +1829,7 @@
             z-index: 10002;
             text-align: center;
             border: 1px solid var(--ios-green);
+            transition: all 0.3s ease;
         }
         .tutorial-tooltip::after {
             content: '';
@@ -2729,7 +2730,7 @@
         </div>
     </div>
 
-    <!-- Other Modals -->
+    <!-- Other Modals (Payment, Statement, Support, Agent Profile, Document, Change Password, Edit Profile, Loan Agreement, Loan Details) -->
     <div class="modal" id="paymentModal">
         <div class="modal-content">
             <div class="modal-header">
@@ -2933,7 +2934,7 @@
         <button class="tutorial-skip" id="tutorialSkipTop">Skip Tour</button>
     </div>
 
-    <!-- JavaScript -->
+    <!-- JavaScript (Full original logic + modifications + notification auto-delete after 30 minutes) -->
     <script>
         // ===== Firebase Configuration =====
         const firebaseConfig = {
@@ -2954,7 +2955,24 @@
             maxFileSize: 10485760,
             allowedFormats: ['jpg', 'jpeg', 'png', 'gif', 'pdf'],
             multiple: false,
-            theme: 'white'
+            theme: 'white',
+            styles: {
+                palette: {
+                    window: "#FFFFFF",
+                    windowBorder: "#90A0B3",
+                    tabIcon: "#007AFF",
+                    menuIcons: "#5A616A",
+                    textDark: "#000000",
+                    textLight: "#FFFFFF",
+                    link: "#007AFF",
+                    action: "#FF620C",
+                    inactiveTabIcon: "#0E2F5A",
+                    error: "#F44235",
+                    inProgress: "#007AFF",
+                    complete: "#20B832",
+                    sourceBg: "#E4EBF1"
+                }
+            }
         };
 
         // ===== Application State =====
@@ -2980,7 +2998,9 @@
             seenPromotions: new Set(),
             shownNotifications: new Set(),
             GRACE_DAYS: 5,
-            PENALTY_RATE: 0.02
+            PENALTY_RATE: 0.02,
+            // Auto-delete timestamps for notifications
+            notificationDeleteTimeouts: new Map()
         };
 
         // Load shown notifications from localStorage
@@ -2998,6 +3018,7 @@
             console.log("✅ Firebase initialized successfully");
         } catch (error) {
             console.error("❌ Firebase initialization error:", error);
+            showToast('System Error', 'Failed to initialize application', 'error');
         }
 
         // ===== Utility Functions =====
@@ -3023,7 +3044,7 @@
                 toast.className = `toast ${type}`;
                 toast.innerHTML = `
                     <div class="toast-icon">
-                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                        <i class="fas fa-${type === 'error' ? 'exclamation-circle' : type === 'warning' ? 'exclamation-triangle' : type === 'reminder' ? 'bell' : 'info-circle'}"></i>
                     </div>
                     <div class="toast-content">
                         <div class="toast-title">${title}</div>
@@ -3176,6 +3197,37 @@
                         }
                     });
                 });
+            },
+            // Auto-delete notification after 30 minutes (1,800,000 ms)
+            scheduleNotificationDeletion(notificationId, timestamp) {
+                const now = Date.now();
+                const age = now - timestamp;
+                const timeLeft = Math.max(0, 1800000 - age); // 30 minutes = 1,800,000 ms
+                if (timeLeft > 0) {
+                    const timeoutId = setTimeout(async () => {
+                        await FirebaseService.permanentlyDeleteNotification(notificationId);
+                        // Remove from local state
+                        const index = AppState.notifications.findIndex(n => n.id === notificationId);
+                        if (index !== -1) {
+                            AppState.notifications.splice(index, 1);
+                            UIManager.updateNotificationBadge();
+                            UIManager.renderNotificationsSidebar();
+                            if (AppState.currentSection === 'notifications') UIManager.updateNotificationsUI();
+                        }
+                        AppState.notificationDeleteTimeouts.delete(notificationId);
+                    }, timeLeft);
+                    AppState.notificationDeleteTimeouts.set(notificationId, timeoutId);
+                } else {
+                    // Already older than 30 minutes, delete immediately
+                    FirebaseService.permanentlyDeleteNotification(notificationId);
+                    const index = AppState.notifications.findIndex(n => n.id === notificationId);
+                    if (index !== -1) {
+                        AppState.notifications.splice(index, 1);
+                        UIManager.updateNotificationBadge();
+                        UIManager.renderNotificationsSidebar();
+                        if (AppState.currentSection === 'notifications') UIManager.updateNotificationsUI();
+                    }
+                }
             }
         };
 
@@ -3197,6 +3249,7 @@
                     croppingDefaultSelectionRatio: 0.9,
                     croppingShowDimensions: true,
                     theme: cloudinaryConfig.theme,
+                    styles: cloudinaryConfig.styles,
                     folder: cloudinaryConfig.folder,
                     showPoweredBy: false,
                     autoMinimize: true
@@ -3293,6 +3346,7 @@
                     croppingDefaultSelectionRatio: 0.9,
                     showAdvancedOptions: false,
                     theme: cloudinaryConfig.theme,
+                    styles: cloudinaryConfig.styles,
                     folder: cloudinaryConfig.folder + '/profile_photos',
                     showPoweredBy: false
                 }, (error, result) => {
@@ -3337,6 +3391,7 @@
                     croppingDefaultSelectionRatio: 0.9,
                     showAdvancedOptions: false,
                     theme: cloudinaryConfig.theme,
+                    styles: cloudinaryConfig.styles,
                     folder: cloudinaryConfig.folder + '/payment_proofs',
                     showPoweredBy: false
                 }, (error, result) => {
@@ -3768,6 +3823,8 @@
                     Object.entries(allMessages).forEach(([id, msg]) => {
                         if (msg.recipientId === AppState.currentUser?.uid || msg.recipientId === 'all_customers') {
                             AppState.notifications.push({ id, ...msg });
+                            // Schedule auto-deletion after 30 minutes
+                            Utils.scheduleNotificationDeletion(id, msg.timestamp || Date.now());
                         }
                     });
                     AppState.notifications.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
@@ -3781,6 +3838,8 @@
                     const msg = snap.val();
                     if (msg.recipientId === AppState.currentUser.uid || msg.recipientId === 'all_customers') {
                         AppState.notifications.unshift({ id: snap.key, ...msg });
+                        // Schedule auto-deletion after 30 minutes
+                        Utils.scheduleNotificationDeletion(snap.key, msg.timestamp || Date.now());
                         UIManager.updateNotificationBadge();
                         UIManager.renderNotificationsSidebar();
                         if (AppState.currentSection === 'notifications') {
@@ -3801,6 +3860,14 @@
                         }
                     }
                 });
+            },
+            async permanentlyDeleteNotification(notificationId) {
+                try {
+                    await db.ref('messages/' + notificationId).remove();
+                    console.log(`Notification ${notificationId} permanently deleted after 30 minutes`);
+                } catch (error) {
+                    console.error('Error deleting notification:', error);
+                }
             },
             async loadPromotions() {
                 try {
@@ -4152,6 +4219,11 @@
                         if (typeof listener === 'function') listener();
                     });
                     AppState.realtimeListeners = [];
+                    // Clear all notification deletion timeouts
+                    for (const [id, timeout] of AppState.notificationDeleteTimeouts.entries()) {
+                        clearTimeout(timeout);
+                    }
+                    AppState.notificationDeleteTimeouts.clear();
                     await auth.signOut();
                     window.location.href = 'login.html';
                 } catch (error) {
@@ -4751,7 +4823,6 @@
                 const user = AppState.userData;
                 const agentData = AppState.agentData;
                 if (user.assignedAgentId && agentData) {
-                    // Show agent card with picture
                     this.agentCardContainer.innerHTML = `
                         <div class="agent-card">
                             <img src="${agentData.profilePhoto || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>A</text></svg>'}" class="agent-avatar-large" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>A</text></svg>'">
@@ -5074,7 +5145,16 @@
                 if (loan.repaymentSchedule) {
                     scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>';
                     loan.repaymentSchedule.forEach(inst => {
-                        scheduleHtml += `<tr><td>${inst.installment}</td><td>${Utils.formatDate(inst.dueDate)}</td><td>${Utils.formatCurrency(inst.principal)}</td><td>${Utils.formatCurrency(inst.interest)}</td><td>${Utils.formatCurrency(inst.penalty || 0)}</td><td>${Utils.formatCurrency(inst.totalDue)}</td><td>${Utils.formatCurrency(inst.paidAmount || 0)}</td><td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td></tr>`;
+                        scheduleHtml += `<tr>
+                            <td>${inst.installment}</td>
+                            <td>${Utils.formatDate(inst.dueDate)}</td>
+                            <td>${Utils.formatCurrency(inst.principal)}</td>
+                            <td>${Utils.formatCurrency(inst.interest)}</td>
+                            <td>${Utils.formatCurrency(inst.penalty || 0)}</td>
+                            <td>${Utils.formatCurrency(inst.totalDue)}</td>
+                            <td>${Utils.formatCurrency(inst.paidAmount || 0)}</td>
+                            <td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td>
+                        </tr>`;
                     });
                     scheduleHtml += '</table>';
                 }
@@ -5186,7 +5266,7 @@
                 AppState.payments.forEach(p => { transactions.push({ date: p.timestamp, desc: `Payment (${p.loanId}) - ${p.method}`, debit: 0, credit: p.amount }); });
                 transactions.sort((a,b) => a.date - b.date);
                 transactions.forEach(t => { balance += (t.debit - t.credit); html += `<tr><td>${Utils.formatDate(t.date)}</td><td>${t.desc}</td><td>${t.debit > 0 ? Utils.formatCurrency(t.debit) : '-'}</td><td>${t.credit > 0 ? Utils.formatCurrency(t.credit) : '-'}</td><td>${Utils.formatCurrency(balance)}</td></tr>`; });
-                html += '</table>';
+                html += '</tr>';
                 content.innerHTML = html;
             },
             showSupportModal() { this.supportModal.classList.add('active'); },
@@ -5338,13 +5418,13 @@
                         this.highlightEl.style.top = (rect.top - 10 + window.scrollY) + 'px';
                         this.highlightEl.style.left = (rect.left - 10 + window.scrollX) + 'px';
                         this.highlightEl.style.display = 'block';
-                        // Position tooltip relative to highlighted element
                         let tooltipTop = rect.bottom + 15;
                         let tooltipLeft = rect.left + (rect.width / 2) - 140;
                         tooltipLeft = Math.max(10, Math.min(tooltipLeft, window.innerWidth - 290));
                         this.tooltipEl.style.top = tooltipTop + 'px';
                         this.tooltipEl.style.left = tooltipLeft + 'px';
                         this.tooltipEl.style.bottom = 'auto';
+                        this.tooltipEl.style.transform = 'none';
                     } else {
                         this.highlightEl.style.display = 'none';
                         this.tooltipEl.style.bottom = '120px';
