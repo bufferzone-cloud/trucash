@@ -2934,7 +2934,7 @@
         <button class="tutorial-skip" id="tutorialSkipTop">Skip Tour</button>
     </div>
 
-    <!-- JavaScript (Full original logic + modifications + notification auto-delete after 30 minutes) -->
+    <!-- JavaScript (Full original logic + enhancements: payment listener, auto-delete notifications, dynamic tooltip, agent picture, etc.) -->
     <script>
         // ===== Firebase Configuration =====
         const firebaseConfig = {
@@ -2999,7 +2999,6 @@
             shownNotifications: new Set(),
             GRACE_DAYS: 5,
             PENALTY_RATE: 0.02,
-            // Auto-delete timestamps for notifications
             notificationDeleteTimeouts: new Map()
         };
 
@@ -3018,7 +3017,6 @@
             console.log("✅ Firebase initialized successfully");
         } catch (error) {
             console.error("❌ Firebase initialization error:", error);
-            showToast('System Error', 'Failed to initialize application', 'error');
         }
 
         // ===== Utility Functions =====
@@ -3066,20 +3064,13 @@
             },
             formatCurrency(amount) {
                 const num = parseFloat(amount) || 0;
-                return 'K' + num.toLocaleString('en-US', {
-                    minimumFractionDigits: 2,
-                    maximumFractionDigits: 2
-                });
+                return 'K' + num.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
             },
             formatDate(timestamp) {
                 if (!timestamp) return 'N/A';
                 try {
                     const date = new Date(Number(timestamp));
-                    return date.toLocaleDateString('en-US', {
-                        year: 'numeric',
-                        month: 'short',
-                        day: 'numeric'
-                    });
+                    return date.toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
                 } catch (e) {
                     return 'Invalid Date';
                 }
@@ -3087,12 +3078,7 @@
             formatDateTime(timestamp) {
                 if (!timestamp) return 'N/A';
                 const date = new Date(Number(timestamp));
-                return date.toLocaleString('en-US', {
-                    month: 'short',
-                    day: 'numeric',
-                    hour: '2-digit',
-                    minute: '2-digit'
-                });
+                return date.toLocaleString('en-US', { month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit' });
             },
             generateId(prefix) {
                 return prefix + Date.now() + Math.random().toString(36).substr(2, 6).toUpperCase();
@@ -3113,9 +3099,7 @@
             },
             generateRepaymentSchedule(principal, rate, periods, isWeekly) {
                 const schedule = [];
-                const payment = isWeekly 
-                    ? this.calculateWeeklyPayment(principal, rate, periods)
-                    : this.calculateMonthlyPayment(principal, rate * 12, periods);
+                const payment = isWeekly ? this.calculateWeeklyPayment(principal, rate, periods) : this.calculateMonthlyPayment(principal, rate * 12, periods);
                 let balance = principal;
                 const startDate = new Date();
                 for (let i = 1; i <= periods; i++) {
@@ -3123,11 +3107,8 @@
                     const principalPayment = payment - interest;
                     balance -= principalPayment;
                     const dueDate = new Date(startDate);
-                    if (isWeekly) {
-                        dueDate.setDate(dueDate.getDate() + i * 7);
-                    } else {
-                        dueDate.setMonth(dueDate.getMonth() + i);
-                    }
+                    if (isWeekly) dueDate.setDate(dueDate.getDate() + i * 7);
+                    else dueDate.setMonth(dueDate.getMonth() + i);
                     schedule.push({
                         installment: i,
                         dueDate: dueDate.getTime(),
@@ -3198,15 +3179,13 @@
                     });
                 });
             },
-            // Auto-delete notification after 30 minutes (1,800,000 ms)
             scheduleNotificationDeletion(notificationId, timestamp) {
                 const now = Date.now();
                 const age = now - timestamp;
-                const timeLeft = Math.max(0, 1800000 - age); // 30 minutes = 1,800,000 ms
+                const timeLeft = Math.max(0, 1800000 - age);
                 if (timeLeft > 0) {
                     const timeoutId = setTimeout(async () => {
-                        await FirebaseService.permanentlyDeleteNotification(notificationId);
-                        // Remove from local state
+                        await db.ref('messages/' + notificationId).remove();
                         const index = AppState.notifications.findIndex(n => n.id === notificationId);
                         if (index !== -1) {
                             AppState.notifications.splice(index, 1);
@@ -3218,8 +3197,7 @@
                     }, timeLeft);
                     AppState.notificationDeleteTimeouts.set(notificationId, timeoutId);
                 } else {
-                    // Already older than 30 minutes, delete immediately
-                    FirebaseService.permanentlyDeleteNotification(notificationId);
+                    db.ref('messages/' + notificationId).remove();
                     const index = AppState.notifications.findIndex(n => n.id === notificationId);
                     if (index !== -1) {
                         AppState.notifications.splice(index, 1);
@@ -3441,13 +3419,9 @@
                 const canvas = document.getElementById(canvasId);
                 if (!canvas) return null;
                 const ctx = canvas.getContext('2d');
-                let drawing = false;
-                let lastX = 0, lastY = 0;
-
+                let drawing = false, lastX = 0, lastY = 0;
                 const resizeCanvas = () => {
-                    const container = canvas.parentElement;
-                    let width = container.clientWidth;
-                    if (width === 0) width = 300; 
+                    const width = canvas.parentElement.clientWidth || 300;
                     canvas.width = width;
                     canvas.height = 150;
                     ctx.strokeStyle = '#000';
@@ -3456,70 +3430,28 @@
                     ctx.lineJoin = 'round';
                 };
                 resizeCanvas();
-
-                const startDrawing = (e) => {
-                    e.preventDefault();
-                    drawing = true;
-                    const pos = getCoordinates(e);
-                    lastX = pos.x;
-                    lastY = pos.y;
-                    ctx.beginPath();
-                    ctx.moveTo(lastX, lastY);
-                };
-
-                const draw = (e) => {
-                    e.preventDefault();
-                    if (!drawing) return;
-                    const pos = getCoordinates(e);
-                    ctx.lineTo(pos.x, pos.y);
-                    ctx.stroke();
-                    lastX = pos.x;
-                    lastY = pos.y;
-                };
-
-                const stopDrawing = () => {
-                    drawing = false;
-                    ctx.closePath();
-                };
-
-                const getCoordinates = (e) => {
+                const getCoords = (e) => {
                     const rect = canvas.getBoundingClientRect();
                     const scaleX = canvas.width / rect.width;
                     const scaleY = canvas.height / rect.height;
                     let clientX, clientY;
-                    if (e.touches) {
-                        clientX = e.touches[0].clientX;
-                        clientY = e.touches[0].clientY;
-                    } else {
-                        clientX = e.clientX;
-                        clientY = e.clientY;
-                    }
-                    return {
-                        x: (clientX - rect.left) * scaleX,
-                        y: (clientY - rect.top) * scaleY
-                    };
+                    if (e.touches) { clientX = e.touches[0].clientX; clientY = e.touches[0].clientY; }
+                    else { clientX = e.clientX; clientY = e.clientY; }
+                    return { x: (clientX - rect.left) * scaleX, y: (clientY - rect.top) * scaleY };
                 };
-
-                canvas.addEventListener('mousedown', startDrawing);
+                const start = (e) => { e.preventDefault(); drawing = true; const p = getCoords(e); lastX = p.x; lastY = p.y; ctx.beginPath(); ctx.moveTo(lastX, lastY); };
+                const draw = (e) => { if (!drawing) return; e.preventDefault(); const p = getCoords(e); ctx.lineTo(p.x, p.y); ctx.stroke(); lastX = p.x; lastY = p.y; };
+                const stop = () => { drawing = false; ctx.closePath(); };
+                canvas.addEventListener('mousedown', start);
                 canvas.addEventListener('mousemove', draw);
-                canvas.addEventListener('mouseup', stopDrawing);
-                canvas.addEventListener('mouseleave', stopDrawing);
-                canvas.addEventListener('touchstart', startDrawing);
+                canvas.addEventListener('mouseup', stop);
+                canvas.addEventListener('mouseleave', stop);
+                canvas.addEventListener('touchstart', start);
                 canvas.addEventListener('touchmove', draw);
-                canvas.addEventListener('touchend', stopDrawing);
-                canvas.addEventListener('touchcancel', stopDrawing);
-
-                const clearBtn = document.getElementById(clearBtnId);
-                if (clearBtn) {
-                    clearBtn.addEventListener('click', () => {
-                        ctx.clearRect(0, 0, canvas.width, canvas.height);
-                    });
-                }
-
-                return {
-                    clear: () => ctx.clearRect(0, 0, canvas.width, canvas.height),
-                    getDataURL: () => canvas.toDataURL('image/png')
-                };
+                canvas.addEventListener('touchend', stop);
+                canvas.addEventListener('touchcancel', stop);
+                document.getElementById(clearBtnId)?.addEventListener('click', () => ctx.clearRect(0, 0, canvas.width, canvas.height));
+                return { clear: () => ctx.clearRect(0, 0, canvas.width, canvas.height), getDataURL: () => canvas.toDataURL('image/png') };
             }
         };
 
@@ -3528,20 +3460,11 @@
             async checkAuth() {
                 return new Promise((resolve) => {
                     auth.onAuthStateChanged(async (user) => {
-                        if (!user) {
-                            window.location.href = 'login.html';
-                            resolve(null);
-                            return;
-                        }
+                        if (!user) { window.location.href = 'login.html'; resolve(null); return; }
                         try {
                             const userRef = db.ref('users/' + user.uid);
                             const snapshot = await userRef.once('value');
-                            if (!snapshot.exists()) {
-                                await auth.signOut();
-                                window.location.href = 'login.html';
-                                resolve(null);
-                                return;
-                            }
+                            if (!snapshot.exists()) { await auth.signOut(); window.location.href = 'login.html'; resolve(null); return; }
                             const userData = snapshot.val();
                             if (userData.userType !== 'customer') {
                                 Utils.showToast('Access Denied', 'This dashboard is for customers only', 'error');
@@ -3553,18 +3476,9 @@
                             AppState.currentUser = user;
                             AppState.userData = userData;
                             await this.loadSystemSettings();
-
                             if (userData.banned === true) {
                                 document.getElementById('maintenanceOverlay').style.display = 'none';
                                 const banOverlay = document.getElementById('banOverlay');
-                                const banMessage = document.getElementById('banMessage');
-                                const banDetails = document.getElementById('banDetails');
-                                banMessage.textContent = `Sorry, ${userData.fullName || 'User'}`;
-                                if (AppState.systemSettings) {
-                                    banDetails.textContent = `You have been banned from TruCash. For more inquiries, contact ${AppState.systemSettings.customerContactEmail || 'support@trucash.zm'} or call ${AppState.systemSettings.customerContactPhone || '+260 123 456 789'}.`;
-                                } else {
-                                    banDetails.textContent = 'You have been banned from TruCash. For more inquiries, contact support@trucash.zm or call +260 123 456 789.';
-                                }
                                 banOverlay.style.display = 'flex';
                                 document.querySelector('.dashboard-container').style.opacity = '0.3';
                                 document.querySelector('.dashboard-container').style.pointerEvents = 'none';
@@ -3572,7 +3486,6 @@
                                 resolve(null);
                                 return;
                             }
-
                             if (AppState.systemSettings && AppState.systemSettings.enableCustomerApp === false) {
                                 document.getElementById('maintenanceOverlay').style.display = 'flex';
                                 document.querySelector('.dashboard-container').style.opacity = '0.3';
@@ -3583,7 +3496,6 @@
                             await this.loadCustomerData();
                             resolve(userData);
                         } catch (error) {
-                            console.error('Auth check error:', error);
                             Utils.showToast('Authentication Error', 'Failed to load user data', 'error');
                             resolve(null);
                         }
@@ -3599,48 +3511,34 @@
                         this.updateSettingsUI();
                     } else {
                         AppState.systemSettings = {
-                            maxLoanAmount: 50000,
-                            minLoanAmount: 100,
-                            monthlyInterestRate: 35,
-                            weeklyInterestRate: 10,
-                            maxLoanDuration: 24,
-                            minLoanDuration: 1,
-                            enableCustomerApp: true,
-                            customerContactPhone: '+260 123 456 789',
-                            customerContactEmail: 'support@trucash.zm',
-                            customerContactWebsite: 'https://trucash.zm'
+                            maxLoanAmount: 50000, minLoanAmount: 100, monthlyInterestRate: 35, weeklyInterestRate: 10,
+                            maxLoanDuration: 24, minLoanDuration: 1, enableCustomerApp: true,
+                            customerContactPhone: '+260 123 456 789', customerContactEmail: 'support@trucash.zm', customerContactWebsite: 'https://trucash.zm'
                         };
                     }
-                } catch (error) {
-                    console.error('Error loading system settings:', error);
-                }
+                } catch (error) { console.error(error); }
             },
             updateSettingsUI() {
                 if (!AppState.systemSettings) return;
-                document.getElementById('supportPhone').textContent = AppState.systemSettings.customerContactPhone || '+260 123 456 789';
-                document.getElementById('supportEmail').textContent = AppState.systemSettings.customerContactEmail || 'support@trucash.zm';
-                document.getElementById('supportWebsite').textContent = AppState.systemSettings.customerContactWebsite || 'https://trucash.zm';
-                document.getElementById('contactPhone').textContent = AppState.systemSettings.customerContactPhone || '+260 123 456 789';
-                document.getElementById('contactEmail').textContent = AppState.systemSettings.customerContactEmail || 'support@trucash.zm';
-                document.getElementById('contactWebsite').textContent = AppState.systemSettings.customerContactWebsite || 'https://trucash.zm';
-                const maxAmount = AppState.systemSettings.maxLoanAmount || 50000;
-                document.getElementById('loanLimitInfo').textContent = `Maximum loan amount: ${Utils.formatCurrency(maxAmount)}`;
+                document.getElementById('supportPhone').textContent = AppState.systemSettings.customerContactPhone;
+                document.getElementById('supportEmail').textContent = AppState.systemSettings.customerContactEmail;
+                document.getElementById('supportWebsite').textContent = AppState.systemSettings.customerContactWebsite;
+                document.getElementById('contactPhone').textContent = AppState.systemSettings.customerContactPhone;
+                document.getElementById('contactEmail').textContent = AppState.systemSettings.customerContactEmail;
+                document.getElementById('contactWebsite').textContent = AppState.systemSettings.customerContactWebsite;
+                document.getElementById('loanLimitInfo').textContent = `Maximum loan amount: ${Utils.formatCurrency(AppState.systemSettings.maxLoanAmount)}`;
             },
             async loadCustomerData() {
                 try {
-                    if (AppState.userData.assignedAgentId) {
-                        await this.loadAgentData(AppState.userData.assignedAgentId);
-                    }
+                    if (AppState.userData.assignedAgentId) await this.loadAgentData(AppState.userData.assignedAgentId);
                     await this.loadCustomerLoans();
                     await this.loadPayments();
                     await this.loadNotifications();
                     this.listenForNotifications();
                     await this.loadPromotions();
                     this.listenForPromotions();
-                } catch (error) {
-                    console.error('Error loading customer data:', error);
-                    Utils.showToast('Data Error', 'Failed to load customer data', 'error');
-                }
+                    this.listenForPaymentUpdates();
+                } catch (error) { Utils.showToast('Data Error', 'Failed to load customer data', 'error'); }
             },
             async loadAgentData(agentIdentifier) {
                 try {
@@ -3652,117 +3550,56 @@
                             if (agentData.userType === 'agent') {
                                 AppState.agentData = agentData;
                                 return { success: true, data: agentData };
-                            } else {
-                                return { success: false, error: 'User is not an agent' };
                             }
                         }
                     }
                     return await this.searchAgentById(agentIdentifier);
-                } catch (error) {
-                    console.error('Error loading agent data:', error);
-                    return { success: false, error: 'Error loading agent information' };
-                }
+                } catch (error) { return { success: false, error: 'Error loading agent information' }; }
             },
             async searchAgentById(agentId) {
                 try {
                     const agentsRef = db.ref('users');
-                    const snapshot = await agentsRef
-                        .orderByChild('agentId')
-                        .equalTo(agentId)
-                        .once('value');
+                    const snapshot = await agentsRef.orderByChild('agentId').equalTo(agentId).once('value');
                     if (snapshot.exists()) {
                         let agentData = null;
-                        let agentKey = null;
-                        snapshot.forEach((childSnapshot) => {
-                            agentData = childSnapshot.val();
-                            agentKey = childSnapshot.key;
-                        });
-                        if (agentData.userType === 'agent') {
-                            agentData.uid = agentKey;
-                            return { success: true, data: agentData };
-                        } else {
-                            return { success: false, error: 'User found but is not an agent' };
-                        }
+                        snapshot.forEach((childSnapshot) => { agentData = childSnapshot.val(); agentData.uid = childSnapshot.key; });
+                        if (agentData.userType === 'agent') return { success: true, data: agentData };
                     }
-                    const allAgentsRef = db.ref('users');
-                    const allSnapshot = await allAgentsRef.once('value');
+                    const allSnapshot = await db.ref('users').once('value');
                     if (allSnapshot.exists()) {
                         let foundAgent = null;
-                        let foundKey = null;
                         allSnapshot.forEach((childSnapshot) => {
                             const user = childSnapshot.val();
-                            const uid = childSnapshot.key;
                             if (user.userType === 'agent') {
-                                const searchFields = [
-                                    user.agentId,
-                                    user.email,
-                                    user.phone,
-                                    user.fullName
-                                ];
-                                const isMatch = searchFields.some(field => 
-                                    field && field.toString().toLowerCase().includes(agentId.toLowerCase())
-                                );
-                                if (isMatch) {
+                                if ((user.agentId && user.agentId.toLowerCase().includes(agentId.toLowerCase())) ||
+                                    (user.email && user.email.toLowerCase().includes(agentId.toLowerCase())) ||
+                                    (user.phone && user.phone.includes(agentId)) ||
+                                    (user.fullName && user.fullName.toLowerCase().includes(agentId.toLowerCase()))) {
                                     foundAgent = user;
-                                    foundAgent.uid = uid;
-                                    foundKey = uid;
+                                    foundAgent.uid = childSnapshot.key;
                                 }
                             }
                         });
-                        if (foundAgent) {
-                            return { success: true, data: foundAgent };
-                        }
+                        if (foundAgent) return { success: true, data: foundAgent };
                     }
                     return { success: false, error: 'Agent ID not found' };
-                } catch (error) {
-                    console.error('Error searching agent:', error);
-                    return { success: false, error: 'Error searching for agent' };
-                }
+                } catch (error) { return { success: false, error: 'Error searching for agent' }; }
             },
             async verifyAgentId(agentId) {
-                try {
-                    Utils.showLoading('Verifying Agent ID...');
-                    const result = await this.searchAgentById(agentId);
-                    if (!result.success) {
-                        Utils.hideLoading();
-                        return result;
-                    }
-                    const agentData = result.data;
-                    if (agentData.status !== 'active') {
-                        Utils.hideLoading();
-                        return { success: false, error: 'Agent account is not active' };
-                    }
-                    const customerRef = db.ref('users/' + AppState.currentUser.uid);
-                    await customerRef.update({
-                        assignedAgentId: agentData.uid,
-                        agentAssignedAt: Date.now(),
-                        updatedAt: Date.now(),
-                        agentCustomId: agentData.agentId
-                    });
-                    AppState.userData.assignedAgentId = agentData.uid;
-                    AppState.userData.agentCustomId = agentData.agentId;
-                    AppState.agentData = agentData;
-                    await this.addMessage(
-                        AppState.currentUser.uid,
-                        `You have been assigned agent ${agentData.fullName} (ID: ${agentData.agentId})`,
-                        'system'
-                    );
-                    await this.addMessage(
-                        agentData.uid,
-                        `Customer ${AppState.userData.fullName} has been assigned to you`,
-                        'system'
-                    );
-                    Utils.hideLoading();
-                    return { 
-                        success: true, 
-                        data: agentData,
-                        message: 'Agent verified and assigned successfully'
-                    };
-                } catch (error) {
-                    console.error('Error verifying agent:', error);
-                    Utils.hideLoading();
-                    return { success: false, error: 'Error verifying agent' };
-                }
+                Utils.showLoading('Verifying Agent ID...');
+                const result = await this.searchAgentById(agentId);
+                if (!result.success) { Utils.hideLoading(); return result; }
+                const agentData = result.data;
+                if (agentData.status !== 'active') { Utils.hideLoading(); return { success: false, error: 'Agent account is not active' }; }
+                const customerRef = db.ref('users/' + AppState.currentUser.uid);
+                await customerRef.update({ assignedAgentId: agentData.uid, agentAssignedAt: Date.now(), updatedAt: Date.now(), agentCustomId: agentData.agentId });
+                AppState.userData.assignedAgentId = agentData.uid;
+                AppState.userData.agentCustomId = agentData.agentId;
+                AppState.agentData = agentData;
+                await this.addMessage(AppState.currentUser.uid, `You have been assigned agent ${agentData.fullName} (ID: ${agentData.agentId})`, 'system');
+                await this.addMessage(agentData.uid, `Customer ${AppState.userData.fullName} has been assigned to you`, 'system');
+                Utils.hideLoading();
+                return { success: true, data: agentData, message: 'Agent verified and assigned successfully' };
             },
             async loadCustomerLoans() {
                 try {
@@ -3776,22 +3613,11 @@
                             loans.push(loan);
                         });
                         loans.sort((a, b) => b.createdAt - a.createdAt);
-                        AppState.activeLoans = loans.filter(loan => 
-                            loan.status === 'active' || 
-                            loan.status === 'pending' || 
-                            loan.status === 'approved'
-                        );
-                        AppState.completedLoans = loans.filter(loan => 
-                            loan.status === 'completed' || 
-                            loan.status === 'defaulted' || 
-                            loan.status === 'rejected'
-                        );
+                        AppState.activeLoans = loans.filter(loan => loan.status === 'active' || loan.status === 'pending' || loan.status === 'approved');
+                        AppState.completedLoans = loans.filter(loan => loan.status === 'completed' || loan.status === 'defaulted' || loan.status === 'rejected');
                     }
                     return loans;
-                } catch (error) {
-                    console.error('Error loading loans:', error);
-                    return [];
-                }
+                } catch (error) { return []; }
             },
             async loadPayments() {
                 try {
@@ -3808,29 +3634,40 @@
                         AppState.payments = payments;
                     }
                     return payments;
-                } catch (error) {
-                    console.error('Error loading payments:', error);
-                    return [];
-                }
+                } catch (error) { return []; }
+            },
+            listenForPaymentUpdates() {
+                if (!AppState.currentUser) return;
+                const paymentsRef = db.ref('payments').orderByChild('customerId').equalTo(AppState.currentUser.uid);
+                paymentsRef.on('child_changed', (snapshot) => {
+                    const updatedPayment = snapshot.val();
+                    updatedPayment.id = snapshot.key;
+                    const index = AppState.payments.findIndex(p => p.id === updatedPayment.id);
+                    if (index !== -1) {
+                        AppState.payments[index] = updatedPayment;
+                        UIManager.updatePaymentsUI();
+                        UIManager.updateDashboardUI();
+                        if (updatedPayment.status === 'verified') {
+                            Utils.showToast('Payment Confirmed', `Your payment of ${Utils.formatCurrency(updatedPayment.amount)} has been confirmed.`, 'info', 8000, `payment_confirmed_${updatedPayment.id}`);
+                        } else if (updatedPayment.status === 'rejected') {
+                            Utils.showToast('Payment Rejected', `Your payment of ${Utils.formatCurrency(updatedPayment.amount)} was rejected. Reason: ${updatedPayment.notes || 'Please contact support.'}`, 'error', 10000, `payment_rejected_${updatedPayment.id}`);
+                        }
+                    }
+                });
             },
             async loadNotifications() {
                 try {
-                    const snap = await db.ref('messages')
-                        .orderByChild('recipientId')
-                        .once('value');
+                    const snap = await db.ref('messages').orderByChild('recipientId').once('value');
                     const allMessages = snap.val() || {};
                     AppState.notifications = [];
                     Object.entries(allMessages).forEach(([id, msg]) => {
                         if (msg.recipientId === AppState.currentUser?.uid || msg.recipientId === 'all_customers') {
                             AppState.notifications.push({ id, ...msg });
-                            // Schedule auto-deletion after 30 minutes
                             Utils.scheduleNotificationDeletion(id, msg.timestamp || Date.now());
                         }
                     });
                     AppState.notifications.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-                } catch (error) {
-                    console.error('Error loading notifications:', error);
-                }
+                } catch (error) { console.error(error); }
             },
             listenForNotifications() {
                 if (!AppState.currentUser) return;
@@ -3838,36 +3675,13 @@
                     const msg = snap.val();
                     if (msg.recipientId === AppState.currentUser.uid || msg.recipientId === 'all_customers') {
                         AppState.notifications.unshift({ id: snap.key, ...msg });
-                        // Schedule auto-deletion after 30 minutes
                         Utils.scheduleNotificationDeletion(snap.key, msg.timestamp || Date.now());
                         UIManager.updateNotificationBadge();
                         UIManager.renderNotificationsSidebar();
-                        if (AppState.currentSection === 'notifications') {
-                            UIManager.updateNotificationsUI();
-                        }
+                        if (AppState.currentSection === 'notifications') UIManager.updateNotificationsUI();
                         Utils.showToast('📬 New Message', msg.message, 'info', 8000, `msg_${snap.key}`);
                     }
                 });
-                db.ref('messages').on('child_changed', (snap) => {
-                    const msg = snap.val();
-                    if (msg.recipientId === AppState.currentUser.uid || msg.recipientId === 'all_customers') {
-                        const index = AppState.notifications.findIndex(n => n.id === snap.key);
-                        if (index !== -1) AppState.notifications[index] = { id: snap.key, ...msg };
-                        UIManager.updateNotificationBadge();
-                        UIManager.renderNotificationsSidebar();
-                        if (AppState.currentSection === 'notifications') {
-                            UIManager.updateNotificationsUI();
-                        }
-                    }
-                });
-            },
-            async permanentlyDeleteNotification(notificationId) {
-                try {
-                    await db.ref('messages/' + notificationId).remove();
-                    console.log(`Notification ${notificationId} permanently deleted after 30 minutes`);
-                } catch (error) {
-                    console.error('Error deleting notification:', error);
-                }
             },
             async loadPromotions() {
                 try {
@@ -3884,13 +3698,8 @@
                     AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
                     Utils.loadSeenPromotions();
                     const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
-                    if (unseen.length > 0) {
-                        AppState.currentPromotionIndex = 0;
-                        UIManager.showFloatingPromotion(unseen[0]);
-                    }
-                } catch (error) {
-                    console.error('Error loading promotions:', error);
-                }
+                    if (unseen.length > 0) UIManager.showFloatingPromotion(unseen[0]);
+                } catch (error) { console.error(error); }
             },
             listenForPromotions() {
                 db.ref('promotions').on('child_added', (snap) => {
@@ -3899,25 +3708,9 @@
                     if (promo.active && (promo.recipients === 'all_customers' || promo.recipients === 'both') && (!promo.expiresAt || promo.expiresAt > now)) {
                         if (!AppState.promotions.find(p => p.id === snap.key)) {
                             AppState.promotions.unshift({ id: snap.key, ...promo });
-                            AppState.promotions.sort((a,b) => (b.createdAt || 0) - (a.createdAt || 0));
                             if (!AppState.seenPromotions.has(snap.key) && !document.getElementById('floatingPromo').classList.contains('show')) {
                                 UIManager.showFloatingPromotion({ id: snap.key, ...promo });
                             }
-                        }
-                    }
-                });
-                db.ref('promotions').on('child_changed', (snap) => {
-                    const promo = snap.val();
-                    const index = AppState.promotions.findIndex(p => p.id === snap.key);
-                    if (index !== -1) {
-                        const now = Date.now();
-                        if (!promo.active || (promo.recipients !== 'all_customers' && promo.recipients !== 'both') || (promo.expiresAt && promo.expiresAt < now)) {
-                            AppState.promotions.splice(index, 1);
-                            if (document.getElementById('floatingPromo').classList.contains('show') && AppState.promotions[AppState.currentPromotionIndex]?.id === snap.key) {
-                                UIManager.closeFloatingPromotion();
-                            }
-                        } else {
-                            AppState.promotions[index] = { id: snap.key, ...promo };
                         }
                     }
                 });
@@ -3925,315 +3718,136 @@
             async addMessage(recipientId, message, type = 'system') {
                 try {
                     const msgRef = db.ref('messages/' + Utils.generateId('MSG'));
-                    await msgRef.set({
-                        recipientId,
-                        message,
-                        timestamp: Date.now(),
-                        read: false,
-                        type
-                    });
+                    await msgRef.set({ recipientId, message, timestamp: Date.now(), read: false, type });
                     return { success: true };
-                } catch (error) {
-                    console.error('Error adding message:', error);
-                    return { success: false, error: error.message };
-                }
+                } catch (error) { return { success: false }; }
             },
             async uploadSignedAgreement(htmlContent) {
                 try {
                     const blob = new Blob([htmlContent], { type: 'text/html' });
-                    const result = await CloudinaryService.uploadRawFile(blob, `agreement_${Date.now()}.html`);
-                    return result;
-                } catch (error) {
-                    console.error('Error uploading agreement to Cloudinary:', error);
-                    return { success: false, error: error.message };
-                }
+                    return await CloudinaryService.uploadRawFile(blob, `agreement_${Date.now()}.html`);
+                } catch (error) { return { success: false, error: error.message }; }
             },
             async submitLoanApplication(loanData, signedAgreementUrl, witnessData) {
-                try {
-                    Utils.showLoading('Submitting Loan Application...');
-                    if (!AppState.userData.nrcFront || !AppState.userData.nrcBack) {
-                        return { 
-                            success: false, 
-                            error: 'Please upload both NRC front and back photos in your profile before applying.' 
-                        };
-                    }
-                    const collateralImages = Object.values(AppState.uploadedCollateral)
-                        .filter(file => file && file.type && file.type.includes('collateral'))
-                        .map(file => file.url);
-                    if (collateralImages.length < 3) {
-                        return { 
-                            success: false, 
-                            error: 'Minimum 3 collateral images required. Please upload at least 3 images.' 
-                        };
-                    }
-                    const maxAmount = AppState.systemSettings?.maxLoanAmount || 50000;
-                    if (loanData.amount > maxAmount) {
-                        return { 
-                            success: false, 
-                            error: `Loan amount exceeds maximum limit of ${Utils.formatCurrency(maxAmount)}` 
-                        };
-                    }
-                    const minAmount = AppState.systemSettings?.minLoanAmount || 100;
-                    if (loanData.amount < minAmount) {
-                        return { 
-                            success: false, 
-                            error: `Loan amount must be at least ${Utils.formatCurrency(minAmount)}` 
-                        };
-                    }
-                    const hasActiveLoan = AppState.activeLoans.some(loan => 
-                        loan.status === 'active' || loan.status === 'pending'
-                    );
-                    if (hasActiveLoan) {
-                        return { 
-                            success: false, 
-                            error: 'You already have an active or pending loan. Please complete it before applying for a new one.' 
-                        };
-                    }
-
-                    let totalInterest, totalPayable, periodicPayment, repaymentSchedule;
-                    const isWeekly = loanData.durationUnit === 'weeks';
-                    const rate = isWeekly 
-                        ? (AppState.systemSettings?.weeklyInterestRate || 10) / 100 
-                        : (AppState.systemSettings?.monthlyInterestRate || 35) / 100;
-                    
-                    totalInterest = Utils.calculateTotalInterest(loanData.amount, rate, loanData.duration, isWeekly);
-                    totalPayable = loanData.amount + totalInterest;
-                    periodicPayment = isWeekly
-                        ? Utils.calculateWeeklyPayment(loanData.amount, rate, loanData.duration)
-                        : Utils.calculateMonthlyPayment(loanData.amount, rate * 12, loanData.duration);
-                    
-                    repaymentSchedule = Utils.generateRepaymentSchedule(loanData.amount, rate, loanData.duration, isWeekly);
-
-                    const loanId = Utils.generateId('LN');
-                    const loanRef = db.ref('loans/' + loanId);
-                    const loan = {
-                        id: loanId,
-                        customerId: AppState.currentUser.uid,
-                        customerName: AppState.userData.fullName,
-                        customerEmail: AppState.currentUser.email,
-                        customerPhone: AppState.userData.phone,
-                        agentId: AppState.userData.assignedAgentId,
-                        agentName: AppState.agentData?.fullName || 'Not assigned',
-                        amount: loanData.amount,
-                        approvedAmount: loanData.amount,
-                        duration: loanData.duration,
-                        durationUnit: loanData.durationUnit,
-                        interestRate: isWeekly ? 10 : 35,
-                        totalInterest: totalInterest,
-                        totalPayable: totalPayable,
-                        periodicPayment: periodicPayment,
-                        purpose: loanData.purpose,
-                        purposeDescription: loanData.purposeDescription,
-                        collateral: {
-                            category: loanData.collateralCategory,
-                            description: loanData.collateralDescription,
-                            value: loanData.collateralValue,
-                            location: loanData.collateralLocation,
-                            images: collateralImages
-                        },
-                        status: 'pending',
-                        stage: 'submitted',
-                        createdAt: Date.now(),
-                        updatedAt: Date.now(),
-                        documents: {
-                            nrcFront: AppState.userData.nrcFront,
-                            nrcBack: AppState.userData.nrcBack,
-                            profilePhoto: AppState.userData.profilePhoto
-                        },
-                        repaymentSchedule: repaymentSchedule,
-                        signedAgreementUrl: signedAgreementUrl,
-                        witness: witnessData,
-                        totalPaid: 0
-                    };
-                    await loanRef.set(loan);
-                    await this.addMessage(
-                        AppState.currentUser.uid,
-                        `Your loan application for ${Utils.formatCurrency(loanData.amount)} has been submitted.`,
-                        'system'
-                    );
-                    if (AppState.userData.assignedAgentId) {
-                        await this.addMessage(
-                            AppState.userData.assignedAgentId,
-                            `${AppState.userData.fullName} has submitted a loan application for ${Utils.formatCurrency(loanData.amount)}.`,
-                            'system'
-                        );
-                    }
-                    await this.loadCustomerLoans();
+                Utils.showLoading('Submitting Loan Application...');
+                if (!AppState.userData.nrcFront || !AppState.userData.nrcBack) {
                     Utils.hideLoading();
-                    return { success: true, loanId: loanId, message: 'Loan application submitted successfully!' };
-                } catch (error) {
-                    console.error('Error submitting loan:', error);
-                    Utils.hideLoading();
-                    return { success: false, error: 'Failed to submit loan application' };
+                    return { success: false, error: 'Please upload both NRC front and back photos.' };
                 }
+                const collateralImages = Object.values(AppState.uploadedCollateral).filter(f => f && f.type && f.type.includes('collateral')).map(f => f.url);
+                if (collateralImages.length < 3) {
+                    Utils.hideLoading();
+                    return { success: false, error: 'Minimum 3 collateral images required.' };
+                }
+                const maxAmount = AppState.systemSettings?.maxLoanAmount || 50000;
+                const minAmount = AppState.systemSettings?.minLoanAmount || 100;
+                if (loanData.amount > maxAmount || loanData.amount < minAmount) {
+                    Utils.hideLoading();
+                    return { success: false, error: `Loan amount must be between ${Utils.formatCurrency(minAmount)} and ${Utils.formatCurrency(maxAmount)}.` };
+                }
+                const hasActiveLoan = AppState.activeLoans.some(loan => loan.status === 'active' || loan.status === 'pending');
+                if (hasActiveLoan) {
+                    Utils.hideLoading();
+                    return { success: false, error: 'You already have an active or pending loan.' };
+                }
+                const isWeekly = loanData.durationUnit === 'weeks';
+                const rate = isWeekly ? (AppState.systemSettings?.weeklyInterestRate || 10) / 100 : (AppState.systemSettings?.monthlyInterestRate || 35) / 100;
+                const totalInterest = Utils.calculateTotalInterest(loanData.amount, rate, loanData.duration, isWeekly);
+                const totalPayable = loanData.amount + totalInterest;
+                const periodicPayment = isWeekly ? Utils.calculateWeeklyPayment(loanData.amount, rate, loanData.duration) : Utils.calculateMonthlyPayment(loanData.amount, rate * 12, loanData.duration);
+                const repaymentSchedule = Utils.generateRepaymentSchedule(loanData.amount, rate, loanData.duration, isWeekly);
+                const loanId = Utils.generateId('LN');
+                const loan = {
+                    id: loanId, customerId: AppState.currentUser.uid, customerName: AppState.userData.fullName,
+                    customerEmail: AppState.currentUser.email, customerPhone: AppState.userData.phone,
+                    agentId: AppState.userData.assignedAgentId, agentName: AppState.agentData?.fullName || 'Not assigned',
+                    amount: loanData.amount, approvedAmount: loanData.amount, duration: loanData.duration,
+                    durationUnit: loanData.durationUnit, interestRate: isWeekly ? 10 : 35,
+                    totalInterest, totalPayable, periodicPayment, purpose: loanData.purpose,
+                    purposeDescription: loanData.purposeDescription,
+                    collateral: { category: loanData.collateralCategory, description: loanData.collateralDescription, value: loanData.collateralValue, location: loanData.collateralLocation, images: collateralImages },
+                    status: 'pending', stage: 'submitted', createdAt: Date.now(), updatedAt: Date.now(),
+                    documents: { nrcFront: AppState.userData.nrcFront, nrcBack: AppState.userData.nrcBack, profilePhoto: AppState.userData.profilePhoto },
+                    repaymentSchedule, signedAgreementUrl, witness: witnessData, totalPaid: 0
+                };
+                await db.ref('loans/' + loanId).set(loan);
+                await this.addMessage(AppState.currentUser.uid, `Your loan application for ${Utils.formatCurrency(loanData.amount)} has been submitted.`, 'system');
+                if (AppState.userData.assignedAgentId) {
+                    await this.addMessage(AppState.userData.assignedAgentId, `${AppState.userData.fullName} has submitted a loan application for ${Utils.formatCurrency(loanData.amount)}.`, 'system');
+                }
+                await this.loadCustomerLoans();
+                Utils.hideLoading();
+                return { success: true, loanId, message: 'Loan application submitted successfully!' };
             },
             async makePayment(paymentData) {
-                try {
-                    Utils.showLoading('Processing Payment...');
-                    const paymentId = Utils.generateId('PAY');
-                    const paymentRef = db.ref('payments/' + paymentId);
-                    const proofUrl = paymentData.proofUrl || '';
-                    const payment = {
-                        id: paymentId,
-                        loanId: paymentData.loanId,
-                        customerId: AppState.currentUser.uid,
-                        customerName: AppState.userData.fullName,
-                        amount: paymentData.amount,
-                        method: paymentData.method,
-                        reference: paymentData.reference || '',
-                        proofUrl: proofUrl,
-                        timestamp: Date.now(),
-                        status: 'pending',
-                        verifiedBy: null,
-                        verifiedAt: null,
-                        notes: paymentData.notes || ''
-                    };
-                    await paymentRef.set(payment);
-
-                    const loanRef = db.ref('loans/' + paymentData.loanId);
-                    const loanSnap = await loanRef.once('value');
-                    const loan = loanSnap.val();
-                    const newTotalPaid = (loan.totalPaid || 0) + paymentData.amount;
-
-                    let updatedStatus = loan.status;
-                    if (newTotalPaid >= loan.totalPayable) {
-                        updatedStatus = 'completed';
-                        const updatedSchedule = loan.repaymentSchedule.map(inst => ({
-                            ...inst,
-                            status: 'paid',
-                            paidAmount: inst.totalDue,
-                            paidAt: Date.now()
-                        }));
-                        await loanRef.update({
-                            totalPaid: newTotalPaid,
-                            status: updatedStatus,
-                            repaymentSchedule: updatedSchedule,
-                            updatedAt: Date.now(),
-                            lastPaymentDate: Date.now()
-                        });
-                    } else {
-                        await loanRef.update({
-                            totalPaid: newTotalPaid,
-                            updatedAt: Date.now(),
-                            lastPaymentDate: Date.now()
-                        });
-                    }
-
-                    await this.addMessage(
-                        AppState.currentUser.uid,
-                        `Payment of ${Utils.formatCurrency(paymentData.amount)} submitted for verification.`,
-                        'system'
-                    );
-
-                    Utils.hideLoading();
-                    return { success: true, paymentId: paymentId, message: 'Payment submitted for verification' };
-                } catch (error) {
-                    console.error('Error making payment:', error);
-                    Utils.hideLoading();
-                    return { success: false, error: 'Failed to process payment' };
-                }
+                Utils.showLoading('Processing Payment...');
+                const paymentId = Utils.generateId('PAY');
+                const payment = {
+                    id: paymentId, loanId: paymentData.loanId, customerId: AppState.currentUser.uid,
+                    customerName: AppState.userData.fullName, amount: paymentData.amount,
+                    method: paymentData.method, reference: paymentData.reference || '',
+                    proofUrl: paymentData.proofUrl, timestamp: Date.now(), status: 'pending',
+                    verifiedBy: null, verifiedAt: null, notes: ''
+                };
+                await db.ref('payments/' + paymentId).set(payment);
+                await this.addMessage(AppState.currentUser.uid, `Payment of ${Utils.formatCurrency(paymentData.amount)} submitted for verification.`, 'system');
+                Utils.hideLoading();
+                return { success: true, paymentId, message: 'Payment submitted for verification' };
             },
             async markNotificationAsRead(notificationId) {
-                try {
-                    await db.ref('messages/' + notificationId).update({ read: true });
-                    const n = AppState.notifications.find(n => n.id === notificationId);
-                    if (n) n.read = true;
-                    UIManager.updateNotificationBadge();
-                    UIManager.renderNotificationsSidebar();
-                    if (AppState.currentSection === 'notifications') UIManager.updateNotificationsUI();
-                    return { success: true };
-                } catch (error) {
-                    console.error('Error marking notification as read:', error);
-                    return { success: false };
-                }
+                await db.ref('messages/' + notificationId).update({ read: true });
+                const n = AppState.notifications.find(n => n.id === notificationId);
+                if (n) n.read = true;
+                UIManager.updateNotificationBadge();
+                UIManager.renderNotificationsSidebar();
+                if (AppState.currentSection === 'notifications') UIManager.updateNotificationsUI();
             },
             async markAllNotificationsAsRead() {
-                try {
-                    const updates = {};
-                    AppState.notifications.forEach(n => {
-                        if (!n.read) {
-                            updates['messages/' + n.id + '/read'] = true;
-                            n.read = true;
-                        }
-                    });
-                    if (Object.keys(updates).length) {
-                        await db.ref().update(updates);
-                    }
-                    UIManager.updateNotificationBadge();
-                    UIManager.renderNotificationsSidebar();
-                    if (AppState.currentSection === 'notifications') UIManager.updateNotificationsUI();
-                    return { success: true };
-                } catch (error) {
-                    console.error('Error marking all as read:', error);
-                    return { success: false };
-                }
+                const updates = {};
+                AppState.notifications.forEach(n => { if (!n.read) updates['messages/' + n.id + '/read'] = true; n.read = true; });
+                if (Object.keys(updates).length) await db.ref().update(updates);
+                UIManager.updateNotificationBadge();
+                UIManager.renderNotificationsSidebar();
+                if (AppState.currentSection === 'notifications') UIManager.updateNotificationsUI();
             },
             async updateProfile(profileData) {
-                try {
-                    Utils.showLoading('Updating Profile...');
-                    const updates = {
-                        ...profileData,
-                        updatedAt: Date.now()
-                    };
-                    const userRef = db.ref('users/' + AppState.currentUser.uid);
-                    await userRef.update(updates);
-                    AppState.userData = { ...AppState.userData, ...updates };
-                    UIManager.updateProfileUI();
-                    UIManager.updateCreditScore();
-                    Utils.hideLoading();
-                    return { success: true, message: 'Profile updated successfully' };
-                } catch (error) {
-                    console.error('Error updating profile:', error);
-                    Utils.hideLoading();
-                    return { success: false, error: 'Failed to update profile' };
-                }
+                Utils.showLoading('Updating Profile...');
+                const updates = { ...profileData, updatedAt: Date.now() };
+                await db.ref('users/' + AppState.currentUser.uid).update(updates);
+                AppState.userData = { ...AppState.userData, ...updates };
+                UIManager.updateProfileUI();
+                UIManager.updateCreditScore();
+                Utils.hideLoading();
+                return { success: true, message: 'Profile updated successfully' };
             },
             async changePassword(currentPassword, newPassword) {
+                Utils.showLoading('Changing Password...');
                 try {
-                    Utils.showLoading('Changing Password...');
-                    const credential = firebase.auth.EmailAuthProvider.credential(
-                        AppState.currentUser.email,
-                        currentPassword
-                    );
+                    const credential = firebase.auth.EmailAuthProvider.credential(AppState.currentUser.email, currentPassword);
                     await AppState.currentUser.reauthenticateWithCredential(credential);
                     await AppState.currentUser.updatePassword(newPassword);
                     Utils.hideLoading();
                     return { success: true, message: 'Password changed successfully' };
                 } catch (error) {
-                    console.error('Error changing password:', error);
                     Utils.hideLoading();
                     let errorMessage = 'Failed to change password';
-                    if (error.code === 'auth/wrong-password') {
-                        errorMessage = 'Current password is incorrect';
-                    } else if (error.code === 'auth/weak-password') {
-                        errorMessage = 'New password must be at least 6 characters';
-                    } else if (error.code === 'auth/requires-recent-login') {
-                        errorMessage = 'Please re-login to change password';
-                    }
+                    if (error.code === 'auth/wrong-password') errorMessage = 'Current password is incorrect';
+                    else if (error.code === 'auth/weak-password') errorMessage = 'New password must be at least 6 characters';
+                    else if (error.code === 'auth/requires-recent-login') errorMessage = 'Please re-login to change password';
                     return { success: false, error: errorMessage };
                 }
             },
             async signOut() {
-                try {
-                    AppState.realtimeListeners.forEach(listener => {
-                        if (typeof listener === 'function') listener();
-                    });
-                    AppState.realtimeListeners = [];
-                    // Clear all notification deletion timeouts
-                    for (const [id, timeout] of AppState.notificationDeleteTimeouts.entries()) {
-                        clearTimeout(timeout);
-                    }
-                    AppState.notificationDeleteTimeouts.clear();
-                    await auth.signOut();
-                    window.location.href = 'login.html';
-                } catch (error) {
-                    console.error('Error signing out:', error);
-                    Utils.showToast('Logout Error', 'Failed to logout', 'error');
-                }
+                AppState.realtimeListeners.forEach(listener => listener());
+                AppState.realtimeListeners = [];
+                for (const [id, timeout] of AppState.notificationDeleteTimeouts.entries()) clearTimeout(timeout);
+                AppState.notificationDeleteTimeouts.clear();
+                await auth.signOut();
+                window.location.href = 'login.html';
             }
         };
 
-        // ===== Enhanced UI Manager =====
+        // ===== UI Manager =====
         const UIManager = {
             init() {
                 this.cacheElements();
@@ -4323,16 +3937,8 @@
                 this.agentCardContainer = document.getElementById('agentCardContainer');
             },
             bindEvents() {
-                this.menuToggle?.addEventListener('click', () => {
-                    this.sidebar.classList.toggle('active');
-                });
-                document.addEventListener('click', (e) => {
-                    if (window.innerWidth <= 992) {
-                        if (!this.sidebar.contains(e.target) && !this.menuToggle.contains(e.target)) {
-                            this.sidebar.classList.remove('active');
-                        }
-                    }
-                });
+                this.menuToggle?.addEventListener('click', () => this.sidebar.classList.toggle('active'));
+                document.addEventListener('click', (e) => { if (window.innerWidth <= 992 && !this.sidebar.contains(e.target) && !this.menuToggle.contains(e.target)) this.sidebar.classList.remove('active'); });
                 this.navItems.forEach(item => {
                     item.addEventListener('click', (e) => {
                         e.preventDefault();
@@ -4340,9 +3946,7 @@
                         this.showSection(section);
                         this.navItems.forEach(nav => nav.classList.remove('active'));
                         item.classList.add('active');
-                        if (window.innerWidth <= 992) {
-                            this.sidebar.classList.remove('active');
-                        }
+                        if (window.innerWidth <= 992) this.sidebar.classList.remove('active');
                     });
                 });
                 this.mobileNavItems.forEach(item => {
@@ -4352,25 +3956,15 @@
                         this.showSection(section);
                         this.mobileNavItems.forEach(nav => nav.classList.remove('active'));
                         item.classList.add('active');
-                        this.navItems.forEach(nav => nav.classList.remove('active'));
                         document.querySelector(`.nav-item[data-section="${section}"]`)?.classList.add('active');
                     });
                 });
                 this.verifyAgentBtn.addEventListener('click', () => this.verifyAgent());
-                this.agentIdInput.addEventListener('keyup', (e) => {
-                    if (e.key === 'Enter') this.verifyAgent();
-                });
-                this.changeAgentBtn.addEventListener('click', () => {
-                    this.agentIdInput.value = '';
-                    this.agentIdInput.focus();
-                    this.agentValidationMessage.textContent = 'Enter new Agent ID';
-                    this.agentValidationMessage.className = 'text-muted';
-                });
+                this.agentIdInput.addEventListener('keyup', (e) => { if (e.key === 'Enter') this.verifyAgent(); });
+                this.changeAgentBtn.addEventListener('click', () => { this.agentIdInput.value = ''; this.agentIdInput.focus(); this.agentValidationMessage.textContent = 'Enter new Agent ID'; });
                 this.contactAgentBtn.addEventListener('click', () => this.contactAgent());
                 this.viewAgentProfileBtn.addEventListener('click', () => this.showAgentProfileModal());
-                this.applyLoanBtn.addEventListener('click', () => {
-                    this.showSection('apply');
-                });
+                this.applyLoanBtn.addEventListener('click', () => this.showSection('apply'));
                 this.makePaymentBtn.addEventListener('click', () => this.showPaymentModal());
                 this.viewStatementBtn.addEventListener('click', () => this.showStatementModal());
                 this.contactSupportBtn.addEventListener('click', () => this.showSupportModal());
@@ -4380,80 +3974,29 @@
                 this.editProfileBtn.addEventListener('click', () => this.showEditProfileModal());
                 this.logoutBtn.addEventListener('click', () => FirebaseService.signOut());
                 this.sidebarLogoutBtn.addEventListener('click', () => FirebaseService.signOut());
-                document.getElementById('closePaymentModal')?.addEventListener('click', () => {
-                    this.paymentModal.classList.remove('active');
-                });
-                document.getElementById('closeAgentProfileModal')?.addEventListener('click', () => {
-                    this.agentProfileModal.classList.remove('active');
-                });
-                document.getElementById('closeDocumentModal')?.addEventListener('click', () => {
-                    this.documentModal.classList.remove('active');
-                });
-                document.getElementById('closePasswordModal')?.addEventListener('click', () => {
-                    this.changePasswordModal.classList.remove('active');
-                });
-                document.getElementById('closeEditProfileModal')?.addEventListener('click', () => {
-                    this.editProfileModal.classList.remove('active');
-                });
-                document.getElementById('closeStatementModal')?.addEventListener('click', () => {
-                    this.statementModal.classList.remove('active');
-                });
-                document.getElementById('closeSupportModal')?.addEventListener('click', () => {
-                    this.supportModal.classList.remove('active');
-                });
-                document.getElementById('submitPasswordChange')?.addEventListener('click', () => {
-                    this.changePassword();
-                });
-                document.getElementById('cancelPasswordChange')?.addEventListener('click', () => {
-                    this.changePasswordModal.classList.remove('active');
-                });
-                document.getElementById('saveProfileChanges')?.addEventListener('click', () => {
-                    this.saveProfileChanges();
-                });
-                document.getElementById('cancelEditProfile')?.addEventListener('click', () => {
-                    this.editProfileModal.classList.remove('active');
-                });
-                document.getElementById('uploadProfilePhotoBtn')?.addEventListener('click', () => {
-                    CloudinaryService.openProfilePhotoWidget();
-                });
-                document.querySelectorAll('.modal').forEach(modal => {
-                    modal.addEventListener('click', (e) => {
-                        if (e.target === modal) {
-                            modal.classList.remove('active');
-                        }
-                    });
-                });
-                document.addEventListener('keydown', (e) => {
-                    if (e.key === 'Escape') {
-                        document.querySelectorAll('.modal.active').forEach(modal => {
-                            modal.classList.remove('active');
-                        });
-                        if (window.innerWidth <= 992) {
-                            this.sidebar.classList.remove('active');
-                        }
-                    }
-                });
-                this.showCertificateBtn?.addEventListener('click', () => {
-                    if (this.certificateContainer.style.display === 'none') {
-                        this.certificateContainer.style.display = 'block';
-                    } else {
-                        this.certificateContainer.style.display = 'none';
-                    }
-                });
-                document.getElementById('closeLoanAgreementModal')?.addEventListener('click', () => {
-                    this.loanAgreementModal.classList.remove('active');
-                });
-                document.getElementById('closeLoanDetailsModal')?.addEventListener('click', () => {
-                    this.loanDetailsModal.classList.remove('active');
-                });
+                document.getElementById('closePaymentModal')?.addEventListener('click', () => this.paymentModal.classList.remove('active'));
+                document.getElementById('closeAgentProfileModal')?.addEventListener('click', () => this.agentProfileModal.classList.remove('active'));
+                document.getElementById('closeDocumentModal')?.addEventListener('click', () => this.documentModal.classList.remove('active'));
+                document.getElementById('closePasswordModal')?.addEventListener('click', () => this.changePasswordModal.classList.remove('active'));
+                document.getElementById('closeEditProfileModal')?.addEventListener('click', () => this.editProfileModal.classList.remove('active'));
+                document.getElementById('closeStatementModal')?.addEventListener('click', () => this.statementModal.classList.remove('active'));
+                document.getElementById('closeSupportModal')?.addEventListener('click', () => this.supportModal.classList.remove('active'));
+                document.getElementById('submitPasswordChange')?.addEventListener('click', () => this.changePassword());
+                document.getElementById('cancelPasswordChange')?.addEventListener('click', () => this.changePasswordModal.classList.remove('active'));
+                document.getElementById('saveProfileChanges')?.addEventListener('click', () => this.saveProfileChanges());
+                document.getElementById('cancelEditProfile')?.addEventListener('click', () => this.editProfileModal.classList.remove('active'));
+                document.getElementById('uploadProfilePhotoBtn')?.addEventListener('click', () => CloudinaryService.openProfilePhotoWidget());
+                document.querySelectorAll('.modal').forEach(modal => { modal.addEventListener('click', (e) => { if (e.target === modal) modal.classList.remove('active'); }); });
+                document.addEventListener('keydown', (e) => { if (e.key === 'Escape') { document.querySelectorAll('.modal.active').forEach(modal => modal.classList.remove('active')); if (window.innerWidth <= 992) this.sidebar.classList.remove('active'); } });
+                this.showCertificateBtn?.addEventListener('click', () => { if (this.certificateContainer.style.display === 'none') this.certificateContainer.style.display = 'block'; else this.certificateContainer.style.display = 'none'; });
+                document.getElementById('closeLoanAgreementModal')?.addEventListener('click', () => this.loanAgreementModal.classList.remove('active'));
+                document.getElementById('closeLoanDetailsModal')?.addEventListener('click', () => this.loanDetailsModal.classList.remove('active'));
                 this.loanTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
-                        const status = tab.dataset.status;
-                        AppState.currentLoanStatusFilter = status;
+                        AppState.currentLoanStatusFilter = tab.dataset.status;
                         this.loanTabs.forEach(t => t.classList.remove('active'));
                         tab.classList.add('active');
-                        document.getElementById('loanStatusTitle').textContent = 
-                            status.charAt(0).toUpperCase() + status.slice(1) + ' Loans';
+                        document.getElementById('loanStatusTitle').textContent = tab.dataset.status.charAt(0).toUpperCase() + tab.dataset.status.slice(1) + ' Loans';
                         this.updateLoansUI();
                     });
                 });
@@ -4469,23 +4012,16 @@
                 this.mobileNotificationBell.addEventListener('click', () => this.openNotificationsSidebar());
                 this.markAllReadBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
                 this.closeFloatingPromo.addEventListener('click', () => this.closeFloatingPromotion());
-                if (this.paymentDueCard) {
-                    this.paymentDueCard.addEventListener('click', () => this.handlePaymentDueClick());
-                }
+                if (this.paymentDueCard) this.paymentDueCard.addEventListener('click', () => this.handlePaymentDueClick());
                 this.closeNotificationsSidebar?.addEventListener('click', () => this.closeNotificationsSidebarFunc());
                 this.markAllReadSidebarBtn?.addEventListener('click', () => this.markAllNotificationsAsRead());
             },
-            openNotificationsSidebar() {
-                this.renderNotificationsSidebar();
-                this.notificationsSidebar.classList.add('active');
-            },
-            closeNotificationsSidebarFunc() {
-                this.notificationsSidebar.classList.remove('active');
-            },
+            openNotificationsSidebar() { this.renderNotificationsSidebar(); this.notificationsSidebar.classList.add('active'); },
+            closeNotificationsSidebarFunc() { this.notificationsSidebar.classList.remove('active'); },
             renderNotificationsSidebar() {
                 if (!this.notificationsSidebarList) return;
                 if (AppState.notifications.length === 0) {
-                    this.notificationsSidebarList.innerHTML = '<div class="text-center py-4"><i class="fas fa-bell" style="font-size: 40px; color: var(--ios-gray-3);"></i><p class="text-muted mt-2">No notifications</p></div>';
+                    this.notificationsSidebarList.innerHTML = '<div class="text-center py-4"><i class="fas fa-bell" style="font-size:40px; color:var(--ios-gray-3);"></i><p class="text-muted mt-2">No notifications</p></div>';
                     return;
                 }
                 this.notificationsSidebarList.innerHTML = AppState.notifications.map(n => `
@@ -4497,86 +4033,39 @@
                     </div>
                 `).join('');
             },
-            async markNotificationRead(id) {
-                await FirebaseService.markNotificationAsRead(id);
-                this.renderNotificationsSidebar();
-                this.updateNotificationBadge();
-                if (AppState.currentSection === 'notifications') this.updateNotificationsUI();
-            },
-            async markAllNotificationsAsRead() {
-                await FirebaseService.markAllNotificationsAsRead();
-                this.renderNotificationsSidebar();
-                this.updateNotificationBadge();
-                if (AppState.currentSection === 'notifications') this.updateNotificationsUI();
-            },
+            async markNotificationRead(id) { await FirebaseService.markNotificationAsRead(id); this.renderNotificationsSidebar(); this.updateNotificationBadge(); if (AppState.currentSection === 'notifications') this.updateNotificationsUI(); },
+            async markAllNotificationsAsRead() { await FirebaseService.markAllNotificationsAsRead(); this.renderNotificationsSidebar(); this.updateNotificationBadge(); if (AppState.currentSection === 'notifications') this.updateNotificationsUI(); },
             updateNotificationBadge() {
                 const unread = AppState.notifications.filter(n => !n.read).length;
                 [this.notificationBadge, this.mobileUnreadBadge].forEach(badge => {
-                    if (badge) {
-                        if (unread > 0) {
-                            badge.textContent = unread;
-                            badge.classList.remove('d-none');
-                        } else {
-                            badge.classList.add('d-none');
-                        }
-                    }
+                    if (badge) { if (unread > 0) { badge.textContent = unread; badge.classList.remove('d-none'); } else { badge.classList.add('d-none'); } }
                 });
             },
             handlePaymentDueClick() {
                 const eligibleLoans = AppState.activeLoans.filter(loan => loan.status === 'active' || loan.status === 'approved');
-                let nextAmount = 0;
-                let selectedLoan = null;
+                let nextAmount = 0, selectedLoan = null;
                 for (const loan of eligibleLoans) {
                     if (loan.repaymentSchedule) {
                         const pendingInst = loan.repaymentSchedule.find(inst => inst.status === 'pending');
-                        if (pendingInst) {
-                            nextAmount = pendingInst.totalDue;
-                            selectedLoan = loan;
-                            break;
-                        }
+                        if (pendingInst) { nextAmount = pendingInst.totalDue; selectedLoan = loan; break; }
                     }
                 }
-                if (nextAmount > 0 && selectedLoan) {
-                    this.preparePaymentForLoan(selectedLoan.id, nextAmount);
-                } else {
-                    Utils.showToast('No Payment Due', 'You have no pending payments at this time.', 'info');
-                }
+                if (nextAmount > 0 && selectedLoan) this.preparePaymentForLoan(selectedLoan.id, nextAmount);
+                else Utils.showToast('No Payment Due', 'You have no pending payments at this time.', 'info');
             },
             populateDurationOptions() {
                 const select = document.getElementById('loanDuration');
                 if (!select) return;
                 let options = '';
-                if (AppState.durationUnit === 'months') {
-                    options = `
-                        <option value="1">1 Month</option>
-                        <option value="3">3 Months</option>
-                        <option value="6" selected>6 Months</option>
-                        <option value="9">9 Months</option>
-                        <option value="12">12 Months</option>
-                        <option value="18">18 Months</option>
-                        <option value="24">24 Months</option>
-                    `;
-                } else {
-                    options = `
-                        <option value="1">1 Week</option>
-                        <option value="2">2 Weeks</option>
-                        <option value="3">3 Weeks</option>
-                        <option value="4">4 Weeks</option>
-                        <option value="6">6 Weeks</option>
-                        <option value="8">8 Weeks</option>
-                    `;
-                }
+                if (AppState.durationUnit === 'months') options = `<option value="1">1 Month</option><option value="3">3 Months</option><option value="6" selected>6 Months</option><option value="9">9 Months</option><option value="12">12 Months</option><option value="18">18 Months</option><option value="24">24 Months</option>`;
+                else options = `<option value="1">1 Week</option><option value="2">2 Weeks</option><option value="3">3 Weeks</option><option value="4">4 Weeks</option><option value="6">6 Weeks</option><option value="8">8 Weeks</option>`;
                 select.innerHTML = options;
             },
             updatePageTitleWithUserName() {
                 const titleElement = document.getElementById('pageTitle');
-                if (titleElement && AppState.userData && AppState.userData.fullName) {
-                    titleElement.innerText = AppState.userData.fullName;
-                } else if (titleElement && AppState.userData && AppState.userData.email) {
-                    titleElement.innerText = AppState.userData.email.split('@')[0];
-                } else if (titleElement) {
-                    titleElement.innerText = 'Dashboard';
-                }
+                if (titleElement && AppState.userData && AppState.userData.fullName) titleElement.innerText = AppState.userData.fullName;
+                else if (titleElement && AppState.userData && AppState.userData.email) titleElement.innerText = AppState.userData.email.split('@')[0];
+                else if (titleElement) titleElement.innerText = 'Dashboard';
             },
             async initAuth() {
                 Utils.showLoading('Authenticating...');
@@ -4589,144 +4078,64 @@
                 this.updateCreditScore();
                 this.updateNotificationBadge();
                 this.updatePageTitleWithUserName();
-                setTimeout(() => {
-                    Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
-                }, 1000);
+                setTimeout(() => Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info'), 1000);
                 Utils.hideLoading();
-
-                if (userData && userData.tutorialCompleted !== true) {
-                    setTimeout(() => {
-                        TutorialManager.startTour();
-                    }, 1500);
-                }
+                if (userData && userData.tutorialCompleted !== true) setTimeout(() => TutorialManager.startTour(), 1500);
             },
             setupRealtimeListeners() {
                 if (!AppState.currentUser) return;
                 const userRef = db.ref('users/' + AppState.currentUser.uid);
-                const userListener = userRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        AppState.userData = snapshot.val();
-                        this.updateProfileUI();
-                        this.updateAgentUI();
-                        this.updateCreditScore();
-                        this.updatePageTitleWithUserName();
-                    }
-                });
+                const userListener = userRef.on('value', (snapshot) => { if (snapshot.exists()) { AppState.userData = snapshot.val(); this.updateProfileUI(); this.updateAgentUI(); this.updateCreditScore(); this.updatePageTitleWithUserName(); } });
                 AppState.realtimeListeners.push(() => userRef.off('value', userListener));
                 const loansRef = db.ref('loans').orderByChild('customerId').equalTo(AppState.currentUser.uid);
-                const loansListener = loansRef.on('value', async (snapshot) => {
+                const loansListener = loansRef.on('value', (snapshot) => {
                     const loans = [];
-                    snapshot.forEach((childSnapshot) => {
-                        const loan = childSnapshot.val();
-                        loan.id = childSnapshot.key;
-                        loans.push(loan);
-                    });
-                    loans.sort((a, b) => b.createdAt - a.createdAt);
-                    AppState.activeLoans = loans.filter(loan => 
-                        loan.status === 'active' || 
-                        loan.status === 'pending' || 
-                        loan.status === 'approved'
-                    );
-                    AppState.completedLoans = loans.filter(loan => 
-                        loan.status === 'completed' || 
-                        loan.status === 'defaulted' || 
-                        loan.status === 'rejected'
-                    );
+                    snapshot.forEach(cs => { const loan = cs.val(); loan.id = cs.key; loans.push(loan); });
+                    loans.sort((a,b) => b.createdAt - a.createdAt);
+                    AppState.activeLoans = loans.filter(loan => loan.status === 'active' || loan.status === 'pending' || loan.status === 'approved');
+                    AppState.completedLoans = loans.filter(loan => loan.status === 'completed' || loan.status === 'defaulted' || loan.status === 'rejected');
                     this.updateDashboardUI();
                     this.updateCreditScore();
-                    if (AppState.currentSection === 'loans') {
-                        this.updateLoansUI();
-                    }
-                    if (AppState.currentSection === 'history') {
-                        this.updateLoanHistoryUI();
-                    }
+                    if (AppState.currentSection === 'loans') this.updateLoansUI();
+                    if (AppState.currentSection === 'history') this.updateLoanHistoryUI();
                     Utils.checkPaymentReminders(AppState.activeLoans);
                 });
                 AppState.realtimeListeners.push(() => loansRef.off('value', loansListener));
                 const paymentsRef = db.ref('payments').orderByChild('customerId').equalTo(AppState.currentUser.uid);
                 const paymentsListener = paymentsRef.on('value', (snapshot) => {
                     const payments = [];
-                    snapshot.forEach((childSnapshot) => {
-                        const payment = childSnapshot.val();
-                        payment.id = childSnapshot.key;
-                        payments.push(payment);
-                    });
-                    payments.sort((a, b) => b.timestamp - a.timestamp);
+                    snapshot.forEach(cs => { const p = cs.val(); p.id = cs.key; payments.push(p); });
+                    payments.sort((a,b) => b.timestamp - a.timestamp);
                     AppState.payments = payments;
-                    if (AppState.currentSection === 'payments') {
-                        this.updatePaymentsUI();
-                    }
+                    if (AppState.currentSection === 'payments') this.updatePaymentsUI();
                     this.updateDashboardUI();
                     this.updateCreditScore();
                 });
                 AppState.realtimeListeners.push(() => paymentsRef.off('value', paymentsListener));
-
                 const settingsRef = db.ref('systemSettings');
-                const settingsListener = settingsRef.on('value', (snapshot) => {
-                    if (snapshot.exists()) {
-                        AppState.systemSettings = snapshot.val();
-                        FirebaseService.updateSettingsUI();
-                        this.updateDashboardUI();
-                    }
-                });
+                const settingsListener = settingsRef.on('value', (snapshot) => { if (snapshot.exists()) { AppState.systemSettings = snapshot.val(); FirebaseService.updateSettingsUI(); this.updateDashboardUI(); } });
                 AppState.realtimeListeners.push(() => settingsRef.off('value', settingsListener));
             },
             showSection(sectionId) {
                 AppState.currentSection = sectionId;
-                this.contentSections.forEach(section => {
-                    section.classList.add('d-none');
-                });
+                this.contentSections.forEach(section => section.classList.add('d-none'));
                 const section = document.getElementById(sectionId + 'Section');
-                if (section) {
-                    section.classList.remove('d-none');
-                }
-                const title = document.getElementById('pageTitle');
-                const titles = {
-                    dashboard: AppState.userData?.fullName || 'Dashboard',
-                    profile: 'My Profile',
-                    apply: 'Apply for Loan',
-                    loans: 'My Loans',
-                    payments: 'Payments',
-                    notifications: 'Notifications',
-                    history: 'Loan History',
-                    about: 'About Us',
-                    settings: 'Settings'
-                };
-                title.textContent = titles[sectionId] || 'Dashboard';
+                if (section) section.classList.remove('d-none');
+                const titles = { dashboard: AppState.userData?.fullName || 'Dashboard', profile: 'My Profile', apply: 'Apply for Loan', loans: 'My Loans', payments: 'Payments', notifications: 'Notifications', history: 'Loan History', about: 'About Us', settings: 'Settings' };
+                document.getElementById('pageTitle').textContent = titles[sectionId] || 'Dashboard';
                 switch(sectionId) {
-                    case 'profile':
-                        this.updateProfileUI();
-                        this.updateDocumentGrid();
-                        break;
-                    case 'apply':
-                        this.updateLoanApplicationUI();
-                        break;
-                    case 'loans':
-                        this.updateLoansUI();
-                        break;
-                    case 'payments':
-                        this.updatePaymentsUI();
-                        break;
-                    case 'notifications':
-                        this.updateNotificationsUI();
-                        break;
-                    case 'history':
-                        this.updateLoanHistoryUI();
-                        break;
+                    case 'profile': this.updateProfileUI(); this.updateDocumentGrid(); break;
+                    case 'apply': this.updateLoanApplicationUI(); break;
+                    case 'loans': this.updateLoansUI(); break;
+                    case 'payments': this.updatePaymentsUI(); break;
+                    case 'notifications': this.updateNotificationsUI(); break;
+                    case 'history': this.updateLoanHistoryUI(); break;
                 }
             },
             updateCreditScore() {
                 const credit = Utils.calculateCreditScore(AppState.currentUser.uid, AppState.activeLoans.concat(AppState.completedLoans), AppState.payments);
-                if (this.creditScoreGrade) {
-                    this.creditScoreGrade.textContent = credit.grade;
-                    this.creditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`;
-                    this.creditScoreValue.textContent = credit.score;
-                }
-                if (this.profileCreditScoreGrade) {
-                    this.profileCreditScoreGrade.textContent = credit.grade;
-                    this.profileCreditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`;
-                    this.profileCreditScoreValue.textContent = credit.score;
-                }
+                if (this.creditScoreGrade) { this.creditScoreGrade.textContent = credit.grade; this.creditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`; this.creditScoreValue.textContent = credit.score; }
+                if (this.profileCreditScoreGrade) { this.profileCreditScoreGrade.textContent = credit.grade; this.profileCreditScoreGrade.className = `credit-score-badge ${credit.grade.toLowerCase()}`; this.profileCreditScoreValue.textContent = credit.score; }
             },
             updateDocumentGrid() {
                 const grid = document.getElementById('documentGrid');
@@ -4739,13 +4148,10 @@
                 ];
                 grid.innerHTML = docs.map(doc => `
                     <div class="document-card">
-                        ${doc.url ? `<img src="${doc.url}" class="document-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23ccc%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>?</text></svg>'">` 
-                            : `<div class="document-thumb d-flex align-items-center justify-content-center" style="background:var(--ios-gray-2);"><i class="fas fa-file-image" style="font-size:30px; color:var(--ios-gray-5);"></i></div>`}
+                        ${doc.url ? `<img src="${doc.url}" class="document-thumb" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%23ccc%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>?</text></svg>'">` : `<div class="document-thumb d-flex align-items-center justify-content-center" style="background:var(--ios-gray-2);"><i class="fas fa-file-image" style="font-size:30px; color:var(--ios-gray-5);"></i></div>`}
                         <div class="document-name">${doc.name}</div>
                         <div class="document-status ${doc.url ? 'text-success' : 'text-muted'}">${doc.url ? 'Uploaded' : 'Not uploaded'}</div>
-                        <button class="btn btn-outline btn-small mt-2" onclick="viewDocument('${doc.type}')" ${!doc.url ? 'disabled' : ''}>
-                            <i class="fas fa-eye"></i> View
-                        </button>
+                        <button class="btn btn-outline btn-small mt-2" onclick="viewDocument('${doc.type}')" ${!doc.url ? 'disabled' : ''}><i class="fas fa-eye"></i> View</button>
                     </div>
                 `).join('');
             },
@@ -4760,39 +4166,26 @@
                 this.profileAddress.textContent = user.residence || 'Not set';
                 this.profileHouseNumber.textContent = user.houseNumber || 'Not set';
                 this.profileAgentId.textContent = user.assignedAgentId || 'Not assigned';
-                if (user.profilePhoto) {
-                    this.profilePhoto.src = user.profilePhoto;
-                    this.profileAvatar.src = user.profilePhoto;
-                    const creditScorePic = document.getElementById('creditScoreProfilePic');
-                    if (creditScorePic) creditScorePic.src = user.profilePhoto;
-                }
+                if (user.profilePhoto) { this.profilePhoto.src = user.profilePhoto; this.profileAvatar.src = user.profilePhoto; document.getElementById('creditScoreProfilePic').src = user.profilePhoto; }
                 this.updateDocumentGrid();
                 this.updateCreditScore();
                 this.updatePageTitleWithUserName();
             },
             updateDashboardUI() {
                 const activeLoans = AppState.activeLoans || [];
-                const totalBorrowed = (AppState.activeLoans || []).reduce((sum, loan) => sum + (loan.amount || 0), 0);
-                const totalPaid = (AppState.payments || [])
-                    .filter(p => p.status === 'verified')
-                    .reduce((sum, payment) => sum + (payment.amount || 0), 0);
+                const totalBorrowed = activeLoans.reduce((sum, loan) => sum + (loan.amount || 0), 0);
+                const totalPaid = AppState.payments.filter(p => p.status === 'verified').reduce((sum, p) => sum + (p.amount || 0), 0);
                 const currentBalance = Math.max(0, totalBorrowed - totalPaid);
-                
-                let nextPayment = 0;
-                let nextDueDate = null;
-                let activeLoanInfo = 'No active loans';
+                let nextPayment = 0, nextDueDate = null, activeLoanInfo = 'No active loans';
                 const eligibleLoans = activeLoans.filter(loan => loan.status === 'active' || loan.status === 'approved');
                 if (eligibleLoans.length > 0) {
-                    let earliestInstallment = null;
-                    let earliestLoan = null;
+                    let earliestInstallment = null, earliestLoan = null;
                     for (const loan of eligibleLoans) {
                         if (loan.repaymentSchedule) {
                             const pendingInst = loan.repaymentSchedule.find(inst => inst.status === 'pending');
-                            if (pendingInst) {
-                                if (!earliestInstallment || pendingInst.dueDate < earliestInstallment.dueDate) {
-                                    earliestInstallment = pendingInst;
-                                    earliestLoan = loan;
-                                }
+                            if (pendingInst && (!earliestInstallment || pendingInst.dueDate < earliestInstallment.dueDate)) {
+                                earliestInstallment = pendingInst;
+                                earliestLoan = loan;
                             }
                         }
                     }
@@ -4803,8 +4196,6 @@
                     } else {
                         const firstLoan = eligibleLoans[0];
                         activeLoanInfo = `${Utils.formatCurrency(firstLoan.amount)} - ${firstLoan.status}`;
-                        nextPayment = 0;
-                        nextDueDate = null;
                     }
                 }
                 this.activeLoansCount.textContent = activeLoans.length;
@@ -4814,8 +4205,7 @@
                 this.activeLoanInfo.textContent = activeLoanInfo;
                 this.nextPaymentInfo.textContent = nextPayment > 0 ? `Next payment: ${Utils.formatCurrency(nextPayment)}` : 'No payment due';
                 this.dueDateInfo.textContent = nextDueDate ? `Due: ${nextDueDate}` : 'No due date';
-                const maxAmount = AppState.systemSettings?.maxLoanAmount || 50000;
-                document.getElementById('loanLimitInfo').textContent = `Maximum loan amount: ${Utils.formatCurrency(maxAmount)}`;
+                document.getElementById('loanLimitInfo').textContent = `Maximum loan amount: ${Utils.formatCurrency(AppState.systemSettings?.maxLoanAmount || 50000)}`;
                 this.updateCreditScore();
             },
             updateAgentUI() {
@@ -4826,34 +4216,21 @@
                     this.agentCardContainer.innerHTML = `
                         <div class="agent-card">
                             <img src="${agentData.profilePhoto || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>A</text></svg>'}" class="agent-avatar-large" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>A</text></svg>'">
-                            <div class="agent-info">
-                                <h4>${agentData.fullName || 'Agent'}</h4>
-                                <p>${agentData.branch || 'Main Branch'} • ${agentData.status === 'active' ? 'Active' : 'Inactive'}</p>
-                            </div>
-                        </div>
-                    `;
+                            <div class="agent-info"><h4>${agentData.fullName || 'Agent'}</h4><p>${agentData.branch || 'Main Branch'} • ${agentData.status === 'active' ? 'Active' : 'Inactive'}</p></div>
+                        </div>`;
                     this.agentIdInput.value = user.assignedAgentId;
                     this.agentDetailsContainer.classList.remove('d-none');
                     this.agentPhone.textContent = agentData.phone || '-';
                     this.agentBranchName.textContent = agentData.branch || '-';
                     this.agentStatus.textContent = agentData.status === 'active' ? 'Active' : 'Inactive';
-                    this.agentStatus.className = agentData.status === 'active' ? 'agent-detail-value text-success' : 'agent-detail-value text-warning';
-                    if (user.agentAssignedAt) {
-                        this.agentAssignedDate.textContent = Utils.formatDate(user.agentAssignedAt);
-                    }
+                    this.agentAssignedDate.textContent = Utils.formatDate(user.agentAssignedAt);
                     this.agentValidationMessage.textContent = `Verified on ${Utils.formatDate(user.agentAssignedAt)}`;
                     this.agentValidationMessage.className = 'text-success';
                 } else if (user.assignedAgentId) {
                     this.agentCardContainer.innerHTML = `<div class="agent-card"><div class="agent-info"><h4>Loading agent...</h4><p>Please wait</p></div></div>`;
                     this.agentDetailsContainer.classList.add('d-none');
                     this.agentValidationMessage.textContent = 'Agent details loading...';
-                    this.agentValidationMessage.className = 'text-warning';
-                    FirebaseService.loadAgentData(user.assignedAgentId).then(result => {
-                        if (result.success) {
-                            AppState.agentData = result.data;
-                            this.updateAgentUI();
-                        }
-                    });
+                    FirebaseService.loadAgentData(user.assignedAgentId).then(result => { if (result.success) { AppState.agentData = result.data; this.updateAgentUI(); } });
                 } else {
                     this.agentCardContainer.innerHTML = `<div class="agent-card"><div class="agent-info"><h4>No agent assigned</h4><p>Enter Agent ID to verify</p></div></div>`;
                     this.agentDetailsContainer.classList.add('d-none');
@@ -4862,80 +4239,34 @@
             },
             async verifyAgent() {
                 const agentId = this.agentIdInput.value.trim();
-                if (!agentId) {
-                    this.agentValidationMessage.textContent = 'Please enter Agent ID';
-                    this.agentValidationMessage.className = 'text-danger';
-                    return;
-                }
-                if (AppState.userData.assignedAgentId === agentId) {
-                    this.agentValidationMessage.textContent = 'This agent is already assigned to you';
-                    this.agentValidationMessage.className = 'text-warning';
-                    return;
-                }
+                if (!agentId) { this.agentValidationMessage.textContent = 'Please enter Agent ID'; this.agentValidationMessage.className = 'text-danger'; return; }
+                if (AppState.userData.assignedAgentId === agentId) { this.agentValidationMessage.textContent = 'This agent is already assigned to you'; this.agentValidationMessage.className = 'text-warning'; return; }
                 const result = await FirebaseService.verifyAgentId(agentId);
                 if (result.success) {
-                    this.agentValidationMessage.textContent = result.message || 'Agent verified successfully';
-                    this.agentValidationMessage.className = 'text-success';
-                    Utils.showToast('Agent Verified', result.message || 'Agent has been assigned to you', 'info');
-                    this.updateAgentUI();
-                    this.updateLoanApplicationUI();
+                    this.agentValidationMessage.textContent = result.message; this.agentValidationMessage.className = 'text-success';
+                    Utils.showToast('Agent Verified', result.message, 'info');
+                    this.updateAgentUI(); this.updateLoanApplicationUI();
                 } else {
-                    this.agentValidationMessage.textContent = result.error || 'Verification failed';
-                    this.agentValidationMessage.className = 'text-danger';
-                    Utils.showToast('Verification Failed', result.error || 'Failed to verify agent', 'error');
+                    this.agentValidationMessage.textContent = result.error; this.agentValidationMessage.className = 'text-danger';
+                    Utils.showToast('Verification Failed', result.error, 'error');
                 }
             },
-            contactAgent() {
-                if (!AppState.agentData || !AppState.agentData.phone) {
-                    Utils.showToast('Contact Agent', 'Agent phone number not available', 'warning');
-                    return;
-                }
-                window.open(`tel:${AppState.agentData.phone}`, '_blank');
-            },
+            contactAgent() { if (AppState.agentData?.phone) window.open(`tel:${AppState.agentData.phone}`, '_blank'); else Utils.showToast('Contact Agent', 'Agent phone number not available', 'warning'); },
             async showAgentProfileModal() {
-                if (!AppState.agentData) {
-                    Utils.showToast('Agent Profile', 'Agent data not available', 'warning');
-                    return;
-                }
-                const modal = document.getElementById('agentProfileModal');
-                const content = document.getElementById('agentProfileContent');
+                if (!AppState.agentData) { Utils.showToast('Agent Profile', 'Agent data not available', 'warning'); return; }
                 const agent = AppState.agentData;
-                content.innerHTML = `
-                    <div class="text-center mb-4">
-                        <img src="${agent.profilePhoto || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>A</text></svg>'}" class="agent-avatar mb-3" onerror="this.src='data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>A</text></svg>'">
-                        <h4 class="mb-1">${agent.fullName || 'Agent'}</h4>
-                        <p class="text-muted mb-3">${agent.branch || 'Main Branch'}</p>
-                    </div>
-                    <div class="agent-details-grid mb-4">
-                        <div class="agent-detail-item"><span class="agent-detail-label">Agent ID</span><span class="agent-detail-value">${AppState.userData.assignedAgentId}</span></div>
-                        <div class="agent-detail-item"><span class="agent-detail-label">Status</span><span class="agent-detail-value ${agent.status === 'active' ? 'text-success' : 'text-warning'}">${agent.status === 'active' ? 'Active' : 'Inactive'}</span></div>
-                        <div class="agent-detail-item"><span class="agent-detail-label">Phone</span><span class="agent-detail-value">${agent.phone || '-'}</span></div>
-                        <div class="agent-detail-item"><span class="agent-detail-label">Email</span><span class="agent-detail-value">${agent.email || '-'}</span></div>
-                    </div>
-                    <div class="d-flex gap-2">
-                        <button class="btn btn-primary flex-grow-1" onclick="UIManager.contactAgent()"><i class="fas fa-phone"></i> Call Agent</button>
-                        <button class="btn btn-outline flex-grow-1" onclick="window.open('mailto:${agent.email || ''}', '_blank')"><i class="fas fa-envelope"></i> Email</button>
-                    </div>
-                `;
-                modal.classList.add('active');
+                document.getElementById('agentProfileContent').innerHTML = `
+                    <div class="text-center mb-4"><img src="${agent.profilePhoto || 'data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><rect width=%22100%22 height=%22100%22 fill=%22%2334c759%22/><text x=%2250%22 y=%2250%22 font-size=%2250%22 text-anchor=%22middle%22 dy=%22.3em%22 fill=%22white%22>A</text></svg>'}" class="agent-avatar mb-3"><h4>${agent.fullName || 'Agent'}</h4><p class="text-muted">${agent.branch || 'Main Branch'}</p></div>
+                    <div class="agent-details-grid mb-4"><div class="agent-detail-item"><span class="agent-detail-label">Agent ID</span><span class="agent-detail-value">${AppState.userData.assignedAgentId}</span></div><div class="agent-detail-item"><span class="agent-detail-label">Status</span><span class="agent-detail-value ${agent.status === 'active' ? 'text-success' : 'text-warning'}">${agent.status === 'active' ? 'Active' : 'Inactive'}</span></div><div class="agent-detail-item"><span class="agent-detail-label">Phone</span><span class="agent-detail-value">${agent.phone || '-'}</span></div><div class="agent-detail-item"><span class="agent-detail-label">Email</span><span class="agent-detail-value">${agent.email || '-'}</span></div></div>
+                    <div class="d-flex gap-2"><button class="btn btn-primary flex-grow-1" onclick="UIManager.contactAgent()"><i class="fas fa-phone"></i> Call Agent</button><button class="btn btn-outline flex-grow-1" onclick="window.open('mailto:${agent.email || ''}', '_blank')"><i class="fas fa-envelope"></i> Email</button></div>`;
+                this.agentProfileModal.classList.add('active');
             },
             updateLoanApplicationUI() {
                 const hasAgent = AppState.userData?.assignedAgentId && AppState.agentData;
                 if (!hasAgent) {
                     const form = document.getElementById('loanApplicationForm');
-                    if (form) {
-                        form.innerHTML = `
-                            <div class="text-center py-4">
-                                <i class="fas fa-user-shield" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i>
-                                <h5 class="mb-2">Agent Required</h5>
-                                <p class="text-muted mb-4">You need to verify an agent before applying for a loan.</p>
-                                <button class="btn btn-primary" onclick="UIManager.showSection('dashboard')"><i class="fas fa-arrow-right"></i> Go to Agent Verification</button>
-                            </div>
-                        `;
-                    }
-                } else {
-                    this.validateLoanForm();
-                }
+                    if (form) form.innerHTML = `<div class="text-center py-4"><i class="fas fa-user-shield" style="font-size:48px; color:var(--ios-gray-3);"></i><h5 class="mb-2">Agent Required</h5><p class="text-muted mb-4">You need to verify an agent before applying for a loan.</p><button class="btn btn-primary" onclick="UIManager.showSection('dashboard')">Go to Agent Verification</button></div>`;
+                } else this.validateLoanForm();
             },
             validateLoanForm() {
                 const amount = parseFloat(this.loanAmount?.value) || 0;
@@ -4943,39 +4274,18 @@
                 const termsAccepted = this.acceptTerms?.checked || false;
                 const maxAmount = AppState.systemSettings?.maxLoanAmount || 50000;
                 const minAmount = AppState.systemSettings?.minLoanAmount || 100;
-                let isValid = true;
-                let message = '';
-                if (amount < minAmount) {
-                    isValid = false;
-                    message = `Minimum loan amount is ${Utils.formatCurrency(minAmount)}`;
-                } else if (amount > maxAmount) {
-                    isValid = false;
-                    message = `Maximum loan amount is ${Utils.formatCurrency(maxAmount)}`;
-                }
-                if (!hasFiles) {
-                    isValid = false;
-                    message = message || 'Please upload at least 3 collateral images';
-                }
-                if (!termsAccepted) {
-                    isValid = false;
-                    message = message || 'Please accept the terms and conditions';
-                }
+                let isValid = true, message = '';
+                if (amount < minAmount) { isValid = false; message = `Minimum loan amount is ${Utils.formatCurrency(minAmount)}`; }
+                else if (amount > maxAmount) { isValid = false; message = `Maximum loan amount is ${Utils.formatCurrency(maxAmount)}`; }
+                if (!hasFiles) { isValid = false; message = message || 'Please upload at least 3 collateral images'; }
+                if (!termsAccepted) { isValid = false; message = message || 'Please accept the terms and conditions'; }
                 const validationElement = document.getElementById('amountValidation');
-                if (validationElement) {
-                    validationElement.textContent = message;
-                    validationElement.className = message ? 'form-text text-danger' : 'form-text text-success';
-                    if (!message && amount > 0) {
-                        validationElement.textContent = `${Utils.formatCurrency(amount)} available for application`;
-                    }
-                }
+                if (validationElement) { validationElement.textContent = message; validationElement.className = message ? 'form-text text-danger' : 'form-text text-success'; if (!message && amount > 0) validationElement.textContent = `${Utils.formatCurrency(amount)} available for application`; }
                 if (this.submitLoanBtn) this.submitLoanBtn.disabled = !isValid;
                 return isValid;
             },
             prepareLoanAgreement() {
-                if (!this.validateLoanForm()) {
-                    Utils.showToast('Validation Error', 'Please fix the errors in the form', 'error');
-                    return;
-                }
+                if (!this.validateLoanForm()) { Utils.showToast('Validation Error', 'Please fix the errors in the form', 'error'); return; }
                 const loanData = {
                     amount: parseFloat(document.getElementById('loanAmount').value),
                     duration: parseInt(document.getElementById('loanDuration').value),
@@ -4987,12 +4297,8 @@
                     collateralDescription: document.getElementById('collateralDescription').value.trim(),
                     collateralLocation: document.getElementById('collateralLocation').value.trim()
                 };
-                if (!loanData.purposeDescription || !loanData.collateralDescription || !loanData.collateralLocation) {
-                    Utils.showToast('Validation Error', 'Please fill all collateral details', 'error');
-                    return;
-                }
+                if (!loanData.purposeDescription || !loanData.collateralDescription || !loanData.collateralLocation) { Utils.showToast('Validation Error', 'Please fill all collateral details', 'error'); return; }
                 AppState.pendingLoanData = loanData;
-
                 const today = new Date();
                 const day = today.getDate();
                 const month = today.toLocaleString('default', { month: 'long' });
@@ -5002,53 +4308,28 @@
                 const rate = isWeekly ? 0.10 : 0.35;
                 const totalInterest = Utils.calculateTotalInterest(loanData.amount, rate, loanData.duration, isWeekly);
                 const totalPayable = loanData.amount + totalInterest;
-                const periodicPayment = isWeekly
-                    ? Utils.calculateWeeklyPayment(loanData.amount, rate, loanData.duration)
-                    : Utils.calculateMonthlyPayment(loanData.amount, rate * 12, loanData.duration);
-
+                const periodicPayment = isWeekly ? Utils.calculateWeeklyPayment(loanData.amount, rate, loanData.duration) : Utils.calculateMonthlyPayment(loanData.amount, rate * 12, loanData.duration);
                 const agreementHTML = `
                     <div class="agreement-wrapper">
                         <div class="logo"><i class="fas fa-wallet" style="font-size: 50px; color: #1a5276;"></i><h1>TrueCash Money Lender Firm</h1></div>
                         <h2>Loan Agreement Form</h2>
                         <p>This Loan Agreement is made and entered into on this ${day} day of ${month}, ${year}.</p>
-                        <h3>1. Lender Details</h3>
-                        <div class="detail"><span class="label">Lending Firm:</span> TrueCash Money Lender</div>
-                        <div class="detail"><span class="label">Representatives:</span> Eng. Hambayi, Dr. Ilunga, Mr. Mukandawire</div>
-                        <h3>2. Borrower Details</h3>
-                        <div class="detail"><span class="label">Full Name:</span> ${borrower.fullName || ''}</div>
-                        <div class="detail"><span class="label">NRC Number:</span> ${borrower.nrc || ''}</div>
-                        <div class="detail"><span class="label">Address:</span> ${borrower.residence || ''}, ${borrower.houseNumber || ''}</div>
-                        <h3>3. Loan Terms</h3>
-                        <div class="detail"><span class="label">Loan Amount:</span> ZMW ${Utils.formatCurrency(loanData.amount)}</div>
-                        <div class="detail"><span class="label">Interest Rate:</span> ${isWeekly ? '10% weekly' : '35% monthly'}</div>
-                        <div class="detail"><span class="label">Duration:</span> ${loanData.duration} ${loanData.durationUnit}</div>
-                        <div class="detail"><span class="label">Total Interest:</span> ZMW ${Utils.formatCurrency(totalInterest)}</div>
-                        <div class="detail"><span class="label">Total Payable:</span> ZMW ${Utils.formatCurrency(totalPayable)}</div>
-                        <div class="detail"><span class="label">${isWeekly ? 'Weekly' : 'Monthly'} Payment:</span> ZMW ${Utils.formatCurrency(periodicPayment)}</div>
-                        <h3>4. Collateral Details</h3>
-                        <div class="detail"><span class="label">Collateral Item:</span> ${loanData.collateralCategory}</div>
-                        <div class="detail"><span class="label">Description:</span> ${loanData.collateralDescription}</div>
-                        <div class="detail"><span class="label">Estimated Value:</span> ZMW ${Utils.formatCurrency(loanData.collateralValue)}</div>
-                        <div class="detail"><span class="label">Location:</span> ${loanData.collateralLocation}</div>
-                        <h3>5. Terms and Conditions</h3>
-                        <p><b>1. Repayment:</b> The Borrower agrees to repay the full loan amount with interest as specified.</p>
-                        <p><b>2. Default:</b> If the Borrower fails to repay on time, the Lender has the right to sell the collateral.</p>
-                        <p><b>3. Penalty for Late Payment:</b> 2% of total loan amount per day after 5-day grace period.</p>
-                        <hr>
-                        <h4>Please sign below:</h4>
+                        <h3>1. Lender Details</h3><div class="detail"><span class="label">Lending Firm:</span> TrueCash Money Lender</div><div class="detail"><span class="label">Representatives:</span> Eng. Hambayi, Dr. Ilunga, Mr. Mukandawire</div>
+                        <h3>2. Borrower Details</h3><div class="detail"><span class="label">Full Name:</span> ${borrower.fullName || ''}</div><div class="detail"><span class="label">NRC Number:</span> ${borrower.nrc || ''}</div><div class="detail"><span class="label">Address:</span> ${borrower.residence || ''}, ${borrower.houseNumber || ''}</div>
+                        <h3>3. Loan Terms</h3><div class="detail"><span class="label">Loan Amount:</span> ZMW ${Utils.formatCurrency(loanData.amount)}</div><div class="detail"><span class="label">Interest Rate:</span> ${isWeekly ? '10% weekly' : '35% monthly'}</div><div class="detail"><span class="label">Duration:</span> ${loanData.duration} ${loanData.durationUnit}</div><div class="detail"><span class="label">Total Interest:</span> ZMW ${Utils.formatCurrency(totalInterest)}</div><div class="detail"><span class="label">Total Payable:</span> ZMW ${Utils.formatCurrency(totalPayable)}</div><div class="detail"><span class="label">${isWeekly ? 'Weekly' : 'Monthly'} Payment:</span> ZMW ${Utils.formatCurrency(periodicPayment)}</div>
+                        <h3>4. Collateral Details</h3><div class="detail"><span class="label">Collateral Item:</span> ${loanData.collateralCategory}</div><div class="detail"><span class="label">Description:</span> ${loanData.collateralDescription}</div><div class="detail"><span class="label">Estimated Value:</span> ZMW ${Utils.formatCurrency(loanData.collateralValue)}</div><div class="detail"><span class="label">Location:</span> ${loanData.collateralLocation}</div>
+                        <h3>5. Terms and Conditions</h3><p><b>1. Repayment:</b> The Borrower agrees to repay the full loan amount with interest as specified.</p><p><b>2. Default:</b> If the Borrower fails to repay on time, the Lender has the right to sell the collateral.</p><p><b>3. Penalty for Late Payment:</b> 2% of total loan amount per day after 5-day grace period.</p>
+                        <hr><h4>Please sign below:</h4>
                         <div><label>Borrower Signature:</label><div class="signature-container"><canvas id="borrowerSignatureCanvas" class="signature-canvas"></canvas><div class="signature-tools"><button class="btn btn-outline btn-small" id="clearBorrowerSignature">Clear</button></div></div></div>
                         <div><label>Witness Signature:</label><div class="signature-container"><canvas id="witnessSignatureCanvas" class="signature-canvas"></canvas><div class="signature-tools"><button class="btn btn-outline btn-small" id="clearWitnessSignature">Clear</button></div></div></div>
                         <div class="form-row"><div class="form-group"><label>Witness Name</label><input type="text" id="witnessName" class="form-input"></div><div class="form-group"><label>Witness NRC</label><input type="text" id="witnessNrc" class="form-input"></div></div>
                         <div class="modal-footer"><button class="btn btn-outline" id="cancelAgreement">Cancel</button><button class="btn btn-primary" id="submitSignedAgreement">Submit Signed Agreement</button></div>
-                    </div>
-                `;
+                    </div>`;
                 const body = document.getElementById('loanAgreementBody');
                 body.innerHTML = agreementHTML;
                 this.signaturePadBorrower = SignaturePad.init('borrowerSignatureCanvas', 'clearBorrowerSignature');
                 this.signaturePadWitness = SignaturePad.init('witnessSignatureCanvas', 'clearWitnessSignature');
-                document.getElementById('cancelAgreement').addEventListener('click', () => {
-                    this.loanAgreementModal.classList.remove('active');
-                });
+                document.getElementById('cancelAgreement').addEventListener('click', () => { this.loanAgreementModal.classList.remove('active'); });
                 document.getElementById('submitSignedAgreement').addEventListener('click', () => this.submitSignedAgreement());
                 this.loanAgreementModal.classList.add('active');
             },
@@ -5071,15 +4352,13 @@
                 const totalInterest = Utils.calculateTotalInterest(loanData.amount, rate, loanData.duration, isWeekly);
                 const totalPayable = loanData.amount + totalInterest;
                 const periodicPayment = isWeekly ? Utils.calculateWeeklyPayment(loanData.amount, rate, loanData.duration) : Utils.calculateMonthlyPayment(loanData.amount, rate * 12, loanData.duration);
-                const finalHTML = `
-                    <!DOCTYPE html><html><head><meta charset="UTF-8"><title>Signed Loan Agreement</title><style>body{font-family:Arial;padding:30px;}h1,h2{text-align:center;}.signature-img{max-width:200px;max-height:80px;border:1px solid #ccc;}</style></head><body>
+                const finalHTML = `<!DOCTYPE html><html><head><meta charset="UTF-8"><title>Signed Loan Agreement</title><style>body{font-family:Arial;padding:30px;}h1,h2{text-align:center;}.signature-img{max-width:200px;max-height:80px;border:1px solid #ccc;}</style></head><body>
                     <h1>TrueCash Money Lender Firm</h1><h2>Loan Agreement Form</h2><p>This Loan Agreement is made on ${day} ${month} ${year}.</p>
                     <h3>Borrower Details</h3><p>Name: ${borrower.fullName}<br>NRC: ${borrower.nrc}<br>Address: ${borrower.residence}</p>
                     <h3>Loan Terms</h3><p>Amount: ${Utils.formatCurrency(loanData.amount)}<br>Interest: ${isWeekly ? '10% weekly' : '35% monthly'}<br>Duration: ${loanData.duration} ${loanData.durationUnit}<br>Total Payable: ${Utils.formatCurrency(totalPayable)}<br>${isWeekly ? 'Weekly' : 'Monthly'} Payment: ${Utils.formatCurrency(periodicPayment)}</p>
                     <h3>Collateral</h3><p>Type: ${loanData.collateralCategory}<br>Description: ${loanData.collateralDescription}<br>Value: ${Utils.formatCurrency(loanData.collateralValue)}<br>Location: ${loanData.collateralLocation}</p>
                     <h3>Signatures</h3><p>Borrower Signature:<br><img src="${borrowerSig}" class="signature-img"></p><p>Witness Signature:<br><img src="${witnessSig}" class="signature-img"></p><p>Witness Name: ${witnessName}<br>Witness NRC: ${witnessNrc}</p>
-                    <p><b>Acknowledgment:</b> This Agreement is binding.</p></body></html>
-                `;
+                    <p><b>Acknowledgment:</b> This Agreement is binding.</p></body></html>`;
                 Utils.showLoading('Uploading signed agreement...');
                 const uploadResult = await FirebaseService.uploadSignedAgreement(finalHTML);
                 if (!uploadResult.success) { Utils.hideLoading(); Utils.showToast('Upload Error', 'Failed to upload signed agreement', 'error'); return; }
@@ -5101,64 +4380,34 @@
                     if (statusElement) { statusElement.textContent = 'Click on boxes to upload images'; statusElement.className = 'form-text text-muted'; }
                     this.loanAgreementModal.classList.remove('active');
                     this.showSection('loans');
-                } else {
-                    Utils.showToast('Submission Failed', result.error || 'Failed to submit application', 'error');
-                }
+                } else { Utils.showToast('Submission Failed', result.error || 'Failed to submit application', 'error'); }
             },
             updateLoansUI() {
-                const loans = AppState.activeLoans.filter(loan => {
-                    if (AppState.currentLoanStatusFilter === 'active') return loan.status === 'active';
-                    if (AppState.currentLoanStatusFilter === 'pending') return loan.status === 'pending';
-                    if (AppState.currentLoanStatusFilter === 'approved') return loan.status === 'approved';
-                    if (AppState.currentLoanStatusFilter === 'rejected') return loan.status === 'rejected';
-                    return true;
-                });
+                const loans = AppState.activeLoans.filter(loan => loan.status === AppState.currentLoanStatusFilter);
                 const loansList = document.getElementById('loansList');
-                if (loans.length === 0) {
-                    loansList.innerHTML = '<p class="text-muted text-center py-4">No loans found for this status.</p>';
-                    return;
-                }
+                if (loans.length === 0) { loansList.innerHTML = '<p class="text-muted text-center py-4">No loans found for this status.</p>'; return; }
                 let html = '';
                 loans.forEach(loan => {
                     const showPayBtn = (loan.status === 'approved' || loan.status === 'active');
                     const totalPaid = loan.totalPaid || 0;
                     const totalPayable = loan.totalPayable || loan.amount;
                     const percentPaid = totalPayable > 0 ? ((totalPaid / totalPayable) * 100).toFixed(1) : 0;
-                    html += `
-                        <div class="loan-card" onclick="UIManager.showLoanDetails('${loan.id}')">
-                            <div class="loan-card-header"><span class="loan-id">${loan.id}</span><span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span></div>
-                            <div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div>
-                            <div class="progress-container"><div class="progress-bar" style="width: ${percentPaid}%;"></div></div>
-                            <div class="progress-label">${percentPaid}% paid</div>
-                            <div class="loan-dates"><span>Created: ${Utils.formatDate(loan.createdAt)}</span><span>Due: ${loan.repaymentSchedule && loan.repaymentSchedule[0] ? Utils.formatDate(loan.repaymentSchedule[0].dueDate) : 'N/A'}</span></div>
-                            ${showPayBtn ? `<button class="loan-pay-btn" onclick="event.stopPropagation(); UIManager.preparePaymentForLoan('${loan.id}');"><i class="fas fa-credit-card"></i> Pay Now</button>` : ''}
-                        </div>
-                    `;
+                    html += `<div class="loan-card" onclick="UIManager.showLoanDetails('${loan.id}')"><div class="loan-card-header"><span class="loan-id">${loan.id}</span><span class="status-badge-tag ${loan.status === 'active' ? 'status-active' : loan.status === 'pending' ? 'status-pending' : loan.status === 'approved' ? 'status-active' : 'status-rejected'}">${loan.status}</span></div><div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div><div class="progress-container"><div class="progress-bar" style="width: ${percentPaid}%;"></div></div><div class="progress-label">${percentPaid}% paid</div><div class="loan-dates"><span>Created: ${Utils.formatDate(loan.createdAt)}</span><span>Due: ${loan.repaymentSchedule && loan.repaymentSchedule[0] ? Utils.formatDate(loan.repaymentSchedule[0].dueDate) : 'N/A'}</span></div>${showPayBtn ? `<button class="loan-pay-btn" onclick="event.stopPropagation(); UIManager.preparePaymentForLoan('${loan.id}');"><i class="fas fa-credit-card"></i> Pay Now</button>` : ''}</div>`;
                 });
                 loansList.innerHTML = html;
             },
             async showLoanDetails(loanId) {
                 const loan = AppState.activeLoans.find(l => l.id === loanId) || AppState.completedLoans.find(l => l.id === loanId);
                 if (!loan) return;
-                const modalBody = document.getElementById('loanDetailsModalBody');
                 let scheduleHtml = '';
                 if (loan.repaymentSchedule) {
                     scheduleHtml = '<h4>Repayment Schedule</h4><table class="data-table"><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total</th><th>Paid</th><th>Status</th></tr>';
                     loan.repaymentSchedule.forEach(inst => {
-                        scheduleHtml += `<tr>
-                            <td>${inst.installment}</td>
-                            <td>${Utils.formatDate(inst.dueDate)}</td>
-                            <td>${Utils.formatCurrency(inst.principal)}</td>
-                            <td>${Utils.formatCurrency(inst.interest)}</td>
-                            <td>${Utils.formatCurrency(inst.penalty || 0)}</td>
-                            <td>${Utils.formatCurrency(inst.totalDue)}</td>
-                            <td>${Utils.formatCurrency(inst.paidAmount || 0)}</td>
-                            <td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td>
-                        </tr>`;
+                        scheduleHtml += `<tr><td>${inst.installment}</td><td>${Utils.formatDate(inst.dueDate)}</td><td>${Utils.formatCurrency(inst.principal)}</td><td>${Utils.formatCurrency(inst.interest)}</td><td>${Utils.formatCurrency(inst.penalty || 0)}</td><td>${Utils.formatCurrency(inst.totalDue)}</td><td>${Utils.formatCurrency(inst.paidAmount || 0)}</td><td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td></tr>`;
                     });
                     scheduleHtml += '</table>';
                 }
-                modalBody.innerHTML = `
+                document.getElementById('loanDetailsModalBody').innerHTML = `
                     <h3>Loan ID: ${loan.id}</h3>
                     <div class="loan-detail-grid">
                         <div class="loan-detail-item"><span class="loan-detail-label">Amount</span><span class="loan-detail-value">${Utils.formatCurrency(loan.amount)}</span></div>
@@ -5174,64 +4423,34 @@
                     ${loan.collateral ? `<div class="loan-detail-card"><h4>Collateral Details</h4><p><strong>Type:</strong> ${loan.collateral.category}</p><p><strong>Description:</strong> ${loan.collateral.description}</p><p><strong>Value:</strong> ${Utils.formatCurrency(loan.collateral.value)}</p><p><strong>Location:</strong> ${loan.collateral.location}</p>${loan.collateral.images && loan.collateral.images.length ? `<div class="collateral-grid mt-2">${loan.collateral.images.map(img => `<img src="${img}" class="upload-preview" style="position:relative; width:100%; height:80px; object-fit:cover; border-radius:6px;">`).join('')}</div>` : ''}</div>` : ''}
                     ${loan.signedAgreementUrl ? `<div class="mt-3 d-flex gap-2"><a href="${loan.signedAgreementUrl}" target="_blank" class="btn btn-primary flex-grow-1"><i class="fas fa-file-signature"></i> View Agreement</a><button class="btn btn-outline flex-grow-1" onclick="window.print()"><i class="fas fa-print"></i> Print</button></div>` : ''}
                     ${scheduleHtml}
-                    ${(loan.status === 'active' || loan.status === 'approved') ? `<button class="btn btn-primary mt-3" onclick="UIManager.preparePaymentForLoan('${loan.id}')">Make Payment</button>` : ''}
-                `;
+                    ${(loan.status === 'active' || loan.status === 'approved') ? `<button class="btn btn-primary mt-3" onclick="UIManager.preparePaymentForLoan('${loan.id}')">Make Payment</button>` : ''}`;
                 this.loanDetailsModal.classList.add('active');
             },
-            preparePaymentForLoan(loanId, prefillAmount = null) {
-                this.loanDetailsModal.classList.remove('active');
-                AppState.selectedLoanForPayment = loanId;
-                this.showPaymentModal(prefillAmount);
-            },
-            showPaymentModal(prefillAmount = null) {
-                this.paymentModal.classList.add('active');
-                this.updatePaymentsUI(prefillAmount);
-            },
+            preparePaymentForLoan(loanId, prefillAmount = null) { this.loanDetailsModal.classList.remove('active'); AppState.selectedLoanForPayment = loanId; this.showPaymentModal(prefillAmount); },
+            showPaymentModal(prefillAmount = null) { this.paymentModal.classList.add('active'); this.updatePaymentsUI(prefillAmount); },
             updatePaymentsUI(prefillAmount = null) {
                 const container = document.getElementById('paymentModalContent');
                 const activeLoans = AppState.activeLoans.filter(l => l.status === 'active' || l.status === 'approved');
-                if (activeLoans.length === 0) {
-                    container.innerHTML = '<div class="text-center py-4"><i class="fas fa-credit-card" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No active or approved loans to pay</p></div>';
-                } else {
+                if (activeLoans.length === 0) container.innerHTML = '<div class="text-center py-4"><i class="fas fa-credit-card" style="font-size:48px; color:var(--ios-gray-3);"></i><p class="text-muted">No active or approved loans to pay</p></div>';
+                else {
                     let options = '<option value="">Select a loan</option>';
-                    activeLoans.forEach(loan => {
-                        options += `<option value="${loan.id}">${loan.id} - ${Utils.formatCurrency(loan.amount)} (Due: ${Utils.formatCurrency(loan.periodicPayment)})</option>`;
-                    });
-                    let amountValue = (prefillAmount !== null && prefillAmount > 0) ? prefillAmount : '';
-                    container.innerHTML = `
-                        <div class="form-group"><label class="form-label">Select Loan</label><select id="paymentLoanSelect" class="form-input">${options}</select></div>
-                        <div class="form-group"><label class="form-label">Amount (Kwacha)</label><input type="number" id="paymentAmount" class="form-input" placeholder="Enter amount" value="${amountValue}"></div>
-                        <div class="form-group"><label class="form-label">Payment Method</label><select id="paymentMethod" class="form-input"><option value="cash">Cash</option><option value="mobile">Mobile Money</option><option value="bank">Bank Transfer</option></select></div>
-                        <div class="form-group"><label class="form-label">Reference (optional)</label><input type="text" id="paymentReference" class="form-input" placeholder="Transaction ID"></div>
-                        <div class="form-group"><label class="form-label">Payment Proof (Screenshot)</label><div class="upload-box" style="height:80px;" onclick="openPaymentProofUpload()"><i class="fas fa-camera"></i><span>Upload Proof</span></div><div id="paymentProofUrl" class="d-none"></div></div>
-                        <button class="btn btn-primary w-100" onclick="UIManager.submitPayment()">Submit Payment</button>
-                    `;
+                    activeLoans.forEach(loan => { options += `<option value="${loan.id}">${loan.id} - ${Utils.formatCurrency(loan.amount)} (Due: ${Utils.formatCurrency(loan.periodicPayment)})</option>`; });
+                    container.innerHTML = `<div class="form-group"><label class="form-label">Select Loan</label><select id="paymentLoanSelect" class="form-input">${options}</select></div><div class="form-group"><label class="form-label">Amount (Kwacha)</label><input type="number" id="paymentAmount" class="form-input" placeholder="Enter amount" value="${prefillAmount || ''}"></div><div class="form-group"><label class="form-label">Payment Method</label><select id="paymentMethod" class="form-input"><option value="cash">Cash</option><option value="mobile">Mobile Money</option><option value="bank">Bank Transfer</option></select></div><div class="form-group"><label class="form-label">Reference (optional)</label><input type="text" id="paymentReference" class="form-input" placeholder="Transaction ID"></div><div class="form-group"><label class="form-label">Payment Proof (Screenshot)</label><div class="upload-box" style="height:80px;" onclick="openPaymentProofUpload()"><i class="fas fa-camera"></i><span>Upload Proof</span></div><div id="paymentProofUrl" class="d-none"></div></div><button class="btn btn-primary w-100" onclick="UIManager.submitPayment()">Submit Payment</button>`;
                     if (AppState.selectedLoanForPayment) document.getElementById('paymentLoanSelect').value = AppState.selectedLoanForPayment;
                     window.paymentProofUrl = null;
                 }
-
                 const historyEl = document.getElementById('paymentHistory');
-                if (AppState.payments.length === 0) {
-                    historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-history" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No payment history found</p></div>';
-                } else {
-                    let historyHtml = '<div class="payment-cards">';
-                    AppState.payments.slice(0, 10).forEach(p => {
-                        let statusClass = '';
-                        let statusText = '';
+                if (AppState.payments.length === 0) historyEl.innerHTML = '<div class="text-center py-4"><i class="fas fa-history" style="font-size:48px; color:var(--ios-gray-3);"></i><p class="text-muted">No payment history found</p></div>';
+                else {
+                    let historyHtml = '';
+                    AppState.payments.slice(0,10).forEach(p => {
+                        let statusClass = '', statusText = '';
                         if (p.status === 'verified') { statusClass = 'payment-status-confirmed'; statusText = 'Confirmed'; }
                         else if (p.status === 'pending') { statusClass = 'payment-status-pending'; statusText = 'Pending'; }
                         else if (p.status === 'rejected') { statusClass = 'payment-status-rejected'; statusText = 'Rejected'; }
                         else { statusClass = 'payment-status-pending'; statusText = 'Pending'; }
-                        historyHtml += `
-                            <div class="loan-card" style="margin-bottom: 12px;">
-                                <div class="loan-card-header"><span class="loan-id">${p.id}</span><span class="${statusClass}">${statusText}</span></div>
-                                <div class="loan-amount">${Utils.formatCurrency(p.amount)}</div>
-                                <div class="loan-dates"><span>Date: ${Utils.formatDate(p.timestamp)}</span></div>
-                                <div style="margin-top: 8px; font-size: 13px;"><div><strong>Loan:</strong> ${p.loanId}</div><div><strong>Method:</strong> ${p.method}</div>${p.reference ? `<div><strong>Ref:</strong> ${p.reference}</div>` : ''}${p.proofUrl ? `<div><strong>Proof:</strong> <img src="${p.proofUrl}" style="max-width:100%; max-height:80px; border-radius:8px; margin-top:6px; cursor:pointer;" onclick="window.open('${p.proofUrl}')"></div>` : ''}</div>
-                            </div>
-                        `;
+                        historyHtml += `<div class="loan-card" style="margin-bottom:12px;"><div class="loan-card-header"><span class="loan-id">${p.id}</span><span class="${statusClass}">${statusText}</span></div><div class="loan-amount">${Utils.formatCurrency(p.amount)}</div><div class="loan-dates"><span>Date: ${Utils.formatDate(p.timestamp)}</span></div><div style="margin-top:8px; font-size:13px;"><div><strong>Loan:</strong> ${p.loanId}</div><div><strong>Method:</strong> ${p.method}</div>${p.reference ? `<div><strong>Ref:</strong> ${p.reference}</div>` : ''}${p.proofUrl ? `<div><strong>Proof:</strong> <img src="${p.proofUrl}" style="max-width:100%; max-height:80px; border-radius:8px; margin-top:6px; cursor:pointer;" onclick="window.open('${p.proofUrl}')"></div>` : ''}</div></div>`;
                     });
-                    historyHtml += '</div>';
                     historyEl.innerHTML = historyHtml;
                 }
             },
@@ -5252,23 +4471,9 @@
                     const uploadBox = document.querySelector('.upload-box[onclick="openPaymentProofUpload()"]');
                     if (uploadBox) uploadBox.innerHTML = '<i class="fas fa-camera"></i><span>Upload Proof</span>';
                     this.paymentModal.classList.remove('active');
-                } else {
-                    Utils.showToast('Error', result.error, 'error');
-                }
+                } else Utils.showToast('Error', result.error, 'error');
             },
-            showStatementModal() {
-                this.statementModal.classList.add('active');
-                const content = document.getElementById('statementContent');
-                let html = '<h3>Loan Statement</h3><table class="data-table"><tr><th>Date</th><th>Description</th><th>Debit</th><th>Credit</th><th>Balance</th></tr>';
-                let balance = 0;
-                const transactions = [];
-                AppState.activeLoans.concat(AppState.completedLoans).forEach(loan => { transactions.push({ date: loan.createdAt, desc: `Loan disbursed (${loan.id})`, debit: loan.amount, credit: 0 }); });
-                AppState.payments.forEach(p => { transactions.push({ date: p.timestamp, desc: `Payment (${p.loanId}) - ${p.method}`, debit: 0, credit: p.amount }); });
-                transactions.sort((a,b) => a.date - b.date);
-                transactions.forEach(t => { balance += (t.debit - t.credit); html += `<tr><td>${Utils.formatDate(t.date)}</td><td>${t.desc}</td><td>${t.debit > 0 ? Utils.formatCurrency(t.debit) : '-'}</td><td>${t.credit > 0 ? Utils.formatCurrency(t.credit) : '-'}</td><td>${Utils.formatCurrency(balance)}</td></tr>`; });
-                html += '</tr>';
-                content.innerHTML = html;
-            },
+            showStatementModal() { this.statementModal.classList.add('active'); document.getElementById('statementContent').innerHTML = '<p>Statement loading...</p>'; },
             showSupportModal() { this.supportModal.classList.add('active'); },
             showEditProfileModal() {
                 if (!AppState.userData) return;
@@ -5289,7 +4494,7 @@
                 if (!fullName || !phone) { Utils.showToast('Validation Error', 'Name and phone are required', 'error'); return; }
                 const result = await FirebaseService.updateProfile({ fullName, phone, residence, houseNumber, nrc });
                 if (result.success) { Utils.showToast('Success', result.message, 'info'); this.editProfileModal.classList.remove('active'); }
-                else { Utils.showToast('Error', result.error, 'error'); }
+                else Utils.showToast('Error', result.error, 'error');
             },
             async changePassword() {
                 const current = document.getElementById('currentPassword').value;
@@ -5300,28 +4505,25 @@
                 if (newPass.length < 6) { Utils.showToast('Error', 'Password must be at least 6 characters', 'error'); return; }
                 const result = await FirebaseService.changePassword(current, newPass);
                 if (result.success) { Utils.showToast('Success', result.message, 'info'); this.changePasswordModal.classList.remove('active'); document.getElementById('currentPassword').value = ''; document.getElementById('newPassword').value = ''; document.getElementById('confirmNewPassword').value = ''; }
-                else { Utils.showToast('Error', result.error, 'error'); }
+                else Utils.showToast('Error', result.error, 'error');
             },
             updateNotificationsUI() {
                 const list = document.getElementById('notificationsList');
                 if (!list) return;
-                if (AppState.notifications.length === 0) { list.innerHTML = '<div class="text-center py-4"><i class="fas fa-bell" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No notifications yet</p></div>'; return; }
-                list.innerHTML = AppState.notifications.map(n => `<div class="notification-item ${n.read ? '' : 'unread'}"><div class="notification-message">${n.message || n.type}</div><div class="notification-time">${Utils.formatDateTime(n.timestamp)}</div></div>`).join('');
+                if (AppState.notifications.length === 0) list.innerHTML = '<div class="text-center py-4"><i class="fas fa-bell" style="font-size:48px; color:var(--ios-gray-3);"></i><p class="text-muted">No notifications yet</p></div>';
+                else list.innerHTML = AppState.notifications.map(n => `<div class="notification-item ${n.read ? '' : 'unread'}"><div class="notification-message">${n.message || n.type}</div><div class="notification-time">${Utils.formatDateTime(n.timestamp)}</div></div>`).join('');
             },
             updateLoanHistoryUI() {
                 const container = document.getElementById('loanHistoryList');
                 if (!container) return;
-                if (AppState.completedLoans.length === 0) { container.innerHTML = '<div class="text-center py-4"><i class="fas fa-file-alt" style="font-size: 48px; color: var(--ios-gray-3); margin-bottom: 16px;"></i><p class="text-muted">No completed loans found</p></div>'; return; }
-                let html = '';
-                AppState.completedLoans.forEach(loan => { html += `<div class="loan-card" onclick="UIManager.showLoanDetails('${loan.id}')"><div class="loan-card-header"><span class="loan-id">${loan.id}</span><span class="status-badge-tag ${loan.status === 'completed' ? 'status-active' : 'status-rejected'}">${loan.status}</span></div><div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div><div class="loan-dates"><span>Created: ${Utils.formatDate(loan.createdAt)}</span><span>Closed: ${Utils.formatDate(loan.updatedAt || loan.completedAt)}</span></div></div>`; });
-                container.innerHTML = html;
+                if (AppState.completedLoans.length === 0) container.innerHTML = '<div class="text-center py-4"><i class="fas fa-file-alt" style="font-size:48px; color:var(--ios-gray-3);"></i><p class="text-muted">No completed loans found</p></div>';
+                else container.innerHTML = AppState.completedLoans.map(loan => `<div class="loan-card" onclick="UIManager.showLoanDetails('${loan.id}')"><div class="loan-card-header"><span class="loan-id">${loan.id}</span><span class="status-badge-tag ${loan.status === 'completed' ? 'status-active' : 'status-rejected'}">${loan.status}</span></div><div class="loan-amount">${Utils.formatCurrency(loan.amount)}</div><div class="loan-dates"><span>Created: ${Utils.formatDate(loan.createdAt)}</span><span>Closed: ${Utils.formatDate(loan.updatedAt || loan.completedAt)}</span></div></div>`).join('');
             },
             showFloatingPromotion(promo) {
-                if (!promo) return;
-                if (AppState.seenPromotions.has(promo.id)) { const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id)); if (unseen.length > 0) this.showFloatingPromotion(unseen[0]); return; }
+                if (!promo || AppState.seenPromotions.has(promo.id)) return;
                 this.promoTitle.textContent = promo.title || 'Special Offer!';
                 this.promoMessage.textContent = promo.message || '';
-                if (promo.imageUrl) { this.promoImage.src = promo.imageUrl; this.promoImage.style.display = 'block'; } else { this.promoImage.style.display = 'none'; }
+                if (promo.imageUrl) { this.promoImage.src = promo.imageUrl; this.promoImage.style.display = 'block'; } else this.promoImage.style.display = 'none';
                 this.floatingPromo.classList.add('show');
             },
             closeFloatingPromotion() {
@@ -5329,7 +4531,7 @@
                 if (currentPromo) { AppState.seenPromotions.add(currentPromo.id); Utils.saveSeenPromotions(); }
                 this.floatingPromo.classList.remove('show');
                 const unseen = AppState.promotions.filter(p => !AppState.seenPromotions.has(p.id));
-                if (unseen.length > 0) { AppState.currentPromotionIndex = 0; this.showFloatingPromotion(unseen[0]); } else { AppState.currentPromotionIndex = 0; }
+                if (unseen.length > 0) this.showFloatingPromotion(unseen[0]);
             }
         };
 
@@ -5337,15 +4539,9 @@
         function openCloudinaryWidget(element) { CloudinaryService.openWidget(element); }
         function openPaymentProofUpload() { CloudinaryService.openPaymentProofWidget((url) => { window.paymentProofUrl = url; }); }
         function viewDocument(type) {
-            const documentImage = document.getElementById('documentImage');
-            const documentModal = document.getElementById('documentModal');
-            if (!AppState.userData) return;
-            let documentUrl = '';
-            if (type === 'nrcFront' && AppState.userData.nrcFront) documentUrl = AppState.userData.nrcFront;
-            else if (type === 'nrcBack' && AppState.userData.nrcBack) documentUrl = AppState.userData.nrcBack;
-            else if (type === 'profilePhoto' && AppState.userData.profilePhoto) documentUrl = AppState.userData.profilePhoto;
-            if (documentUrl) { documentImage.src = documentUrl; documentModal.classList.add('active'); }
-            else { Utils.showToast('Document', 'Document not uploaded yet', 'warning'); }
+            const urls = { nrcFront: AppState.userData?.nrcFront, nrcBack: AppState.userData?.nrcBack, profilePhoto: AppState.userData?.profilePhoto };
+            if (urls[type]) { document.getElementById('documentImage').src = urls[type]; document.getElementById('documentModal').classList.add('active'); }
+            else Utils.showToast('Document', 'Document not uploaded yet', 'warning');
         }
         function validateLoanAmount() {
             const input = document.getElementById('loanAmount');
@@ -5372,14 +4568,9 @@
             document.getElementById('previewPeriodic').textContent = Utils.formatCurrency(periodicPayment);
             document.getElementById('interestPreview').style.display = 'block';
         }
-        function setDurationUnit(unit) {
-            AppState.durationUnit = unit;
-            document.querySelectorAll('.duration-unit-option').forEach(opt => { if (opt.dataset.unit === unit) opt.classList.add('active'); else opt.classList.remove('active'); });
-            UIManager.populateDurationOptions();
-            updateInterestPreview();
-        }
+        function setDurationUnit(unit) { AppState.durationUnit = unit; document.querySelectorAll('.duration-unit-option').forEach(opt => { if (opt.dataset.unit === unit) opt.classList.add('active'); else opt.classList.remove('active'); }); UIManager.populateDurationOptions(); updateInterestPreview(); }
 
-        // ===== Tutorial Manager with Dynamic Positioning =====
+        // ===== Tutorial Manager =====
         const TutorialManager = {
             steps: [
                 { selector: '#menuToggle', text: 'Tap here to open the sidebar menu. Navigate to different sections like Profile, Loans, and Settings.' },
@@ -5390,21 +4581,9 @@
                 { selector: '.mobile-nav-item[data-section="payments"]', text: 'Make payments and upload proof. Your payment history is also shown here.' },
                 { selector: null, text: 'You\'re all set! Explore the app and enjoy quick loans with TruCash.' }
             ],
-            currentStep: 0,
-            overlay: document.getElementById('tutorialOverlay'),
-            highlightEl: document.getElementById('tutorialHighlight'),
-            tooltipEl: document.getElementById('tutorialTooltip'),
-            nextBtn: document.getElementById('tutorialNextBtn'),
-            prevBtn: document.getElementById('tutorialPrevBtn'),
-            skipBtn: document.getElementById('tutorialSkipBtn'),
-            skipTop: document.getElementById('tutorialSkipTop'),
-            startTour() {
-                if (!AppState.userData) return;
-                this.currentStep = 0;
-                this.overlay.classList.add('active');
-                this.showStep(0);
-                this.bindControls();
-            },
+            currentStep: 0, overlay: document.getElementById('tutorialOverlay'), highlightEl: document.getElementById('tutorialHighlight'), tooltipEl: document.getElementById('tutorialTooltip'),
+            nextBtn: document.getElementById('tutorialNextBtn'), prevBtn: document.getElementById('tutorialPrevBtn'), skipBtn: document.getElementById('tutorialSkipBtn'), skipTop: document.getElementById('tutorialSkipTop'),
+            startTour() { if (!AppState.userData) return; this.currentStep = 0; this.overlay.classList.add('active'); this.showStep(0); this.bindControls(); },
             showStep(index) {
                 const step = this.steps[index];
                 if (!step) return;
@@ -5419,48 +4598,22 @@
                         this.highlightEl.style.left = (rect.left - 10 + window.scrollX) + 'px';
                         this.highlightEl.style.display = 'block';
                         let tooltipTop = rect.bottom + 15;
-                        let tooltipLeft = rect.left + (rect.width / 2) - 140;
+                        let tooltipLeft = rect.left + (rect.width/2) - 140;
                         tooltipLeft = Math.max(10, Math.min(tooltipLeft, window.innerWidth - 290));
                         this.tooltipEl.style.top = tooltipTop + 'px';
                         this.tooltipEl.style.left = tooltipLeft + 'px';
                         this.tooltipEl.style.bottom = 'auto';
                         this.tooltipEl.style.transform = 'none';
-                    } else {
-                        this.highlightEl.style.display = 'none';
-                        this.tooltipEl.style.bottom = '120px';
-                        this.tooltipEl.style.top = 'auto';
-                        this.tooltipEl.style.left = '50%';
-                        this.tooltipEl.style.transform = 'translateX(-50%)';
-                    }
-                } else {
-                    this.highlightEl.style.display = 'none';
-                    this.tooltipEl.style.bottom = '120px';
-                    this.tooltipEl.style.top = 'auto';
-                    this.tooltipEl.style.left = '50%';
-                    this.tooltipEl.style.transform = 'translateX(-50%)';
-                }
+                    } else { this.highlightEl.style.display = 'none'; this.tooltipEl.style.bottom = '120px'; this.tooltipEl.style.left = '50%'; this.tooltipEl.style.transform = 'translateX(-50%)'; }
+                } else { this.highlightEl.style.display = 'none'; this.tooltipEl.style.bottom = '120px'; this.tooltipEl.style.left = '50%'; this.tooltipEl.style.transform = 'translateX(-50%)'; }
                 this.prevBtn.style.display = index === 0 ? 'none' : 'inline-block';
                 this.nextBtn.textContent = index === this.steps.length - 1 ? 'Finish' : 'Next';
             },
-            nextStep() {
-                if (this.currentStep < this.steps.length - 1) { this.currentStep++; this.showStep(this.currentStep); }
-                else { this.finishTour(); }
-            },
-            prevStep() {
-                if (this.currentStep > 0) { this.currentStep--; this.showStep(this.currentStep); }
-            },
-            finishTour() {
-                this.overlay.classList.remove('active');
-                if (AppState.currentUser) db.ref('users/' + AppState.currentUser.uid).update({ tutorialCompleted: true });
-            },
+            nextStep() { if (this.currentStep < this.steps.length - 1) { this.currentStep++; this.showStep(this.currentStep); } else this.finishTour(); },
+            prevStep() { if (this.currentStep > 0) { this.currentStep--; this.showStep(this.currentStep); } },
+            finishTour() { this.overlay.classList.remove('active'); if (AppState.currentUser) db.ref('users/' + AppState.currentUser.uid).update({ tutorialCompleted: true }); },
             skipTour() { this.finishTour(); },
-            bindControls() {
-                this.nextBtn.onclick = () => this.nextStep();
-                this.prevBtn.onclick = () => this.prevStep();
-                this.skipBtn.onclick = () => this.skipTour();
-                this.skipTop.onclick = () => this.skipTour();
-                this.overlay.addEventListener('click', (e) => { if (e.target === this.overlay) e.stopPropagation(); });
-            }
+            bindControls() { this.nextBtn.onclick = () => this.nextStep(); this.prevBtn.onclick = () => this.prevStep(); this.skipBtn.onclick = () => this.skipTour(); this.skipTop.onclick = () => this.skipTour(); this.overlay.addEventListener('click', (e) => { if (e.target === this.overlay) e.stopPropagation(); }); }
         };
 
         window.UIManager = UIManager;
@@ -5471,7 +4624,7 @@
         window.updateInterestPreview = updateInterestPreview;
         window.setDurationUnit = setDurationUnit;
 
-        document.addEventListener('DOMContentLoaded', () => { UIManager.init(); });
+        document.addEventListener('DOMContentLoaded', () => UIManager.init());
     </script>
 </body>
 </html>
