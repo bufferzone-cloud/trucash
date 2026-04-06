@@ -3,28 +3,26 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>TruCash · Sudo Panel</title>
+    <title>TruCash · Super Admin Console</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDKs -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <!-- Cloudinary Upload Widget -->
+    <!-- Cloudinary -->
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-    <!-- Chart.js & Moment.js -->
+    <!-- Chart.js, Moment, PapaParse, html2pdf -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* ===== iOS‑inspired design – clean, scaled ===== */
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
         }
-
         :root {
             --bg: #f5f7fa;
             --card: #ffffff;
@@ -39,12 +37,11 @@
             --radius: 16px;
             --shadow: 0 2px 8px rgba(0,0,0,0.05);
         }
-
         body {
             background: var(--bg);
             padding-bottom: 70px;
+            overflow-x: hidden;
         }
-
         /* Header */
         .app-header {
             position: sticky;
@@ -85,7 +82,6 @@
             justify-content: center;
             cursor: pointer;
         }
-
         /* Sidebar */
         .sidebar-overlay {
             position: fixed;
@@ -107,8 +103,8 @@
         .sidebar {
             position: fixed;
             top: 0;
-            right: -300px;
-            width: 280px;
+            right: -320px;
+            width: 300px;
             height: 100%;
             background: rgba(255,255,255,0.95);
             backdrop-filter: blur(10px);
@@ -161,8 +157,7 @@
             margin-top: 24px;
             color: var(--red);
         }
-
-        /* Bottom Navigation */
+        /* Bottom Nav (mobile) */
         .bottom-nav {
             position: fixed;
             bottom: 0;
@@ -192,10 +187,9 @@
         .nav-item-bottom.active {
             color: var(--blue);
         }
-
         /* Main Content */
         .main-content {
-            max-width: 1360px;
+            max-width: 1400px;
             margin: 0 auto;
             padding: 20px;
         }
@@ -205,7 +199,6 @@
         .content-section.active {
             display: block;
         }
-
         /* Cards & Grids */
         .stats-grid {
             display: grid;
@@ -282,7 +275,6 @@
                 grid-template-columns: 1fr;
             }
         }
-
         /* Search Bar */
         .search-bar {
             background: var(--card);
@@ -301,7 +293,6 @@
             font-size: 13px;
             background: transparent;
         }
-
         /* Buttons */
         .btn {
             padding: 8px 16px;
@@ -325,11 +316,18 @@
             background: var(--red);
             color: white;
         }
+        .btn-warning {
+            background: var(--orange);
+            color: white;
+        }
         .btn-outline {
             border-color: var(--gray2);
         }
-
-        /* Loan Card (redesigned) */
+        .btn-small {
+            padding: 4px 10px;
+            font-size: 11px;
+        }
+        /* Loan Card */
         .loan-card {
             display: flex;
             align-items: center;
@@ -373,7 +371,6 @@
             background: linear-gradient(90deg, var(--blue), var(--purple));
             width: 0%;
         }
-
         /* Status Badges */
         .status-badge {
             display: inline-block;
@@ -382,7 +379,7 @@
             font-size: 10px;
             font-weight: 600;
         }
-        .status-badge.active, .status-badge.approved {
+        .status-badge.active, .status-badge.approved, .status-badge.confirmed {
             background: rgba(52,199,89,0.2);
             color: #1d7a3d;
         }
@@ -390,7 +387,7 @@
             background: rgba(255,204,0,0.2);
             color: #b37b00;
         }
-        .status-badge.rejected, .status-badge.banned {
+        .status-badge.rejected, .status-badge.banned, .status-badge.defaulted {
             background: rgba(255,59,48,0.2);
             color: #b31f1f;
         }
@@ -406,8 +403,7 @@
         .credit-score-badge.good { background: #5856d6; }
         .credit-score-badge.fair { background: #FF9500; }
         .credit-score-badge.poor { background: #FF3B30; }
-
-        /* Modal */
+        /* Modals */
         .modal-overlay {
             position: fixed;
             top: 0;
@@ -427,10 +423,13 @@
         .modal-container {
             background: white;
             border-radius: 28px;
-            max-width: 600px;
+            max-width: 700px;
             width: 90%;
             max-height: 90vh;
             overflow-y: auto;
+        }
+        .modal-container.large {
+            max-width: 900px;
         }
         .modal-header {
             padding: 16px 20px;
@@ -484,7 +483,24 @@
             object-fit: cover;
             border-radius: 14px;
         }
-
+        /* Tabs */
+        .tab-bar {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+        .tab {
+            padding: 6px 14px;
+            background: var(--gray1);
+            border-radius: 30px;
+            font-size: 12px;
+            cursor: pointer;
+        }
+        .tab.active {
+            background: var(--blue);
+            color: white;
+        }
         /* Toast & Loading */
         .toast-container {
             position: fixed;
@@ -532,6 +548,11 @@
             color: var(--gray5);
             font-size: 12px;
         }
+        hr {
+            margin: 16px 0;
+            border: none;
+            border-top: 1px solid var(--gray2);
+        }
     </style>
 </head>
 <body>
@@ -546,19 +567,19 @@
 <div class="app-header">
     <div class="logo">
         <i class="fas fa-shield-alt"></i>
-        <span>TruCash · Sudo</span>
+        <span>TruCash · Super Admin</span>
     </div>
-    <div class="admin-name" id="adminNameDisplay">Sudo Admin</div>
+    <div class="admin-name" id="adminNameDisplay">Super Admin</div>
     <div class="menu-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></div>
 </div>
 
-<!-- Sidebar Overlay & Sidebar -->
+<!-- Sidebar -->
 <div class="sidebar-overlay" id="sidebarOverlay"></div>
 <div class="sidebar" id="sidebar">
     <div class="sidebar-header">
         <div class="sidebar-avatar"><i class="fas fa-user-shield"></i></div>
         <div>
-            <div id="sidebarName">Sudo User</div>
+            <div id="sidebarName">Super User</div>
             <div class="text-muted">Super Administrator</div>
         </div>
     </div>
@@ -569,21 +590,16 @@
         <div class="sidebar-item" data-section="admins"><i class="fas fa-user-shield"></i> Admins</div>
         <div class="sidebar-item" data-section="loans"><i class="fas fa-file-invoice"></i> Loans</div>
         <div class="sidebar-item" data-section="payments"><i class="fas fa-credit-card"></i> Payments</div>
-        <div class="sidebar-item" data-section="analytics"><i class="fas fa-chart-line"></i> Analytics</div>
-        <div class="sidebar-item" data-section="commission"><i class="fas fa-percent"></i> Commission</div>
-        <div class="sidebar-item" data-section="profit"><i class="fas fa-coins"></i> Profit & Loss</div>
-        <div class="sidebar-item" data-section="reports"><i class="fas fa-file-pdf"></i> Reports</div>
-        <div class="sidebar-item" data-section="assignment"><i class="fas fa-handshake"></i> Assignment</div>
-        <div class="sidebar-item" data-section="audit"><i class="fas fa-history"></i> Audit Logs</div>
-        <div class="sidebar-item" data-section="applications"><i class="fas fa-clipboard-list"></i> Pending Apps</div>
-        <div class="sidebar-item" data-section="upcoming"><i class="fas fa-exclamation-triangle"></i> Upcoming/Overdue</div>
-        <div class="sidebar-item" data-section="messages"><i class="fas fa-bell"></i> Messages & Promos</div>
-        <div class="sidebar-item" data-section="settings"><i class="fas fa-cog"></i> System Settings</div>
+        <div class="sidebar-item" data-section="lending"><i class="fas fa-hand-holding-usd"></i> Lending Ops</div>
+        <div class="sidebar-item" data-section="database"><i class="fas fa-database"></i> Database Ops</div>
+        <div class="sidebar-item" data-section="security"><i class="fas fa-shield-alt"></i> Security</div>
+        <div class="sidebar-item" data-section="system"><i class="fas fa-cog"></i> System Config</div>
+        <div class="sidebar-item" data-section="reports"><i class="fas fa-chart-line"></i> Reports & Analytics</div>
         <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
     </div>
 </div>
 
-<!-- Bottom Navigation (Mobile) -->
+<!-- Bottom Navigation (mobile) -->
 <div class="bottom-nav">
     <div class="nav-item-bottom active" data-section="dashboard"><i class="fas fa-home"></i><span>Home</span></div>
     <div class="nav-item-bottom" data-section="customers"><i class="fas fa-users"></i><span>Customers</span></div>
@@ -594,7 +610,7 @@
 
 <!-- Main Content -->
 <div class="main-content" id="mainContent">
-    <!-- Dashboard Section -->
+    <!-- ==================== DASHBOARD SECTION ==================== -->
     <section class="content-section active" id="dashboardSection">
         <div class="stats-grid">
             <div class="stat-card" onclick="showSection('customers')"><div class="label">Total Customers</div><div class="value" id="statCustomers">0</div></div>
@@ -619,60 +635,136 @@
         </div>
     </section>
 
-    <!-- Customers Section -->
+    <!-- ==================== CUSTOMERS SECTION ==================== -->
     <section class="content-section" id="customersSection">
         <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="customerSearch" placeholder="Search customers..."></div>
         <div id="customersList"></div>
     </section>
 
-    <!-- Agents Section -->
+    <!-- ==================== AGENTS SECTION ==================== -->
     <section class="content-section" id="agentsSection">
         <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="agentSearch" placeholder="Search agents..."></div>
         <div id="agentsList"></div>
+        <div class="floating-card"><h4>Pending Agent Applications</h4><div id="pendingAppsList"></div></div>
     </section>
 
-    <!-- Admins Section -->
+    <!-- ==================== ADMINS SECTION ==================== -->
     <section class="content-section" id="adminsSection">
         <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="adminSearch" placeholder="Search admins..."></div>
-        <button class="btn btn-primary" id="createAdminBtn" style="margin-bottom: 16px;"><i class="fas fa-plus"></i> Create Admin</button>
+        <button class="btn btn-primary" id="createAdminBtn" style="margin-bottom:16px;"><i class="fas fa-plus"></i> Create Admin</button>
         <div id="adminsList"></div>
     </section>
 
-    <!-- Loans Section -->
+    <!-- ==================== LOANS SECTION ==================== -->
     <section class="content-section" id="loansSection">
         <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="loanSearch" placeholder="Search loans..."></div>
+        <div class="tab-bar"><span class="tab active" data-status="all">All</span><span class="tab" data-status="pending">Pending</span><span class="tab" data-status="approved">Approved</span><span class="tab" data-status="active">Active</span><span class="tab" data-status="completed">Completed</span></div>
         <div id="loansList"></div>
     </section>
 
-    <!-- Payments Section -->
+    <!-- ==================== PAYMENTS SECTION ==================== -->
     <section class="content-section" id="paymentsSection">
         <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="paymentSearch" placeholder="Search payments..."></div>
+        <div class="tab-bar"><span class="tab active" data-status="all">All</span><span class="tab" data-status="pending">Pending</span><span class="tab" data-status="confirmed">Confirmed</span><span class="tab" data-status="rejected">Rejected</span></div>
         <div id="paymentsList"></div>
     </section>
 
-    <!-- Analytics Section -->
-    <section class="content-section" id="analyticsSection">
-        <div class="grid-2">
-            <div class="floating-card"><canvas id="loanTrendChart" height="200"></canvas></div>
-            <div class="floating-card"><canvas id="paymentTrendChart" height="200"></canvas></div>
+    <!-- ==================== LENDING OPERATIONS SECTION ==================== -->
+    <section class="content-section" id="lendingSection">
+        <div class="floating-card">
+            <h4>Loan Override / Manual Adjustment</h4>
+            <div class="form-group"><label class="form-label">Loan ID</label><input type="text" id="overrideLoanId" class="form-input" placeholder="Loan ID"></div>
+            <div class="form-group"><label class="form-label">Operation</label><select id="overrideOp" class="form-select"><option>Change Status</option><option>Extend Duration</option><option>Adjust Amount</option></select></div>
+            <div class="form-group"><label class="form-label">New Value</label><input type="text" id="overrideValue" class="form-input" placeholder="e.g., active, completed, 5000"></div>
+            <button class="btn btn-primary" id="executeOverride">Execute Override</button>
         </div>
-        <div class="floating-card"><h4>Financial Summary</h4><div class="grid-3" id="financialSummary"></div></div>
+        <div class="floating-card">
+            <h4>Wallet Operations (Credit/Debit/Freeze)</h4>
+            <div class="form-group"><label class="form-label">Wallet ID / Customer ID</label><input type="text" id="walletId" class="form-input"></div>
+            <div class="form-group"><label class="form-label">Operation</label><select id="walletOp" class="form-select"><option>Credit Adjustment</option><option>Debit Adjustment</option><option>Freeze Wallet</option></select></div>
+            <div class="form-group"><label class="form-label">Amount (ZMW)</label><input type="number" id="walletAmount" class="form-input"></div>
+            <button class="btn btn-primary" id="executeWalletOp">Execute</button>
+        </div>
+        <div class="floating-card">
+            <h4>KYC Review Queue</h4>
+            <div id="kycQueueList"></div>
+        </div>
     </section>
 
-    <!-- Commission Section -->
-    <section class="content-section" id="commissionSection">
-        <div class="floating-card"><h4>Commission Overview</h4><div class="grid-3" id="commissionOverview"></div></div>
-        <div id="agentsCommissionList"></div>
+    <!-- ==================== DATABASE OPS SECTION ==================== -->
+    <section class="content-section" id="databaseSection">
+        <div class="floating-card">
+            <h4>Query Runner</h4>
+            <div class="form-group"><label class="form-label">Target Table</label><select id="dbTable" class="form-select"><option>users</option><option>loans</option><option>payments</option><option>commissionHistory</option><option>auditLogs</option></select></div>
+            <div class="form-group"><label class="form-label">SQL-like Filter (JSON path)</label><textarea id="dbQuery" class="form-textarea" rows="3" placeholder='{"status": "pending"}'></textarea></div>
+            <button class="btn btn-primary" id="runQueryBtn">Run Query</button>
+            <div id="queryResult" class="detail-grid" style="margin-top:16px;"></div>
+        </div>
+        <div class="floating-card">
+            <h4>Backup & Recovery</h4>
+            <button class="btn btn-success" id="manualBackupBtn">Trigger Manual Backup</button>
+            <div id="backupStatus" class="text-muted mt-2"></div>
+        </div>
+        <div class="floating-card">
+            <h4>Storage Distribution</h4>
+            <canvas id="storageChart" height="150"></canvas>
+        </div>
     </section>
 
-    <!-- Profit & Loss Section -->
-    <section class="content-section" id="profitSection">
-        <div class="floating-card"><h4>Profit & Loss Statement</h4><div class="grid-3" id="profitSummary"></div></div>
-        <button class="btn btn-primary" id="generateDetailedProfitReport">Generate Detailed Report</button>
+    <!-- ==================== SECURITY SECTION ==================== -->
+    <section class="content-section" id="securitySection">
+        <div class="floating-card">
+            <h4>Security Policies</h4>
+            <div class="form-group"><label>MFA Required for Admins</label><input type="checkbox" id="mfaToggle"></div>
+            <div class="form-group"><label>IP Whitelisting Enabled</label><input type="checkbox" id="ipWhitelistToggle"></div>
+            <div class="form-group"><label>Session Timeout (minutes)</label><input type="number" id="sessionTimeout" class="form-input" value="30"></div>
+            <button class="btn btn-primary" id="saveSecurityPolicies">Save Policies</button>
+        </div>
+        <div class="floating-card">
+            <h4>Audit Logs</h4>
+            <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="auditSearch" placeholder="Search logs..."></div>
+            <div id="auditLogsList"></div>
+        </div>
+        <div class="floating-card">
+            <h4>Encryption Status</h4>
+            <div>Database: AES-256 <span class="status-badge active">Active</span></div>
+            <div>In-Transit: TLS 1.3 <span class="status-badge active">Active</span></div>
+            <div>Backup Encryption: <span id="backupEncryptStatus">Partial (72%)</span></div>
+        </div>
     </section>
 
-    <!-- Reports Section -->
+    <!-- ==================== SYSTEM CONFIG SECTION ==================== -->
+    <section class="content-section" id="systemSection">
+        <div class="grid-2">
+            <div class="floating-card">
+                <h4>General Settings</h4>
+                <div class="form-group"><label class="form-label">Commission Rate (%)</label><input type="number" id="commissionRate" class="form-input" value="15"></div>
+                <div class="form-group"><label class="form-label">Monthly Interest (%)</label><input type="number" id="monthlyInterest" class="form-input" value="35"></div>
+                <div class="form-group"><label class="form-label">Weekly Interest (%)</label><input type="number" id="weeklyInterest" class="form-input" value="10"></div>
+                <div class="form-group"><label class="form-label">Max Loan Amount (K)</label><input type="number" id="maxLoanAmount" class="form-input" value="50000"></div>
+                <div class="form-group"><label class="form-label">Min Loan Amount (K)</label><input type="number" id="minLoanAmount" class="form-input" value="100"></div>
+                <div class="form-group"><label>Enable Customer App</label><input type="checkbox" id="enableCustomerApp"></div>
+                <div class="form-group"><label>Enable Agent App</label><input type="checkbox" id="enableAgentApp"></div>
+                <button class="btn btn-primary" id="saveSystemSettings">Save Settings</button>
+            </div>
+            <div class="floating-card">
+                <h4>Update Center</h4>
+                <div>Current Version: v2.4.1-stable</div>
+                <div>Latest Available: v2.4.1-stable</div>
+                <button class="btn btn-outline mt-2" id="checkUpdatesBtn">Check for Updates</button>
+                <hr>
+                <h4>Danger Zone</h4>
+                <button class="btn btn-danger" id="sudoResetBtn">Sudo Reset Database (Wipe All Data)</button>
+            </div>
+        </div>
+    </section>
+
+    <!-- ==================== REPORTS & ANALYTICS SECTION ==================== -->
     <section class="content-section" id="reportsSection">
+        <div class="floating-card">
+            <h4>Financial Summary</h4>
+            <div class="grid-3" id="financialSummary"></div>
+        </div>
         <div class="floating-card">
             <h4>Export Data</h4>
             <div class="grid-2">
@@ -683,120 +775,20 @@
                 <button class="btn btn-success" id="exportAllZipBtn">Export All (ZIP)</button>
             </div>
         </div>
-    </section>
-
-    <!-- Assignment Section -->
-    <section class="content-section" id="assignmentSection">
-        <div class="grid-2">
-            <div class="floating-card">
-                <h4>Assign Agent to Customer</h4>
-                <div class="form-group"><label class="form-label">Customer</label><select id="assignCustomer" class="form-select"></select></div>
-                <div class="form-group"><label class="form-label">Agent</label><select id="assignAgent" class="form-select"></select></div>
-                <button class="btn btn-primary" id="assignBtn">Assign</button>
-            </div>
-            <div class="floating-card"><h4>Current Assignments</h4><div id="assignmentsList"></div></div>
-        </div>
-    </section>
-
-    <!-- Audit Logs Section -->
-    <section class="content-section" id="auditSection">
-        <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="auditSearch" placeholder="Search logs..."></div>
-        <div id="auditLogsList"></div>
-    </section>
-
-    <!-- Pending Applications Section -->
-    <section class="content-section" id="applicationsSection">
-        <div id="pendingApplicationsList"></div>
-    </section>
-
-    <!-- Upcoming/Overdue Payments Section -->
-    <section class="content-section" id="upcomingSection">
-        <div id="upcomingPaymentsList"></div>
-    </section>
-
-    <!-- Messages & Promotions Section -->
-    <section class="content-section" id="messagesSection">
         <div class="floating-card">
-            <h4>Send Message</h4>
-            <div class="form-group"><label class="form-label">Recipient Type</label><select id="msgRecipientType" class="form-select"><option value="all_customers">All Customers</option><option value="all_agents">All Agents</option><option value="specific_customer">Specific Customer</option><option value="specific_agent">Specific Agent</option></select></div>
-            <div class="form-group" id="specificRecipientSelect" style="display:none;"><label class="form-label">Select Recipient</label><select id="specificRecipientId" class="form-select"></select></div>
-            <div class="form-group"><label class="form-label">Message</label><textarea id="msgText" class="form-textarea" rows="3"></textarea></div>
-            <button class="btn btn-primary" id="sendMessageBtn">Send Message</button>
-        </div>
-        <div class="floating-card">
-            <h4>Send Promotion</h4>
-            <div class="form-group"><label class="form-label">Title</label><input type="text" id="promoTitle" class="form-input"></div>
-            <div class="form-group"><label class="form-label">Message</label><textarea id="promoMessage" class="form-textarea" rows="3"></textarea></div>
-            <div class="form-group"><label class="form-label">Image (optional)</label><div class="upload-box" data-type="promo-image" onclick="openCloudinaryUpload('promo-image')"><i class="fas fa-image"></i><span>Click to upload</span><div class="upload-preview" id="promoImagePreview"></div></div><input type="hidden" id="promoImageUrl"></div>
-            <div class="form-group"><label class="form-label">Send to</label><select id="promoRecipients" class="form-select"><option value="all_customers">All Customers</option><option value="all_agents">All Agents</option><option value="both">Both</option></select></div>
-            <button class="btn btn-primary" id="sendPromotionBtn">Send Promotion</button>
-        </div>
-        <div class="floating-card"><h4>Recent Messages</h4><div id="recentMessagesList"></div></div>
-        <div class="floating-card"><h4>Promotion History</h4><div id="promotionHistoryList"></div></div>
-    </section>
-
-    <!-- System Settings Section -->
-    <section class="content-section" id="settingsSection">
-        <div class="grid-2">
-            <div class="floating-card">
-                <h4>General Settings</h4>
-                <div class="form-group"><label class="form-label">Commission Rate (%)</label><input type="number" id="commissionRate" class="form-input" value="15"></div>
-                <div class="form-group"><label class="form-label">Monthly Interest (%)</label><input type="number" id="monthlyInterest" class="form-input" value="35"></div>
-                <div class="form-group"><label class="form-label">Weekly Interest (%)</label><input type="number" id="weeklyInterest" class="form-input" value="10"></div>
-                <div class="form-group"><label class="form-label">Max Loan Amount (K)</label><input type="number" id="maxLoanAmount" class="form-input" value="50000"></div>
-                <div class="form-group"><label class="form-label">Min Loan Amount (K)</label><input type="number" id="minLoanAmount" class="form-input" value="100"></div>
-                <div class="form-group"><label class="form-label">Grace Days</label><input type="number" id="graceDays" class="form-input" value="5"></div>
-                <div class="form-group"><label class="form-label">Penalty Rate (daily %)</label><input type="number" id="penaltyRate" class="form-input" value="2"></div>
-                <div class="form-group"><label>Enable Customer App</label><input type="checkbox" id="enableCustomerApp"></div>
-                <div class="form-group"><label>Enable Agent App</label><input type="checkbox" id="enableAgentApp"></div>
-                <button class="btn btn-primary" id="saveSystemSettings">Save Settings</button>
-            </div>
-            <div class="floating-card">
-                <h4>Contact Details</h4>
-                <div class="form-group"><label class="form-label">Customer Support Phone</label><input type="text" id="customerContactPhone" class="form-input"></div>
-                <div class="form-group"><label class="form-label">Customer Support Email</label><input type="email" id="customerContactEmail" class="form-input"></div>
-                <div class="form-group"><label class="form-label">Agent Support Phone</label><input type="text" id="agentContactPhone" class="form-input"></div>
-                <div class="form-group"><label class="form-label">Agent Support Email</label><input type="email" id="agentContactEmail" class="form-input"></div>
-                <button class="btn btn-primary" id="saveContactDetails">Save Contact Details</button>
-            </div>
-        </div>
-        <div class="floating-card">
-            <h4>Danger Zone</h4>
-            <button class="btn btn-danger" id="sudoResetBtn">Sudo Reset Database (Wipe All Data)</button>
+            <h4>Loan Trends</h4>
+            <canvas id="loanTrendChart" height="200"></canvas>
         </div>
     </section>
 </div>
 
-<!-- ======================== MODALS ======================== -->
-<!-- Create/Edit Customer Modal -->
-<div class="modal-overlay" id="customerModal">
+<!-- ==================== MODALS ==================== -->
+<!-- Customer/Agent/Admin Modals (reused) -->
+<div class="modal-overlay" id="genericModal">
     <div class="modal-container">
-        <div class="modal-header"><h3>Customer</h3><span class="modal-close" onclick="closeModal('customerModal')"><i class="fas fa-times"></i></span></div>
-        <div class="modal-body" id="customerModalBody"></div>
-        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('customerModal')">Cancel</button><button class="btn btn-primary" id="saveCustomerBtn">Save</button></div>
-    </div>
-</div>
-
-<!-- Create/Edit Agent Modal -->
-<div class="modal-overlay" id="agentModal">
-    <div class="modal-container">
-        <div class="modal-header"><h3>Agent</h3><span class="modal-close" onclick="closeModal('agentModal')"><i class="fas fa-times"></i></span></div>
-        <div class="modal-body" id="agentModalBody"></div>
-        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('agentModal')">Cancel</button><button class="btn btn-primary" id="saveAgentBtn">Save</button></div>
-    </div>
-</div>
-
-<!-- Create Admin Modal -->
-<div class="modal-overlay" id="adminModal">
-    <div class="modal-container">
-        <div class="modal-header"><h3>Admin Account</h3><span class="modal-close" onclick="closeModal('adminModal')"><i class="fas fa-times"></i></span></div>
-        <div class="modal-body">
-            <div class="form-group"><label class="form-label">Full Name</label><input type="text" id="adminFullName" class="form-input"></div>
-            <div class="form-group"><label class="form-label">Email</label><input type="email" id="adminEmail" class="form-input"></div>
-            <div class="form-group"><label class="form-label">Password</label><input type="password" id="adminPassword" class="form-input"></div>
-            <div class="form-group"><label class="form-label">Confirm Password</label><input type="password" id="adminConfirmPassword" class="form-input"></div>
-        </div>
-        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('adminModal')">Cancel</button><button class="btn btn-primary" id="submitAdminBtn">Create</button></div>
+        <div class="modal-header"><h3 id="modalTitle">Title</h3><span class="modal-close" onclick="closeModal('genericModal')"><i class="fas fa-times"></i></span></div>
+        <div class="modal-body" id="genericModalBody"></div>
+        <div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('genericModal')">Cancel</button><button class="btn btn-primary" id="modalActionBtn">Save</button></div>
     </div>
 </div>
 
@@ -818,7 +810,7 @@
     </div>
 </div>
 
-<!-- Rejection Reason Modal -->
+<!-- Rejection Modal -->
 <div class="modal-overlay" id="rejectionModal">
     <div class="modal-container">
         <div class="modal-header"><h3>Rejection Reason</h3><span class="modal-close" onclick="closeModal('rejectionModal')"><i class="fas fa-times"></i></span></div>
@@ -855,6 +847,9 @@
     let allCustomers = [], allAgents = [], allAdmins = [];
     let allLoans = [], allPayments = [], allCommission = [], allAuditLogs = [], allAgentApps = [];
     let systemSettings = {};
+    let currentLoanFilter = 'all';
+    let currentPaymentFilter = 'all';
+    let pendingRejectCallback = null;
 
     // Helper functions
     const utils = {
@@ -878,6 +873,24 @@
                 timestamp: Date.now(), adminUid: currentUser.uid, adminEmail: currentUser.email,
                 action, details: JSON.stringify(details)
             });
+        },
+        calculateCreditScore: (customerId) => {
+            const loans = allLoans.filter(l => l.customerId === customerId);
+            if (loans.length === 0) return { score: 70, grade: 'Good' };
+            let totalPaid = 0, totalDue = 0, late = 0;
+            loans.forEach(l => {
+                totalDue += l.totalPayable || l.amount;
+                totalPaid += l.totalPaid || 0;
+                if (l.repaymentSchedule) {
+                    l.repaymentSchedule.forEach(inst => {
+                        if (inst.status === 'paid' && inst.paidAt > inst.dueDate + 5*86400000) late++;
+                    });
+                }
+            });
+            let score = Math.min(100, Math.max(0, 100 - (late * 2) - (loans.filter(l => l.status === 'defaulted').length * 15)));
+            score = Math.round(score * (0.5 + 0.5 * (totalDue ? totalPaid/totalDue : 1)));
+            let grade = score >= 80 ? 'Excellent' : score >= 60 ? 'Good' : score >= 40 ? 'Fair' : 'Poor';
+            return { score, grade };
         }
     };
 
@@ -921,14 +934,11 @@
         document.getElementById('weeklyInterest').value = systemSettings.weeklyInterestRate || 10;
         document.getElementById('maxLoanAmount').value = systemSettings.maxLoanAmount || 50000;
         document.getElementById('minLoanAmount').value = systemSettings.minLoanAmount || 100;
-        document.getElementById('graceDays').value = systemSettings.graceDays || 5;
-        document.getElementById('penaltyRate').value = (systemSettings.penaltyRate || 0.02) * 100;
         document.getElementById('enableCustomerApp').checked = systemSettings.enableCustomerApp !== false;
         document.getElementById('enableAgentApp').checked = systemSettings.enableAgentApp !== false;
-        document.getElementById('customerContactPhone').value = systemSettings.customerContactPhone || '';
-        document.getElementById('customerContactEmail').value = systemSettings.customerContactEmail || '';
-        document.getElementById('agentContactPhone').value = systemSettings.agentContactPhone || '';
-        document.getElementById('agentContactEmail').value = systemSettings.agentContactEmail || '';
+        document.getElementById('mfaToggle').checked = systemSettings.mfaRequired || false;
+        document.getElementById('ipWhitelistToggle').checked = systemSettings.ipWhitelistEnabled || false;
+        document.getElementById('sessionTimeout').value = systemSettings.sessionTimeout || 30;
     }
 
     function updateAllUI() {
@@ -938,14 +948,12 @@
         renderAdmins();
         renderLoans();
         renderPayments();
-        renderCommission();
-        renderProfit();
-        renderAssignments();
+        renderLendingOps();
         renderAuditLogs();
-        renderPendingApplications();
-        renderUpcomingPayments();
-        renderMessages();
-        renderPromotions();
+        renderFinancialSummary();
+        renderPendingApps();
+        if (window.storageChart) window.storageChart.destroy();
+        initCharts();
     }
 
     function updateDashboardStats() {
@@ -969,15 +977,18 @@
         const search = document.getElementById('customerSearch')?.value.toLowerCase() || '';
         let filtered = allCustomers.filter(c => c.fullName?.toLowerCase().includes(search) || c.email?.toLowerCase().includes(search) || c.phone?.includes(search));
         const container = document.getElementById('customersList');
-        container.innerHTML = filtered.map(c => `
+        container.innerHTML = filtered.map(c => {
+            const credit = utils.calculateCreditScore(c.id);
+            return `
             <div class="floating-card" style="cursor:pointer" onclick="showCustomerDetails('${c.id}')">
                 <div style="display:flex; gap:12px; align-items:center">
                     <img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName)}" style="width:48px;height:48px;border-radius:50%;object-fit:cover">
                     <div><strong>${c.fullName}</strong><br><span class="text-muted">${c.email} | ${c.phone}</span></div>
                     <div class="status-badge ${c.status}">${c.status}</div>
+                    <div class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.grade} (${credit.score})</div>
                 </div>
-            </div>
-        `).join('');
+            </div>`;
+        }).join('');
     }
 
     function renderAgents() {
@@ -1010,6 +1021,7 @@
     function renderLoans() {
         const search = document.getElementById('loanSearch')?.value.toLowerCase() || '';
         let filtered = allLoans.filter(l => l.customerName?.toLowerCase().includes(search) || l.id?.toLowerCase().includes(search));
+        if (currentLoanFilter !== 'all') filtered = filtered.filter(l => l.status === currentLoanFilter);
         const container = document.getElementById('loansList');
         container.innerHTML = filtered.map(l => {
             const customer = allCustomers.find(c => c.id === l.customerId);
@@ -1035,39 +1047,53 @@
     function renderPayments() {
         const search = document.getElementById('paymentSearch')?.value.toLowerCase() || '';
         let filtered = allPayments.filter(p => p.customerName?.toLowerCase().includes(search) || p.loanId?.toLowerCase().includes(search));
+        if (currentPaymentFilter !== 'all') filtered = filtered.filter(p => p.status === currentPaymentFilter);
         const container = document.getElementById('paymentsList');
         container.innerHTML = filtered.map(p => `
             <div class="floating-card" style="cursor:pointer" onclick="showPaymentDetails('${p.id}')">
                 <div><strong>${p.customerName}</strong> - ${utils.formatCurrency(p.amount)}</div>
                 <div class="text-muted">Loan: ${p.loanId.substring(0,8)}... | Method: ${p.method}</div>
                 <div class="status-badge ${p.status}">${p.status}</div>
+                ${p.proofUrl ? `<img src="${p.proofUrl}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;margin-top:6px;">` : ''}
             </div>
         `).join('');
     }
 
-    function renderCommission() {
-        const totalEarned = allCommission.filter(c => c.status === 'paid').reduce((s,c) => s + c.amount, 0);
-        const pending = allCommission.filter(c => c.status === 'pending').reduce((s,c) => s + c.amount, 0);
-        document.getElementById('commissionOverview').innerHTML = `
-            <div class="detail-card"><div class="detail-label">Total Paid</div><div class="detail-value">${utils.formatCurrency(totalEarned)}</div></div>
-            <div class="detail-card"><div class="detail-label">Pending</div><div class="detail-value">${utils.formatCurrency(pending)}</div></div>
-        `;
-        const container = document.getElementById('agentsCommissionList');
-        container.innerHTML = allAgents.map(a => {
-            const agentComm = allCommission.filter(c => c.agentId === a.id);
-            const paid = agentComm.filter(c => c.status === 'paid').reduce((s,c) => s + c.amount, 0);
-            const pend = agentComm.filter(c => c.status === 'pending').reduce((s,c) => s + c.amount, 0);
-            return `<div class="floating-card"><strong>${a.fullName}</strong> | Earned: ${utils.formatCurrency(paid)} | Pending: ${utils.formatCurrency(pend)}</div>`;
-        }).join('');
+    function renderLendingOps() {
+        const kycQueue = allCustomers.filter(c => !c.kycVerified).slice(0,5);
+        const container = document.getElementById('kycQueueList');
+        container.innerHTML = kycQueue.map(c => `
+            <div class="detail-card"><strong>${c.fullName}</strong><br>NRC: ${c.nrc}<br><button class="btn btn-small btn-primary" onclick="verifyKyc('${c.id}')">Verify KYC</button></div>
+        `).join('');
     }
 
-    function renderProfit() {
+    function renderAuditLogs() {
+        const search = document.getElementById('auditSearch')?.value.toLowerCase() || '';
+        let filtered = allAuditLogs.filter(l => l.action?.toLowerCase().includes(search) || l.adminEmail?.toLowerCase().includes(search));
+        const container = document.getElementById('auditLogsList');
+        container.innerHTML = filtered.slice(0, 30).map(l => `
+            <div class="floating-card"><strong>${l.action}</strong><br><span class="text-muted">${l.adminEmail} | ${utils.formatDateTime(l.timestamp)}</span><br><small>${l.details}</small></div>
+        `).join('');
+    }
+
+    function renderPendingApps() {
+        const pending = allAgentApps.filter(a => a.status === 'pending');
+        const container = document.getElementById('pendingAppsList');
+        container.innerHTML = pending.map(app => `
+            <div class="detail-card" style="cursor:pointer" onclick="showAgentApplication('${app.id}')">
+                <strong>${app.fullName}</strong> | ${app.phone}<br>
+                <span class="status-badge pending">Pending</span>
+            </div>
+        `).join('');
+    }
+
+    function renderFinancialSummary() {
         const totalLent = allLoans.filter(l => l.status === 'active' || l.status === 'approved').reduce((s,l) => s + (l.amount || 0), 0);
         const totalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((s,p) => s + p.amount, 0);
         const interestEarned = allLoans.reduce((s,l) => s + (l.totalInterest || 0), 0);
         const commissionPaid = allCommission.filter(c => c.status === 'paid').reduce((s,c) => s + c.amount, 0);
         const net = interestEarned - commissionPaid;
-        document.getElementById('profitSummary').innerHTML = `
+        document.getElementById('financialSummary').innerHTML = `
             <div class="detail-card"><div class="detail-label">Total Lent</div><div class="detail-value">${utils.formatCurrency(totalLent)}</div></div>
             <div class="detail-card"><div class="detail-label">Repaid</div><div class="detail-value">${utils.formatCurrency(totalRepaid)}</div></div>
             <div class="detail-card"><div class="detail-label">Interest Earned</div><div class="detail-value">${utils.formatCurrency(interestEarned)}</div></div>
@@ -1076,75 +1102,12 @@
         `;
     }
 
-    function renderAssignments() {
-        const custSelect = document.getElementById('assignCustomer');
-        const agentSelect = document.getElementById('assignAgent');
-        custSelect.innerHTML = '<option value="">Select Customer</option>' + allCustomers.map(c => `<option value="${c.id}">${c.fullName}</option>`).join('');
-        agentSelect.innerHTML = '<option value="">Select Agent</option>' + allAgents.filter(a => a.status === 'active').map(a => `<option value="${a.id}">${a.fullName} (${a.agentId})</option>`).join('');
-        const assigned = allCustomers.filter(c => c.assignedAgentId);
-        const list = document.getElementById('assignmentsList');
-        list.innerHTML = assigned.map(c => {
-            const agent = allAgents.find(a => a.id === c.assignedAgentId);
-            return `<div class="detail-card"><strong>${c.fullName}</strong> → ${agent?.fullName || 'Unknown'}</div>`;
-        }).join('');
-    }
-
-    function renderAuditLogs() {
-        const search = document.getElementById('auditSearch')?.value.toLowerCase() || '';
-        let filtered = allAuditLogs.filter(l => l.action?.toLowerCase().includes(search) || l.adminEmail?.toLowerCase().includes(search));
-        const container = document.getElementById('auditLogsList');
-        container.innerHTML = filtered.slice(0, 50).map(l => `
-            <div class="floating-card"><strong>${l.action}</strong><br><span class="text-muted">${l.adminEmail} | ${utils.formatDateTime(l.timestamp)}</span><br><small>${l.details}</small></div>
-        `).join('');
-    }
-
-    function renderPendingApplications() {
-        const pending = allAgentApps.filter(a => a.status === 'pending');
-        const container = document.getElementById('pendingApplicationsList');
-        container.innerHTML = pending.map(app => `
-            <div class="floating-card" style="cursor:pointer" onclick="showAgentApplication('${app.id}')">
-                <strong>${app.fullName}</strong> | ${app.phone}<br>
-                <span class="status-badge pending">Pending</span>
-            </div>
-        `).join('');
-    }
-
-    function renderUpcomingPayments() {
-        const now = Date.now();
-        const upcoming = [];
-        allLoans.forEach(loan => {
-            if (loan.repaymentSchedule) {
-                loan.repaymentSchedule.forEach(inst => {
-                    if (inst.status !== 'paid') {
-                        const daysLeft = Math.ceil((inst.dueDate - now) / (86400000));
-                        if (daysLeft <= 7 && daysLeft >= 0) upcoming.push({loan, inst, daysLeft});
-                    }
-                });
-            }
-        });
-        const container = document.getElementById('upcomingPaymentsList');
-        container.innerHTML = upcoming.map(u => `
-            <div class="floating-card">
-                <strong>${u.loan.customerName}</strong> - Installment #${u.inst.installment}<br>
-                Due: ${utils.formatDate(u.inst.dueDate)} (${u.daysLeft} days left)<br>
-                Amount: ${utils.formatCurrency(u.inst.totalDue)}
-            </div>
-        `).join('');
-    }
-
-    function renderMessages() {
-        // Simple placeholder – would load from 'messages' node
-        document.getElementById('recentMessagesList').innerHTML = '<div class="text-muted">Messages will appear here</div>';
-    }
-
-    function renderPromotions() {
-        document.getElementById('promotionHistoryList').innerHTML = '<div class="text-muted">Promotions will appear here</div>';
-    }
-
     // ==================== DETAIL VIEWS & ACTIONS ====================
     window.showCustomerDetails = async (id) => {
         const c = allCustomers.find(c => c.id === id);
         if (!c) return;
+        const credit = utils.calculateCreditScore(id);
+        const loans = allLoans.filter(l => l.customerId === id);
         const html = `
             <div class="form-group"><label>Full Name</label><input type="text" id="editFullName" class="form-input" value="${c.fullName || ''}"></div>
             <div class="form-group"><label>Email</label><input type="email" id="editEmail" class="form-input" value="${c.email || ''}"></div>
@@ -1152,9 +1115,14 @@
             <div class="form-group"><label>NRC</label><input type="text" id="editNrc" class="form-input" value="${c.nrc || ''}"></div>
             <div class="form-group"><label>Address</label><input type="text" id="editAddress" class="form-input" value="${c.residence || ''}"></div>
             <div class="form-group"><label>Status</label><select id="editStatus" class="form-select"><option value="active" ${c.status === 'active' ? 'selected' : ''}>Active</option><option value="banned" ${c.status === 'banned' ? 'selected' : ''}>Banned</option></select></div>
+            <div class="detail-card"><div class="detail-label">Credit Score</div><div class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.grade} (${credit.score})</div></div>
+            <div><strong>Loans:</strong> ${loans.length} (${loans.filter(l => l.status === 'active').length} active)</div>
+            ${c.nrcFront ? `<div><strong>NRC Front:</strong> <a href="${c.nrcFront}" target="_blank">View</a></div>` : ''}
+            ${c.nrcBack ? `<div><strong>NRC Back:</strong> <a href="${c.nrcBack}" target="_blank">View</a></div>` : ''}
         `;
-        document.getElementById('customerModalBody').innerHTML = html;
-        document.getElementById('saveCustomerBtn').onclick = async () => {
+        document.getElementById('genericModalBody').innerHTML = html;
+        document.getElementById('modalTitle').innerText = 'Edit Customer';
+        document.getElementById('modalActionBtn').onclick = async () => {
             await db.ref('users/' + id).update({
                 fullName: document.getElementById('editFullName').value,
                 email: document.getElementById('editEmail').value,
@@ -1164,10 +1132,10 @@
                 status: document.getElementById('editStatus').value
             });
             utils.showToast('Updated', 'Customer updated', 'success');
-            closeModal('customerModal');
+            closeModal('genericModal');
             loadAllData();
         };
-        openModal('customerModal');
+        openModal('genericModal');
     };
 
     window.showAgentDetails = async (id) => {
@@ -1180,8 +1148,9 @@
             <div class="form-group"><label>Agent ID</label><input type="text" id="editAgentId" class="form-input" value="${a.agentId || ''}"></div>
             <div class="form-group"><label>Status</label><select id="editAgentStatus" class="form-select"><option value="active" ${a.status === 'active' ? 'selected' : ''}>Active</option><option value="banned" ${a.status === 'banned' ? 'selected' : ''}>Banned</option></select></div>
         `;
-        document.getElementById('agentModalBody').innerHTML = html;
-        document.getElementById('saveAgentBtn').onclick = async () => {
+        document.getElementById('genericModalBody').innerHTML = html;
+        document.getElementById('modalTitle').innerText = 'Edit Agent';
+        document.getElementById('modalActionBtn').onclick = async () => {
             await db.ref('users/' + id).update({
                 fullName: document.getElementById('editAgentName').value,
                 email: document.getElementById('editAgentEmail').value,
@@ -1190,10 +1159,10 @@
                 status: document.getElementById('editAgentStatus').value
             });
             utils.showToast('Updated', 'Agent updated', 'success');
-            closeModal('agentModal');
+            closeModal('genericModal');
             loadAllData();
         };
-        openModal('agentModal');
+        openModal('genericModal');
     };
 
     window.showLoanDetails = async (id) => {
@@ -1201,13 +1170,15 @@
         if (!loan) return;
         let scheduleHtml = '';
         if (loan.repaymentSchedule) {
-            scheduleHtml = '<table style="width:100%; border-collapse:collapse;"><tr><th>#</th><th>Due</th><th>Amount</th><th>Paid</th><th>Status</th></tr>';
+            scheduleHtml = '<table style="width:100%; border-collapse:collapse;"><tr><th>#</th><th>Due</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Paid</th><th>Status</th></tr>';
             loan.repaymentSchedule.forEach(inst => {
-                scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.totalDue)}</td><td>${utils.formatCurrency(inst.paidAmount || 0)}</td><td>${inst.status}</td></tr>`;
+                scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.principal)}</td><td>${utils.formatCurrency(inst.interest)}</td><td>${utils.formatCurrency(inst.penalty || 0)}</td><td>${utils.formatCurrency(inst.paidAmount || 0)}</td><td>${inst.status}</td></tr>`;
             });
             scheduleHtml += '</table>';
         }
         const agreementBtn = loan.signedAgreementUrl ? `<button class="btn btn-outline" onclick="viewAgreement('${loan.signedAgreementUrl}')">View Signed Agreement</button>` : '';
+        const approveBtn = loan.status === 'pending' ? `<button class="btn btn-success" onclick="approveLoan('${loan.id}')">Approve</button>` : '';
+        const rejectBtn = loan.status === 'pending' ? `<button class="btn btn-danger" onclick="openRejectModal('${loan.id}')">Reject</button>` : '';
         const html = `
             <div><strong>Customer:</strong> ${loan.customerName}</div>
             <div><strong>Amount:</strong> ${utils.formatCurrency(loan.amount)}</div>
@@ -1215,11 +1186,13 @@
             <div><strong>Duration:</strong> ${loan.duration} ${loan.durationUnit || 'months'}</div>
             <div><strong>Total Paid:</strong> ${utils.formatCurrency(loan.totalPaid || 0)}</div>
             <div><strong>Remaining:</strong> ${utils.formatCurrency((loan.totalPayable || loan.amount) - (loan.totalPaid || 0))}</div>
+            <div><strong>Collateral:</strong> ${loan.collateral?.category || 'N/A'} - ${utils.formatCurrency(loan.collateral?.value || 0)}</div>
+            ${loan.collateral?.images ? `<div><strong>Collateral Images:</strong> ${loan.collateral.images.map(img => `<a href="${img}" target="_blank">View</a>`).join(', ')}</div>` : ''}
             <hr>
             <h4>Repayment Schedule</h4>
             ${scheduleHtml}
             <hr>
-            ${agreementBtn}
+            <div class="grid-2">${approveBtn} ${rejectBtn} ${agreementBtn}</div>
         `;
         document.getElementById('loanDetailsBody').innerHTML = html;
         openModal('loanDetailsModal');
@@ -1228,6 +1201,8 @@
     window.showPaymentDetails = async (id) => {
         const payment = allPayments.find(p => p.id === id);
         if (!payment) return;
+        const confirmBtn = payment.status === 'pending' ? `<button class="btn btn-success" onclick="confirmPayment('${payment.id}')">Confirm</button>` : '';
+        const rejectBtn = payment.status === 'pending' ? `<button class="btn btn-danger" onclick="rejectPayment('${payment.id}')">Reject</button>` : '';
         const html = `
             <div><strong>Customer:</strong> ${payment.customerName}</div>
             <div><strong>Amount:</strong> ${utils.formatCurrency(payment.amount)}</div>
@@ -1235,14 +1210,10 @@
             <div><strong>Status:</strong> <span class="status-badge ${payment.status}">${payment.status}</span></div>
             <div><strong>Date:</strong> ${utils.formatDateTime(payment.timestamp)}</div>
             ${payment.proofUrl ? `<div><strong>Proof:</strong> <a href="${payment.proofUrl}" target="_blank">View</a></div>` : ''}
+            <hr>${confirmBtn} ${rejectBtn}
         `;
         document.getElementById('paymentDetailsBody').innerHTML = html;
         openModal('paymentDetailsModal');
-    };
-
-    window.viewAgreement = (url) => {
-        document.getElementById('agreementFrame').src = url;
-        openModal('agreementModal');
     };
 
     window.showAgentApplication = async (id) => {
@@ -1254,13 +1225,15 @@
             <div><strong>NRC:</strong> ${app.nrc}</div>
             <div><strong>Residence:</strong> ${app.residence}</div>
             <div><strong>Submitted:</strong> ${utils.formatDateTime(app.submittedAt)}</div>
+            <div><strong>Documents:</strong> <a href="${app.nrcFront}" target="_blank">NRC Front</a>, <a href="${app.nrcBack}" target="_blank">NRC Back</a>, <a href="${app.profilePhoto}" target="_blank">Profile</a></div>
             <hr>
             <button class="btn btn-success" onclick="approveAgentApp('${id}')">Approve & Create Agent</button>
             <button class="btn btn-danger" onclick="rejectAgentApp('${id}')">Reject</button>
         `;
-        document.getElementById('customerModalBody').innerHTML = html;
-        document.getElementById('saveCustomerBtn').style.display = 'none';
-        openModal('customerModal');
+        document.getElementById('genericModalBody').innerHTML = html;
+        document.getElementById('modalTitle').innerText = 'Agent Application';
+        document.getElementById('modalActionBtn').style.display = 'none';
+        openModal('genericModal');
     };
 
     window.approveAgentApp = async (appId) => {
@@ -1282,7 +1255,7 @@
             });
             await db.ref('agentApplications/' + appId).update({ status: 'approved', reviewedAt: Date.now() });
             utils.showToast('Success', 'Agent created', 'success');
-            closeModal('customerModal');
+            closeModal('genericModal');
             loadAllData();
         } catch(e) { utils.showToast('Error', e.message, 'error'); }
         utils.hideLoading();
@@ -1291,21 +1264,64 @@
     window.rejectAgentApp = async (appId) => {
         await db.ref('agentApplications/' + appId).update({ status: 'rejected', reviewedAt: Date.now() });
         utils.showToast('Rejected', 'Application rejected', 'info');
-        closeModal('customerModal');
+        closeModal('genericModal');
         loadAllData();
     };
 
+    window.approveLoan = async (loanId) => {
+        await db.ref('loans/' + loanId).update({ status: 'approved', approvedAt: Date.now() });
+        utils.showToast('Approved', 'Loan approved', 'success');
+        closeModal('loanDetailsModal');
+        loadAllData();
+    };
+
+    window.openRejectModal = (loanId) => {
+        pendingRejectCallback = async (reason) => {
+            await db.ref('loans/' + loanId).update({ status: 'rejected', rejectionReason: reason, rejectedAt: Date.now() });
+            utils.showToast('Rejected', 'Loan rejected', 'info');
+            closeModal('rejectionModal');
+            closeModal('loanDetailsModal');
+            loadAllData();
+        };
+        document.getElementById('rejectionReason').value = '';
+        openModal('rejectionModal');
+    };
+
+    window.confirmPayment = async (paymentId) => {
+        await db.ref('payments/' + paymentId).update({ status: 'confirmed', verifiedAt: Date.now() });
+        utils.showToast('Confirmed', 'Payment confirmed', 'success');
+        closeModal('paymentDetailsModal');
+        loadAllData();
+    };
+
+    window.rejectPayment = async (paymentId) => {
+        await db.ref('payments/' + paymentId).update({ status: 'rejected', rejectedAt: Date.now() });
+        utils.showToast('Rejected', 'Payment rejected', 'info');
+        closeModal('paymentDetailsModal');
+        loadAllData();
+    };
+
+    window.verifyKyc = async (customerId) => {
+        await db.ref('users/' + customerId).update({ kycVerified: true });
+        utils.showToast('KYC', 'Customer verified', 'success');
+        loadAllData();
+    };
+
+    window.viewAgreement = (url) => {
+        document.getElementById('agreementFrame').src = url;
+        openModal('agreementModal');
+    };
+
     window.deleteAdmin = async (id) => {
-        if (confirm('Delete this admin? This action cannot be undone.')) {
+        if (confirm('Delete this admin?')) {
             await db.ref('users/' + id).remove();
-            utils.showToast('Deleted', 'Admin removed', 'success');
             loadAllData();
         }
     };
 
     // ==================== CREATE MODALS ====================
     document.getElementById('quickCreateCustomer').onclick = () => {
-        document.getElementById('customerModalBody').innerHTML = `
+        document.getElementById('genericModalBody').innerHTML = `
             <div class="form-group"><label>Full Name</label><input type="text" id="newCustName" class="form-input"></div>
             <div class="form-group"><label>Email</label><input type="email" id="newCustEmail" class="form-input"></div>
             <div class="form-group"><label>Phone</label><input type="text" id="newCustPhone" class="form-input"></div>
@@ -1313,88 +1329,141 @@
             <div class="form-group"><label>Address</label><input type="text" id="newCustAddress" class="form-input"></div>
             <div class="form-group"><label>Password</label><input type="password" id="newCustPassword" class="form-input"></div>
         `;
-        document.getElementById('saveCustomerBtn').onclick = async () => {
+        document.getElementById('modalTitle').innerText = 'Create Customer';
+        document.getElementById('modalActionBtn').style.display = 'block';
+        document.getElementById('modalActionBtn').onclick = async () => {
             const email = document.getElementById('newCustEmail').value;
-            const password = document.getElementById('newCustPassword').value;
-            if (!email || !password) { alert('Email and password required'); return; }
-            utils.showLoading('Creating customer...');
+            const pwd = document.getElementById('newCustPassword').value;
+            if (!email || !pwd) { alert('Email and password required'); return; }
+            utils.showLoading('Creating...');
             try {
-                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
                 await db.ref('users/' + cred.user.uid).set({
                     fullName: document.getElementById('newCustName').value,
-                    email: email, phone: document.getElementById('newCustPhone').value,
+                    email, phone: document.getElementById('newCustPhone').value,
                     nrc: document.getElementById('newCustNrc').value,
                     residence: document.getElementById('newCustAddress').value,
                     userType: 'customer', status: 'active', createdAt: Date.now()
                 });
                 utils.showToast('Success', 'Customer created', 'success');
-                closeModal('customerModal');
+                closeModal('genericModal');
                 loadAllData();
             } catch(e) { utils.showToast('Error', e.message, 'error'); }
             utils.hideLoading();
         };
-        openModal('customerModal');
+        openModal('genericModal');
     };
 
     document.getElementById('quickCreateAgent').onclick = () => {
-        document.getElementById('agentModalBody').innerHTML = `
+        document.getElementById('genericModalBody').innerHTML = `
             <div class="form-group"><label>Full Name</label><input type="text" id="newAgentName" class="form-input"></div>
             <div class="form-group"><label>Email</label><input type="email" id="newAgentEmail" class="form-input"></div>
             <div class="form-group"><label>Phone</label><input type="text" id="newAgentPhone" class="form-input"></div>
             <div class="form-group"><label>Agent ID</label><input type="text" id="newAgentId" class="form-input"></div>
             <div class="form-group"><label>Password</label><input type="password" id="newAgentPassword" class="form-input"></div>
         `;
-        document.getElementById('saveAgentBtn').onclick = async () => {
+        document.getElementById('modalTitle').innerText = 'Create Agent';
+        document.getElementById('modalActionBtn').onclick = async () => {
             const email = document.getElementById('newAgentEmail').value;
-            const password = document.getElementById('newAgentPassword').value;
-            if (!email || !password) { alert('Email and password required'); return; }
-            utils.showLoading('Creating agent...');
+            const pwd = document.getElementById('newAgentPassword').value;
+            if (!email || !pwd) { alert('Email and password required'); return; }
+            utils.showLoading('Creating...');
             try {
-                const cred = await auth.createUserWithEmailAndPassword(email, password);
+                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
                 await db.ref('users/' + cred.user.uid).set({
                     fullName: document.getElementById('newAgentName').value,
-                    email: email, phone: document.getElementById('newAgentPhone').value,
+                    email, phone: document.getElementById('newAgentPhone').value,
                     agentId: document.getElementById('newAgentId').value,
                     userType: 'agent', status: 'active', createdAt: Date.now()
                 });
                 utils.showToast('Success', 'Agent created', 'success');
-                closeModal('agentModal');
+                closeModal('genericModal');
                 loadAllData();
             } catch(e) { utils.showToast('Error', e.message, 'error'); }
             utils.hideLoading();
         };
-        openModal('agentModal');
+        openModal('genericModal');
     };
 
-    document.getElementById('quickCreateAdmin').onclick = () => openModal('adminModal');
-    document.getElementById('submitAdminBtn').onclick = async () => {
-        const name = document.getElementById('adminFullName').value;
-        const email = document.getElementById('adminEmail').value;
-        const pwd = document.getElementById('adminPassword').value;
-        const confirm = document.getElementById('adminConfirmPassword').value;
-        if (!name || !email || !pwd || pwd !== confirm) { alert('Please fill all fields and match passwords'); return; }
-        utils.showLoading('Creating admin...');
+    document.getElementById('quickCreateAdmin').onclick = () => {
+        document.getElementById('genericModalBody').innerHTML = `
+            <div class="form-group"><label>Full Name</label><input type="text" id="newAdminName" class="form-input"></div>
+            <div class="form-group"><label>Email</label><input type="email" id="newAdminEmail" class="form-input"></div>
+            <div class="form-group"><label>Password</label><input type="password" id="newAdminPassword" class="form-input"></div>
+            <div class="form-group"><label>Confirm</label><input type="password" id="newAdminConfirm" class="form-input"></div>
+        `;
+        document.getElementById('modalTitle').innerText = 'Create Admin';
+        document.getElementById('modalActionBtn').onclick = async () => {
+            const email = document.getElementById('newAdminEmail').value;
+            const pwd = document.getElementById('newAdminPassword').value;
+            const confirm = document.getElementById('newAdminConfirm').value;
+            if (!email || !pwd || pwd !== confirm) { alert('Check fields'); return; }
+            utils.showLoading('Creating...');
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+                await db.ref('users/' + cred.user.uid).set({
+                    fullName: document.getElementById('newAdminName').value,
+                    email, userType: 'admin', status: 'active', createdAt: Date.now()
+                });
+                utils.showToast('Success', 'Admin created', 'success');
+                closeModal('genericModal');
+                loadAllData();
+            } catch(e) { utils.showToast('Error', e.message, 'error'); }
+            utils.hideLoading();
+        };
+        openModal('genericModal');
+    };
+
+    // ==================== LENDING & DATABASE OPS ====================
+    document.getElementById('executeOverride').onclick = async () => {
+        const loanId = document.getElementById('overrideLoanId').value;
+        const op = document.getElementById('overrideOp').value;
+        const value = document.getElementById('overrideValue').value;
+        if (!loanId) return;
+        utils.showLoading('Executing...');
         try {
-            const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-            await db.ref('users/' + cred.user.uid).set({
-                fullName: name, email: email, userType: 'admin', status: 'active', createdAt: Date.now()
-            });
-            utils.showToast('Success', 'Admin created', 'success');
-            closeModal('adminModal');
+            if (op === 'Change Status') await db.ref('loans/' + loanId).update({ status: value });
+            else if (op === 'Extend Duration') await db.ref('loans/' + loanId).update({ duration: parseInt(value) });
+            else if (op === 'Adjust Amount') await db.ref('loans/' + loanId).update({ amount: parseFloat(value) });
+            utils.showToast('Done', 'Override executed', 'success');
             loadAllData();
         } catch(e) { utils.showToast('Error', e.message, 'error'); }
         utils.hideLoading();
     };
 
-    // ==================== ASSIGNMENT ====================
-    document.getElementById('assignBtn').onclick = async () => {
-        const custId = document.getElementById('assignCustomer').value;
-        const agentId = document.getElementById('assignAgent').value;
-        if (!custId || !agentId) { alert('Select both'); return; }
-        const agent = allAgents.find(a => a.id === agentId);
-        await db.ref('users/' + custId).update({ assignedAgentId: agentId, agentName: agent.fullName });
-        utils.showToast('Assigned', 'Agent assigned', 'success');
-        loadAllData();
+    document.getElementById('executeWalletOp').onclick = async () => {
+        const walletId = document.getElementById('walletId').value;
+        const op = document.getElementById('walletOp').value;
+        const amount = parseFloat(document.getElementById('walletAmount').value);
+        if (!walletId) return;
+        utils.showLoading('Processing...');
+        try {
+            // This is a mock; real wallet logic would need a wallet node
+            utils.showToast('Wallet Op', `${op} on ${walletId} ${amount ? 'amount '+amount : ''}`, 'info');
+        } catch(e) { utils.showToast('Error', e.message, 'error'); }
+        utils.hideLoading();
+    };
+
+    document.getElementById('runQueryBtn').onclick = async () => {
+        const table = document.getElementById('dbTable').value;
+        const filter = document.getElementById('dbQuery').value.trim();
+        utils.showLoading('Querying...');
+        try {
+            const snap = await db.ref(table).once('value');
+            let data = snap.val() || {};
+            if (filter) {
+                const condition = JSON.parse(filter);
+                data = Object.entries(data).filter(([k,v]) => {
+                    return Object.entries(condition).every(([ck, cv]) => v[ck] == cv);
+                }).reduce((a,[k,v]) => ({...a, [k]: v}), {});
+            }
+            document.getElementById('queryResult').innerHTML = `<pre>${JSON.stringify(data, null, 2).substring(0, 1000)}</pre>`;
+        } catch(e) { utils.showToast('Error', e.message, 'error'); }
+        utils.hideLoading();
+    };
+
+    document.getElementById('manualBackupBtn').onclick = () => {
+        utils.showToast('Backup', 'Manual backup triggered (simulated)', 'success');
     };
 
     // ==================== SETTINGS ====================
@@ -1405,23 +1474,23 @@
             weeklyInterestRate: parseFloat(document.getElementById('weeklyInterest').value),
             maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value),
             minLoanAmount: parseFloat(document.getElementById('minLoanAmount').value),
-            graceDays: parseInt(document.getElementById('graceDays').value),
-            penaltyRate: parseFloat(document.getElementById('penaltyRate').value) / 100,
             enableCustomerApp: document.getElementById('enableCustomerApp').checked,
-            enableAgentApp: document.getElementById('enableAgentApp').checked
+            enableAgentApp: document.getElementById('enableAgentApp').checked,
+            mfaRequired: document.getElementById('mfaToggle').checked,
+            ipWhitelistEnabled: document.getElementById('ipWhitelistToggle').checked,
+            sessionTimeout: parseInt(document.getElementById('sessionTimeout').value)
         };
         await db.ref('systemSettings').update(settings);
         utils.showToast('Saved', 'System settings updated', 'success');
     };
 
-    document.getElementById('saveContactDetails').onclick = async () => {
+    document.getElementById('saveSecurityPolicies').onclick = async () => {
         await db.ref('systemSettings').update({
-            customerContactPhone: document.getElementById('customerContactPhone').value,
-            customerContactEmail: document.getElementById('customerContactEmail').value,
-            agentContactPhone: document.getElementById('agentContactPhone').value,
-            agentContactEmail: document.getElementById('agentContactEmail').value
+            mfaRequired: document.getElementById('mfaToggle').checked,
+            ipWhitelistEnabled: document.getElementById('ipWhitelistToggle').checked,
+            sessionTimeout: parseInt(document.getElementById('sessionTimeout').value)
         });
-        utils.showToast('Saved', 'Contact details updated', 'success');
+        utils.showToast('Saved', 'Security policies updated', 'success');
     };
 
     document.getElementById('sudoResetBtn').onclick = () => {
@@ -1436,6 +1505,36 @@
         }
     };
 
+    // ==================== EXPORTS & CHARTS ====================
+    document.getElementById('exportCustomersBtn').onclick = () => exportToCSV(allCustomers.map(c => ({Name:c.fullName,Email:c.email,Phone:c.phone,Status:c.status})), 'customers.csv');
+    document.getElementById('exportAgentsBtn').onclick = () => exportToCSV(allAgents.map(a => ({Name:a.fullName,Email:a.email,AgentID:a.agentId,Status:a.status})), 'agents.csv');
+    document.getElementById('exportLoansBtn').onclick = () => exportToCSV(allLoans.map(l => ({ID:l.id,Customer:l.customerName,Amount:l.amount,Status:l.status})), 'loans.csv');
+    document.getElementById('exportPaymentsBtn').onclick = () => exportToCSV(allPayments.map(p => ({Customer:p.customerName,Amount:p.amount,Status:p.status,Date:utils.formatDateTime(p.timestamp)})), 'payments.csv');
+    document.getElementById('exportAllZipBtn').onclick = () => { utils.showToast('Info', 'ZIP export simulated', 'info'); };
+
+    function exportToCSV(data, filename) {
+        const csv = Papa.unparse(data);
+        const blob = new Blob(['\uFEFF' + csv], {type: 'text/csv;charset=utf-8;'});
+        const link = document.createElement('a');
+        link.href = URL.createObjectURL(blob);
+        link.download = filename;
+        link.click();
+    }
+
+    function initCharts() {
+        const ctx = document.getElementById('loanTrendChart').getContext('2d');
+        new Chart(ctx, {
+            type: 'line',
+            data: { labels: ['Jan','Feb','Mar','Apr','May','Jun'], datasets: [{ label: 'Loans Created', data: [12,19,15,22,30,25], borderColor: '#007AFF' }] },
+            options: { responsive: true }
+        });
+        const storageCtx = document.getElementById('storageChart').getContext('2d');
+        new Chart(storageCtx, {
+            type: 'bar',
+            data: { labels: ['Users','Loans','Payments','Logs'], datasets: [{ label: 'Records', data: [allCustomers.length, allLoans.length, allPayments.length, allAuditLogs.length], backgroundColor: '#34C759' }] }
+        });
+    }
+
     // ==================== NAVIGATION ====================
     function showSection(sectionId) {
         document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
@@ -1443,7 +1542,7 @@
         document.querySelectorAll('.nav-item-bottom').forEach(n => n.classList.remove('active'));
         document.querySelector(`.nav-item-bottom[data-section="${sectionId}"]`)?.classList.add('active');
         if (sectionId === 'audit') renderAuditLogs();
-        if (sectionId === 'reports') {}
+        if (sectionId === 'reports') initCharts();
     }
     window.showSection = showSection;
 
@@ -1467,8 +1566,29 @@
     };
     document.getElementById('logoutBtn').onclick = () => auth.signOut();
 
+    // Tab listeners
+    document.querySelectorAll('#loansSection .tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentLoanFilter = tab.dataset.status;
+            renderLoans();
+        });
+    });
+    document.querySelectorAll('#paymentsSection .tab').forEach(tab => {
+        tab.addEventListener('click', () => {
+            document.querySelectorAll('#paymentsSection .tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            currentPaymentFilter = tab.dataset.status;
+            renderPayments();
+        });
+    });
+
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+    document.getElementById('confirmRejectBtn').onclick = () => {
+        if (pendingRejectCallback) pendingRejectCallback(document.getElementById('rejectionReason').value);
+    };
 
     // ==================== AUTH ====================
     auth.onAuthStateChanged(async (user) => {
@@ -1476,17 +1596,16 @@
         const snap = await db.ref('users/' + user.uid).once('value');
         const userData = snap.val();
         if (userData?.userType !== 'admin' && userData?.userType !== 'sudo') {
-            utils.showToast('Access Denied', 'Not a sudo/admin account', 'error');
+            utils.showToast('Access Denied', 'Not a super admin account', 'error');
             auth.signOut();
             return;
         }
         currentUser = user;
-        document.getElementById('adminNameDisplay').innerText = userData?.fullName || 'Sudo';
-        document.getElementById('sidebarName').innerText = userData?.fullName || 'Sudo User';
+        document.getElementById('adminNameDisplay').innerText = userData?.fullName || 'Super Admin';
+        document.getElementById('sidebarName').innerText = userData?.fullName || 'Super User';
         await loadAllData();
-        // Setup realtime listeners
-        const refs = ['users', 'loans', 'payments', 'commissionHistory', 'auditLogs', 'agentApplications'];
-        refs.forEach(r => {
+        // Realtime listeners
+        ['users','loans','payments','commissionHistory','auditLogs','agentApplications','systemSettings'].forEach(r => {
             db.ref(r).on('value', () => loadAllData());
         });
     });
