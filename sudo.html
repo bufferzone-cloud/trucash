@@ -1,1075 +1,1123 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>TruCash · Sudo Admin</title>
-    <link rel="preconnect" href="https://fonts.googleapis.com">
-    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Firebase & Cloudinary -->
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
-    <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-    <!-- Chart.js, Moment, PapaParse, html2pdf -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
-    <style>
-        /* ===== DARK THEME (from original pages) ===== */
-        :root {
-            --bg:         #04070f;
-            --surface:    #080e1a;
-            --surface2:   #0c1422;
-            --surface3:   #10192b;
-            --border:     rgba(255,255,255,0.07);
-            --border2:    rgba(255,255,255,0.13);
-            --text:       #e8f0fc;
-            --text-muted: #5d7498;
-            --text-dim:   #2d4060;
-            --accent:     #00e5b8;
-            --accent2:    #4f8eff;
-            --danger:     #f43f5e;
-            --success:    #10b981;
-            --warning:    #f59e0b;
-            --purple:     #a78bfa;
-            --cyan:       #22d3ee;
-            --radius:     20px;
-            --radius-sm:  13px;
-            --nav-h:      72px;
-        }
-        * { margin:0; padding:0; box-sizing:border-box; }
-        body {
-            font-family: Arial, sans-serif;
-            background: var(--bg);
-            color: var(--text);
-            overflow-x: hidden;
-            user-select: none;
-        }
-        h1,h2,h3 { font-family: 'Poppins', sans-serif; font-weight: 700; }
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.45;
-        }
-        .app {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
-        }
-        /* Header */
-        .app-header {
-            position: sticky; top:0; z-index: 10;
-            padding: env(safe-area-inset-top,12px) 20px 0;
-            background: linear-gradient(180deg, var(--bg) 60%, transparent);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            height: 72px;
-        }
-        .header-brand { display: flex; align-items: center; gap: 10px; }
-        .brand-icon {
-            width: 38px; height: 38px;
-            background: linear-gradient(140deg, var(--accent) 0%, #00b896 100%);
-            border-radius: 12px;
-            display: grid; place-items: center;
-            font-size: 17px; color: #001a12;
-            position: relative;
-        }
-        .brand-text strong {
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px; letter-spacing: 1.5px;
-            color: var(--text);
-        }
-        .brand-text span {
-            font-size: 9.5px; color: var(--accent);
-            letter-spacing: 2px;
-        }
-        .hdr-btn {
-            width: 40px; height: 40px;
-            border-radius: 13px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            display: grid; place-items: center;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-        /* Sidebar (dark) */
-        .sidebar-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 200;
-            opacity: 0; visibility: hidden;
-            transition: 0.3s;
-        }
-        .sidebar-overlay.active { opacity: 1; visibility: visible; }
-        .sidebar {
-            position: fixed; top:0; right:-300px; width:280px;
-            height: 100%; background: var(--bg);
-            border-left: 1px solid var(--border);
-            z-index: 201;
-            transition: right 0.3s;
-            padding: 20px 16px;
-            overflow-y: auto;
-        }
-        .sidebar.active { right: 0; }
-        .sidebar-header {
-            display: flex; gap: 12px;
-            border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 20px;
-        }
-        .sidebar-avatar {
-            width: 48px; height: 48px;
-            background: linear-gradient(135deg, var(--accent), var(--cyan));
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        .sidebar-menu { display: flex; flex-direction: column; gap: 6px; }
-        .sidebar-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 14px; border-radius: 12px;
-            cursor: pointer; transition: 0.2s;
-            color: var(--text-muted);
-        }
-        .sidebar-item:hover { background: var(--surface); color: var(--accent); }
-        .sidebar-item.logout { margin-top: 24px; color: var(--danger); }
-        /* Bottom nav (mobile) */
-        .bottom-nav {
-            position: fixed; bottom:0; left:0; width:100%;
-            background: var(--surface);
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: space-around;
-            padding: 8px 12px 20px;
-            z-index: 150;
-        }
-        .nav-item-bottom {
-            display: flex; flex-direction: column;
-            align-items: center; gap: 4px;
-            color: var(--text-dim);
-            font-size: 10px;
-            cursor: pointer;
-            flex: 1;
-        }
-        .nav-item-bottom i { font-size: 20px; }
-        .nav-item-bottom.active { color: var(--accent); }
-        /* Main content */
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
-            width: 100%;
-            padding-bottom: calc(var(--nav-h) + 16px);
-        }
-        .content-section { display: none; }
-        .content-section.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        /* Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2,1fr);
-            gap: 14px;
-            margin-bottom: 20px;
-        }
-        @media (min-width:640px) { .stats-grid { grid-template-columns: repeat(4,1fr); } }
-        .stat-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 16px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .stat-card:hover { background: var(--surface2); transform: translateY(-2px); }
-        .stat-card .label { font-size: 12px; color: var(--text-muted); }
-        .stat-card .value { font-size: 26px; font-weight: 700; color: var(--accent); }
-        .floating-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 18px;
-            margin-bottom: 16px;
-        }
-        .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-        @media (max-width:640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
-        .detail-card {
-            background: var(--surface2);
-            padding: 12px;
-            border-radius: var(--radius-sm);
-            border: 1px solid var(--border);
-        }
-        .detail-label { font-size: 10px; color: var(--text-muted); text-transform: uppercase; }
-        .detail-value { font-size: 13px; font-weight: 500; }
-        /* Search bar */
-        .search-bar {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 34px;
-            padding: 8px 16px;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 16px;
-        }
-        .search-bar input {
-            flex: 1;
-            background: transparent;
-            border: none;
-            color: var(--text);
-            outline: none;
-        }
-        /* Buttons */
-        .btn {
-            padding: 8px 16px;
-            border-radius: 34px;
-            font-weight: 500;
-            border: 1px solid transparent;
-            cursor: pointer;
-            font-size: 12px;
-            transition: 0.2s;
-            background: var(--surface2);
-            color: var(--text);
-        }
-        .btn-primary { background: linear-gradient(135deg, var(--accent), #00b896); color: #001f17; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-outline { border-color: var(--border2); }
-        /* Loan card */
-        .loan-card {
-            display: flex;
-            align-items: center;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius-sm);
-            padding: 10px;
-            margin-bottom: 10px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .loan-card:hover { background: var(--surface2); transform: translateY(-2px); }
-        .loan-card-left, .loan-card-right { flex: 0 0 48px; text-align: center; }
-        .loan-card-center { flex: 1; padding: 0 10px; }
-        .loan-card-profile-img, .loan-card-agent-img {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .progress-container {
-            background: var(--surface3);
-            border-radius: 20px;
-            height: 6px;
-            margin: 6px 0;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--cyan));
-            width: 0%;
-        }
-        /* Status badges */
-        .status-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 30px;
-            font-size: 10px;
-            font-weight: 600;
-        }
-        .status-badge.active, .status-badge.approved { background: rgba(16,185,129,0.2); color: var(--success); }
-        .status-badge.pending { background: rgba(245,158,11,0.2); color: var(--warning); }
-        .status-badge.rejected { background: rgba(244,63,94,0.2); color: var(--danger); }
-        .credit-score-badge {
-            display: inline-block;
-            padding: 2px 10px;
-            border-radius: 20px;
-            font-size: 10px;
-            font-weight: 600;
-            color: white;
-        }
-        .credit-score-badge.excellent { background: #10b981; }
-        .credit-score-badge.good { background: #4f8eff; }
-        .credit-score-badge.fair { background: #f59e0b; }
-        .credit-score-badge.poor { background: #f43f5e; }
-        /* Tabs */
-        .tab-bar {
-            display: flex;
-            gap: 8px;
-            margin-bottom: 16px;
-            flex-wrap: wrap;
-        }
-        .tab {
-            padding: 6px 14px;
-            background: var(--surface);
-            border-radius: 30px;
-            font-size: 12px;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-        .tab.active { background: var(--accent); color: #001f17; }
-        /* Modals */
-        .modal-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6);
-            backdrop-filter: blur(8px);
-            z-index: 300;
-            display: none;
-            align-items: center;
-            justify-content: center;
-        }
-        .modal-overlay.active { display: flex; }
-        .modal-container {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            max-width: 700px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-        }
-        .modal-header {
-            padding: 16px 20px;
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-        .modal-body { padding: 20px; }
-        .modal-footer {
-            padding: 16px 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            justify-content: flex-end;
-            gap: 12px;
-        }
-        .form-group { margin-bottom: 16px; }
-        .form-label { font-size: 12px; font-weight: 500; margin-bottom: 5px; display: block; }
-        .form-input, .form-select, .form-textarea {
-            width: 100%;
-            padding: 10px 14px;
-            background: var(--surface2);
-            border: 1px solid var(--border2);
-            border-radius: 28px;
-            color: var(--text);
-            font-size: 13px;
-        }
-        .upload-box {
-            background: var(--surface2);
-            border: 2px dashed var(--border2);
-            border-radius: 16px;
-            padding: 12px;
-            text-align: center;
-            cursor: pointer;
-            position: relative;
-            min-height: 80px;
-        }
-        .upload-preview {
-            position: absolute; inset: 0;
-            width: 100%; height: 100%;
-            object-fit: cover;
-            border-radius: 14px;
-        }
-        /* Toast & Loading */
-        .toast-container {
-            position: fixed; top: 20px; right: 20px;
-            z-index: 1000;
-        }
-        .toast {
-            background: var(--surface);
-            border-left: 4px solid var(--accent);
-            border-radius: 12px;
-            padding: 12px 16px;
-            margin-bottom: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
-        }
-        .loading-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.8);
-            backdrop-filter: blur(10px);
-            z-index: 2000;
-            display: none;
-            align-items: center;
-            justify-content: center;
-            flex-direction: column;
-        }
-        .loading-overlay.active { display: flex; }
-        .loading-spinner {
-            width: 36px; height: 36px;
-            border: 3px solid var(--surface3);
-            border-top-color: var(--accent);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-        @keyframes spin { to { transform: rotate(360deg); } }
-        .text-muted { color: var(--text-muted); font-size: 12px; }
-        hr { border-color: var(--border); margin: 16px 0; }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="theme-color" content="#04070f">
+  <title>TruCash · Sudo Enterprise Suite</title>
+  <!-- Google Fonts + Font Awesome -->
+  <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <!-- Firebase SDKs -->
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
+  <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+  <!-- Cloudinary Upload Widget -->
+  <script src="https://upload-widget.cloudinary.com/global/all.js" type="text/javascript"></script>
+  <!-- Chart.js for analytics -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
+  <!-- PapaParse + JSZip for exports -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
+  <style>
+    /* ---------- GLOBAL RESET & DARK THEME ---------- */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+
+    :root {
+      --bg: #04070f;
+      --surface: #080e1a;
+      --surface2: #0c1422;
+      --border: rgba(255, 255, 255, 0.07);
+      --border2: rgba(255, 255, 255, 0.12);
+      --text: #e8f0fc;
+      --text-muted: #6a7f9f;
+      --accent: #00e5b8;
+      --accent2: #4f8eff;
+      --danger: #f43f5e;
+      --success: #10b981;
+      --warning: #f59e0b;
+      --purple: #a78bfa;
+      --radius: 20px;
+      --radius-sm: 12px;
+    }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      height: 100vh;
+      overflow: hidden;
+      font-weight: 500;
+    }
+
+    /* custom scrollbar */
+    ::-webkit-scrollbar { width: 4px; }
+    ::-webkit-scrollbar-track { background: var(--surface2); }
+    ::-webkit-scrollbar-thumb { background: var(--accent2); border-radius: 6px; }
+
+    /* main layout */
+    .app {
+      display: flex;
+      height: 100vh;
+      overflow: hidden;
+    }
+
+    /* ---------- SIDEBAR ---------- */
+    .sidebar {
+      width: 280px;
+      background: rgba(8, 14, 26, 0.96);
+      backdrop-filter: blur(16px);
+      border-right: 1px solid var(--border);
+      display: flex;
+      flex-direction: column;
+      overflow-y: auto;
+      flex-shrink: 0;
+    }
+
+    .sidebar-header {
+      padding: 24px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+
+    .logo-icon {
+      width: 38px;
+      height: 38px;
+      background: linear-gradient(135deg, var(--accent), #00b896);
+      border-radius: 12px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+      color: #001a12;
+    }
+
+    .logo-text {
+      font-weight: 800;
+      font-size: 18px;
+      letter-spacing: -0.3px;
+    }
+
+    .logo-text span:first-child { color: var(--accent); }
+
+    .nav {
+      flex: 1;
+      padding: 20px 12px;
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+    }
+
+    .nav-item {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      padding: 12px 16px;
+      border-radius: 14px;
+      color: var(--text-muted);
+      transition: all 0.2s;
+      cursor: pointer;
+    }
+
+    .nav-item i { width: 22px; font-size: 18px; }
+
+    .nav-item.active,
+    .nav-item:hover {
+      background: var(--surface2);
+      color: var(--accent);
+      border-left: 2px solid var(--accent);
+    }
+
+    /* ---------- MAIN CONTENT AREA ---------- */
+    .main {
+      flex: 1;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+    }
+
+    .top-bar {
+      padding: 16px 28px;
+      background: rgba(4, 7, 15, 0.7);
+      backdrop-filter: blur(12px);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .page-title {
+      font-size: 22px;
+      font-weight: 700;
+      background: linear-gradient(135deg, var(--text), var(--accent2));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .content {
+      flex: 1;
+      overflow-y: auto;
+      padding: 24px 28px;
+    }
+
+    /* ---------- CARDS & UTILITIES ---------- */
+    .card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 20px;
+      margin-bottom: 20px;
+    }
+
+    .card-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 18px;
+      font-weight: 600;
+      border-bottom: 1px solid var(--border);
+      padding-bottom: 12px;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(210px, 1fr));
+      gap: 16px;
+      margin-bottom: 28px;
+    }
+
+    .stat-card {
+      background: var(--surface2);
+      border-radius: var(--radius-sm);
+      padding: 18px;
+      border: 1px solid var(--border);
+    }
+
+    .stat-value {
+      font-size: 32px;
+      font-weight: 800;
+      color: var(--accent);
+    }
+
+    .btn {
+      padding: 8px 18px;
+      border-radius: 40px;
+      border: none;
+      font-weight: 600;
+      cursor: pointer;
+      background: var(--surface2);
+      color: var(--text);
+      transition: 0.15s;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #001a12;
+      box-shadow: 0 2px 8px rgba(0, 229, 184, 0.2);
+    }
+
+    .btn-danger {
+      background: var(--danger);
+      color: white;
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    input, select, textarea {
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 12px;
+      padding: 10px 14px;
+      color: var(--text);
+      width: 100%;
+      outline: none;
+    }
+
+    .form-group { margin-bottom: 16px; }
+    .label {
+      font-size: 12px;
+      font-weight: 600;
+      margin-bottom: 6px;
+      display: block;
+      color: var(--text-muted);
+    }
+
+    .grid-2 {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 16px;
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+    }
+
+    th, td {
+      padding: 12px 8px;
+      text-align: left;
+      border-bottom: 1px solid var(--border);
+      font-size: 13px;
+    }
+
+    th { color: var(--accent2); }
+
+    .badge {
+      padding: 4px 10px;
+      border-radius: 40px;
+      font-size: 11px;
+      font-weight: 600;
+      background: var(--surface2);
+    }
+
+    .badge.active { background: rgba(16, 185, 129, 0.2); color: var(--success); }
+    .badge.pending { background: rgba(245, 158, 11, 0.2); color: var(--warning); }
+
+    .upload-box {
+      border: 2px dashed var(--border2);
+      border-radius: 12px;
+      padding: 12px;
+      text-align: center;
+      cursor: pointer;
+      transition: 0.2s;
+    }
+
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%);
+      background: var(--surface2);
+      border-radius: 60px;
+      padding: 12px 24px;
+      z-index: 999;
+      display: none;
+      gap: 8px;
+      backdrop-filter: blur(12px);
+    }
+
+    .show-toast { display: flex; animation: fadeUp 0.2s; }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    .flex-between { display: flex; justify-content: space-between; align-items: center; }
+    .mb-2 { margin-bottom: 8px; }
+    .mt-4 { margin-top: 16px; }
+    .text-accent { color: var(--accent); }
+    i { margin-right: 6px; }
+  </style>
 </head>
 <body>
-<div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text">Loading...</div></div>
-<div class="toast-container" id="toastContainer"></div>
-
 <div class="app">
-    <!-- Header -->
-    <div class="app-header">
-        <div class="header-brand">
-            <div class="brand-icon"><i class="fas fa-shield-alt"></i></div>
-            <div class="brand-text"><strong>TRUCASH</strong><span>Sudo Panel</span></div>
-        </div>
-        <div class="hdr-btn" id="menuToggle"><i class="fas fa-bars"></i></div>
+  <!-- ==================== SIDEBAR ==================== -->
+  <div class="sidebar">
+    <div class="sidebar-header">
+      <div class="logo">
+        <div class="logo-icon"><i class="fas fa-shield-halbed"></i></div>
+        <div class="logo-text"><span>TRU</span>CASH</div>
+      </div>
+      <div class="mt-4" style="font-size:12px; color:var(--text-muted);">⚡ SUDO CONTROL</div>
     </div>
-
-    <!-- Sidebar -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-avatar"><i class="fas fa-user-shield"></i></div>
-            <div><div id="sidebarName">Sudo Admin</div><div class="text-muted">Super Admin</div></div>
-        </div>
-        <div class="sidebar-menu">
-            <div class="sidebar-item" data-section="dashboard"><i class="fas fa-home"></i> Dashboard</div>
-            <div class="sidebar-item" data-section="customers"><i class="fas fa-users"></i> Customers</div>
-            <div class="sidebar-item" data-section="agents"><i class="fas fa-user-tie"></i> Agents</div>
-            <div class="sidebar-item" data-section="admins"><i class="fas fa-user-shield"></i> Admins</div>
-            <div class="sidebar-item" data-section="loans"><i class="fas fa-file-invoice"></i> Loans</div>
-            <div class="sidebar-item" data-section="payments"><i class="fas fa-credit-card"></i> Payments</div>
-            <div class="sidebar-item" data-section="lending"><i class="fas fa-hand-holding-usd"></i> Lending Ops</div>
-            <div class="sidebar-item" data-section="database"><i class="fas fa-database"></i> Database Ops</div>
-            <div class="sidebar-item" data-section="security"><i class="fas fa-shield-alt"></i> Security</div>
-            <div class="sidebar-item" data-section="system"><i class="fas fa-cog"></i> System Config</div>
-            <div class="sidebar-item" data-section="reports"><i class="fas fa-chart-line"></i> Reports</div>
-            <div class="sidebar-item logout" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</div>
-        </div>
+    <div class="nav" id="navContainer">
+      <div class="nav-item active" data-tab="dashboard"><i class="fas fa-chart-line"></i> Dashboard</div>
+      <div class="nav-item" data-tab="customers"><i class="fas fa-users"></i> Customers</div>
+      <div class="nav-item" data-tab="agents"><i class="fas fa-user-tie"></i> Agents</div>
+      <div class="nav-item" data-tab="admins"><i class="fas fa-user-shield"></i> Admins</div>
+      <div class="nav-item" data-tab="loans"><i class="fas fa-hand-holding-usd"></i> Loans</div>
+      <div class="nav-item" data-tab="payments"><i class="fas fa-credit-card"></i> Payments</div>
+      <div class="nav-item" data-tab="commission"><i class="fas fa-coins"></i> Commission</div>
+      <div class="nav-item" data-tab="lending"><i class="fas fa-percent"></i> Lending Ops</div>
+      <div class="nav-item" data-tab="security"><i class="fas fa-shield-alt"></i> Security</div>
+      <div class="nav-item" data-tab="database"><i class="fas fa-database"></i> DB Ops</div>
+      <div class="nav-item" data-tab="system"><i class="fas fa-cog"></i> System</div>
+      <div class="nav-item" data-tab="logs"><i class="fas fa-history"></i> Audit Logs</div>
+      <div class="nav-item" data-tab="messages"><i class="fas fa-bell"></i> Promos/Msg</div>
     </div>
+  </div>
 
-    <!-- Bottom Nav (mobile) -->
-    <div class="bottom-nav">
-        <div class="nav-item-bottom active" data-section="dashboard"><i class="fas fa-home"></i><span>Home</span></div>
-        <div class="nav-item-bottom" data-section="customers"><i class="fas fa-users"></i><span>Customers</span></div>
-        <div class="nav-item-bottom" data-section="agents"><i class="fas fa-user-tie"></i><span>Agents</span></div>
-        <div class="nav-item-bottom" data-section="loans"><i class="fas fa-file-invoice"></i><span>Loans</span></div>
-        <div class="nav-item-bottom" data-section="payments"><i class="fas fa-credit-card"></i><span>Payments</span></div>
+  <!-- ==================== MAIN CONTENT ==================== -->
+  <div class="main">
+    <div class="top-bar">
+      <div class="page-title" id="pageTitle">Sudo Dashboard</div>
+      <button class="btn" id="logoutBtn"><i class="fas fa-sign-out-alt"></i> Logout</button>
     </div>
-
-    <!-- Main Content (sections) -->
-    <div class="main-content" id="mainContent">
-        <!-- Dashboard -->
-        <section class="content-section active" id="dashboardSection">
-            <div class="stats-grid">
-                <div class="stat-card" onclick="showSection('customers')"><div class="label">Total Customers</div><div class="value" id="statCustomers">0</div></div>
-                <div class="stat-card" onclick="showSection('agents')"><div class="label">Total Agents</div><div class="value" id="statAgents">0</div></div>
-                <div class="stat-card" onclick="showSection('admins')"><div class="label">Admins</div><div class="value" id="statAdmins">0</div></div>
-                <div class="stat-card" onclick="showSection('loans')"><div class="label">Active Loans</div><div class="value" id="statActiveLoans">0</div></div>
-            </div>
-            <div class="grid-2">
-                <div class="floating-card"><h4>Pending Approvals</h4><div id="pendingSummary" class="detail-grid"></div></div>
-                <div class="floating-card"><h4>Quick Actions</h4><div class="grid-2"><button class="btn btn-primary" id="quickCreateCustomer">New Customer</button><button class="btn btn-primary" id="quickCreateAgent">New Agent</button><button class="btn btn-primary" id="quickCreateAdmin">New Admin</button><button class="btn btn-outline" id="quickReports">Reports</button></div></div>
-            </div>
-        </section>
-
-        <!-- Customers -->
-        <section class="content-section" id="customersSection">
-            <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="customerSearch" placeholder="Search customers..."></div>
-            <div id="customersList"></div>
-        </section>
-
-        <!-- Agents -->
-        <section class="content-section" id="agentsSection">
-            <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="agentSearch" placeholder="Search agents..."></div>
-            <div id="agentsList"></div>
-            <div class="floating-card"><h4>Pending Agent Applications</h4><div id="pendingAppsList"></div></div>
-        </section>
-
-        <!-- Admins -->
-        <section class="content-section" id="adminsSection">
-            <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="adminSearch" placeholder="Search admins..."></div>
-            <button class="btn btn-primary" id="createAdminBtn" style="margin-bottom:16px;"><i class="fas fa-plus"></i> Create Admin</button>
-            <div id="adminsList"></div>
-        </section>
-
-        <!-- Loans -->
-        <section class="content-section" id="loansSection">
-            <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="loanSearch" placeholder="Search loans..."></div>
-            <div class="tab-bar"><span class="tab active" data-status="all">All</span><span class="tab" data-status="pending">Pending</span><span class="tab" data-status="approved">Approved</span><span class="tab" data-status="active">Active</span><span class="tab" data-status="completed">Completed</span><span class="tab" data-status="rejected">Rejected</span></div>
-            <div id="loansList"></div>
-        </section>
-
-        <!-- Payments -->
-        <section class="content-section" id="paymentsSection">
-            <div class="search-bar"><i class="fas fa-search"></i><input type="text" id="paymentSearch" placeholder="Search payments..."></div>
-            <div class="tab-bar"><span class="tab active" data-status="all">All</span><span class="tab" data-status="pending">Pending</span><span class="tab" data-status="confirmed">Confirmed</span><span class="tab" data-status="rejected">Rejected</span></div>
-            <div id="paymentsList"></div>
-        </section>
-
-        <!-- Lending Operations -->
-        <section class="content-section" id="lendingSection">
-            <div class="floating-card"><h4>Loan Override</h4><div class="form-group"><label class="form-label">Loan ID</label><input type="text" id="overrideLoanId" class="form-input"></div><div class="form-group"><label class="form-label">Operation</label><select id="overrideOp" class="form-select"><option>Change Status</option><option>Extend Duration</option><option>Adjust Amount</option></select></div><div class="form-group"><label class="form-label">New Value</label><input type="text" id="overrideValue" class="form-input"></div><button class="btn btn-primary" id="executeOverride">Execute Override</button></div>
-            <div class="floating-card"><h4>Wallet Operations</h4><div class="form-group"><label class="form-label">Wallet ID / Customer ID</label><input type="text" id="walletId" class="form-input"></div><div class="form-group"><label class="form-label">Operation</label><select id="walletOp" class="form-select"><option>Credit Adjustment</option><option>Debit Adjustment</option><option>Freeze Wallet</option></select></div><div class="form-group"><label class="form-label">Amount (ZMW)</label><input type="number" id="walletAmount" class="form-input"></div><button class="btn btn-primary" id="executeWalletOp">Execute</button></div>
-            <div class="floating-card"><h4>KYC Review Queue</h4><div id="kycQueueList"></div></div>
-        </section>
-
-        <!-- Database Ops -->
-        <section class="content-section" id="databaseSection">
-            <div class="floating-card"><h4>Query Runner</h4><div class="form-group"><label class="form-label">Target Table</label><select id="dbTable" class="form-select"><option>users</option><option>loans</option><option>payments</option><option>commissionHistory</option><option>auditLogs</option></select></div><div class="form-group"><label class="form-label">Filter (JSON)</label><textarea id="dbQuery" class="form-textarea" rows="3" placeholder='{"status":"pending"}'></textarea></div><button class="btn btn-primary" id="runQueryBtn">Run Query</button><div id="queryResult" class="detail-grid" style="margin-top:16px;"></div></div>
-            <div class="floating-card"><h4>Backup & Recovery</h4><button class="btn btn-success" id="manualBackupBtn">Trigger Manual Backup</button><div id="backupStatus" class="text-muted mt-2"></div></div>
-        </section>
-
-        <!-- Security -->
-        <section class="content-section" id="securitySection">
-            <div class="floating-card"><h4>Security Policies</h4><div class="form-group"><label>MFA Required</label><input type="checkbox" id="mfaToggle"></div><div class="form-group"><label>IP Whitelisting</label><input type="checkbox" id="ipWhitelistToggle"></div><div class="form-group"><label>Session Timeout (min)</label><input type="number" id="sessionTimeout" class="form-input" value="30"></div><button class="btn btn-primary" id="saveSecurityPolicies">Save Policies</button></div>
-            <div class="floating-card"><h4>Audit Logs</h4><div class="search-bar"><i class="fas fa-search"></i><input type="text" id="auditSearch" placeholder="Search logs..."></div><div id="auditLogsList"></div></div>
-            <div class="floating-card"><h4>Encryption Status</h4><div>Database: AES-256 <span class="status-badge active">Active</span></div><div>In-Transit: TLS 1.3 <span class="status-badge active">Active</span></div><div>Backup Encryption: <span id="backupEncryptStatus">72%</span></div></div>
-        </section>
-
-        <!-- System Config -->
-        <section class="content-section" id="systemSection">
-            <div class="grid-2">
-                <div class="floating-card"><h4>General Settings</h4><div class="form-group"><label>Commission Rate (%)</label><input type="number" id="commissionRate" class="form-input" value="15"></div><div class="form-group"><label>Monthly Interest (%)</label><input type="number" id="monthlyInterest" class="form-input" value="35"></div><div class="form-group"><label>Weekly Interest (%)</label><input type="number" id="weeklyInterest" class="form-input" value="10"></div><div class="form-group"><label>Max Loan (K)</label><input type="number" id="maxLoanAmount" class="form-input" value="50000"></div><div class="form-group"><label>Min Loan (K)</label><input type="number" id="minLoanAmount" class="form-input" value="100"></div><div class="form-group"><label>Enable Customer App</label><input type="checkbox" id="enableCustomerApp"></div><div class="form-group"><label>Enable Agent App</label><input type="checkbox" id="enableAgentApp"></div><button class="btn btn-primary" id="saveSystemSettings">Save Settings</button></div>
-                <div class="floating-card"><h4>Update Center</h4><div>Current: v2.4.1</div><div>Latest: v2.4.1</div><button class="btn btn-outline mt-2" id="checkUpdatesBtn">Check for Updates</button><hr><h4>Danger Zone</h4><button class="btn btn-danger" id="sudoResetBtn">Sudo Reset Database</button></div>
-            </div>
-        </section>
-
-        <!-- Reports -->
-        <section class="content-section" id="reportsSection">
-            <div class="floating-card"><h4>Financial Summary</h4><div class="grid-3" id="financialSummary"></div></div>
-            <div class="floating-card"><h4>Export Data</h4><div class="grid-2"><button class="btn btn-outline" id="exportCustomersBtn">Customers CSV</button><button class="btn btn-outline" id="exportAgentsBtn">Agents CSV</button><button class="btn btn-outline" id="exportLoansBtn">Loans CSV</button><button class="btn btn-outline" id="exportPaymentsBtn">Payments CSV</button><button class="btn btn-success" id="exportAllZipBtn">Export All (ZIP)</button></div></div>
-            <div class="floating-card"><canvas id="loanTrendChart" height="200"></canvas></div>
-        </section>
-    </div>
+    <div class="content" id="mainContent"></div>
+  </div>
 </div>
 
-<!-- Modals -->
-<div class="modal-overlay" id="genericModal"><div class="modal-container"><div class="modal-header"><h3 id="modalTitle">Title</h3><span class="modal-close" onclick="closeModal('genericModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="genericModalBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('genericModal')">Cancel</button><button class="btn btn-primary" id="modalActionBtn">Save</button></div></div></div>
-<div class="modal-overlay" id="loanDetailsModal"><div class="modal-container large"><div class="modal-header"><h3>Loan Details</h3><span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="loanDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button></div></div></div>
-<div class="modal-overlay" id="paymentDetailsModal"><div class="modal-container"><div class="modal-header"><h3>Payment Details</h3><span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="paymentDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('paymentDetailsModal')">Close</button></div></div></div>
-<div class="modal-overlay" id="rejectionModal"><div class="modal-container"><div class="modal-header"><h3>Rejection Reason</h3><span class="modal-close" onclick="closeModal('rejectionModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><textarea id="rejectionReason" class="form-textarea" rows="4" placeholder="Enter reason..."></textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('rejectionModal')">Cancel</button><button class="btn btn-danger" id="confirmRejectBtn">Confirm</button></div></div></div>
-<div class="modal-overlay" id="agreementModal"><div class="modal-container large"><div class="modal-header"><h3>Signed Agreement</h3><span class="modal-close" onclick="closeModal('agreementModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><iframe id="agreementFrame" style="width:100%; height:500px; border:none;"></iframe></div></div></div>
+<div id="toastMsg" class="toast"><i class="fas fa-check-circle"></i><span></span></div>
 
 <script>
-    // ==================== FIREBASE ====================
-    const firebaseConfig = {
-        apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
-        authDomain: "trucash-9fee8.firebaseapp.com",
-        databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
-        projectId: "trucash-9fee8",
-        storageBucket: "trucash-9fee8.firebasestorage.app",
-        messagingSenderId: "622416212225",
-        appId: "1:622416212225:web:07418a9b16f955c330ab00"
-    };
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.database();
+  // =========================================================================
+  // 1. FIREBASE CONFIGURATION
+  // =========================================================================
+  const firebaseConfig = {
+    apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
+    authDomain: "trucash-9fee8.firebaseapp.com",
+    databaseURL: "https://trucash-9fee8-default-rtdb.firebaseio.com",
+    projectId: "trucash-9fee8",
+    storageBucket: "trucash-9fee8.firebasestorage.app",
+    appId: "1:622416212225:web:07418a9b16f955c330ab00"
+  };
+  firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
+  const db = firebase.database();
 
-    // ==================== GLOBAL STATE ====================
-    let currentUser = null;
-    let allCustomers = [], allAgents = [], allAdmins = [];
-    let allLoans = [], allPayments = [], allCommission = [], allAuditLogs = [], allAgentApps = [];
-    let systemSettings = {};
-    let currentLoanFilter = 'all', currentPaymentFilter = 'all';
-    let pendingRejectCallback = null;
+  // =========================================================================
+  // 2. CLOUDINARY UPLOAD WIDGET
+  // =========================================================================
+  let cloudinaryWidget = null;
+  let activeUploadCallback = null;
 
-    const utils = {
-        formatCurrency: (amt) => 'K' + (amt || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
-        formatDate: (ts) => ts ? moment(ts).format('MMM D, YYYY') : 'N/A',
-        formatDateTime: (ts) => ts ? moment(ts).format('MMM D, YYYY h:mm A') : 'N/A',
-        showToast: (title, msg, type='info') => {
-            const toast = document.createElement('div');
-            toast.className = 'toast';
-            toast.style.borderLeftColor = type==='error'?'#f43f5e':type==='success'?'#10b981':'#00e5b8';
-            toast.innerHTML = `<strong>${title}</strong><br>${msg}`;
-            document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
-        },
-        showLoading: (msg) => { document.querySelector('#loadingOverlay .loading-text').textContent = msg; document.getElementById('loadingOverlay').classList.add('active'); },
-        hideLoading: () => document.getElementById('loadingOverlay').classList.remove('active'),
-        generateId: (p) => p + Date.now() + Math.random().toString(36).substr(2,8),
-        logAudit: async (action, details) => {
-            if(!currentUser) return;
-            await db.ref('auditLogs/'+utils.generateId('LOG')).set({
-                timestamp: Date.now(), adminUid: currentUser.uid, adminEmail: currentUser.email,
-                action, details: JSON.stringify(details)
-            });
-        },
-        calculateCreditScore: (customerId) => {
-            const loans = allLoans.filter(l => l.customerId === customerId);
-            if(loans.length===0) return {score:70, grade:'Good'};
-            let totalPaid=0, totalDue=0, late=0;
-            loans.forEach(l => {
-                totalDue += l.totalPayable || l.amount;
-                totalPaid += l.totalPaid || 0;
-                if(l.repaymentSchedule) l.repaymentSchedule.forEach(inst => {
-                    if(inst.status==='paid' && inst.paidAt > inst.dueDate + 5*86400000) late++;
-                });
-            });
-            let score = Math.min(100, Math.max(0, 100 - (late*2) - (loans.filter(l=>l.status==='defaulted').length*15)));
-            score = Math.round(score * (0.5 + 0.5 * (totalDue ? totalPaid/totalDue : 1)));
-            let grade = score>=80?'Excellent':score>=60?'Good':score>=40?'Fair':'Poor';
-            return {score, grade};
+  function initCloudinary() {
+    if (!cloudinaryWidget) {
+      cloudinaryWidget = cloudinary.createUploadWidget({
+        cloudName: 'dd3lcymrk',
+        uploadPreset: 'h3eyhc2o',
+        folder: 'sudo_admin',
+        sources: ['local', 'camera'],
+        maxFileSize: 5242880,
+        clientAllowedFormats: ['jpg', 'jpeg', 'png', 'pdf']
+      }, (error, result) => {
+        if (result && result.event === 'success' && activeUploadCallback) {
+          activeUploadCallback(result.info.secure_url);
+          activeUploadCallback = null;
         }
-    };
-
-    // ==================== LOAD DATA ====================
-    async function loadAllData() {
-        utils.showLoading('Loading system data...');
-        try {
-            const usersSnap = await db.ref('users').once('value');
-            const users = usersSnap.val() || {};
-            allCustomers = Object.entries(users).filter(([_,u])=>u.userType==='customer').map(([id,u])=>({...u,id}));
-            allAgents = Object.entries(users).filter(([_,u])=>u.userType==='agent').map(([id,u])=>({...u,id}));
-            allAdmins = Object.entries(users).filter(([_,u])=>u.userType==='admin').map(([id,u])=>({...u,id}));
-
-            const loansSnap = await db.ref('loans').once('value');
-            allLoans = Object.entries(loansSnap.val() || {}).map(([id,l])=>({...l,id}));
-
-            const paymentsSnap = await db.ref('payments').once('value');
-            allPayments = Object.entries(paymentsSnap.val() || {}).map(([id,p])=>({...p,id}));
-
-            const commSnap = await db.ref('commissionHistory').once('value');
-            allCommission = Object.entries(commSnap.val() || {}).map(([id,c])=>({...c,id}));
-
-            const auditSnap = await db.ref('auditLogs').once('value');
-            allAuditLogs = Object.entries(auditSnap.val() || {}).map(([id,l])=>({...l,id})).sort((a,b)=>b.timestamp - a.timestamp);
-
-            const appsSnap = await db.ref('agentApplications').once('value');
-            allAgentApps = Object.entries(appsSnap.val() || {}).map(([id,a])=>({...a,id}));
-
-            const settingsSnap = await db.ref('systemSettings').once('value');
-            systemSettings = settingsSnap.val() || {};
-            applySettingsToForm();
-
-            updateAllUI();
-            utils.hideLoading();
-        } catch(e) { utils.showToast('Error', e.message, 'error'); utils.hideLoading(); }
+      });
     }
+  }
 
-    function applySettingsToForm() {
-        document.getElementById('commissionRate').value = systemSettings.commissionRate || 15;
-        document.getElementById('monthlyInterest').value = systemSettings.monthlyInterestRate || 35;
-        document.getElementById('weeklyInterest').value = systemSettings.weeklyInterestRate || 10;
-        document.getElementById('maxLoanAmount').value = systemSettings.maxLoanAmount || 50000;
-        document.getElementById('minLoanAmount').value = systemSettings.minLoanAmount || 100;
-        document.getElementById('enableCustomerApp').checked = systemSettings.enableCustomerApp !== false;
-        document.getElementById('enableAgentApp').checked = systemSettings.enableAgentApp !== false;
-        document.getElementById('mfaToggle').checked = systemSettings.mfaRequired || false;
-        document.getElementById('ipWhitelistToggle').checked = systemSettings.ipWhitelistEnabled || false;
-        document.getElementById('sessionTimeout').value = systemSettings.sessionTimeout || 30;
-    }
+  function openUpload(callback) {
+    initCloudinary();
+    activeUploadCallback = callback;
+    cloudinaryWidget.open();
+  }
 
-    function updateAllUI() {
-        document.getElementById('statCustomers').innerText = allCustomers.length;
-        document.getElementById('statAgents').innerText = allAgents.length;
-        document.getElementById('statAdmins').innerText = allAdmins.length;
-        document.getElementById('statActiveLoans').innerText = allLoans.filter(l=>l.status==='active').length;
-        const pendingLoans = allLoans.filter(l=>l.status==='pending').length;
-        const pendingAgentApps = allAgentApps.filter(a=>a.status==='pending').length;
-        const pendingPayments = allPayments.filter(p=>p.status==='pending').length;
-        document.getElementById('pendingSummary').innerHTML = `<div class="detail-card"><div class="detail-label">Loan Apps</div><div class="detail-value">${pendingLoans}</div></div><div class="detail-card"><div class="detail-label">Agent Apps</div><div class="detail-value">${pendingAgentApps}</div></div><div class="detail-card"><div class="detail-label">Payments</div><div class="detail-value">${pendingPayments}</div></div>`;
-        renderCustomers(); renderAgents(); renderAdmins(); renderLoans(); renderPayments();
-        renderLendingOps(); renderAuditLogs(); renderFinancialSummary(); renderPendingApps();
-        if(window.loanChart) window.loanChart.destroy();
-        initCharts();
-    }
+  // =========================================================================
+  // 3. GLOBAL STATE & HELPER FUNCTIONS
+  // =========================================================================
+  let currentUser = null;
+  let allCustomers = [];
+  let allAgents = [];
+  let allAdmins = [];
+  let allLoans = [];
+  let allPayments = [];
+  let allCommission = [];
+  let allAuditLogs = [];
+  let systemSettings = {};
 
-    // ==================== RENDERERS ====================
-    function renderCustomers() {
-        const search = document.getElementById('customerSearch')?.value.toLowerCase() || '';
-        let filtered = allCustomers.filter(c => c.fullName?.toLowerCase().includes(search) || c.email?.toLowerCase().includes(search) || c.phone?.includes(search));
-        document.getElementById('customersList').innerHTML = filtered.map(c => {
-            const credit = utils.calculateCreditScore(c.id);
-            return `<div class="floating-card" style="cursor:pointer" onclick="showCustomerDetails('${c.id}')"><div style="display:flex; gap:12px; align-items:center"><img src="${c.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(c.fullName)}" style="width:48px;height:48px;border-radius:50%;object-fit:cover"><div><strong>${c.fullName}</strong><br><span class="text-muted">${c.email} | ${c.phone}</span></div><div class="status-badge ${c.status}">${c.status}</div><div class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.grade} (${credit.score})</div></div></div>`;
-        }).join('');
-    }
+  function showToast(message, type = 'success') {
+    const toast = document.getElementById('toastMsg');
+    toast.querySelector('span').innerText = message;
+    toast.classList.add('show-toast');
+    setTimeout(() => toast.classList.remove('show-toast'), 3000);
+  }
 
-    function renderAgents() {
-        const search = document.getElementById('agentSearch')?.value.toLowerCase() || '';
-        let filtered = allAgents.filter(a => a.fullName?.toLowerCase().includes(search) || a.agentId?.toLowerCase().includes(search) || a.phone?.includes(search));
-        document.getElementById('agentsList').innerHTML = filtered.map(a => `<div class="floating-card" style="cursor:pointer" onclick="showAgentDetails('${a.id}')"><div style="display:flex; gap:12px; align-items:center"><img src="${a.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(a.fullName)}" style="width:48px;height:48px;border-radius:50%;object-fit:cover"><div><strong>${a.fullName}</strong><br><span class="text-muted">${a.agentId} | ${a.phone}</span></div><div class="status-badge ${a.status}">${a.status}</div></div></div>`).join('');
-    }
+  function formatCurrency(amount) {
+    return 'K' + (Number(amount || 0).toFixed(2)).replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+  }
 
-    function renderAdmins() {
-        const search = document.getElementById('adminSearch')?.value.toLowerCase() || '';
-        let filtered = allAdmins.filter(a => a.fullName?.toLowerCase().includes(search) || a.email?.toLowerCase().includes(search));
-        document.getElementById('adminsList').innerHTML = filtered.map(a => `<div class="floating-card" style="display:flex; justify-content:space-between; align-items:center"><div><strong>${a.fullName}</strong><br><span class="text-muted">${a.email}</span></div><button class="btn btn-danger btn-small" onclick="deleteAdmin('${a.id}')">Delete</button></div>`).join('');
-    }
+  function formatDate(timestamp) {
+    if (!timestamp) return 'N/A';
+    return new Date(timestamp).toLocaleDateString();
+  }
 
-    function renderLoans() {
-        const search = document.getElementById('loanSearch')?.value.toLowerCase() || '';
-        let filtered = allLoans.filter(l => l.customerName?.toLowerCase().includes(search) || l.id?.toLowerCase().includes(search));
-        if(currentLoanFilter !== 'all') filtered = filtered.filter(l => l.status === currentLoanFilter);
-        document.getElementById('loansList').innerHTML = filtered.map(l => {
-            const customer = allCustomers.find(c=>c.id===l.customerId);
-            const agent = allAgents.find(a=>a.id===l.agentId);
-            const percent = (l.totalPayable || l.amount) ? ((l.totalPaid||0)/(l.totalPayable||l.amount)*100).toFixed(1) : 0;
-            return `<div class="loan-card" onclick="showLoanDetails('${l.id}')"><div class="loan-card-left"><img src="${customer?.profilePhoto||''}" class="loan-card-profile-img"></div><div class="loan-card-center"><div class="loan-card-customer-name">${l.customerName}</div><div class="loan-card-amount">${utils.formatCurrency(l.amount)}</div><div class="progress-container"><div class="progress-bar" style="width:${percent}%"></div></div><div><span class="status-badge ${l.status}">${l.status}</span></div></div><div class="loan-card-right"><img src="${agent?.profilePhoto||''}" class="loan-card-agent-img"></div></div>`;
-        }).join('');
-    }
+  function formatDateTime(timestamp) {
+    if (!timestamp) return 'N/A';
+    return new Date(timestamp).toLocaleString();
+  }
 
-    function renderPayments() {
-        const search = document.getElementById('paymentSearch')?.value.toLowerCase() || '';
-        let filtered = allPayments.filter(p => p.customerName?.toLowerCase().includes(search) || p.loanId?.toLowerCase().includes(search));
-        if(currentPaymentFilter !== 'all') filtered = filtered.filter(p => p.status === currentPaymentFilter);
-        document.getElementById('paymentsList').innerHTML = filtered.map(p => `<div class="floating-card" style="cursor:pointer" onclick="showPaymentDetails('${p.id}')"><div><strong>${p.customerName}</strong> - ${utils.formatCurrency(p.amount)}</div><div class="text-muted">Loan: ${p.loanId.substring(0,8)}... | Method: ${p.method}</div><div class="status-badge ${p.status}">${p.status}</div>${p.proofUrl ? `<img src="${p.proofUrl}" style="width:40px;height:40px;object-fit:cover;border-radius:8px;margin-top:6px;">` : ''}</div>`).join('');
-    }
-
-    function renderLendingOps() {
-        const kycQueue = allCustomers.filter(c => !c.kycVerified).slice(0,5);
-        document.getElementById('kycQueueList').innerHTML = kycQueue.map(c => `<div class="detail-card"><strong>${c.fullName}</strong><br>NRC: ${c.nrc}<br><button class="btn btn-small btn-primary" onclick="verifyKyc('${c.id}')">Verify KYC</button></div>`).join('');
-    }
-
-    function renderAuditLogs() {
-        const search = document.getElementById('auditSearch')?.value.toLowerCase() || '';
-        let filtered = allAuditLogs.filter(l => l.action?.toLowerCase().includes(search) || l.adminEmail?.toLowerCase().includes(search));
-        document.getElementById('auditLogsList').innerHTML = filtered.slice(0,30).map(l => `<div class="floating-card"><strong>${l.action}</strong><br><span class="text-muted">${l.adminEmail} | ${utils.formatDateTime(l.timestamp)}</span><br><small>${l.details}</small></div>`).join('');
-    }
-
-    function renderPendingApps() {
-        const pending = allAgentApps.filter(a => a.status === 'pending');
-        document.getElementById('pendingAppsList').innerHTML = pending.map(app => `<div class="detail-card" style="cursor:pointer" onclick="showAgentApplication('${app.id}')"><strong>${app.fullName}</strong> | ${app.phone}<br><span class="status-badge pending">Pending</span></div>`).join('');
-    }
-
-    function renderFinancialSummary() {
-        const totalLent = allLoans.filter(l=>l.status==='active'||l.status==='approved').reduce((s,l)=>s+(l.amount||0),0);
-        const totalRepaid = allPayments.filter(p=>p.status==='confirmed').reduce((s,p)=>s+p.amount,0);
-        const interestEarned = allLoans.reduce((s,l)=>s+(l.totalInterest||0),0);
-        const commissionPaid = allCommission.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0);
-        const net = interestEarned - commissionPaid;
-        document.getElementById('financialSummary').innerHTML = `<div class="detail-card"><div class="detail-label">Total Lent</div><div class="detail-value">${utils.formatCurrency(totalLent)}</div></div><div class="detail-card"><div class="detail-label">Repaid</div><div class="detail-value">${utils.formatCurrency(totalRepaid)}</div></div><div class="detail-card"><div class="detail-label">Interest Earned</div><div class="detail-value">${utils.formatCurrency(interestEarned)}</div></div><div class="detail-card"><div class="detail-label">Commission Paid</div><div class="detail-value">${utils.formatCurrency(commissionPaid)}</div></div><div class="detail-card"><div class="detail-label">Net Profit</div><div class="detail-value">${utils.formatCurrency(net)}</div></div>`;
-    }
-
-    function initCharts() {
-        const ctx = document.getElementById('loanTrendChart').getContext('2d');
-        window.loanChart = new Chart(ctx, {
-            type: 'line',
-            data: { labels: ['Jan','Feb','Mar','Apr','May','Jun'], datasets: [{ label: 'Loans Created', data: [12,19,15,22,30,25], borderColor: '#00e5b8' }] },
-            options: { responsive: true }
-        });
-    }
-
-    // ==================== ACTIONS ====================
-    window.showCustomerDetails = async (id) => {
-        const c = allCustomers.find(c=>c.id===id);
-        if(!c) return;
-        const credit = utils.calculateCreditScore(id);
-        const html = `<div class="form-group"><label>Full Name</label><input type="text" id="editFullName" class="form-input" value="${c.fullName||''}"></div><div class="form-group"><label>Email</label><input type="email" id="editEmail" class="form-input" value="${c.email||''}"></div><div class="form-group"><label>Phone</label><input type="text" id="editPhone" class="form-input" value="${c.phone||''}"></div><div class="form-group"><label>NRC</label><input type="text" id="editNrc" class="form-input" value="${c.nrc||''}"></div><div class="form-group"><label>Address</label><input type="text" id="editAddress" class="form-input" value="${c.residence||''}"></div><div class="form-group"><label>Status</label><select id="editStatus" class="form-select"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="banned" ${c.status==='banned'?'selected':''}>Banned</option></select></div><div class="detail-card"><div class="detail-label">Credit Score</div><div class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.grade} (${credit.score})</div></div>`;
-        document.getElementById('genericModalBody').innerHTML = html;
-        document.getElementById('modalTitle').innerText = 'Edit Customer';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            await db.ref('users/'+id).update({ fullName: document.getElementById('editFullName').value, email: document.getElementById('editEmail').value, phone: document.getElementById('editPhone').value, nrc: document.getElementById('editNrc').value, residence: document.getElementById('editAddress').value, status: document.getElementById('editStatus').value });
-            utils.showToast('Updated', 'Customer updated', 'success');
-            closeModal('genericModal'); loadAllData();
-        };
-        openModal('genericModal');
-    };
-
-    window.showAgentDetails = async (id) => {
-        const a = allAgents.find(a=>a.id===id);
-        if(!a) return;
-        const html = `<div class="form-group"><label>Full Name</label><input type="text" id="editAgentName" class="form-input" value="${a.fullName||''}"></div><div class="form-group"><label>Email</label><input type="email" id="editAgentEmail" class="form-input" value="${a.email||''}"></div><div class="form-group"><label>Phone</label><input type="text" id="editAgentPhone" class="form-input" value="${a.phone||''}"></div><div class="form-group"><label>Agent ID</label><input type="text" id="editAgentId" class="form-input" value="${a.agentId||''}"></div><div class="form-group"><label>Status</label><select id="editAgentStatus" class="form-select"><option value="active" ${a.status==='active'?'selected':''}>Active</option><option value="banned" ${a.status==='banned'?'selected':''}>Banned</option></select></div>`;
-        document.getElementById('genericModalBody').innerHTML = html;
-        document.getElementById('modalTitle').innerText = 'Edit Agent';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            await db.ref('users/'+id).update({ fullName: document.getElementById('editAgentName').value, email: document.getElementById('editAgentEmail').value, phone: document.getElementById('editAgentPhone').value, agentId: document.getElementById('editAgentId').value, status: document.getElementById('editAgentStatus').value });
-            utils.showToast('Updated', 'Agent updated', 'success');
-            closeModal('genericModal'); loadAllData();
-        };
-        openModal('genericModal');
-    };
-
-    window.showLoanDetails = async (id) => {
-        const loan = allLoans.find(l=>l.id===id);
-        if(!loan) return;
-        let scheduleHtml = '';
-        if(loan.repaymentSchedule) {
-            scheduleHtml = '<table style="width:100%"><tr><th>#</th><th>Due</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Paid</th><th>Status</th></tr>';
-            loan.repaymentSchedule.forEach(inst => { scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.principal)}</td><td>${utils.formatCurrency(inst.interest)}</td><td>${utils.formatCurrency(inst.penalty||0)}</td><td>${utils.formatCurrency(inst.paidAmount||0)}</td><td>${inst.status}</td></tr>`; });
-            scheduleHtml += '</table>';
-        }
-        const agreementBtn = loan.signedAgreementUrl ? `<button class="btn btn-outline" onclick="viewAgreement('${loan.signedAgreementUrl}')">View Signed Agreement</button>` : '';
-        const approveBtn = loan.status === 'pending' ? `<button class="btn btn-success" onclick="approveLoan('${loan.id}')">Approve</button>` : '';
-        const rejectBtn = loan.status === 'pending' ? `<button class="btn btn-danger" onclick="openRejectModal('${loan.id}')">Reject</button>` : '';
-        document.getElementById('loanDetailsBody').innerHTML = `<div><strong>Customer:</strong> ${loan.customerName}</div><div><strong>Amount:</strong> ${utils.formatCurrency(loan.amount)}</div><div><strong>Status:</strong> <span class="status-badge ${loan.status}">${loan.status}</span></div><div><strong>Duration:</strong> ${loan.duration} ${loan.durationUnit||'months'}</div><div><strong>Total Paid:</strong> ${utils.formatCurrency(loan.totalPaid||0)}</div><div><strong>Remaining:</strong> ${utils.formatCurrency((loan.totalPayable||loan.amount)-(loan.totalPaid||0))}</div><div><strong>Collateral:</strong> ${loan.collateral?.category||'N/A'} - ${utils.formatCurrency(loan.collateral?.value||0)}</div><hr><h4>Repayment Schedule</h4>${scheduleHtml}<hr><div class="grid-2">${approveBtn} ${rejectBtn} ${agreementBtn}</div>`;
-        openModal('loanDetailsModal');
-    };
-
-    window.showPaymentDetails = async (id) => {
-        const payment = allPayments.find(p=>p.id===id);
-        if(!payment) return;
-        const confirmBtn = payment.status === 'pending' ? `<button class="btn btn-success" onclick="confirmPayment('${payment.id}')">Confirm</button>` : '';
-        const rejectBtn = payment.status === 'pending' ? `<button class="btn btn-danger" onclick="rejectPayment('${payment.id}')">Reject</button>` : '';
-        document.getElementById('paymentDetailsBody').innerHTML = `<div><strong>Customer:</strong> ${payment.customerName}</div><div><strong>Amount:</strong> ${utils.formatCurrency(payment.amount)}</div><div><strong>Method:</strong> ${payment.method}</div><div><strong>Status:</strong> <span class="status-badge ${payment.status}">${payment.status}</span></div><div><strong>Date:</strong> ${utils.formatDateTime(payment.timestamp)}</div>${payment.proofUrl ? `<div><strong>Proof:</strong> <a href="${payment.proofUrl}" target="_blank">View</a></div>` : ''}<hr>${confirmBtn} ${rejectBtn}`;
-        openModal('paymentDetailsModal');
-    };
-
-    window.showAgentApplication = async (id) => {
-        const app = allAgentApps.find(a=>a.id===id);
-        if(!app) return;
-        const html = `<div><strong>Name:</strong> ${app.fullName}</div><div><strong>Phone:</strong> ${app.phone}</div><div><strong>NRC:</strong> ${app.nrc}</div><div><strong>Residence:</strong> ${app.residence}</div><div><strong>Submitted:</strong> ${utils.formatDateTime(app.submittedAt)}</div><div><strong>Documents:</strong> <a href="${app.nrcFront}" target="_blank">NRC Front</a>, <a href="${app.nrcBack}" target="_blank">NRC Back</a>, <a href="${app.profilePhoto}" target="_blank">Profile</a></div><hr><button class="btn btn-success" onclick="approveAgentApp('${id}')">Approve & Create Agent</button><button class="btn btn-danger" onclick="rejectAgentApp('${id}')">Reject</button>`;
-        document.getElementById('genericModalBody').innerHTML = html;
-        document.getElementById('modalTitle').innerText = 'Agent Application';
-        document.getElementById('modalActionBtn').style.display = 'none';
-        openModal('genericModal');
-    };
-
-    window.approveAgentApp = async (appId) => {
-        const app = allAgentApps.find(a=>a.id===appId);
-        if(!app) return;
-        const email = prompt('Enter email for agent account:');
-        if(!email) return;
-        const password = prompt('Enter password:');
-        if(!password) return;
-        utils.showLoading('Creating agent...');
-        try {
-            const cred = await auth.createUserWithEmailAndPassword(email, password);
-            const agentId = 'AG' + Date.now().toString().slice(-6);
-            await db.ref('users/'+cred.user.uid).set({ fullName: app.fullName, phone: app.phone, nrc: app.nrc, residence: app.residence, email, agentId, userType:'agent', status:'active', profilePhoto: app.profilePhoto, nrcFront: app.nrcFront, nrcBack: app.nrcBack, createdAt: Date.now() });
-            await db.ref('agentApplications/'+appId).update({ status:'approved', reviewedAt: Date.now() });
-            utils.showToast('Success', 'Agent created', 'success');
-            closeModal('genericModal'); loadAllData();
-        } catch(e) { utils.showToast('Error', e.message, 'error'); }
-        utils.hideLoading();
-    };
-
-    window.rejectAgentApp = async (appId) => {
-        await db.ref('agentApplications/'+appId).update({ status:'rejected', reviewedAt: Date.now() });
-        utils.showToast('Rejected', 'Application rejected', 'info');
-        closeModal('genericModal'); loadAllData();
-    };
-
-    window.approveLoan = async (loanId) => {
-        await db.ref('loans/'+loanId).update({ status:'approved', approvedAt: Date.now() });
-        utils.showToast('Approved', 'Loan approved', 'success');
-        closeModal('loanDetailsModal'); loadAllData();
-    };
-
-    window.openRejectModal = (loanId) => {
-        pendingRejectCallback = async (reason) => {
-            await db.ref('loans/'+loanId).update({ status:'rejected', rejectionReason: reason, rejectedAt: Date.now() });
-            utils.showToast('Rejected', 'Loan rejected', 'info');
-            closeModal('rejectionModal'); closeModal('loanDetailsModal'); loadAllData();
-        };
-        document.getElementById('rejectionReason').value = '';
-        openModal('rejectionModal');
-    };
-
-    window.confirmPayment = async (paymentId) => {
-        await db.ref('payments/'+paymentId).update({ status:'confirmed', verifiedAt: Date.now() });
-        utils.showToast('Confirmed', 'Payment confirmed', 'success');
-        closeModal('paymentDetailsModal'); loadAllData();
-    };
-
-    window.rejectPayment = async (paymentId) => {
-        await db.ref('payments/'+paymentId).update({ status:'rejected', rejectedAt: Date.now() });
-        utils.showToast('Rejected', 'Payment rejected', 'info');
-        closeModal('paymentDetailsModal'); loadAllData();
-    };
-
-    window.verifyKyc = async (customerId) => {
-        await db.ref('users/'+customerId).update({ kycVerified: true });
-        utils.showToast('KYC', 'Customer verified', 'success');
-        loadAllData();
-    };
-
-    window.viewAgreement = (url) => {
-        document.getElementById('agreementFrame').src = url;
-        openModal('agreementModal');
-    };
-
-    window.deleteAdmin = async (id) => {
-        if(confirm('Delete this admin?')) { await db.ref('users/'+id).remove(); loadAllData(); }
-    };
-
-    // ==================== CREATE MODALS ====================
-    document.getElementById('quickCreateCustomer').onclick = () => {
-        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Full Name</label><input type="text" id="newCustName" class="form-input"></div><div class="form-group"><label>Email</label><input type="email" id="newCustEmail" class="form-input"></div><div class="form-group"><label>Phone</label><input type="text" id="newCustPhone" class="form-input"></div><div class="form-group"><label>NRC</label><input type="text" id="newCustNrc" class="form-input"></div><div class="form-group"><label>Address</label><input type="text" id="newCustAddress" class="form-input"></div><div class="form-group"><label>Password</label><input type="password" id="newCustPassword" class="form-input"></div>`;
-        document.getElementById('modalTitle').innerText = 'Create Customer';
-        document.getElementById('modalActionBtn').style.display = 'block';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            const email = document.getElementById('newCustEmail').value;
-            const pwd = document.getElementById('newCustPassword').value;
-            if(!email || !pwd) { alert('Email and password required'); return; }
-            utils.showLoading('Creating...');
-            try {
-                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-                await db.ref('users/'+cred.user.uid).set({ fullName: document.getElementById('newCustName').value, email, phone: document.getElementById('newCustPhone').value, nrc: document.getElementById('newCustNrc').value, residence: document.getElementById('newCustAddress').value, userType:'customer', status:'active', createdAt: Date.now() });
-                utils.showToast('Success', 'Customer created', 'success');
-                closeModal('genericModal'); loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        openModal('genericModal');
-    };
-
-    document.getElementById('quickCreateAgent').onclick = () => {
-        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Full Name</label><input type="text" id="newAgentName" class="form-input"></div><div class="form-group"><label>Email</label><input type="email" id="newAgentEmail" class="form-input"></div><div class="form-group"><label>Phone</label><input type="text" id="newAgentPhone" class="form-input"></div><div class="form-group"><label>Agent ID</label><input type="text" id="newAgentId" class="form-input"></div><div class="form-group"><label>Password</label><input type="password" id="newAgentPassword" class="form-input"></div>`;
-        document.getElementById('modalTitle').innerText = 'Create Agent';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            const email = document.getElementById('newAgentEmail').value;
-            const pwd = document.getElementById('newAgentPassword').value;
-            if(!email || !pwd) { alert('Email and password required'); return; }
-            utils.showLoading('Creating...');
-            try {
-                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-                await db.ref('users/'+cred.user.uid).set({ fullName: document.getElementById('newAgentName').value, email, phone: document.getElementById('newAgentPhone').value, agentId: document.getElementById('newAgentId').value, userType:'agent', status:'active', createdAt: Date.now() });
-                utils.showToast('Success', 'Agent created', 'success');
-                closeModal('genericModal'); loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        openModal('genericModal');
-    };
-
-    document.getElementById('quickCreateAdmin').onclick = () => {
-        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Full Name</label><input type="text" id="newAdminName" class="form-input"></div><div class="form-group"><label>Email</label><input type="email" id="newAdminEmail" class="form-input"></div><div class="form-group"><label>Password</label><input type="password" id="newAdminPassword" class="form-input"></div><div class="form-group"><label>Confirm</label><input type="password" id="newAdminConfirm" class="form-input"></div>`;
-        document.getElementById('modalTitle').innerText = 'Create Admin';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            const email = document.getElementById('newAdminEmail').value;
-            const pwd = document.getElementById('newAdminPassword').value;
-            const confirm = document.getElementById('newAdminConfirm').value;
-            if(!email || !pwd || pwd!==confirm) { alert('Check fields'); return; }
-            utils.showLoading('Creating...');
-            try {
-                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-                await db.ref('users/'+cred.user.uid).set({ fullName: document.getElementById('newAdminName').value, email, userType:'admin', status:'active', createdAt: Date.now() });
-                utils.showToast('Success', 'Admin created', 'success');
-                closeModal('genericModal'); loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        openModal('genericModal');
-    };
-
-    // ==================== LENDING & DATABASE OPS ====================
-    document.getElementById('executeOverride').onclick = async () => {
-        const loanId = document.getElementById('overrideLoanId').value;
-        const op = document.getElementById('overrideOp').value;
-        const value = document.getElementById('overrideValue').value;
-        if(!loanId) return;
-        utils.showLoading('Executing...');
-        try {
-            if(op === 'Change Status') await db.ref('loans/'+loanId).update({ status: value });
-            else if(op === 'Extend Duration') await db.ref('loans/'+loanId).update({ duration: parseInt(value) });
-            else if(op === 'Adjust Amount') await db.ref('loans/'+loanId).update({ amount: parseFloat(value) });
-            utils.showToast('Done', 'Override executed', 'success'); loadAllData();
-        } catch(e) { utils.showToast('Error', e.message, 'error'); }
-        utils.hideLoading();
-    };
-    document.getElementById('executeWalletOp').onclick = () => utils.showToast('Wallet Op', 'Simulated', 'info');
-    document.getElementById('runQueryBtn').onclick = async () => {
-        const table = document.getElementById('dbTable').value;
-        const filter = document.getElementById('dbQuery').value.trim();
-        utils.showLoading('Querying...');
-        try {
-            const snap = await db.ref(table).once('value');
-            let data = snap.val() || {};
-            if(filter) {
-                const condition = JSON.parse(filter);
-                data = Object.entries(data).filter(([k,v]) => Object.entries(condition).every(([ck,cv]) => v[ck]==cv)).reduce((a,[k,v])=>({...a,[k]:v}),{});
-            }
-            document.getElementById('queryResult').innerHTML = `<pre>${JSON.stringify(data,null,2).substring(0,1000)}</pre>`;
-        } catch(e) { utils.showToast('Error', e.message, 'error'); }
-        utils.hideLoading();
-    };
-    document.getElementById('manualBackupBtn').onclick = () => utils.showToast('Backup', 'Manual backup triggered', 'success');
-
-    // ==================== SETTINGS & SECURITY ====================
-    document.getElementById('saveSystemSettings').onclick = async () => {
-        await db.ref('systemSettings').update({ commissionRate: parseFloat(document.getElementById('commissionRate').value), monthlyInterestRate: parseFloat(document.getElementById('monthlyInterest').value), weeklyInterestRate: parseFloat(document.getElementById('weeklyInterest').value), maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value), minLoanAmount: parseFloat(document.getElementById('minLoanAmount').value), enableCustomerApp: document.getElementById('enableCustomerApp').checked, enableAgentApp: document.getElementById('enableAgentApp').checked });
-        utils.showToast('Saved', 'System settings updated', 'success');
-    };
-    document.getElementById('saveSecurityPolicies').onclick = async () => {
-        await db.ref('systemSettings').update({ mfaRequired: document.getElementById('mfaToggle').checked, ipWhitelistEnabled: document.getElementById('ipWhitelistToggle').checked, sessionTimeout: parseInt(document.getElementById('sessionTimeout').value) });
-        utils.showToast('Saved', 'Security policies updated', 'success');
-    };
-    document.getElementById('sudoResetBtn').onclick = () => {
-        if(confirm('⚠️ WARNING: This will DELETE ALL DATA. Type "RESET" to confirm.')) {
-            if(prompt('Type "RESET" to proceed') === 'RESET') {
-                db.ref().set(null).then(() => { utils.showToast('Wiped', 'Database cleared', 'error'); setTimeout(()=>location.reload(),2000); });
-            }
-        }
-    };
-
-    // ==================== EXPORTS ====================
-    function exportToCSV(data, filename) {
-        const csv = Papa.unparse(data);
-        const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
-        const link = document.createElement('a');
-        link.href = URL.createObjectURL(blob);
-        link.download = filename;
-        link.click();
-    }
-    document.getElementById('exportCustomersBtn').onclick = () => exportToCSV(allCustomers.map(c=>({Name:c.fullName,Email:c.email,Phone:c.phone,Status:c.status})), 'customers.csv');
-    document.getElementById('exportAgentsBtn').onclick = () => exportToCSV(allAgents.map(a=>({Name:a.fullName,Email:a.email,AgentID:a.agentId,Status:a.status})), 'agents.csv');
-    document.getElementById('exportLoansBtn').onclick = () => exportToCSV(allLoans.map(l=>({ID:l.id,Customer:l.customerName,Amount:l.amount,Status:l.status})), 'loans.csv');
-    document.getElementById('exportPaymentsBtn').onclick = () => exportToCSV(allPayments.map(p=>({Customer:p.customerName,Amount:p.amount,Status:p.status,Date:utils.formatDateTime(p.timestamp)})), 'payments.csv');
-    document.getElementById('exportAllZipBtn').onclick = () => utils.showToast('Info', 'ZIP export simulated', 'info');
-
-    // ==================== NAVIGATION ====================
-    function showSection(sectionId) {
-        document.querySelectorAll('.content-section').forEach(s => s.classList.remove('active'));
-        document.getElementById(sectionId+'Section').classList.add('active');
-        document.querySelectorAll('.nav-item-bottom').forEach(n => n.classList.remove('active'));
-        document.querySelector(`.nav-item-bottom[data-section="${sectionId}"]`)?.classList.add('active');
-        if(sectionId === 'audit') renderAuditLogs();
-        if(sectionId === 'reports') initCharts();
-    }
-    window.showSection = showSection;
-
-    document.querySelectorAll('.sidebar-item[data-section]').forEach(item => {
-        item.addEventListener('click', () => { showSection(item.dataset.section); document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); });
+  async function logAudit(action, details) {
+    await db.ref('auditLogs/' + Date.now()).set({
+      timestamp: Date.now(),
+      adminUid: currentUser?.uid,
+      adminEmail: currentUser?.email,
+      action: action,
+      details: JSON.stringify(details)
     });
-    document.querySelectorAll('.nav-item-bottom').forEach(item => {
-        item.addEventListener('click', () => showSection(item.dataset.section));
-    });
-    document.getElementById('menuToggle').onclick = () => { document.getElementById('sidebar').classList.toggle('active'); document.getElementById('sidebarOverlay').classList.toggle('active'); };
-    document.getElementById('sidebarOverlay').onclick = () => { document.getElementById('sidebar').classList.remove('active'); document.getElementById('sidebarOverlay').classList.remove('active'); };
-    document.getElementById('logoutBtn').onclick = () => auth.signOut();
+  }
 
-    // Tab listeners
-    document.querySelectorAll('#loansSection .tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('#loansSection .tab').forEach(t=>t.classList.remove('active'));
-            tab.classList.add('active');
-            currentLoanFilter = tab.dataset.status;
-            renderLoans();
-        });
-    });
-    document.querySelectorAll('#paymentsSection .tab').forEach(tab => {
-        tab.addEventListener('click', () => {
-            document.querySelectorAll('#paymentsSection .tab').forEach(t=>t.classList.remove('active'));
-            tab.classList.add('active');
-            currentPaymentFilter = tab.dataset.status;
-            renderPayments();
-        });
-    });
+  // =========================================================================
+  // 4. LOAD ALL DATA FROM FIREBASE
+  // =========================================================================
+  async function loadAllData() {
+    // Users (customers, agents, admins)
+    const usersSnap = await db.ref('users').once('value');
+    const users = usersSnap.val() || {};
+    allCustomers = Object.entries(users)
+      .filter(([_, u]) => u.userType === 'customer')
+      .map(([id, u]) => ({ id, ...u }));
+    allAgents = Object.entries(users)
+      .filter(([_, u]) => u.userType === 'agent')
+      .map(([id, u]) => ({ id, ...u }));
+    allAdmins = Object.entries(users)
+      .filter(([_, u]) => u.userType === 'admin' || u.userType === 'sudo')
+      .map(([id, u]) => ({ id, ...u }));
 
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-    document.getElementById('confirmRejectBtn').onclick = () => { if(pendingRejectCallback) pendingRejectCallback(document.getElementById('rejectionReason').value); };
+    // Loans
+    const loansSnap = await db.ref('loans').once('value');
+    allLoans = Object.entries(loansSnap.val() || {})
+      .map(([id, l]) => ({ id, ...l }));
 
-    // ==================== AUTH ====================
-    auth.onAuthStateChanged(async (user) => {
-        if(!user) { window.location.href = 'login.html'; return; }
-        const snap = await db.ref('users/'+user.uid).once('value');
-        const userData = snap.val();
-        if(userData?.userType !== 'admin' && userData?.userType !== 'sudo') {
-            utils.showToast('Access Denied', 'Not a super admin', 'error');
-            auth.signOut(); return;
-        }
-        currentUser = user;
-        document.getElementById('sidebarName').innerText = userData?.fullName || 'Sudo Admin';
-        await loadAllData();
-        ['users','loans','payments','commissionHistory','auditLogs','agentApplications','systemSettings'].forEach(r => db.ref(r).on('value', () => loadAllData()));
+    // Payments
+    const paymentsSnap = await db.ref('payments').once('value');
+    allPayments = Object.entries(paymentsSnap.val() || {})
+      .map(([id, p]) => ({ id, ...p }));
+
+    // Commission History
+    const commSnap = await db.ref('commissionHistory').once('value');
+    allCommission = Object.entries(commSnap.val() || {})
+      .map(([id, c]) => ({ id, ...c }));
+
+    // Audit Logs
+    const auditSnap = await db.ref('auditLogs').once('value');
+    allAuditLogs = Object.entries(auditSnap.val() || {})
+      .map(([id, a]) => ({ id, ...a }))
+      .sort((a, b) => b.timestamp - a.timestamp);
+
+    // System Settings
+    const settingsSnap = await db.ref('systemSettings').once('value');
+    systemSettings = settingsSnap.val() || {
+      commissionRate: 15,
+      monthlyInterest: 35,
+      weeklyInterest: 10,
+      maxLoanAmount: 50000,
+      minLoanAmount: 100,
+      enableCustomerApp: true,
+      enableAgentApp: true,
+      customerContactPhone: '+260 123 456 789',
+      customerContactEmail: 'support@trucash.zm',
+      agentContactPhone: '+260 123 456 789',
+      agentContactEmail: 'agents@trucash.zm'
+    };
+
+    // Re-render current active tab
+    renderActiveTab();
+  }
+
+  // =========================================================================
+  // 5. RENDER FUNCTIONS FOR EACH TAB (Dashboard, Customers, Agents, ...)
+  // =========================================================================
+  let activeTab = 'dashboard';
+
+  function renderDashboard() {
+    const activeLoans = allLoans.filter(l => l.status === 'active').length;
+    const pendingLoans = allLoans.filter(l => l.status === 'pending').length;
+    const totalDisbursed = allLoans.reduce((sum, l) => sum + (l.amount || 0), 0);
+    const totalRepaid = allPayments.filter(p => p.status === 'confirmed').reduce((sum, p) => sum + p.amount, 0);
+    const profit = allLoans.reduce((sum, l) => sum + (l.interestPaid || 0), 0) -
+                   allCommission.filter(c => c.status === 'paid').reduce((sum, c) => sum + c.amount, 0);
+
+    return `
+      <div class="stats-grid">
+        <div class="stat-card"><div class="stat-value">${allCustomers.length}</div><div>Total Customers</div></div>
+        <div class="stat-card"><div class="stat-value">${allAgents.length}</div><div>Total Agents</div></div>
+        <div class="stat-card"><div class="stat-value">${activeLoans}</div><div>Active Loans</div></div>
+        <div class="stat-card"><div class="stat-value">${formatCurrency(totalDisbursed)}</div><div>Total Disbursed</div></div>
+        <div class="stat-card"><div class="stat-value">${formatCurrency(totalRepaid)}</div><div>Total Repaid</div></div>
+        <div class="stat-card"><div class="stat-value">${formatCurrency(profit)}</div><div>Net Profit</div></div>
+      </div>
+      <div class="card">
+        <div class="card-header">⚠️ Pending Actions</div>
+        <div>Loan Applications: ${pendingLoans} | Payments Pending: ${allPayments.filter(p => p.status === 'pending').length}</div>
+      </div>
+    `;
+  }
+
+  function renderCustomers() {
+    return `
+      <div class="card">
+        <div class="card-header">
+          <span>Customer Management</span>
+          <button class="btn btn-primary btn-sm" id="createCustomerBtn">+ New Customer</button>
+        </div>
+        <div id="customersTable"></div>
+      </div>
+    `;
+  }
+
+  function renderAgents() {
+    return `
+      <div class="card">
+        <div class="card-header">
+          <span>Agent Management</span>
+          <button class="btn btn-primary btn-sm" id="createAgentBtn">+ New Agent</button>
+        </div>
+        <div id="agentsTable"></div>
+      </div>
+    `;
+  }
+
+  function renderAdmins() {
+    return `
+      <div class="card">
+        <div class="card-header">
+          <span>Administrators</span>
+          <button class="btn btn-primary btn-sm" id="createAdminBtn">+ Create Admin</button>
+        </div>
+        <div id="adminsTable"></div>
+      </div>
+    `;
+  }
+
+  function renderLoans() {
+    return `
+      <div class="card">
+        <div class="card-header">Loan Management</div>
+        <div class="mb-2">
+          <select id="loanFilter" class="btn-sm" style="width: auto;">
+            <option value="all">All Loans</option>
+            <option value="pending">Pending</option>
+            <option value="active">Active</option>
+            <option value="completed">Completed</option>
+            <option value="rejected">Rejected</option>
+          </select>
+        </div>
+        <div id="loansList"></div>
+      </div>
+    `;
+  }
+
+  function renderPayments() {
+    return `
+      <div class="card">
+        <div class="card-header">Payment Verification</div>
+        <div id="paymentsList"></div>
+      </div>
+    `;
+  }
+
+  function renderCommission() {
+    return `
+      <div class="card">
+        <div class="card-header">Commission Overview</div>
+        <div id="commissionSummary"></div>
+        <div class="mt-4"><h3>Commission History</h3><div id="commissionHistory"></div></div>
+      </div>
+    `;
+  }
+
+  function renderLending() {
+    return `
+      <div class="card">
+        <div class="card-header">Lending Overrides & Calculator</div>
+        <div class="grid-2">
+          <div>
+            <div class="label">Loan ID Override (Force Approve)</div>
+            <input type="text" id="overrideLoanId" placeholder="Loan ID">
+            <button id="forceApproveBtn" class="btn btn-primary mt-2">Force Approve</button>
+          </div>
+          <div>
+            <div class="label">Quick Loan Calculator</div>
+            <input type="number" id="calcAmount" placeholder="Loan Amount">
+            <select id="calcDuration" class="mt-2">
+              <option value="1">1 month</option>
+              <option value="3">3 months</option>
+              <option value="6">6 months</option>
+            </select>
+            <button id="calcBtn" class="btn mt-2">Calculate</button>
+            <div id="calcResult" class="mt-2"></div>
+          </div>
+        </div>
+      </div>
+    `;
+  }
+
+  function renderSecurity() {
+    return `
+      <div class="card">
+        <div class="card-header">Security Policies</div>
+        <div class="form-group">
+          <label class="label"><input type="checkbox" id="mfaToggle" ${systemSettings.mfaRequired ? 'checked' : ''}> Require MFA for all admins</label>
+        </div>
+        <div class="form-group">
+          <label class="label"><input type="checkbox" id="ipWhitelistToggle" ${systemSettings.ipWhitelist ? 'checked' : ''}> Enable IP Whitelist (simulated)</label>
+        </div>
+        <button id="saveSecurityBtn" class="btn btn-primary">Save Security Policies</button>
+      </div>
+    `;
+  }
+
+  function renderDatabase() {
+    return `
+      <div class="card">
+        <div class="card-header">Database Query Runner (Simulated)</div>
+        <textarea id="sqlQuery" rows="4" placeholder="SELECT * FROM users WHERE userType = 'customer'"></textarea>
+        <button id="runQueryBtn" class="btn btn-primary mt-2">Execute Query</button>
+        <pre id="queryResult" class="mt-2" style="background: var(--surface2); padding: 12px; border-radius: 12px;"></pre>
+      </div>
+    `;
+  }
+
+  function renderSystem() {
+    return `
+      <div class="card">
+        <div class="card-header">System Configuration</div>
+        <div class="grid-2">
+          <div class="form-group"><label class="label">Commission Rate (%)</label><input id="commRate" value="${systemSettings.commissionRate || 15}"></div>
+          <div class="form-group"><label class="label">Monthly Interest (%)</label><input id="monthlyInt" value="${systemSettings.monthlyInterest || 35}"></div>
+          <div class="form-group"><label class="label">Weekly Interest (%)</label><input id="weeklyInt" value="${systemSettings.weeklyInterest || 10}"></div>
+          <div class="form-group"><label class="label">Max Loan Amount (K)</label><input id="maxLoan" value="${systemSettings.maxLoanAmount || 50000}"></div>
+          <div class="form-group"><label class="label">Min Loan Amount (K)</label><input id="minLoan" value="${systemSettings.minLoanAmount || 100}"></div>
+          <div class="form-group"><label class="label">Enable Customer App</label><input type="checkbox" id="enableCustApp" ${systemSettings.enableCustomerApp !== false ? 'checked' : ''}></div>
+          <div class="form-group"><label class="label">Enable Agent App</label><input type="checkbox" id="enableAgentApp" ${systemSettings.enableAgentApp !== false ? 'checked' : ''}></div>
+        </div>
+        <button id="saveSystemBtn" class="btn btn-primary">Save System Settings</button>
+      </div>
+      <div class="card">
+        <div class="card-header">Contact Details (for Apps)</div>
+        <div class="grid-2">
+          <div class="form-group"><label class="label">Customer Support Phone</label><input id="custPhone" value="${systemSettings.customerContactPhone || ''}"></div>
+          <div class="form-group"><label class="label">Customer Support Email</label><input id="custEmail" value="${systemSettings.customerContactEmail || ''}"></div>
+          <div class="form-group"><label class="label">Agent Support Phone</label><input id="agentPhone" value="${systemSettings.agentContactPhone || ''}"></div>
+          <div class="form-group"><label class="label">Agent Support Email</label><input id="agentEmail" value="${systemSettings.agentContactEmail || ''}"></div>
+        </div>
+        <button id="saveContactBtn" class="btn btn-primary">Save Contact Info</button>
+      </div>
+    `;
+  }
+
+  function renderLogs() {
+    return `
+      <div class="card">
+        <div class="card-header">Audit Trail</div>
+        <div id="auditTable"></div>
+      </div>
+    `;
+  }
+
+  function renderMessages() {
+    return `
+      <div class="card">
+        <div class="card-header">Broadcast & Promotions</div>
+        <div class="grid-2">
+          <div><input id="promoTitle" placeholder="Promotion Title"></div>
+          <div><textarea id="promoMsg" placeholder="Message" rows="3"></textarea></div>
+        </div>
+        <div class="flex-between mt-2">
+          <button id="sendToCustomersBtn" class="btn btn-primary">Send to All Customers</button>
+          <button id="sendToAgentsBtn" class="btn btn-primary">Send to All Agents</button>
+        </div>
+        <div class="mt-4"><h3>Recent Promotions</h3><div id="recentPromos"></div></div>
+      </div>
+    `;
+  }
+
+  // =========================================================================
+  // 6. POPULATE TABLES & LISTS WITH REAL DATA
+  // =========================================================================
+  async function populateCustomersTable() {
+    const container = document.getElementById('customersTable');
+    if (!container) return;
+    let html = `<table><thead><tr><th>Name</th><th>Email</th><th>Phone</th><th>Agent</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+    allCustomers.forEach(c => {
+      const agentName = allAgents.find(a => a.id === c.assignedAgentId)?.fullName || 'None';
+      html += `<tr>
+        <td>${c.fullName || ''}</td>
+        <td>${c.email || ''}</td>
+        <td>${c.phone || ''}</td>
+        <td>${agentName}</td>
+        <td><span class="badge ${c.status === 'active' ? 'active' : 'pending'}">${c.status || 'active'}</span></td>
+        <td>
+          <button class="btn btn-sm" onclick="viewCustomer('${c.id}')">View</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser('${c.id}')">Delete</button>
+        </td>
+      </tr>`;
     });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  }
+
+  async function populateAgentsTable() {
+    const container = document.getElementById('agentsTable');
+    if (!container) return;
+    let html = `<table><thead><tr><th>Name</th><th>Agent ID</th><th>Phone</th><th>Customers</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+    allAgents.forEach(a => {
+      const customerCount = allCustomers.filter(c => c.assignedAgentId === a.id).length;
+      html += `<tr>
+        <td>${a.fullName || ''}</td>
+        <td>${a.agentId || a.id.slice(-6)}</td>
+        <td>${a.phone || ''}</td>
+        <td>${customerCount}</td>
+        <td><span class="badge ${a.status === 'active' ? 'active' : 'pending'}">${a.status || 'active'}</span></td>
+        <td>
+          <button class="btn btn-sm" onclick="viewAgent('${a.id}')">View</button>
+          <button class="btn btn-danger btn-sm" onclick="deleteUser('${a.id}')">Delete</button>
+        </td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  }
+
+  async function populateAdminsTable() {
+    const container = document.getElementById('adminsTable');
+    if (!container) return;
+    let html = `<table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Actions</th></tr></thead><tbody>`;
+    allAdmins.forEach(a => {
+      html += `<tr>
+        <td>${a.fullName || ''}</td>
+        <td>${a.email || ''}</td>
+        <td>${a.userType || 'admin'}</td>
+        <td><button class="btn btn-danger btn-sm" onclick="deleteUser('${a.id}')">Delete</button></td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  }
+
+  async function populateLoansList() {
+    const container = document.getElementById('loansList');
+    if (!container) return;
+    const filter = document.getElementById('loanFilter')?.value || 'all';
+    let filtered = filter === 'all' ? allLoans : allLoans.filter(l => l.status === filter);
+    if (filtered.length === 0) {
+      container.innerHTML = '<div class="text-muted">No loans found.</div>';
+      return;
+    }
+    let html = '';
+    filtered.forEach(loan => {
+      html += `
+        <div class="card" style="margin-bottom:12px;">
+          <div class="flex-between">
+            <div><strong>${loan.customerName || 'Unknown'}</strong> - ${formatCurrency(loan.amount)} (${loan.status})</div>
+            <button class="btn btn-sm" onclick="viewLoan('${loan.id}')">View Details</button>
+          </div>
+          <div class="mt-2">Agent: ${loan.agentName || 'None'} | Created: ${formatDate(loan.createdAt)}</div>
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  async function populatePaymentsList() {
+    const container = document.getElementById('paymentsList');
+    if (!container) return;
+    const pending = allPayments.filter(p => p.status === 'pending');
+    if (pending.length === 0) {
+      container.innerHTML = '<div class="text-muted">No pending payments.</div>';
+      return;
+    }
+    let html = '';
+    pending.forEach(p => {
+      html += `
+        <div class="card" style="margin-bottom:12px;">
+          <div class="flex-between">
+            <div><strong>${p.customerName}</strong> - ${formatCurrency(p.amount)} (${p.method})<br><small>Ref: ${p.reference || 'N/A'}</small></div>
+            <div>
+              <button class="btn btn-sm" onclick="confirmPayment('${p.id}')">✅ Confirm</button>
+              <button class="btn btn-danger btn-sm" onclick="rejectPayment('${p.id}')">❌ Reject</button>
+            </div>
+          </div>
+          ${p.proofUrl ? `<img src="${p.proofUrl}" style="max-width:100px; margin-top:8px; border-radius:8px;" onclick="window.open('${p.proofUrl}')">` : ''}
+        </div>
+      `;
+    });
+    container.innerHTML = html;
+  }
+
+  async function populateCommission() {
+    const summaryDiv = document.getElementById('commissionSummary');
+    const historyDiv = document.getElementById('commissionHistory');
+    if (summaryDiv) {
+      const totalEarned = allCommission.filter(c => c.status === 'paid').reduce((s, c) => s + c.amount, 0);
+      const pendingComm = allCommission.filter(c => c.status === 'pending').reduce((s, c) => s + c.amount, 0);
+      summaryDiv.innerHTML = `
+        <div class="stats-grid">
+          <div class="stat-card"><div class="stat-value">${formatCurrency(totalEarned)}</div><div>Paid Commission</div></div>
+          <div class="stat-card"><div class="stat-value">${formatCurrency(pendingComm)}</div><div>Pending Commission</div></div>
+        </div>
+      `;
+    }
+    if (historyDiv) {
+      let html = `<table><thead><tr><th>Agent</th><th>Customer</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>`;
+      allCommission.slice(0, 30).forEach(c => {
+        const agent = allAgents.find(a => a.id === c.agentId);
+        html += `<tr>
+          <td>${agent?.fullName || 'Unknown'}</td>
+          <td>${c.customerName || ''}</td>
+          <td>${formatCurrency(c.amount)}</td>
+          <td><span class="badge ${c.status === 'paid' ? 'active' : 'pending'}">${c.status}</span></td>
+          <td>${formatDateTime(c.paidAt || c.timestamp)}</td>
+        </tr>`;
+      });
+      html += `</tbody></table>`;
+      historyDiv.innerHTML = html;
+    }
+  }
+
+  async function populateAuditLogs() {
+    const container = document.getElementById('auditTable');
+    if (!container) return;
+    let html = `<table><thead><tr><th>Timestamp</th><th>Admin</th><th>Action</th><th>Details</th></tr></thead><tbody>`;
+    allAuditLogs.slice(0, 100).forEach(log => {
+      html += `<tr>
+        <td>${formatDateTime(log.timestamp)}</td>
+        <td>${log.adminEmail || 'system'}</td>
+        <td>${log.action}</td>
+        <td>${log.details}</td>
+      </tr>`;
+    });
+    html += `</tbody></table>`;
+    container.innerHTML = html;
+  }
+
+  async function populateRecentPromos() {
+    const container = document.getElementById('recentPromos');
+    if (!container) return;
+    const promoSnap = await db.ref('promotions').limitToLast(10).once('value');
+    let html = '';
+    promoSnap.forEach(child => {
+      const p = child.val();
+      html += `<div class="card" style="margin-bottom:8px;"><strong>${p.title || 'Promo'}</strong><br>${p.message}<br><small>Sent to: ${p.recipients} on ${formatDateTime(p.createdAt)}</small></div>`;
+    });
+    container.innerHTML = html || '<div class="text-muted">No promotions yet.</div>';
+  }
+
+  // =========================================================================
+  // 7. ACTIONS: CREATE, EDIT, DELETE, APPROVE, REJECT, ETC.
+  // =========================================================================
+  window.viewCustomer = (id) => {
+    const cust = allCustomers.find(c => c.id === id);
+    if (!cust) return;
+    alert(`Customer: ${cust.fullName}\nEmail: ${cust.email}\nPhone: ${cust.phone}\nNRC: ${cust.nrc}\nAddress: ${cust.residence}\nAgent: ${cust.agentName || 'None'}`);
+  };
+  window.viewAgent = (id) => {
+    const agent = allAgents.find(a => a.id === id);
+    if (!agent) return;
+    alert(`Agent: ${agent.fullName}\nID: ${agent.agentId}\nPhone: ${agent.phone}\nBranch: ${agent.branch || 'Main'}`);
+  };
+  window.viewLoan = (id) => {
+    const loan = allLoans.find(l => l.id === id);
+    if (!loan) return;
+    alert(`Loan ${id}\nCustomer: ${loan.customerName}\nAmount: ${formatCurrency(loan.amount)}\nStatus: ${loan.status}\nCollateral: ${loan.collateral?.category || 'None'}\nSigned Agreement: ${loan.signedAgreementUrl || 'No'}`);
+  };
+  window.deleteUser = async (id) => {
+    if (!confirm('Delete this user permanently?')) return;
+    await db.ref('users/' + id).remove();
+    await logAudit('DELETE_USER', { userId: id });
+    showToast('User deleted');
+    loadAllData();
+  };
+  window.confirmPayment = async (paymentId) => {
+    await db.ref('payments/' + paymentId).update({ status: 'confirmed', verifiedAt: Date.now() });
+    await logAudit('CONFIRM_PAYMENT', { paymentId });
+    showToast('Payment confirmed');
+    loadAllData();
+  };
+  window.rejectPayment = async (paymentId) => {
+    await db.ref('payments/' + paymentId).update({ status: 'rejected' });
+    await logAudit('REJECT_PAYMENT', { paymentId });
+    showToast('Payment rejected');
+    loadAllData();
+  };
+
+  async function createCustomer() {
+    const name = prompt('Full Name');
+    const email = prompt('Email');
+    const phone = prompt('Phone');
+    const pwd = Math.random().toString(36).slice(-8);
+    if (!name || !email) return;
+    const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+    await db.ref('users/' + cred.user.uid).set({
+      fullName: name, email, phone, userType: 'customer', status: 'active', createdAt: Date.now()
+    });
+    await logAudit('CREATE_CUSTOMER', { email });
+    showToast('Customer created');
+    loadAllData();
+  }
+
+  async function createAgent() {
+    const name = prompt('Full Name');
+    const email = prompt('Email');
+    const phone = prompt('Phone');
+    const agentId = 'AG' + Date.now().toString().slice(-6);
+    const pwd = Math.random().toString(36).slice(-8);
+    if (!name || !email) return;
+    const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+    await db.ref('users/' + cred.user.uid).set({
+      fullName: name, email, phone, agentId, userType: 'agent', status: 'active', branch: 'Main', createdAt: Date.now()
+    });
+    await logAudit('CREATE_AGENT', { email });
+    showToast('Agent created');
+    loadAllData();
+  }
+
+  async function createAdmin() {
+    const name = prompt('Admin Name');
+    const email = prompt('Admin Email');
+    const pwd = prompt('Temporary Password');
+    if (!name || !email || !pwd) return;
+    const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+    await db.ref('users/' + cred.user.uid).set({
+      fullName: name, email, userType: 'admin', status: 'active', createdAt: Date.now()
+    });
+    await logAudit('CREATE_ADMIN', { email });
+    showToast('Admin created');
+    loadAllData();
+  }
+
+  async function forceApproveLoan() {
+    const loanId = document.getElementById('overrideLoanId')?.value;
+    if (!loanId) { showToast('Enter Loan ID', 'error'); return; }
+    await db.ref('loans/' + loanId).update({ status: 'approved', approvedAt: Date.now() });
+    await logAudit('FORCE_APPROVE_LOAN', { loanId });
+    showToast(`Loan ${loanId} approved`);
+    loadAllData();
+  }
+
+  async function saveSystemSettings() {
+    const updates = {
+      commissionRate: parseFloat(document.getElementById('commRate')?.value || 15),
+      monthlyInterest: parseFloat(document.getElementById('monthlyInt')?.value || 35),
+      weeklyInterest: parseFloat(document.getElementById('weeklyInt')?.value || 10),
+      maxLoanAmount: parseFloat(document.getElementById('maxLoan')?.value || 50000),
+      minLoanAmount: parseFloat(document.getElementById('minLoan')?.value || 100),
+      enableCustomerApp: document.getElementById('enableCustApp')?.checked || false,
+      enableAgentApp: document.getElementById('enableAgentApp')?.checked || false
+    };
+    await db.ref('systemSettings').update(updates);
+    await logAudit('UPDATE_SYSTEM_SETTINGS', updates);
+    showToast('System settings saved');
+    loadAllData();
+  }
+
+  async function saveContactInfo() {
+    const updates = {
+      customerContactPhone: document.getElementById('custPhone')?.value || '',
+      customerContactEmail: document.getElementById('custEmail')?.value || '',
+      agentContactPhone: document.getElementById('agentPhone')?.value || '',
+      agentContactEmail: document.getElementById('agentEmail')?.value || ''
+    };
+    await db.ref('systemSettings').update(updates);
+    await logAudit('UPDATE_CONTACT_INFO', updates);
+    showToast('Contact info saved');
+    loadAllData();
+  }
+
+  async function saveSecurityPolicies() {
+    const mfa = document.getElementById('mfaToggle')?.checked || false;
+    const ipWhitelist = document.getElementById('ipWhitelistToggle')?.checked || false;
+    await db.ref('systemSettings').update({ mfaRequired: mfa, ipWhitelist: ipWhitelist });
+    await logAudit('UPDATE_SECURITY_POLICIES', { mfa, ipWhitelist });
+    showToast('Security policies updated');
+  }
+
+  async function sendPromotion(recipients) {
+    const title = document.getElementById('promoTitle')?.value;
+    const message = document.getElementById('promoMsg')?.value;
+    if (!message) { showToast('Message cannot be empty', 'error'); return; }
+    await db.ref('promotions/' + Date.now()).set({
+      title: title || 'Special Offer',
+      message: message,
+      recipients: recipients,
+      createdAt: Date.now(),
+      createdBy: currentUser?.uid
+    });
+    await logAudit('SEND_PROMOTION', { recipients, message });
+    showToast(`Promotion sent to ${recipients}`);
+    document.getElementById('promoMsg').value = '';
+    populateRecentPromos();
+  }
+
+  // =========================================================================
+  // 8. RENDER ACTIVE TAB & ATTACH EVENT LISTENERS
+  // =========================================================================
+  function renderActiveTab() {
+    const container = document.getElementById('mainContent');
+    if (activeTab === 'dashboard') container.innerHTML = renderDashboard();
+    else if (activeTab === 'customers') container.innerHTML = renderCustomers();
+    else if (activeTab === 'agents') container.innerHTML = renderAgents();
+    else if (activeTab === 'admins') container.innerHTML = renderAdmins();
+    else if (activeTab === 'loans') container.innerHTML = renderLoans();
+    else if (activeTab === 'payments') container.innerHTML = renderPayments();
+    else if (activeTab === 'commission') container.innerHTML = renderCommission();
+    else if (activeTab === 'lending') container.innerHTML = renderLending();
+    else if (activeTab === 'security') container.innerHTML = renderSecurity();
+    else if (activeTab === 'database') container.innerHTML = renderDatabase();
+    else if (activeTab === 'system') container.innerHTML = renderSystem();
+    else if (activeTab === 'logs') container.innerHTML = renderLogs();
+    else if (activeTab === 'messages') container.innerHTML = renderMessages();
+
+    // After DOM update, populate dynamic tables and attach events
+    setTimeout(() => {
+      if (activeTab === 'customers') populateCustomersTable();
+      if (activeTab === 'agents') populateAgentsTable();
+      if (activeTab === 'admins') populateAdminsTable();
+      if (activeTab === 'loans') { populateLoansList(); document.getElementById('loanFilter')?.addEventListener('change', populateLoansList); }
+      if (activeTab === 'payments') populatePaymentsList();
+      if (activeTab === 'commission') populateCommission();
+      if (activeTab === 'logs') populateAuditLogs();
+      if (activeTab === 'messages') populateRecentPromos();
+
+      // Buttons
+      document.getElementById('createCustomerBtn')?.addEventListener('click', createCustomer);
+      document.getElementById('createAgentBtn')?.addEventListener('click', createAgent);
+      document.getElementById('createAdminBtn')?.addEventListener('click', createAdmin);
+      document.getElementById('forceApproveBtn')?.addEventListener('click', forceApproveLoan);
+      document.getElementById('saveSystemBtn')?.addEventListener('click', saveSystemSettings);
+      document.getElementById('saveContactBtn')?.addEventListener('click', saveContactInfo);
+      document.getElementById('saveSecurityBtn')?.addEventListener('click', saveSecurityPolicies);
+      document.getElementById('sendToCustomersBtn')?.addEventListener('click', () => sendPromotion('all_customers'));
+      document.getElementById('sendToAgentsBtn')?.addEventListener('click', () => sendPromotion('all_agents'));
+      document.getElementById('runQueryBtn')?.addEventListener('click', () => {
+        const q = document.getElementById('sqlQuery')?.value;
+        document.getElementById('queryResult').innerText = `Simulated query: "${q}" would return results from Firebase.`;
+      });
+      document.getElementById('calcBtn')?.addEventListener('click', () => {
+        const amount = parseFloat(document.getElementById('calcAmount')?.value || 0);
+        const duration = parseInt(document.getElementById('calcDuration')?.value || 1);
+        const interest = amount * 0.35 * duration;
+        document.getElementById('calcResult').innerHTML = `Total Interest: ${formatCurrency(interest)}<br>Total Payable: ${formatCurrency(amount + interest)}`;
+      });
+    }, 50);
+  }
+
+  // =========================================================================
+  // 9. NAVIGATION & AUTHENTICATION
+  // =========================================================================
+  document.querySelectorAll('.nav-item').forEach(item => {
+    item.addEventListener('click', () => {
+      document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+      item.classList.add('active');
+      activeTab = item.dataset.tab;
+      document.getElementById('pageTitle').innerText = item.innerText.trim();
+      renderActiveTab();
+    });
+  });
+
+  document.getElementById('logoutBtn').addEventListener('click', () => auth.signOut());
+
+  auth.onAuthStateChanged(async (user) => {
+    if (!user) {
+      window.location.href = 'login.html';
+      return;
+    }
+    const snap = await db.ref('users/' + user.uid).once('value');
+    const userData = snap.val();
+    if (!userData || (userData.userType !== 'sudo' && userData.userType !== 'admin')) {
+      auth.signOut();
+      alert('Unauthorized access');
+      return;
+    }
+    currentUser = user;
+    await loadAllData();
+  });
 </script>
 </body>
 </html>
