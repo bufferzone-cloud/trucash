@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TruCash · Mobile Super Admin</title>
+    <title>TruCash · Super Admin (Full Control)</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
@@ -17,12 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
+        /* ===== DARK GLOWING THEME (original style) ===== */
         :root {
             --bg: #04070f;
             --surface: #080e1a;
@@ -38,7 +33,9 @@
             --warning: #f59e0b;
             --radius: 20px;
             --radius-sm: 13px;
+            --nav-h: 70px;
         }
+        * { margin: 0; padding: 0; box-sizing: border-box; -webkit-tap-highlight-color: transparent; }
         body {
             font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
@@ -49,14 +46,14 @@
         .app-header {
             position: sticky;
             top: 0;
-            background: rgba(4,7,15,0.9);
+            background: rgba(4,7,15,0.95);
             backdrop-filter: blur(20px);
-            padding: 14px 16px;
+            padding: 12px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
             border-bottom: 1px solid var(--border);
-            z-index: 10;
+            z-index: 100;
         }
         .logo {
             display: flex;
@@ -74,6 +71,39 @@
             padding: 6px 12px;
             border-radius: 30px;
             font-size: 12px;
+        }
+        /* Impersonation bar */
+        .impersonate-bar {
+            background: var(--surface2);
+            padding: 10px 16px;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            flex-wrap: wrap;
+            border-bottom: 1px solid var(--border);
+        }
+        .impersonate-bar select {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: 30px;
+            padding: 8px 12px;
+            color: var(--text);
+            flex: 1;
+            font-size: 13px;
+        }
+        .impersonate-bar button {
+            background: var(--accent);
+            border: none;
+            border-radius: 30px;
+            padding: 8px 16px;
+            color: #001f17;
+            font-weight: 600;
+            cursor: pointer;
+        }
+        .impersonate-bar .reset-btn {
+            background: var(--surface);
+            color: var(--text-muted);
+            border: 1px solid var(--border);
         }
         /* Bottom Tab Bar */
         .bottom-tab-bar {
@@ -100,28 +130,16 @@
             transition: 0.2s;
             flex: 1;
         }
-        .tab-item i {
-            font-size: 22px;
-        }
-        .tab-item.active {
-            color: var(--accent);
-        }
-        /* Main content – scrollable */
+        .tab-item i { font-size: 22px; }
+        .tab-item.active { color: var(--accent); }
+        /* Main content */
         .main-content {
             padding: 16px;
             padding-bottom: 80px;
         }
-        .mode-view {
-            display: none;
-        }
-        .mode-view.active {
-            display: block;
-            animation: fadeIn 0.3s;
-        }
-        @keyframes fadeIn {
-            from { opacity: 0; transform: translateY(10px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .mode-view { display: none; }
+        .mode-view.active { display: block; animation: fadeIn 0.3s; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: translateY(0); } }
         /* Cards */
         .card {
             background: var(--surface);
@@ -142,27 +160,19 @@
             padding: 14px;
             text-align: center;
         }
-        .stat-card .label {
-            font-size: 11px;
-            color: var(--text-muted);
-        }
-        .stat-card .value {
-            font-size: 24px;
-            font-weight: 700;
-            color: var(--accent);
-        }
+        .stat-card .label { font-size: 11px; color: var(--text-muted); }
+        .stat-card .value { font-size: 24px; font-weight: 700; color: var(--accent); }
         .detail-card {
             background: var(--surface2);
             padding: 12px;
             border-radius: var(--radius-sm);
             margin-bottom: 8px;
             border: 1px solid var(--border);
+            cursor: pointer;
+            transition: 0.2s;
         }
-        .grid-2 {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 12px;
-        }
+        .detail-card:hover { background: var(--surface3); }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .btn {
             padding: 10px 16px;
             border-radius: 34px;
@@ -175,18 +185,10 @@
             width: 100%;
             margin-bottom: 8px;
         }
-        .btn-primary {
-            background: linear-gradient(135deg, var(--accent), #00b896);
-            color: #001f17;
-        }
-        .btn-danger {
-            background: var(--danger);
-            color: white;
-        }
-        .btn-success {
-            background: var(--success);
-            color: white;
-        }
+        .btn-primary { background: linear-gradient(135deg, var(--accent), #00b896); color: #001f17; }
+        .btn-danger { background: var(--danger); color: white; }
+        .btn-success { background: var(--success); color: white; }
+        .btn-outline { border: 1px solid var(--border2); background: transparent; }
         .search-bar {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -221,6 +223,7 @@
         }
         .status-badge.active { background: rgba(16,185,129,0.2); color: var(--success); }
         .status-badge.pending { background: rgba(245,158,11,0.2); color: var(--warning); }
+        .status-badge.rejected { background: rgba(244,63,94,0.2); color: var(--danger); }
         .credit-score-badge {
             display: inline-block;
             padding: 4px 10px;
@@ -231,6 +234,8 @@
         }
         .credit-score-badge.excellent { background: #10b981; }
         .credit-score-badge.good { background: #4f8eff; }
+        .credit-score-badge.fair { background: #f59e0b; }
+        .credit-score-badge.poor { background: #f43f5e; }
         .tab-bar {
             display: flex;
             gap: 8px;
@@ -246,14 +251,33 @@
             white-space: nowrap;
             cursor: pointer;
         }
-        .tab.active {
-            background: var(--accent);
-            color: #001f17;
+        .tab.active { background: var(--accent); color: #001f17; }
+        /* Images */
+        .profile-img {
+            width: 48px;
+            height: 48px;
+            border-radius: 50%;
+            object-fit: cover;
+            margin-right: 12px;
         }
-        /* Modal (same as before) */
+        .collateral-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 8px;
+            margin-top: 8px;
+        }
+        .collateral-img {
+            width: 100%;
+            aspect-ratio: 1;
+            object-fit: cover;
+            border-radius: 12px;
+            cursor: pointer;
+            border: 1px solid var(--border);
+        }
+        /* Modal */
         .modal-overlay {
             position: fixed; inset: 0;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             backdrop-filter: blur(8px);
             z-index: 300;
             display: none;
@@ -275,6 +299,7 @@
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
+            align-items: center;
         }
         .modal-body { padding: 16px; }
         .modal-footer {
@@ -355,13 +380,30 @@
 <div class="toast-container" id="toastContainer"></div>
 
 <div class="app-header">
-    <div class="logo"><i class="fas fa-shield-alt"></i><span>TruCash</span></div>
+    <div class="logo"><i class="fas fa-crown"></i><span>TruCash Sudo</span></div>
     <div class="admin-name" id="adminNameDisplay">Super Admin</div>
+</div>
+
+<!-- Impersonation Bar -->
+<div class="impersonate-bar">
+    <select id="impersonateSelect">
+        <option value="">-- Select Customer/Agent to Impersonate --</option>
+    </select>
+    <button id="impersonateBtn">View as User</button>
+    <button id="resetImpersonateBtn" class="reset-btn">Reset</button>
+</div>
+
+<!-- Bottom Tab Bar -->
+<div class="bottom-tab-bar">
+    <div class="tab-item active" data-mode="customer"><i class="fas fa-user"></i><span>Customer</span></div>
+    <div class="tab-item" data-mode="agent"><i class="fas fa-user-tie"></i><span>Agent</span></div>
+    <div class="tab-item" data-mode="admin"><i class="fas fa-user-shield"></i><span>Admin</span></div>
+    <div class="tab-item" data-mode="sudo"><i class="fas fa-crown"></i><span>Sudo</span></div>
 </div>
 
 <div class="main-content" id="mainContent">
     <!-- Customer Mode -->
-    <div class="mode-view" id="customerMode">
+    <div class="mode-view active" id="customerMode">
         <div class="stats-grid">
             <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="custActiveLoans">0</div></div>
             <div class="stat-card"><div class="label">Total Borrowed</div><div class="value" id="custTotalBorrowed">K0</div></div>
@@ -370,7 +412,7 @@
         </div>
         <div class="card"><h4>Credit Score</h4><div id="custCreditScore"></div></div>
         <div class="card"><h4>Agent Info</h4><div id="custAgentInfo"></div></div>
-        <div class="card"><div class="grid-2"><button class="btn btn-primary" id="custApplyLoan">Apply Loan</button><button class="btn btn-outline" id="custMakePayment">Pay</button></div></div>
+        <div class="card"><div class="grid-2"><button class="btn btn-primary" id="custApplyLoan">Apply Loan</button><button class="btn btn-outline" id="custMakePayment">Make Payment</button></div></div>
         <div class="card"><h4>My Loans</h4><div id="custLoansList"></div></div>
     </div>
 
@@ -380,7 +422,7 @@
             <div class="stat-card"><div class="label">My Customers</div><div class="value" id="agentCustomersCount">0</div></div>
             <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="agentActiveLoans">0</div></div>
             <div class="stat-card"><div class="label">Total Commission</div><div class="value" id="agentTotalCommission">K0</div></div>
-            <div class="stat-card"><div class="label">Pending</div><div class="value" id="agentPendingCommission">K0</div></div>
+            <div class="stat-card"><div class="label">Pending Commission</div><div class="value" id="agentPendingCommission">K0</div></div>
         </div>
         <div class="card"><h4>My Customers</h4><div id="agentCustomersList"></div></div>
         <div class="card"><h4>Loans (my customers)</h4><div id="agentLoansList"></div></div>
@@ -397,7 +439,7 @@
         </div>
         <div class="card"><h4>Pending Approvals</h4><div id="adminPendingSummary" class="grid-2"></div></div>
         <div class="card"><div class="grid-2"><button class="btn btn-primary" id="adminCreateCustomer">+ Customer</button><button class="btn btn-primary" id="adminCreateAgent">+ Agent</button><button class="btn btn-primary" id="adminCreateAdmin">+ Admin</button></div></div>
-        <div class="tab-bar"><span class="tab active" data-admin-tab="customers">Customers</span><span class="tab" data-admin-tab="agents">Agents</span><span class="tab" data-admin-tab="loans">Loans</span><span class="tab" data-admin-tab="payments">Payments</span></div>
+        <div class="tab-bar"><span class="tab active" data-admin-tab="customers">Customers</span><span class="tab" data-admin-tab="agents">Agents</span><span class="tab" data-admin-tab="loans">Loans</span><span class="tab" data-admin-tab="payments">Payments</span><span class="tab" data-admin-tab="promotions">Promotions</span><span class="tab" data-admin-tab="messages">Messages</span></div>
         <div id="adminTabContent"></div>
     </div>
 
@@ -416,33 +458,24 @@
             <span class="tab" data-sudo-tab="admins">Admins</span>
             <span class="tab" data-sudo-tab="loans">Loans</span>
             <span class="tab" data-sudo-tab="payments">Payments</span>
-            <span class="tab" data-sudo-tab="lending">Lending</span>
+            <span class="tab" data-sudo-tab="lending">Lending Ops</span>
             <span class="tab" data-sudo-tab="database">Database</span>
             <span class="tab" data-sudo-tab="security">Security</span>
             <span class="tab" data-sudo-tab="system">System</span>
             <span class="tab" data-sudo-tab="reports">Reports</span>
+            <span class="tab" data-sudo-tab="promotions">Promotions</span>
+            <span class="tab" data-sudo-tab="messages">Messages</span>
         </div>
         <div id="sudoTabContent"></div>
     </div>
 </div>
 
-<!-- Bottom Tab Bar -->
-<div class="bottom-tab-bar">
-    <div class="tab-item active" data-mode="customer"><i class="fas fa-user"></i><span>Customer</span></div>
-    <div class="tab-item" data-mode="agent"><i class="fas fa-user-tie"></i><span>Agent</span></div>
-    <div class="tab-item" data-mode="admin"><i class="fas fa-user-shield"></i><span>Admin</span></div>
-    <div class="tab-item" data-mode="sudo"><i class="fas fa-crown"></i><span>Sudo</span></div>
-</div>
-
-<!-- Modals (simplified, same as before but kept compact) -->
+<!-- ==================== MODALS ==================== -->
 <div class="modal-overlay" id="genericModal"><div class="modal-container"><div class="modal-header"><h3 id="modalTitle">Title</h3><span class="modal-close" onclick="closeModal('genericModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="genericModalBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('genericModal')">Cancel</button><button class="btn btn-primary" id="modalActionBtn">Save</button></div></div></div>
-<div class="modal-overlay" id="loanDetailsModal"><div class="modal-container"><div class="modal-header"><h3>Loan Details</h3><span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="loanDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button></div></div></div>
-<div class="modal-overlay" id="paymentDetailsModal"><div class="modal-container"><div class="modal-header"><h3>Payment</h3><span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="paymentDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('paymentDetailsModal')">Close</button></div></div></div>
-<div class="modal-overlay" id="rejectionModal"><div class="modal-container"><div class="modal-header"><h3>Rejection Reason</h3><span class="modal-close" onclick="closeModal('rejectionModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><textarea id="rejectionReason" class="form-textarea" rows="4"></textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('rejectionModal')">Cancel</button><button class="btn btn-danger" id="confirmRejectBtn">Confirm</button></div></div></div>
-<div class="modal-overlay" id="paymentModal"><div class="modal-container"><div class="modal-header"><h3>Make Payment</h3><span class="modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><div class="form-group"><label>Amount</label><input type="number" id="payAmount" class="form-input"></div><div class="form-group"><label>Method</label><select id="payMethod" class="form-select"><option>Cash</option><option>Mobile Money</option></select></div><div class="form-group"><label>Proof</label><div class="upload-box" data-type="payment-proof" onclick="openCloudinaryUpload('payment-proof')"><i class="fas fa-camera"></i><span>Upload</span><div class="upload-preview" id="payProofPreview"></div></div><input type="hidden" id="payProofUrl"></div><button id="submitPaymentBtn" class="btn btn-primary">Submit</button></div></div></div>
+<div class="modal-overlay" id="imageModal"><div class="modal-container" style="max-width: 90%;"><div class="modal-header"><h3>Image Preview</h3><span class="modal-close" onclick="closeModal('imageModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><img id="fullImage" src="" style="width:100%; border-radius: 12px;"></div></div></div>
 
 <script>
-    // ==================== FIREBASE ====================
+    // ==================== FIREBASE CONFIG ====================
     const firebaseConfig = {
         apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
         authDomain: "trucash-9fee8.firebaseapp.com",
@@ -457,12 +490,12 @@
     const db = firebase.database();
 
     // ==================== GLOBAL STATE ====================
-    let currentUser = null, currentUserData = null;
-    let allCustomers = [], allAgents = [], allAdmins = [], allLoans = [], allPayments = [], allCommission = [], allAuditLogs = [], allAgentApps = [];
+    let currentUser = null;
+    let currentUserData = null;
+    let impersonatedUserId = null;
+    let allCustomers = [], allAgents = [], allAdmins = [], allLoans = [], allPayments = [], allCommission = [], allAuditLogs = [], allAgentApps = [], allPromotions = [], allMessages = [];
     let systemSettings = {};
     let pendingRejectCallback = null;
-    let cloudinaryWidget = null;
-    let uploadedCollateral = {};
 
     // ==================== UTILITIES ====================
     const utils = {
@@ -499,50 +532,16 @@
             score = Math.round(score * (0.5 + 0.5 * (totalDue ? totalPaid/totalDue : 1)));
             let grade = score>=80?'Excellent':score>=60?'Good':score>=40?'Fair':'Poor';
             return {score, grade};
+        },
+        openImage: (url) => {
+            document.getElementById('fullImage').src = url;
+            openModal('imageModal');
         }
     };
 
-    // ==================== CLOUDINARY ====================
-    function initCloudinaryWidget() {
-        if(cloudinaryWidget) return;
-        cloudinaryWidget = cloudinary.createUploadWidget({
-            cloudName: 'dd3lcymrk', uploadPreset: 'h3eyhc2o', sources: ['local','camera'],
-            multiple: false, maxFileSize: 5242880, clientAllowedFormats: ['jpg','jpeg','png','pdf']
-        }, (error, result) => {
-            if(result && result.event === 'success') {
-                const url = result.info.secure_url;
-                const activeBox = document.querySelector('.upload-box.active');
-                if(activeBox) {
-                    const preview = activeBox.querySelector('.upload-preview');
-                    if(preview) preview.remove();
-                    const img = document.createElement('img');
-                    img.src = url;
-                    img.className = 'upload-preview';
-                    activeBox.appendChild(img);
-                    const type = activeBox.dataset.type;
-                    if(type === 'collateral') {
-                        const idx = activeBox.dataset.idx;
-                        uploadedCollateral[idx] = url;
-                    } else if(type === 'payment-proof') {
-                        document.getElementById('payProofUrl').value = url;
-                    }
-                    activeBox.classList.remove('active');
-                }
-            }
-        });
-    }
-    window.openCloudinaryUpload = (type, idx=null) => {
-        initCloudinaryWidget();
-        document.querySelectorAll('.upload-box').forEach(b => b.classList.remove('active'));
-        let selector = `.upload-box[data-type="${type}"]`;
-        if(idx !== null) selector = `.upload-box[data-type="${type}"][data-idx="${idx}"]`;
-        const box = document.querySelector(selector);
-        if(box) { box.classList.add('active'); cloudinaryWidget.open(); }
-    };
-
-    // ==================== LOAD DATA ====================
+    // ==================== LOAD ALL DATA ====================
     async function loadAllData() {
-        utils.showLoading('Loading...');
+        utils.showLoading('Loading data...');
         try {
             const usersSnap = await db.ref('users').once('value');
             const users = usersSnap.val() || {};
@@ -560,15 +559,21 @@
             allAuditLogs = Object.entries(auditSnap.val() || {}).map(([id,l])=>({...l,id})).sort((a,b)=>b.timestamp - a.timestamp);
             const appsSnap = await db.ref('agentApplications').once('value');
             allAgentApps = Object.entries(appsSnap.val() || {}).map(([id,a])=>({...a,id}));
+            const promoSnap = await db.ref('promotions').once('value');
+            allPromotions = Object.entries(promoSnap.val() || {}).map(([id,p])=>({...p,id})).sort((a,b)=>b.createdAt - a.createdAt);
+            const msgSnap = await db.ref('messages').once('value');
+            allMessages = Object.entries(msgSnap.val() || {}).map(([id,m])=>({...m,id})).sort((a,b)=>b.timestamp - a.timestamp);
             const settingsSnap = await db.ref('systemSettings').once('value');
             systemSettings = settingsSnap.val() || {};
 
-            if(currentUserData) {
-                if(currentUserData.userType === 'customer') {
-                    allLoans = allLoans.filter(l => l.customerId === currentUser.uid);
-                    allPayments = allPayments.filter(p => p.customerId === currentUser.uid);
-                } else if(currentUserData.userType === 'agent') {
-                    const myCustomerIds = allCustomers.filter(c => c.assignedAgentId === currentUser.uid).map(c => c.id);
+            // Filter if impersonating
+            if(impersonatedUserId) {
+                const impersonatedUser = allCustomers.find(c=>c.id===impersonatedUserId) || allAgents.find(a=>a.id===impersonatedUserId);
+                if(impersonatedUser?.userType === 'customer') {
+                    allLoans = allLoans.filter(l => l.customerId === impersonatedUserId);
+                    allPayments = allPayments.filter(p => p.customerId === impersonatedUserId);
+                } else if(impersonatedUser?.userType === 'agent') {
+                    const myCustomerIds = allCustomers.filter(c => c.assignedAgentId === impersonatedUserId).map(c => c.id);
                     allCustomers = allCustomers.filter(c => myCustomerIds.includes(c.id));
                     allLoans = allLoans.filter(l => myCustomerIds.includes(l.customerId));
                     allPayments = allPayments.filter(p => myCustomerIds.includes(p.customerId));
@@ -580,10 +585,11 @@
         } catch(e) { utils.showToast('Error', e.message, 'error'); utils.hideLoading(); }
     }
 
-    // ==================== UPDATE VIEWS ====================
+    // ==================== UPDATE ALL VIEWS ====================
     function updateAllViews() {
         // Customer mode
-        if(currentUserData && currentUserData.userType === 'customer') {
+        const activeCustomer = impersonatedUserId ? allCustomers.find(c=>c.id===impersonatedUserId) : (currentUserData?.userType === 'customer' ? currentUserData : null);
+        if(activeCustomer) {
             const myLoans = allLoans;
             const activeLoans = myLoans.filter(l => l.status === 'active');
             const totalBorrowed = myLoans.reduce((s,l)=>s+(l.amount||0),0);
@@ -594,32 +600,31 @@
             document.getElementById('custTotalBorrowed').innerText = utils.formatCurrency(totalBorrowed);
             document.getElementById('custBalance').innerText = utils.formatCurrency(balance);
             document.getElementById('custPaymentDue').innerText = utils.formatCurrency(nextPayment);
-            const credit = utils.calculateCreditScore(currentUser.uid);
+            const credit = utils.calculateCreditScore(activeCustomer.id);
             document.getElementById('custCreditScore').innerHTML = `<span class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.grade} (${credit.score})</span>`;
-            const agent = allAgents.find(a => a.id === currentUserData.assignedAgentId);
-            document.getElementById('custAgentInfo').innerHTML = agent ? `<strong>${agent.fullName}</strong><br>${agent.phone}` : 'No agent';
-            document.getElementById('custLoansList').innerHTML = myLoans.map(l => `<div class="detail-card" onclick="showLoanDetails('${l.id}')">${utils.formatCurrency(l.amount)} - ${l.status} - ${utils.formatDate(l.createdAt)}</div>`).join('');
+            const agent = allAgents.find(a => a.id === activeCustomer.assignedAgentId);
+            document.getElementById('custAgentInfo').innerHTML = agent ? `<img src="${agent.profilePhoto || ''}" class="profile-img" style="width:40px;height:40px;" onerror="this.style.display='none'"> <strong>${agent.fullName}</strong><br>${agent.phone}` : 'No agent assigned';
+            document.getElementById('custLoansList').innerHTML = myLoans.map(l => `<div class="detail-card" onclick="showLoanDetails('${l.id}')"><strong>${utils.formatCurrency(l.amount)}</strong> - ${l.status} - ${utils.formatDate(l.createdAt)}</div>`).join('');
         }
         // Agent mode
-        if(currentUserData && currentUserData.userType === 'agent') {
+        const activeAgent = impersonatedUserId ? allAgents.find(a=>a.id===impersonatedUserId) : (currentUserData?.userType === 'agent' ? currentUserData : null);
+        if(activeAgent) {
             document.getElementById('agentCustomersCount').innerText = allCustomers.length;
             document.getElementById('agentActiveLoans').innerText = allLoans.filter(l=>l.status==='active').length;
-            const myCommission = allCommission.filter(c => c.agentId === currentUser.uid);
+            const myCommission = allCommission.filter(c => c.agentId === activeAgent.id);
             document.getElementById('agentTotalCommission').innerText = utils.formatCurrency(myCommission.reduce((s,c)=>s+c.amount,0));
             document.getElementById('agentPendingCommission').innerText = utils.formatCurrency(myCommission.filter(c=>c.status==='pending').reduce((s,c)=>s+c.amount,0));
-            document.getElementById('agentCustomersList').innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')">${c.fullName} (${c.phone})</div>`).join('');
+            document.getElementById('agentCustomersList').innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')"><img src="${c.profilePhoto || ''}" class="profile-img" style="width:36px;height:36px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"> ${c.fullName} (${c.phone})</div>`).join('');
             document.getElementById('agentLoansList').innerHTML = allLoans.map(l => `<div class="detail-card" onclick="showLoanDetails('${l.id}')">${l.customerName} - ${utils.formatCurrency(l.amount)} (${l.status})</div>`).join('');
-            document.getElementById('agentCommissionList').innerHTML = myCommission.map(c => `<div class="detail-card">${utils.formatCurrency(c.amount)} - ${c.status}</div>`).join('');
+            document.getElementById('agentCommissionList').innerHTML = myCommission.map(c => `<div class="detail-card">${utils.formatCurrency(c.amount)} - ${c.status} - ${c.loanId}</div>`).join('');
         }
         // Admin mode
-        if(currentUserData && currentUserData.userType === 'admin') {
-            document.getElementById('adminTotalCustomers').innerText = allCustomers.length;
-            document.getElementById('adminTotalAgents').innerText = allAgents.length;
-            document.getElementById('adminActiveLoans').innerText = allLoans.filter(l=>l.status==='active').length;
-            document.getElementById('adminPendingPayments').innerText = allPayments.filter(p=>p.status==='pending').length;
-            document.getElementById('adminPendingSummary').innerHTML = `<div class="stat-card">Loan Apps: ${allLoans.filter(l=>l.status==='pending').length}</div><div class="stat-card">Agent Apps: ${allAgentApps.filter(a=>a.status==='pending').length}</div><div class="stat-card">Payments: ${allPayments.filter(p=>p.status==='pending').length}</div>`;
-            renderAdminTab('customers');
-        }
+        document.getElementById('adminTotalCustomers').innerText = allCustomers.length;
+        document.getElementById('adminTotalAgents').innerText = allAgents.length;
+        document.getElementById('adminActiveLoans').innerText = allLoans.filter(l=>l.status==='active').length;
+        document.getElementById('adminPendingPayments').innerText = allPayments.filter(p=>p.status==='pending').length;
+        document.getElementById('adminPendingSummary').innerHTML = `<div class="stat-card">Loan Apps: ${allLoans.filter(l=>l.status==='pending').length}</div><div class="stat-card">Agent Apps: ${allAgentApps.filter(a=>a.status==='pending').length}</div><div class="stat-card">Payments: ${allPayments.filter(p=>p.status==='pending').length}</div>`;
+        renderAdminTab('customers');
         // Sudo mode
         document.getElementById('sudoStatCustomers').innerText = allCustomers.length;
         document.getElementById('sudoStatAgents').innerText = allAgents.length;
@@ -631,52 +636,74 @@
     function renderAdminTab(tab) {
         const container = document.getElementById('adminTabContent');
         if(tab === 'customers') {
-            container.innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')">${c.fullName}<br><span class="text-muted">${c.email} | ${c.phone}</span> <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
+            container.innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')"><img src="${c.profilePhoto || ''}" class="profile-img" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"> <strong>${c.fullName}</strong><br>${c.email} | ${c.phone} <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
         } else if(tab === 'agents') {
-            container.innerHTML = allAgents.map(a => `<div class="detail-card" onclick="showAgentDetails('${a.id}')">${a.fullName} (${a.agentId})<br>${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
+            container.innerHTML = allAgents.map(a => `<div class="detail-card" onclick="showAgentDetails('${a.id}')"><img src="${a.profilePhoto || ''}" class="profile-img" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"> <strong>${a.fullName}</strong> (${a.agentId})<br>${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
         } else if(tab === 'loans') {
             container.innerHTML = allLoans.map(l => `<div class="loan-card" onclick="showLoanDetails('${l.id}')"><strong>${l.customerName}</strong> - ${utils.formatCurrency(l.amount)} <span class="status-badge ${l.status}">${l.status}</span></div>`).join('');
         } else if(tab === 'payments') {
-            container.innerHTML = allPayments.map(p => `<div class="detail-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} <span class="status-badge ${p.status}">${p.status}</span></div>`).join('');
+            container.innerHTML = allPayments.map(p => `<div class="detail-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} <span class="status-badge ${p.status}">${p.status}</span>${p.proofUrl ? `<br><img src="${p.proofUrl}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;margin-top:6px;" onclick="event.stopPropagation();utils.openImage('${p.proofUrl}')">` : ''}</div>`).join('');
+        } else if(tab === 'promotions') {
+            container.innerHTML = allPromotions.map(p => `<div class="detail-card" onclick="showPromotionDetails('${p.id}')"><strong>${p.title}</strong><br>${p.message.substring(0,50)}...<br><span class="text-muted">${utils.formatDate(p.createdAt)}</span></div>`).join('');
+            container.innerHTML += `<button class="btn btn-primary mt-2" id="adminSendPromoBtn">+ Send Promotion</button>`;
+            document.getElementById('adminSendPromoBtn')?.addEventListener('click', () => openPromotionModal());
+        } else if(tab === 'messages') {
+            container.innerHTML = allMessages.map(m => `<div class="detail-card"><strong>To: ${m.recipientId === 'all_customers' ? 'All Customers' : m.recipientId === 'all_agents' ? 'All Agents' : m.recipientId}</strong><br>${m.message}<br><span class="text-muted">${utils.formatDateTime(m.timestamp)}</span></div>`).join('');
+            container.innerHTML += `<button class="btn btn-primary mt-2" id="adminSendMsgBtn">+ Send Message</button>`;
+            document.getElementById('adminSendMsgBtn')?.addEventListener('click', () => openMessageModal());
         }
     }
 
     function renderSudoTab(tab) {
         const container = document.getElementById('sudoTabContent');
         if(tab === 'overview') {
-            container.innerHTML = `<div class="card"><h4>System Overview</h4><div class="stats-grid"><div class="stat-card">Customers: ${allCustomers.length}</div><div class="stat-card">Agents: ${allAgents.length}</div><div class="stat-card">Admins: ${allAdmins.length}</div><div class="stat-card">Loans: ${allLoans.length}</div></div></div>`;
+            container.innerHTML = `<div class="card"><h4>System Overview</h4><div class="stats-grid"><div class="stat-card">Customers: ${allCustomers.length}</div><div class="stat-card">Agents: ${allAgents.length}</div><div class="stat-card">Admins: ${allAdmins.length}</div><div class="stat-card">Loans: ${allLoans.length}</div><div class="stat-card">Payments: ${allPayments.length}</div><div class="stat-card">Commission Paid: ${utils.formatCurrency(allCommission.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0))}</div></div></div>`;
         } else if(tab === 'customers') {
-            container.innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')">${c.fullName}<br>${c.email} | ${c.phone} <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
+            container.innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')"><img src="${c.profilePhoto || ''}" class="profile-img" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"> <strong>${c.fullName}</strong><br>${c.email} | ${c.phone} <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
         } else if(tab === 'agents') {
-            container.innerHTML = allAgents.map(a => `<div class="detail-card" onclick="showAgentDetails('${a.id}')">${a.fullName} (${a.agentId})<br>${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
-            container.innerHTML += `<div class="card"><h4>Pending Applications</h4>${allAgentApps.filter(a=>a.status==='pending').map(app=>`<div class="detail-card" onclick="showAgentApplication('${app.id}')">${app.fullName} - ${app.phone}</div>`).join('')}</div>`;
+            container.innerHTML = allAgents.map(a => `<div class="detail-card" onclick="showAgentDetails('${a.id}')"><img src="${a.profilePhoto || ''}" class="profile-img" style="width:40px;height:40px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"> <strong>${a.fullName}</strong> (${a.agentId})<br>${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
+            container.innerHTML += `<div class="card"><h4>Pending Agent Applications</h4>${allAgentApps.filter(a=>a.status==='pending').map(app=>`<div class="detail-card" onclick="showAgentApplication('${app.id}')">${app.fullName} - ${app.phone}</div>`).join('')}</div>`;
         } else if(tab === 'admins') {
             container.innerHTML = allAdmins.map(a => `<div class="detail-card">${a.fullName} - ${a.email} <button class="btn btn-danger btn-small" onclick="deleteAdmin('${a.id}')">Delete</button></div>`).join('');
-            container.innerHTML += `<button class="btn btn-primary" id="sudoCreateAdminBtn">+ New Admin</button>`;
+            container.innerHTML += `<button class="btn btn-primary mt-2" id="sudoCreateAdminBtn">+ New Admin</button>`;
             document.getElementById('sudoCreateAdminBtn')?.addEventListener('click', () => openCreateAdminModal());
         } else if(tab === 'loans') {
             container.innerHTML = allLoans.map(l => `<div class="loan-card" onclick="showLoanDetails('${l.id}')"><strong>${l.customerName}</strong> - ${utils.formatCurrency(l.amount)} <span class="status-badge ${l.status}">${l.status}</span></div>`).join('');
         } else if(tab === 'payments') {
-            container.innerHTML = allPayments.map(p => `<div class="detail-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} <span class="status-badge ${p.status}">${p.status}</span></div>`).join('');
+            container.innerHTML = allPayments.map(p => `<div class="detail-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} <span class="status-badge ${p.status}">${p.status}</span>${p.proofUrl ? `<br><img src="${p.proofUrl}" style="width:50px;height:50px;object-fit:cover;border-radius:8px;margin-top:6px;" onclick="event.stopPropagation();utils.openImage('${p.proofUrl}')">` : ''}</div>`).join('');
         } else if(tab === 'lending') {
-            container.innerHTML = `<div class="card"><h4>Loan Override</h4><input type="text" id="overrideLoanId" class="form-input" placeholder="Loan ID"><select id="overrideOp" class="form-select mt-2"><option>Change Status</option><option>Extend Duration</option></select><input type="text" id="overrideValue" class="form-input mt-2" placeholder="New value"><button class="btn btn-primary mt-2" id="executeOverrideBtn">Execute</button></div>
-            <div class="card"><h4>KYC Queue</h4><div id="kycQueue"></div></div>`;
+            container.innerHTML = `<div class="card"><h4>Loan Override</h4><input type="text" id="overrideLoanId" class="form-input" placeholder="Loan ID"><select id="overrideOp" class="form-select mt-2"><option>Change Status</option><option>Extend Duration</option><option>Adjust Amount</option></select><input type="text" id="overrideValue" class="form-input mt-2" placeholder="New value"><button class="btn btn-primary mt-2" id="executeOverrideBtn">Execute</button></div>
+            <div class="card"><h4>Wallet Operations</h4><input type="text" id="walletId" class="form-input" placeholder="Customer ID"><select id="walletOp" class="form-select mt-2"><option>Credit</option><option>Debit</option><option>Freeze</option></select><input type="number" id="walletAmount" class="form-input mt-2" placeholder="Amount"><button class="btn btn-primary mt-2" id="executeWalletBtn">Execute</button></div>
+            <div class="card"><h4>KYC Review Queue</h4><div id="kycQueue"></div></div>`;
             const kycQueue = allCustomers.filter(c => !c.kycVerified).slice(0,5);
-            document.getElementById('kycQueue').innerHTML = kycQueue.map(c => `<div class="detail-card">${c.fullName} <button class="btn btn-small btn-primary" onclick="verifyKyc('${c.id}')">Verify</button></div>`).join('');
+            document.getElementById('kycQueue').innerHTML = kycQueue.map(c => `<div class="detail-card">${c.fullName} <button class="btn btn-small btn-primary" onclick="verifyKyc('${c.id}')">Verify KYC</button></div>`).join('');
         } else if(tab === 'database') {
-            container.innerHTML = `<div class="card"><h4>Query Runner</h4><select id="dbTable" class="form-select"><option>users</option><option>loans</option><option>payments</option></select><textarea id="dbQuery" class="form-textarea mt-2" rows="2" placeholder='{"status":"pending"}'></textarea><button class="btn btn-primary mt-2" id="runQueryBtn">Run</button><div id="queryResult" class="mt-2"></div></div><div class="card"><button class="btn btn-success" id="manualBackupBtn">Manual Backup</button></div>`;
+            container.innerHTML = `<div class="card"><h4>Query Runner</h4><select id="dbTable" class="form-select"><option>users</option><option>loans</option><option>payments</option><option>commissionHistory</option><option>auditLogs</option></select><textarea id="dbQuery" class="form-textarea mt-2" rows="2" placeholder='{"status":"pending"}'></textarea><button class="btn btn-primary mt-2" id="runQueryBtn">Run Query</button><div id="queryResult" class="mt-2"></div></div><div class="card"><button class="btn btn-success" id="manualBackupBtn">Manual Backup</button></div>`;
         } else if(tab === 'security') {
-            container.innerHTML = `<div class="card"><h4>Security Policies</h4><label><input type="checkbox" id="mfaToggle" ${systemSettings.mfaRequired?'checked':''}> MFA Required</label><br><label><input type="checkbox" id="ipWhitelistToggle" ${systemSettings.ipWhitelistEnabled?'checked':''}> IP Whitelisting</label><br><label>Session Timeout: <input type="number" id="sessionTimeout" class="form-input" value="${systemSettings.sessionTimeout||30}"></label><button class="btn btn-primary mt-2" id="saveSecurityBtn">Save</button></div><div class="card"><h4>Audit Logs</h4><div id="auditLogsList"></div></div>`;
-            document.getElementById('auditLogsList').innerHTML = allAuditLogs.slice(0,10).map(l => `<div class="detail-card">${l.action}<br><span class="text-muted">${l.adminEmail} ${utils.formatDateTime(l.timestamp)}</span></div>`).join('');
+            container.innerHTML = `<div class="card"><h4>Security Policies</h4><label><input type="checkbox" id="mfaToggle" ${systemSettings.mfaRequired?'checked':''}> MFA Required</label><br><label><input type="checkbox" id="ipWhitelistToggle" ${systemSettings.ipWhitelistEnabled?'checked':''}> IP Whitelisting</label><br><label>Session Timeout: <input type="number" id="sessionTimeout" class="form-input" value="${systemSettings.sessionTimeout||30}"></label><button class="btn btn-primary mt-2" id="saveSecurityBtn">Save</button></div><div class="card"><h4>Audit Logs</h4><div id="auditLogsList"></div></div><div class="card"><h4>Encryption Status</h4><div>Database: AES-256 <span class="status-badge active">Active</span></div><div>In-Transit: TLS 1.3 <span class="status-badge active">Active</span></div></div>`;
+            document.getElementById('auditLogsList').innerHTML = allAuditLogs.slice(0,15).map(l => `<div class="detail-card">${l.action}<br><span class="text-muted">${l.adminEmail} ${utils.formatDateTime(l.timestamp)}</span><br><small>${l.details}</small></div>`).join('');
         } else if(tab === 'system') {
-            container.innerHTML = `<div class="card"><h4>System Settings</h4><label>Commission (%): <input type="number" id="commissionRate" class="form-input" value="${systemSettings.commissionRate||15}"></label><label>Monthly Interest: <input type="number" id="monthlyInterest" class="form-input" value="${systemSettings.monthlyInterestRate||35}"></label><label>Max Loan: <input type="number" id="maxLoanAmount" class="form-input" value="${systemSettings.maxLoanAmount||50000}"></label><label><input type="checkbox" id="enableCustomerApp" ${systemSettings.enableCustomerApp!==false?'checked':''}> Enable Customer App</label><button class="btn btn-primary mt-2" id="saveSystemBtn">Save</button></div><div class="card"><button class="btn btn-danger" id="sudoResetBtn">⚠️ Wipe Database</button></div>`;
+            container.innerHTML = `<div class="card"><h4>System Settings</h4><label>Commission (%): <input type="number" id="commissionRate" class="form-input" value="${systemSettings.commissionRate||15}"></label><label>Monthly Interest: <input type="number" id="monthlyInterest" class="form-input" value="${systemSettings.monthlyInterestRate||35}"></label><label>Max Loan: <input type="number" id="maxLoanAmount" class="form-input" value="${systemSettings.maxLoanAmount||50000}"></label><label>Min Loan: <input type="number" id="minLoanAmount" class="form-input" value="${systemSettings.minLoanAmount||100}"></label><label><input type="checkbox" id="enableCustomerApp" ${systemSettings.enableCustomerApp!==false?'checked':''}> Enable Customer App</label><label><input type="checkbox" id="enableAgentApp" ${systemSettings.enableAgentApp!==false?'checked':''}> Enable Agent App</label><button class="btn btn-primary mt-2" id="saveSystemBtn">Save</button></div><div class="card"><button class="btn btn-danger" id="sudoResetBtn">⚠️ Wipe Database</button></div>`;
         } else if(tab === 'reports') {
             const totalLent = allLoans.filter(l=>l.status==='active'||l.status==='approved').reduce((s,l)=>s+(l.amount||0),0);
-            container.innerHTML = `<div class="card"><h4>Financial Summary</h4><div class="stats-grid"><div class="stat-card">Lent: ${utils.formatCurrency(totalLent)}</div><div class="stat-card">Repaid: ${utils.formatCurrency(allPayments.filter(p=>p.status==='confirmed').reduce((s,p)=>s+p.amount,0))}</div></div></div><div class="card"><button class="btn btn-outline" id="exportCustomersCsv">Export Customers</button><button class="btn btn-outline mt-2" id="exportLoansCsv">Export Loans</button></div>`;
-            document.getElementById('exportCustomersCsv')?.addEventListener('click', () => exportToCSV(allCustomers.map(c=>({Name:c.fullName,Email:c.email})), 'customers.csv'));
-            document.getElementById('exportLoansCsv')?.addEventListener('click', () => exportToCSV(allLoans.map(l=>({ID:l.id,Customer:l.customerName,Amount:l.amount})), 'loans.csv'));
+            const totalRepaid = allPayments.filter(p=>p.status==='confirmed').reduce((s,p)=>s+p.amount,0);
+            const interest = allLoans.reduce((s,l)=>s+(l.totalInterest||0),0);
+            const commissionPaid = allCommission.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0);
+            container.innerHTML = `<div class="card"><h4>Financial Summary</h4><div class="stats-grid"><div class="stat-card">Lent: ${utils.formatCurrency(totalLent)}</div><div class="stat-card">Repaid: ${utils.formatCurrency(totalRepaid)}</div><div class="stat-card">Interest: ${utils.formatCurrency(interest)}</div><div class="stat-card">Commission Paid: ${utils.formatCurrency(commissionPaid)}</div><div class="stat-card">Net Profit: ${utils.formatCurrency(interest - commissionPaid)}</div></div></div><div class="card"><button class="btn btn-outline" id="exportCustomersCsv">Export Customers</button><button class="btn btn-outline mt-2" id="exportLoansCsv">Export Loans</button><button class="btn btn-outline mt-2" id="exportPaymentsCsv">Export Payments</button></div><canvas id="reportChart" height="150" class="mt-2"></canvas>`;
+            document.getElementById('exportCustomersCsv')?.addEventListener('click', () => exportToCSV(allCustomers.map(c=>({Name:c.fullName,Email:c.email,Phone:c.phone,Status:c.status})), 'customers.csv'));
+            document.getElementById('exportLoansCsv')?.addEventListener('click', () => exportToCSV(allLoans.map(l=>({ID:l.id,Customer:l.customerName,Amount:l.amount,Status:l.status})), 'loans.csv'));
+            document.getElementById('exportPaymentsCsv')?.addEventListener('click', () => exportToCSV(allPayments.map(p=>({Customer:p.customerName,Amount:p.amount,Status:p.status})), 'payments.csv'));
+            new Chart(document.getElementById('reportChart'), { type:'line', data:{ labels:['Jan','Feb','Mar','Apr','May','Jun'], datasets:[{ label:'Loans', data:[12,19,15,22,30,25], borderColor:'#00e5b8' }] } });
+        } else if(tab === 'promotions') {
+            container.innerHTML = allPromotions.map(p => `<div class="detail-card" onclick="showPromotionDetails('${p.id}')"><strong>${p.title}</strong><br>${p.message.substring(0,50)}...<br><span class="text-muted">${utils.formatDate(p.createdAt)}</span></div>`).join('');
+            container.innerHTML += `<button class="btn btn-primary mt-2" id="sudoSendPromoBtn">+ Send Promotion</button>`;
+            document.getElementById('sudoSendPromoBtn')?.addEventListener('click', () => openPromotionModal());
+        } else if(tab === 'messages') {
+            container.innerHTML = allMessages.map(m => `<div class="detail-card"><strong>To: ${m.recipientId === 'all_customers' ? 'All Customers' : m.recipientId === 'all_agents' ? 'All Agents' : m.recipientId}</strong><br>${m.message}<br><span class="text-muted">${utils.formatDateTime(m.timestamp)}</span></div>`).join('');
+            container.innerHTML += `<button class="btn btn-primary mt-2" id="sudoSendMsgBtn">+ Send Message</button>`;
+            document.getElementById('sudoSendMsgBtn')?.addEventListener('click', () => openMessageModal());
         }
-        // Attach dynamic listeners for sudo tabs
+        // Attach dynamic listeners
         document.getElementById('executeOverrideBtn')?.addEventListener('click', async () => {
             const loanId = document.getElementById('overrideLoanId').value;
             const op = document.getElementById('overrideOp').value;
@@ -684,9 +711,11 @@
             if(!loanId) return;
             if(op === 'Change Status') await db.ref('loans/'+loanId).update({status: val});
             else if(op === 'Extend Duration') await db.ref('loans/'+loanId).update({duration: parseInt(val)});
+            else if(op === 'Adjust Amount') await db.ref('loans/'+loanId).update({amount: parseFloat(val)});
             utils.showToast('Done', 'Override executed', 'success');
             loadAllData();
         });
+        document.getElementById('executeWalletBtn')?.addEventListener('click', () => utils.showToast('Wallet', 'Operation simulated', 'info'));
         document.getElementById('runQueryBtn')?.addEventListener('click', async () => {
             const table = document.getElementById('dbTable').value;
             const filter = document.getElementById('dbQuery').value.trim();
@@ -704,7 +733,7 @@
             utils.showToast('Saved', 'Security policies saved', 'success');
         });
         document.getElementById('saveSystemBtn')?.addEventListener('click', async () => {
-            await db.ref('systemSettings').update({ commissionRate: parseFloat(document.getElementById('commissionRate').value), monthlyInterestRate: parseFloat(document.getElementById('monthlyInterest').value), maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value), enableCustomerApp: document.getElementById('enableCustomerApp').checked });
+            await db.ref('systemSettings').update({ commissionRate: parseFloat(document.getElementById('commissionRate').value), monthlyInterestRate: parseFloat(document.getElementById('monthlyInterest').value), maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value), minLoanAmount: parseFloat(document.getElementById('minLoanAmount').value), enableCustomerApp: document.getElementById('enableCustomerApp').checked, enableAgentApp: document.getElementById('enableAgentApp').checked });
             utils.showToast('Saved', 'System settings saved', 'success');
         });
         document.getElementById('sudoResetBtn')?.addEventListener('click', () => {
@@ -723,15 +752,27 @@
         link.click();
     }
 
-    // ==================== MODAL ACTIONS ====================
+    // ==================== DETAIL POPUPS ====================
     window.showCustomerDetails = async (id) => {
         const c = allCustomers.find(c=>c.id===id);
         if(!c) return;
-        const html = `<div class="form-group"><label>Name</label><input id="editFullName" class="form-input" value="${c.fullName||''}"></div><div class="form-group"><label>Email</label><input id="editEmail" class="form-input" value="${c.email||''}"></div><div class="form-group"><label>Phone</label><input id="editPhone" class="form-input" value="${c.phone||''}"></div><div class="form-group"><label>Status</label><select id="editStatus" class="form-select"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="banned" ${c.status==='banned'?'selected':''}>Banned</option></select></div>`;
+        const credit = utils.calculateCreditScore(id);
+        const loans = allLoans.filter(l=>l.customerId===id);
+        const html = `<div><img src="${c.profilePhoto || ''}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;margin-bottom:12px;" onerror="this.style.display='none'"></div>
+            <div class="form-group"><label>Name</label><input id="editFullName" class="form-input" value="${c.fullName||''}"></div>
+            <div class="form-group"><label>Email</label><input id="editEmail" class="form-input" value="${c.email||''}"></div>
+            <div class="form-group"><label>Phone</label><input id="editPhone" class="form-input" value="${c.phone||''}"></div>
+            <div class="form-group"><label>NRC</label><input id="editNrc" class="form-input" value="${c.nrc||''}"></div>
+            <div class="form-group"><label>Address</label><input id="editAddress" class="form-input" value="${c.residence||''}"></div>
+            <div class="form-group"><label>Status</label><select id="editStatus" class="form-select"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="banned" ${c.status==='banned'?'selected':''}>Banned</option></select></div>
+            <div class="detail-card">Credit Score: <span class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.grade} (${credit.score})</span></div>
+            <div class="detail-card">Total Loans: ${loans.length} | Active: ${loans.filter(l=>l.status==='active').length}</div>
+            ${c.nrcFront ? `<div><strong>NRC Front:</strong> <img src="${c.nrcFront}" style="width:80px;border-radius:8px;cursor:pointer;" onclick="utils.openImage('${c.nrcFront}')"></div>` : ''}
+            ${c.nrcBack ? `<div><strong>NRC Back:</strong> <img src="${c.nrcBack}" style="width:80px;border-radius:8px;cursor:pointer;" onclick="utils.openImage('${c.nrcBack}')"></div>` : ''}`;
         document.getElementById('genericModalBody').innerHTML = html;
-        document.getElementById('modalTitle').innerText = 'Edit Customer';
+        document.getElementById('modalTitle').innerText = 'Customer Details';
         document.getElementById('modalActionBtn').onclick = async () => {
-            await db.ref('users/'+id).update({ fullName: document.getElementById('editFullName').value, email: document.getElementById('editEmail').value, phone: document.getElementById('editPhone').value, status: document.getElementById('editStatus').value });
+            await db.ref('users/'+id).update({ fullName: document.getElementById('editFullName').value, email: document.getElementById('editEmail').value, phone: document.getElementById('editPhone').value, nrc: document.getElementById('editNrc').value, residence: document.getElementById('editAddress').value, status: document.getElementById('editStatus').value });
             utils.showToast('Updated', 'Customer updated', 'success');
             closeModal('genericModal'); loadAllData();
         };
@@ -740,11 +781,20 @@
     window.showAgentDetails = async (id) => {
         const a = allAgents.find(a=>a.id===id);
         if(!a) return;
-        const html = `<div class="form-group"><label>Name</label><input id="editAgentName" class="form-input" value="${a.fullName||''}"></div><div class="form-group"><label>Email</label><input id="editAgentEmail" class="form-input" value="${a.email||''}"></div><div class="form-group"><label>Phone</label><input id="editAgentPhone" class="form-input" value="${a.phone||''}"></div><div class="form-group"><label>Status</label><select id="editAgentStatus" class="form-select"><option value="active" ${a.status==='active'?'selected':''}>Active</option><option value="banned" ${a.status==='banned'?'selected':''}>Banned</option></select></div>`;
+        const customers = allCustomers.filter(c=>c.assignedAgentId===id);
+        const commissions = allCommission.filter(c=>c.agentId===id);
+        const totalComm = commissions.reduce((s,c)=>s+c.amount,0);
+        const html = `<div><img src="${a.profilePhoto || ''}" style="width:80px;height:80px;border-radius:50%;object-fit:cover;" onerror="this.style.display='none'"></div>
+            <div class="form-group"><label>Name</label><input id="editAgentName" class="form-input" value="${a.fullName||''}"></div>
+            <div class="form-group"><label>Email</label><input id="editAgentEmail" class="form-input" value="${a.email||''}"></div>
+            <div class="form-group"><label>Phone</label><input id="editAgentPhone" class="form-input" value="${a.phone||''}"></div>
+            <div class="form-group"><label>Agent ID</label><input id="editAgentId" class="form-input" value="${a.agentId||''}"></div>
+            <div class="form-group"><label>Status</label><select id="editAgentStatus" class="form-select"><option value="active" ${a.status==='active'?'selected':''}>Active</option><option value="banned" ${a.status==='banned'?'selected':''}>Banned</option></select></div>
+            <div class="detail-card">Customers: ${customers.length} | Total Commission: ${utils.formatCurrency(totalComm)} | Paid: ${utils.formatCurrency(commissions.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0))}</div>`;
         document.getElementById('genericModalBody').innerHTML = html;
-        document.getElementById('modalTitle').innerText = 'Edit Agent';
+        document.getElementById('modalTitle').innerText = 'Agent Details';
         document.getElementById('modalActionBtn').onclick = async () => {
-            await db.ref('users/'+id).update({ fullName: document.getElementById('editAgentName').value, email: document.getElementById('editAgentEmail').value, phone: document.getElementById('editAgentPhone').value, status: document.getElementById('editAgentStatus').value });
+            await db.ref('users/'+id).update({ fullName: document.getElementById('editAgentName').value, email: document.getElementById('editAgentEmail').value, phone: document.getElementById('editAgentPhone').value, agentId: document.getElementById('editAgentId').value, status: document.getElementById('editAgentStatus').value });
             utils.showToast('Updated', 'Agent updated', 'success');
             closeModal('genericModal'); loadAllData();
         };
@@ -755,33 +805,90 @@
         if(!loan) return;
         let scheduleHtml = '';
         if(loan.repaymentSchedule) {
-            scheduleHtml = '<table style="width:100%"><tr><th>#</th><th>Due</th><th>Amount</th><th>Paid</th></tr>';
+            scheduleHtml = '<table style="width:100%"><tr><th>#</th><th>Due</th><th>Amount</th><th>Paid</th><th>Status</th></tr>';
             loan.repaymentSchedule.forEach(inst => {
-                scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.totalDue)}</td><td>${utils.formatCurrency(inst.paidAmount||0)}</td></tr>`;
+                scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.totalDue)}</td><td>${utils.formatCurrency(inst.paidAmount||0)}</td><td>${inst.status}</td></tr>`;
             });
             scheduleHtml += '</table>';
         }
+        const collateralHtml = loan.collateral?.images ? `<div class="collateral-grid">${loan.collateral.images.map(img => `<img src="${img}" class="collateral-img" onclick="utils.openImage('${img}')">`).join('')}</div>` : '<div>No collateral images</div>';
         const approveBtn = loan.status === 'pending' ? `<button class="btn btn-success" onclick="approveLoan('${loan.id}')">Approve</button>` : '';
         const rejectBtn = loan.status === 'pending' ? `<button class="btn btn-danger" onclick="openRejectModal('${loan.id}')">Reject</button>` : '';
-        document.getElementById('loanDetailsBody').innerHTML = `<div><strong>${loan.customerName}</strong><br>Amount: ${utils.formatCurrency(loan.amount)}<br>Status: ${loan.status}</div>${scheduleHtml}<div class="grid-2 mt-2">${approveBtn} ${rejectBtn}</div>`;
-        openModal('loanDetailsModal');
+        const html = `<div><strong>Customer:</strong> ${loan.customerName}</div><div><strong>Amount:</strong> ${utils.formatCurrency(loan.amount)}</div><div><strong>Status:</strong> <span class="status-badge ${loan.status}">${loan.status}</span></div><div><strong>Duration:</strong> ${loan.duration} ${loan.durationUnit||'months'}</div><div><strong>Total Paid:</strong> ${utils.formatCurrency(loan.totalPaid||0)}</div><div><strong>Remaining:</strong> ${utils.formatCurrency((loan.totalPayable||loan.amount)-(loan.totalPaid||0))}</div><div><strong>Collateral:</strong> ${loan.collateral?.category||'N/A'} - ${utils.formatCurrency(loan.collateral?.value||0)}</div><div><strong>Collateral Images:</strong></div>${collateralHtml}<hr><h4>Repayment Schedule</h4>${scheduleHtml}<hr><div class="grid-2">${approveBtn} ${rejectBtn}</div>${loan.signedAgreementUrl ? `<button class="btn btn-outline mt-2" onclick="window.open('${loan.signedAgreementUrl}','_blank')">View Signed Agreement</button>` : ''}`;
+        document.getElementById('genericModalBody').innerHTML = html;
+        document.getElementById('modalTitle').innerText = 'Loan Details';
+        document.getElementById('modalActionBtn').style.display = 'none';
+        openModal('genericModal');
     };
     window.showPaymentDetails = async (id) => {
         const payment = allPayments.find(p=>p.id===id);
         if(!payment) return;
         const confirmBtn = payment.status === 'pending' ? `<button class="btn btn-success" onclick="confirmPayment('${payment.id}')">Confirm</button>` : '';
         const rejectBtn = payment.status === 'pending' ? `<button class="btn btn-danger" onclick="rejectPayment('${payment.id}')">Reject</button>` : '';
-        document.getElementById('paymentDetailsBody').innerHTML = `<div><strong>${payment.customerName}</strong><br>Amount: ${utils.formatCurrency(payment.amount)}<br>Method: ${payment.method}<br>Status: ${payment.status}</div><div class="grid-2 mt-2">${confirmBtn} ${rejectBtn}</div>`;
-        openModal('paymentDetailsModal');
+        const html = `<div><strong>Customer:</strong> ${payment.customerName}</div><div><strong>Amount:</strong> ${utils.formatCurrency(payment.amount)}</div><div><strong>Method:</strong> ${payment.method}</div><div><strong>Status:</strong> <span class="status-badge ${payment.status}">${payment.status}</span></div><div><strong>Date:</strong> ${utils.formatDateTime(payment.timestamp)}</div>${payment.proofUrl ? `<div><strong>Proof:</strong> <img src="${payment.proofUrl}" style="max-width:100%;border-radius:12px;cursor:pointer;" onclick="utils.openImage('${payment.proofUrl}')"></div>` : ''}<hr>${confirmBtn} ${rejectBtn}`;
+        document.getElementById('genericModalBody').innerHTML = html;
+        document.getElementById('modalTitle').innerText = 'Payment Details';
+        document.getElementById('modalActionBtn').style.display = 'none';
+        openModal('genericModal');
     };
     window.showAgentApplication = async (id) => {
         const app = allAgentApps.find(a=>a.id===id);
         if(!app) return;
-        const html = `<div><strong>${app.fullName}</strong><br>Phone: ${app.phone}<br>NRC: ${app.nrc}</div><div class="grid-2 mt-2"><button class="btn btn-success" onclick="approveAgentApp('${id}')">Approve</button><button class="btn btn-danger" onclick="rejectAgentApp('${id}')">Reject</button></div>`;
+        const html = `<div><strong>Name:</strong> ${app.fullName}</div><div><strong>Phone:</strong> ${app.phone}</div><div><strong>NRC:</strong> ${app.nrc}</div><div><strong>Residence:</strong> ${app.residence}</div><div><strong>Submitted:</strong> ${utils.formatDateTime(app.submittedAt)}</div><div><strong>Documents:</strong> ${app.nrcFront ? `<img src="${app.nrcFront}" style="width:60px;border-radius:8px;cursor:pointer;" onclick="utils.openImage('${app.nrcFront}')">` : ''} ${app.nrcBack ? `<img src="${app.nrcBack}" style="width:60px;border-radius:8px;cursor:pointer;" onclick="utils.openImage('${app.nrcBack}')">` : ''} ${app.profilePhoto ? `<img src="${app.profilePhoto}" style="width:60px;border-radius:50%;cursor:pointer;" onclick="utils.openImage('${app.profilePhoto}')">` : ''}</div><hr><button class="btn btn-success" onclick="approveAgentApp('${id}')">Approve & Create Agent</button><button class="btn btn-danger" onclick="rejectAgentApp('${id}')">Reject</button>`;
         document.getElementById('genericModalBody').innerHTML = html;
         document.getElementById('modalTitle').innerText = 'Agent Application';
         document.getElementById('modalActionBtn').style.display = 'none';
         openModal('genericModal');
+    };
+    window.showPromotionDetails = async (id) => {
+        const promo = allPromotions.find(p=>p.id===id);
+        if(!promo) return;
+        const html = `<div><strong>Title:</strong> ${promo.title}</div><div><strong>Message:</strong> ${promo.message}</div><div><strong>Recipients:</strong> ${promo.recipients}</div><div><strong>Created:</strong> ${utils.formatDateTime(promo.createdAt)}</div>${promo.imageUrl ? `<img src="${promo.imageUrl}" style="max-width:100%;border-radius:12px;margin-top:8px;" onclick="utils.openImage('${promo.imageUrl}')">` : ''}<hr><button class="btn btn-primary" onclick="resendPromotion('${id}')">Resend Promotion</button>`;
+        document.getElementById('genericModalBody').innerHTML = html;
+        document.getElementById('modalTitle').innerText = 'Promotion Details';
+        document.getElementById('modalActionBtn').style.display = 'none';
+        openModal('genericModal');
+    };
+    window.resendPromotion = async (id) => {
+        const promo = allPromotions.find(p=>p.id===id);
+        if(!promo) return;
+        await db.ref('promotions/'+utils.generateId('PROMO')).set({ ...promo, createdAt: Date.now() });
+        utils.showToast('Resent', 'Promotion resent', 'success');
+        loadAllData();
+    };
+
+    // ==================== ACTIONS ====================
+    window.approveLoan = async (loanId) => {
+        await db.ref('loans/'+loanId).update({ status:'approved', approvedAt: Date.now() });
+        utils.showToast('Approved', 'Loan approved', 'success');
+        closeModal('genericModal'); loadAllData();
+    };
+    window.openRejectModal = (loanId) => {
+        pendingRejectCallback = async (reason) => {
+            await db.ref('loans/'+loanId).update({ status:'rejected', rejectionReason: reason, rejectedAt: Date.now() });
+            utils.showToast('Rejected', 'Loan rejected', 'info');
+            closeModal('rejectionModal'); closeModal('genericModal'); loadAllData();
+        };
+        document.getElementById('rejectionReason').value = '';
+        openModal('rejectionModal');
+    };
+    window.confirmPayment = async (paymentId) => {
+        await db.ref('payments/'+paymentId).update({ status:'confirmed', verifiedAt: Date.now() });
+        utils.showToast('Confirmed', 'Payment confirmed', 'success');
+        closeModal('genericModal'); loadAllData();
+    };
+    window.rejectPayment = async (paymentId) => {
+        await db.ref('payments/'+paymentId).update({ status:'rejected' });
+        utils.showToast('Rejected', 'Payment rejected', 'info');
+        closeModal('genericModal'); loadAllData();
+    };
+    window.verifyKyc = async (customerId) => {
+        await db.ref('users/'+customerId).update({ kycVerified: true });
+        utils.showToast('KYC', 'Verified', 'success');
+        loadAllData();
+    };
+    window.deleteAdmin = async (id) => {
+        if(confirm('Delete admin?')) { await db.ref('users/'+id).remove(); loadAllData(); }
     };
     window.approveAgentApp = async (appId) => {
         const app = allAgentApps.find(a=>a.id===appId);
@@ -806,38 +913,6 @@
         utils.showToast('Rejected', 'Application rejected', 'info');
         closeModal('genericModal'); loadAllData();
     };
-    window.approveLoan = async (loanId) => {
-        await db.ref('loans/'+loanId).update({ status:'approved' });
-        utils.showToast('Approved', 'Loan approved', 'success');
-        closeModal('loanDetailsModal'); loadAllData();
-    };
-    window.openRejectModal = (loanId) => {
-        pendingRejectCallback = async (reason) => {
-            await db.ref('loans/'+loanId).update({ status:'rejected', rejectionReason: reason });
-            utils.showToast('Rejected', 'Loan rejected', 'info');
-            closeModal('rejectionModal'); closeModal('loanDetailsModal'); loadAllData();
-        };
-        document.getElementById('rejectionReason').value = '';
-        openModal('rejectionModal');
-    };
-    window.confirmPayment = async (paymentId) => {
-        await db.ref('payments/'+paymentId).update({ status:'confirmed' });
-        utils.showToast('Confirmed', 'Payment confirmed', 'success');
-        closeModal('paymentDetailsModal'); loadAllData();
-    };
-    window.rejectPayment = async (paymentId) => {
-        await db.ref('payments/'+paymentId).update({ status:'rejected' });
-        utils.showToast('Rejected', 'Payment rejected', 'info');
-        closeModal('paymentDetailsModal'); loadAllData();
-    };
-    window.verifyKyc = async (customerId) => {
-        await db.ref('users/'+customerId).update({ kycVerified: true });
-        utils.showToast('KYC', 'Verified', 'success');
-        loadAllData();
-    };
-    window.deleteAdmin = async (id) => {
-        if(confirm('Delete admin?')) { await db.ref('users/'+id).remove(); loadAllData(); }
-    };
 
     // ==================== CREATE MODALS ====================
     function openCreateAdminModal() {
@@ -856,6 +931,53 @@
                 closeModal('genericModal'); loadAllData();
             } catch(e) { utils.showToast('Error', e.message, 'error'); }
             utils.hideLoading();
+        };
+        openModal('genericModal');
+    }
+    function openPromotionModal() {
+        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Title</label><input id="promoTitle" class="form-input"></div><div class="form-group"><label>Message</label><textarea id="promoMessage" class="form-textarea" rows="3"></textarea></div><div class="form-group"><label>Recipients</label><select id="promoRecipients" class="form-select"><option value="all_customers">All Customers</option><option value="all_agents">All Agents</option><option value="both">Both</option></select></div><div class="form-group"><label>Image URL (optional)</label><input id="promoImageUrl" class="form-input" placeholder="https://..."></div>`;
+        document.getElementById('modalTitle').innerText = 'Send Promotion';
+        document.getElementById('modalActionBtn').innerText = 'Send';
+        document.getElementById('modalActionBtn').onclick = async () => {
+            const title = document.getElementById('promoTitle').value;
+            const message = document.getElementById('promoMessage').value;
+            const recipients = document.getElementById('promoRecipients').value;
+            const imageUrl = document.getElementById('promoImageUrl').value;
+            if(!title || !message) { alert('Title and message required'); return; }
+            await db.ref('promotions/'+utils.generateId('PROMO')).set({ title, message, recipients, imageUrl, createdAt: Date.now(), active: true });
+            utils.showToast('Sent', 'Promotion sent', 'success');
+            closeModal('genericModal'); loadAllData();
+        };
+        openModal('genericModal');
+    }
+    function openMessageModal() {
+        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Recipient Type</label><select id="msgRecipientType" class="form-select"><option value="all_customers">All Customers</option><option value="all_agents">All Agents</option><option value="specific_customer">Specific Customer</option><option value="specific_agent">Specific Agent</option></select></div><div id="specificSelect" style="display:none;"><div class="form-group"><label>Select User</label><select id="specificUserId" class="form-select"></select></div></div><div class="form-group"><label>Message</label><textarea id="msgText" class="form-textarea" rows="3"></textarea></div>`;
+        document.getElementById('modalTitle').innerText = 'Send Message';
+        document.getElementById('modalActionBtn').innerText = 'Send';
+        document.getElementById('msgRecipientType').addEventListener('change', (e) => {
+            const specificDiv = document.getElementById('specificSelect');
+            const select = document.getElementById('specificUserId');
+            if(e.target.value === 'specific_customer') {
+                specificDiv.style.display = 'block';
+                select.innerHTML = allCustomers.map(c => `<option value="${c.id}">${c.fullName} (Customer)</option>`).join('');
+            } else if(e.target.value === 'specific_agent') {
+                specificDiv.style.display = 'block';
+                select.innerHTML = allAgents.map(a => `<option value="${a.id}">${a.fullName} (Agent)</option>`).join('');
+            } else {
+                specificDiv.style.display = 'none';
+            }
+        });
+        document.getElementById('modalActionBtn').onclick = async () => {
+            const recipientType = document.getElementById('msgRecipientType').value;
+            const message = document.getElementById('msgText').value;
+            let recipientId = recipientType;
+            if(recipientType === 'specific_customer' || recipientType === 'specific_agent') {
+                recipientId = document.getElementById('specificUserId').value;
+            }
+            if(!message) { alert('Message required'); return; }
+            await db.ref('messages/'+utils.generateId('MSG')).set({ recipientId, message, timestamp: Date.now(), read: false });
+            utils.showToast('Sent', 'Message sent', 'success');
+            closeModal('genericModal'); loadAllData();
         };
         openModal('genericModal');
     }
@@ -897,88 +1019,24 @@
     });
     document.getElementById('adminCreateAdmin')?.addEventListener('click', () => openCreateAdminModal());
 
-    // ==================== CUSTOMER LOAN APPLICATION ====================
-    document.getElementById('custApplyLoan')?.addEventListener('click', () => {
-        uploadedCollateral = {};
-        const uploadsDiv = document.createElement('div');
-        uploadsDiv.className = 'grid-2';
-        for(let i=0; i<4; i++) {
-            const box = document.createElement('div');
-            box.className = 'upload-box';
-            box.setAttribute('data-type', 'collateral');
-            box.setAttribute('data-idx', i);
-            box.innerHTML = `<i class="fas fa-camera"></i><span>Image ${i+1}</span><div class="upload-preview"></div>`;
-            box.onclick = () => openCloudinaryUpload('collateral', i);
-            uploadsDiv.appendChild(box);
+    // ==================== IMPERSONATION ====================
+    async function loadImpersonateList() {
+        const select = document.getElementById('impersonateSelect');
+        const allUsers = [...allCustomers, ...allAgents];
+        select.innerHTML = '<option value="">-- Select Customer/Agent --</option>' + allUsers.map(u => `<option value="${u.id}" data-type="${u.userType}">${u.fullName} (${u.userType})</option>`).join('');
+    }
+    document.getElementById('impersonateBtn').addEventListener('click', () => {
+        const selected = document.getElementById('impersonateSelect').value;
+        if(selected) {
+            impersonatedUserId = selected;
+            utils.showToast('Impersonating', `Viewing as ${selected}`, 'info');
+            loadAllData();
         }
-        const modalBody = document.getElementById('genericModalBody');
-        modalBody.innerHTML = `<div class="form-group"><label>Amount (K)</label><input id="loanAmount" class="form-input" type="number"></div><div class="form-group"><label>Duration (months)</label><select id="loanDuration" class="form-select"><option>3</option><option>6</option><option>12</option></select></div><div class="form-group"><label>Purpose</label><textarea id="loanPurpose" class="form-textarea"></textarea></div><div><label>Collateral Images (min 3)</label>${uploadsDiv.outerHTML}</div>`;
-        document.getElementById('modalTitle').innerText = 'Apply for Loan';
-        document.getElementById('modalActionBtn').style.display = 'none';
-        const submitBtn = document.createElement('button');
-        submitBtn.className = 'btn btn-primary mt-2';
-        submitBtn.innerText = 'Submit';
-        submitBtn.onclick = async () => {
-            const amount = parseFloat(document.getElementById('loanAmount').value);
-            const duration = parseInt(document.getElementById('loanDuration').value);
-            const purpose = document.getElementById('loanPurpose').value;
-            const collateralImages = Object.values(uploadedCollateral);
-            if(!amount || amount<100 || collateralImages.length<3) { alert('Amount min 100, upload at least 3 collateral images'); return; }
-            utils.showLoading('Submitting...');
-            try {
-                const rate = (systemSettings.monthlyInterestRate || 35) / 100;
-                const totalInterest = amount * rate * duration;
-                const totalPayable = amount + totalInterest;
-                const periodicPayment = totalPayable / duration;
-                let repaymentSchedule = [];
-                let balance = amount;
-                for(let i=1; i<=duration; i++) {
-                    const interest = balance * rate;
-                    const principal = periodicPayment - interest;
-                    balance -= principal;
-                    const dueDate = moment().add(i, 'months').valueOf();
-                    repaymentSchedule.push({ installment: i, dueDate, principal, interest, totalDue: periodicPayment, paidAmount: 0, status: 'pending', penalty: 0 });
-                }
-                const loanId = utils.generateId('LN');
-                await db.ref('loans/'+loanId).set({
-                    id: loanId, customerId: currentUser.uid, customerName: currentUserData.fullName,
-                    amount, duration, durationUnit: 'months', interestRate: 35,
-                    totalInterest, totalPayable, periodicPayment, purpose,
-                    collateral: { category: 'Other', description: 'Collateral', value: amount, images: collateralImages },
-                    status: 'pending', createdAt: Date.now(), repaymentSchedule, totalPaid: 0
-                });
-                utils.showToast('Success', 'Application submitted', 'success');
-                closeModal('genericModal');
-                loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        modalBody.appendChild(submitBtn);
-        openModal('genericModal');
     });
-    document.getElementById('custMakePayment')?.addEventListener('click', () => {
-        document.getElementById('payAmount').value = '';
-        document.getElementById('payProofUrl').value = '';
-        document.getElementById('payProofPreview').innerHTML = '';
-        document.getElementById('submitPaymentBtn').onclick = async () => {
-            const amount = parseFloat(document.getElementById('payAmount').value);
-            const method = document.getElementById('payMethod').value;
-            const proofUrl = document.getElementById('payProofUrl').value;
-            if(!amount || amount<=0) { alert('Enter amount'); return; }
-            utils.showLoading('Recording...');
-            try {
-                const paymentId = utils.generateId('PAY');
-                await db.ref('payments/'+paymentId).set({
-                    id: paymentId, loanId: 'manual', customerId: currentUser.uid, customerName: currentUserData.fullName,
-                    amount, method, proofUrl, timestamp: Date.now(), status: 'pending'
-                });
-                utils.showToast('Success', 'Payment submitted', 'success');
-                closeModal('paymentModal');
-                loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        openModal('paymentModal');
+    document.getElementById('resetImpersonateBtn').addEventListener('click', () => {
+        impersonatedUserId = null;
+        utils.showToast('Reset', 'Back to normal view', 'info');
+        loadAllData();
     });
 
     // ==================== MODE SWITCHING ====================
@@ -993,8 +1051,6 @@
     document.querySelectorAll('.tab-item').forEach(tab => {
         tab.addEventListener('click', () => setMode(tab.dataset.mode));
     });
-
-    // Tab listeners for admin/sudo
     document.querySelectorAll('[data-admin-tab]').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('[data-admin-tab]').forEach(t=>t.classList.remove('active'));
@@ -1012,24 +1068,23 @@
 
     function openModal(id) { document.getElementById(id).classList.add('active'); }
     window.closeModal = (id) => document.getElementById(id).classList.remove('active');
-    document.getElementById('confirmRejectBtn').onclick = () => { if(pendingRejectCallback) pendingRejectCallback(document.getElementById('rejectionReason').value); };
+    document.getElementById('confirmRejectBtn')?.addEventListener('click', () => { if(pendingRejectCallback) pendingRejectCallback(document.getElementById('rejectionReason').value); });
 
     // ==================== AUTH ====================
     auth.onAuthStateChanged(async (user) => {
         if(!user) { window.location.href = 'login.html'; return; }
         const snap = await db.ref('users/'+user.uid).once('value');
         currentUserData = snap.val();
-        if(!currentUserData) { auth.signOut(); return; }
+        if(!currentUserData || (currentUserData.userType !== 'admin' && currentUserData.userType !== 'sudo')) {
+            utils.showToast('Access Denied', 'Not authorized', 'error');
+            auth.signOut(); return;
+        }
         currentUser = user;
-        document.getElementById('adminNameDisplay').innerText = currentUserData.fullName || 'User';
-        let defaultMode = 'sudo';
-        if(currentUserData.userType === 'customer') defaultMode = 'customer';
-        else if(currentUserData.userType === 'agent') defaultMode = 'agent';
-        else if(currentUserData.userType === 'admin') defaultMode = 'admin';
-        setMode(defaultMode);
+        document.getElementById('adminNameDisplay').innerText = currentUserData.fullName || 'Super Admin';
         await loadAllData();
-        ['users','loans','payments','commissionHistory','auditLogs','agentApplications','systemSettings'].forEach(r => {
-            db.ref(r).on('value', () => loadAllData());
+        await loadImpersonateList();
+        ['users','loans','payments','commissionHistory','auditLogs','agentApplications','promotions','messages','systemSettings'].forEach(r => {
+            db.ref(r).on('value', () => { loadAllData(); loadImpersonateList(); });
         });
     });
 </script>
