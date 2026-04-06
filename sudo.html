@@ -2,8 +2,8 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <title>TruCash · Unified Super Admin</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <title>TruCash · Mobile Super Admin</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
@@ -13,281 +13,217 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-auth-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <script src="https://upload-widget.cloudinary.com/global/all.js"></script>
-    <!-- Chart.js, Moment, PapaParse, html2pdf -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/html2pdf.js/0.10.1/html2pdf.bundle.min.js"></script>
     <style>
-        /* ===== DARK GLOWING THEME (original style) ===== */
-        :root {
-            --bg:         #04070f;
-            --surface:    #080e1a;
-            --surface2:   #0c1422;
-            --surface3:   #10192b;
-            --border:     rgba(255,255,255,0.07);
-            --border2:    rgba(255,255,255,0.13);
-            --text:       #e8f0fc;
-            --text-muted: #5d7498;
-            --text-dim:   #2d4060;
-            --accent:     #00e5b8;
-            --accent2:    #4f8eff;
-            --danger:     #f43f5e;
-            --success:    #10b981;
-            --warning:    #f59e0b;
-            --purple:     #a78bfa;
-            --cyan:       #22d3ee;
-            --radius:     20px;
-            --radius-sm:  13px;
-            --nav-h:      72px;
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
-        * { margin:0; padding:0; box-sizing:border-box; }
+        :root {
+            --bg: #04070f;
+            --surface: #080e1a;
+            --surface2: #0c1422;
+            --surface3: #10192b;
+            --border: rgba(255,255,255,0.07);
+            --border2: rgba(255,255,255,0.13);
+            --text: #e8f0fc;
+            --text-muted: #5d7498;
+            --accent: #00e5b8;
+            --danger: #f43f5e;
+            --success: #10b981;
+            --warning: #f59e0b;
+            --radius: 20px;
+            --radius-sm: 13px;
+        }
         body {
-            font-family: Arial, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
             background: var(--bg);
             color: var(--text);
-            overflow-x: hidden;
-            user-select: none;
-        }
-        h1,h2,h3 { font-family: 'Poppins', sans-serif; font-weight: 700; }
-        body::before {
-            content: '';
-            position: fixed; inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
-            pointer-events: none;
-            z-index: 9999;
-            opacity: 0.45;
-        }
-        .app {
-            display: flex;
-            flex-direction: column;
-            min-height: 100vh;
+            padding-bottom: 70px;
         }
         /* Header */
         .app-header {
-            position: sticky; top:0; z-index: 10;
-            padding: env(safe-area-inset-top,12px) 20px 0;
-            background: linear-gradient(180deg, var(--bg) 60%, transparent);
+            position: sticky;
+            top: 0;
+            background: rgba(4,7,15,0.9);
+            backdrop-filter: blur(20px);
+            padding: 14px 16px;
             display: flex;
             justify-content: space-between;
             align-items: center;
-            height: 72px;
-        }
-        .header-brand { display: flex; align-items: center; gap: 10px; }
-        .brand-icon {
-            width: 38px; height: 38px;
-            background: linear-gradient(140deg, var(--accent) 0%, #00b896 100%);
-            border-radius: 12px;
-            display: grid; place-items: center;
-            font-size: 17px; color: #001a12;
-            position: relative;
-        }
-        .brand-text strong {
-            font-family: 'Poppins', sans-serif;
-            font-size: 14px; letter-spacing: 1.5px;
-            color: var(--text);
-        }
-        .brand-text span {
-            font-size: 9.5px; color: var(--accent);
-            letter-spacing: 2px;
-        }
-        .mode-selector {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: 30px;
-            padding: 4px 8px;
-            display: flex;
-            gap: 4px;
-        }
-        .mode-btn {
-            padding: 6px 14px;
-            border-radius: 30px;
-            font-size: 11px;
-            font-weight: 600;
-            cursor: pointer;
-            background: transparent;
-            color: var(--text-muted);
-            transition: 0.2s;
-        }
-        .mode-btn.active {
-            background: var(--accent);
-            color: #001f17;
-        }
-        .hdr-btn {
-            width: 40px; height: 40px;
-            border-radius: 13px;
-            background: var(--surface);
-            border: 1px solid var(--border);
-            display: grid; place-items: center;
-            cursor: pointer;
-            color: var(--text-muted);
-        }
-        /* Sidebar */
-        .sidebar-overlay {
-            position: fixed; inset: 0;
-            background: rgba(0,0,0,0.4);
-            z-index: 200;
-            opacity: 0; visibility: hidden;
-            transition: 0.3s;
-        }
-        .sidebar-overlay.active { opacity: 1; visibility: visible; }
-        .sidebar {
-            position: fixed; top:0; right:-300px; width:280px;
-            height: 100%; background: var(--bg);
-            border-left: 1px solid var(--border);
-            z-index: 201;
-            transition: right 0.3s;
-            padding: 20px 16px;
-            overflow-y: auto;
-        }
-        .sidebar.active { right: 0; }
-        .sidebar-header {
-            display: flex; gap: 12px;
             border-bottom: 1px solid var(--border);
-            padding-bottom: 16px;
-            margin-bottom: 20px;
+            z-index: 10;
         }
-        .sidebar-avatar {
-            width: 48px; height: 48px;
-            background: linear-gradient(135deg, var(--accent), var(--cyan));
-            border-radius: 50%;
+        .logo {
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-weight: bold;
+            gap: 8px;
+            font-weight: 700;
+            font-size: 16px;
         }
-        .sidebar-menu { display: flex; flex-direction: column; gap: 6px; }
-        .sidebar-item {
-            display: flex; align-items: center; gap: 12px;
-            padding: 10px 14px; border-radius: 12px;
-            cursor: pointer; transition: 0.2s;
-            color: var(--text-muted);
+        .logo i {
+            font-size: 24px;
+            color: var(--accent);
         }
-        .sidebar-item:hover { background: var(--surface); color: var(--accent); }
-        .sidebar-item.logout { margin-top: 24px; color: var(--danger); }
-        /* Main content */
-        .main-content {
-            flex: 1;
-            padding: 20px;
-            max-width: 1400px;
-            margin: 0 auto;
+        .admin-name {
+            background: var(--surface);
+            padding: 6px 12px;
+            border-radius: 30px;
+            font-size: 12px;
+        }
+        /* Bottom Tab Bar */
+        .bottom-tab-bar {
+            position: fixed;
+            bottom: 0;
+            left: 0;
             width: 100%;
-            padding-bottom: calc(var(--nav-h) + 16px);
+            background: rgba(8,14,26,0.95);
+            backdrop-filter: blur(20px);
+            border-top: 1px solid var(--border);
+            display: flex;
+            justify-content: space-around;
+            padding: 8px 12px 20px;
+            z-index: 100;
         }
-        .mode-view { display: none; }
-        .mode-view.active { display: block; animation: fadeIn 0.3s; }
-        @keyframes fadeIn { from { opacity:0; transform:translateY(10px); } to { opacity:1; transform:translateY(0); } }
-        /* Cards & common styles (reused across modes) */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(2,1fr);
-            gap: 14px;
-            margin-bottom: 20px;
+        .tab-item {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 4px;
+            color: var(--text-muted);
+            font-size: 10px;
+            cursor: pointer;
+            transition: 0.2s;
+            flex: 1;
         }
-        @media (min-width:640px) { .stats-grid { grid-template-columns: repeat(4,1fr); } }
-        .stat-card {
+        .tab-item i {
+            font-size: 22px;
+        }
+        .tab-item.active {
+            color: var(--accent);
+        }
+        /* Main content – scrollable */
+        .main-content {
+            padding: 16px;
+            padding-bottom: 80px;
+        }
+        .mode-view {
+            display: none;
+        }
+        .mode-view.active {
+            display: block;
+            animation: fadeIn 0.3s;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        /* Cards */
+        .card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             padding: 16px;
-            cursor: pointer;
-            transition: 0.2s;
-        }
-        .stat-card:hover { background: var(--surface2); transform: translateY(-2px); }
-        .stat-card .label { font-size: 12px; color: var(--text-muted); }
-        .stat-card .value { font-size: 26px; font-weight: 700; color: var(--accent); }
-        .floating-card {
-            background: var(--surface);
-            border: 1px solid var(--border);
-            border-radius: var(--radius);
-            padding: 18px;
             margin-bottom: 16px;
         }
-        .grid-2 { display: grid; grid-template-columns: repeat(2,1fr); gap: 16px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(3,1fr); gap: 16px; }
-        @media (max-width:640px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+        .stat-card {
+            background: var(--surface2);
+            border-radius: var(--radius-sm);
+            padding: 14px;
+            text-align: center;
+        }
+        .stat-card .label {
+            font-size: 11px;
+            color: var(--text-muted);
+        }
+        .stat-card .value {
+            font-size: 24px;
+            font-weight: 700;
+            color: var(--accent);
+        }
         .detail-card {
             background: var(--surface2);
             padding: 12px;
             border-radius: var(--radius-sm);
+            margin-bottom: 8px;
             border: 1px solid var(--border);
+        }
+        .grid-2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+        .btn {
+            padding: 10px 16px;
+            border-radius: 34px;
+            font-weight: 600;
+            font-size: 13px;
+            border: none;
+            cursor: pointer;
+            background: var(--surface2);
+            color: var(--text);
+            width: 100%;
+            margin-bottom: 8px;
+        }
+        .btn-primary {
+            background: linear-gradient(135deg, var(--accent), #00b896);
+            color: #001f17;
+        }
+        .btn-danger {
+            background: var(--danger);
+            color: white;
+        }
+        .btn-success {
+            background: var(--success);
+            color: white;
         }
         .search-bar {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: 34px;
-            padding: 8px 16px;
+            padding: 10px 16px;
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 8px;
             margin-bottom: 16px;
         }
         .search-bar input {
-            flex: 1;
             background: transparent;
             border: none;
             color: var(--text);
+            flex: 1;
             outline: none;
         }
-        .btn {
-            padding: 8px 16px;
-            border-radius: 34px;
-            font-weight: 500;
-            border: 1px solid transparent;
-            cursor: pointer;
-            font-size: 12px;
-            transition: 0.2s;
-            background: var(--surface2);
-            color: var(--text);
-        }
-        .btn-primary { background: linear-gradient(135deg, var(--accent), #00b896); color: #001f17; }
-        .btn-danger { background: var(--danger); color: white; }
-        .btn-success { background: var(--success); color: white; }
-        .btn-outline { border-color: var(--border2); }
         .loan-card {
-            display: flex;
-            align-items: center;
-            background: var(--surface);
-            border: 1px solid var(--border);
+            background: var(--surface2);
             border-radius: var(--radius-sm);
-            padding: 10px;
+            padding: 12px;
             margin-bottom: 10px;
+            border: 1px solid var(--border);
             cursor: pointer;
-            transition: 0.2s;
-        }
-        .loan-card:hover { background: var(--surface2); transform: translateY(-2px); }
-        .loan-card-left, .loan-card-right { flex: 0 0 48px; text-align: center; }
-        .loan-card-center { flex: 1; padding: 0 10px; }
-        .loan-card-profile-img, .loan-card-agent-img {
-            width: 40px; height: 40px;
-            border-radius: 50%;
-            object-fit: cover;
-        }
-        .progress-container {
-            background: var(--surface3);
-            border-radius: 20px;
-            height: 6px;
-            margin: 6px 0;
-            overflow: hidden;
-        }
-        .progress-bar {
-            height: 100%;
-            background: linear-gradient(90deg, var(--accent), var(--cyan));
-            width: 0%;
         }
         .status-badge {
             display: inline-block;
-            padding: 2px 10px;
+            padding: 4px 10px;
             border-radius: 30px;
             font-size: 10px;
             font-weight: 600;
         }
-        .status-badge.active, .status-badge.approved { background: rgba(16,185,129,0.2); color: var(--success); }
+        .status-badge.active { background: rgba(16,185,129,0.2); color: var(--success); }
         .status-badge.pending { background: rgba(245,158,11,0.2); color: var(--warning); }
-        .status-badge.rejected { background: rgba(244,63,94,0.2); color: var(--danger); }
         .credit-score-badge {
             display: inline-block;
-            padding: 2px 10px;
+            padding: 4px 10px;
             border-radius: 20px;
             font-size: 10px;
             font-weight: 600;
@@ -295,24 +231,26 @@
         }
         .credit-score-badge.excellent { background: #10b981; }
         .credit-score-badge.good { background: #4f8eff; }
-        .credit-score-badge.fair { background: #f59e0b; }
-        .credit-score-badge.poor { background: #f43f5e; }
         .tab-bar {
             display: flex;
             gap: 8px;
+            overflow-x: auto;
             margin-bottom: 16px;
-            flex-wrap: wrap;
+            padding-bottom: 4px;
         }
         .tab {
             padding: 6px 14px;
             background: var(--surface);
             border-radius: 30px;
             font-size: 12px;
+            white-space: nowrap;
             cursor: pointer;
-            color: var(--text-muted);
         }
-        .tab.active { background: var(--accent); color: #001f17; }
-        /* Modals */
+        .tab.active {
+            background: var(--accent);
+            color: #001f17;
+        }
+        /* Modal (same as before) */
         .modal-overlay {
             position: fixed; inset: 0;
             background: rgba(0,0,0,0.6);
@@ -327,28 +265,27 @@
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
-            max-width: 700px;
+            max-width: 500px;
             width: 90%;
-            max-height: 90vh;
+            max-height: 85vh;
             overflow-y: auto;
         }
         .modal-header {
-            padding: 16px 20px;
+            padding: 16px;
             border-bottom: 1px solid var(--border);
             display: flex;
             justify-content: space-between;
-            align-items: center;
         }
-        .modal-body { padding: 20px; }
+        .modal-body { padding: 16px; }
         .modal-footer {
-            padding: 16px 20px;
+            padding: 16px;
             border-top: 1px solid var(--border);
             display: flex;
             justify-content: flex-end;
             gap: 12px;
         }
         .form-group { margin-bottom: 16px; }
-        .form-label { font-size: 12px; font-weight: 500; margin-bottom: 5px; display: block; }
+        .form-label { font-size: 12px; margin-bottom: 5px; display: block; }
         .form-input, .form-select, .form-textarea {
             width: 100%;
             padding: 10px 14px;
@@ -375,16 +312,19 @@
             border-radius: 14px;
         }
         .toast-container {
-            position: fixed; top: 20px; right: 20px;
+            position: fixed; top: 20px; left: 50%;
+            transform: translateX(-50%);
             z-index: 1000;
+            width: 90%;
+            max-width: 350px;
         }
         .toast {
             background: var(--surface);
             border-left: 4px solid var(--accent);
             border-radius: 12px;
-            padding: 12px 16px;
+            padding: 12px;
             margin-bottom: 8px;
-            box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+            text-align: center;
         }
         .loading-overlay {
             position: fixed; inset: 0;
@@ -406,129 +346,103 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .text-muted { color: var(--text-muted); font-size: 12px; }
-        hr { border-color: var(--border); margin: 16px 0; }
+        hr { border-color: var(--border); margin: 12px 0; }
     </style>
 </head>
 <body>
+
 <div class="loading-overlay" id="loadingOverlay"><div class="loading-spinner"></div><div class="loading-text">Loading...</div></div>
 <div class="toast-container" id="toastContainer"></div>
 
-<div class="app">
-    <div class="app-header">
-        <div class="header-brand">
-            <div class="brand-icon"><i class="fas fa-shield-alt"></i></div>
-            <div class="brand-text"><strong>TRUCASH</strong><span>Unified Console</span></div>
+<div class="app-header">
+    <div class="logo"><i class="fas fa-shield-alt"></i><span>TruCash</span></div>
+    <div class="admin-name" id="adminNameDisplay">Super Admin</div>
+</div>
+
+<div class="main-content" id="mainContent">
+    <!-- Customer Mode -->
+    <div class="mode-view" id="customerMode">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="custActiveLoans">0</div></div>
+            <div class="stat-card"><div class="label">Total Borrowed</div><div class="value" id="custTotalBorrowed">K0</div></div>
+            <div class="stat-card"><div class="label">Balance</div><div class="value" id="custBalance">K0</div></div>
+            <div class="stat-card"><div class="label">Payment Due</div><div class="value" id="custPaymentDue">K0</div></div>
         </div>
-        <div class="mode-selector">
-            <div class="mode-btn" data-mode="customer">Customer</div>
-            <div class="mode-btn" data-mode="agent">Agent</div>
-            <div class="mode-btn" data-mode="admin">Admin</div>
-            <div class="mode-btn active" data-mode="sudo">Sudo</div>
-        </div>
-        <div class="hdr-btn" id="menuToggle"><i class="fas fa-bars"></i></div>
+        <div class="card"><h4>Credit Score</h4><div id="custCreditScore"></div></div>
+        <div class="card"><h4>Agent Info</h4><div id="custAgentInfo"></div></div>
+        <div class="card"><div class="grid-2"><button class="btn btn-primary" id="custApplyLoan">Apply Loan</button><button class="btn btn-outline" id="custMakePayment">Pay</button></div></div>
+        <div class="card"><h4>My Loans</h4><div id="custLoansList"></div></div>
     </div>
 
-    <!-- Sidebar (same for all modes, but actions differ) -->
-    <div class="sidebar-overlay" id="sidebarOverlay"></div>
-    <div class="sidebar" id="sidebar">
-        <div class="sidebar-header">
-            <div class="sidebar-avatar"><i class="fas fa-user-shield"></i></div>
-            <div><div id="sidebarName">Super Admin</div><div class="text-muted" id="sidebarRole">Sudo Mode</div></div>
+    <!-- Agent Mode -->
+    <div class="mode-view" id="agentMode">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">My Customers</div><div class="value" id="agentCustomersCount">0</div></div>
+            <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="agentActiveLoans">0</div></div>
+            <div class="stat-card"><div class="label">Total Commission</div><div class="value" id="agentTotalCommission">K0</div></div>
+            <div class="stat-card"><div class="label">Pending</div><div class="value" id="agentPendingCommission">K0</div></div>
         </div>
-        <div class="sidebar-menu" id="sidebarMenu">
-            <!-- Dynamic sidebar items per mode -->
-        </div>
+        <div class="card"><h4>My Customers</h4><div id="agentCustomersList"></div></div>
+        <div class="card"><h4>Loans (my customers)</h4><div id="agentLoansList"></div></div>
+        <div class="card"><h4>Commission History</h4><div id="agentCommissionList"></div></div>
     </div>
 
-    <!-- Main Content: 4 mode views -->
-    <div class="main-content" id="mainContent">
-        <!-- CUSTOMER MODE VIEW (mimics customer.html) -->
-        <div class="mode-view" id="customerMode">
-            <div class="stats-grid">
-                <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="custActiveLoans">0</div></div>
-                <div class="stat-card"><div class="label">Total Borrowed</div><div class="value" id="custTotalBorrowed">K0</div></div>
-                <div class="stat-card"><div class="label">Current Balance</div><div class="value" id="custBalance">K0</div></div>
-                <div class="stat-card"><div class="label">Payment Due</div><div class="value" id="custPaymentDue">K0</div></div>
-            </div>
-            <div class="floating-card"><h4>Your Credit Score</h4><div id="custCreditScore"></div></div>
-            <div class="floating-card"><h4>Agent Information</h4><div id="custAgentInfo"></div></div>
-            <div class="floating-card"><h4>Quick Actions</h4><div class="grid-2"><button class="btn btn-primary" id="custApplyLoan">Apply for Loan</button><button class="btn btn-outline" id="custMakePayment">Make Payment</button></div></div>
-            <div class="floating-card"><h4>Recent Loans</h4><div id="custLoansList"></div></div>
-            <!-- Loan Application Modal (hidden) -->
-            <div id="custLoanAppForm" style="display:none;">
-                <div class="form-group"><label>Amount (K)</label><input type="number" id="loanAmount" class="form-input"></div>
-                <div class="form-group"><label>Duration (months)</label><select id="loanDuration" class="form-select"><option>3</option><option>6</option><option>12</option></select></div>
-                <div class="form-group"><label>Purpose</label><textarea id="loanPurpose" class="form-textarea"></textarea></div>
-                <div class="form-group"><label>Collateral Images (min 3)</label><div id="collateralUploads" class="grid-2"></div></div>
-                <button id="submitLoanApp" class="btn btn-primary">Submit Application</button>
-            </div>
+    <!-- Admin Mode -->
+    <div class="mode-view" id="adminMode">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Customers</div><div class="value" id="adminTotalCustomers">0</div></div>
+            <div class="stat-card"><div class="label">Agents</div><div class="value" id="adminTotalAgents">0</div></div>
+            <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="adminActiveLoans">0</div></div>
+            <div class="stat-card"><div class="label">Pending Payments</div><div class="value" id="adminPendingPayments">0</div></div>
         </div>
+        <div class="card"><h4>Pending Approvals</h4><div id="adminPendingSummary" class="grid-2"></div></div>
+        <div class="card"><div class="grid-2"><button class="btn btn-primary" id="adminCreateCustomer">+ Customer</button><button class="btn btn-primary" id="adminCreateAgent">+ Agent</button><button class="btn btn-primary" id="adminCreateAdmin">+ Admin</button></div></div>
+        <div class="tab-bar"><span class="tab active" data-admin-tab="customers">Customers</span><span class="tab" data-admin-tab="agents">Agents</span><span class="tab" data-admin-tab="loans">Loans</span><span class="tab" data-admin-tab="payments">Payments</span></div>
+        <div id="adminTabContent"></div>
+    </div>
 
-        <!-- AGENT MODE VIEW (mimics agent.html) -->
-        <div class="mode-view" id="agentMode">
-            <div class="stats-grid">
-                <div class="stat-card"><div class="label">My Customers</div><div class="value" id="agentCustomersCount">0</div></div>
-                <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="agentActiveLoans">0</div></div>
-                <div class="stat-card"><div class="label">Total Commission</div><div class="value" id="agentTotalCommission">K0</div></div>
-                <div class="stat-card"><div class="label">Pending Commission</div><div class="value" id="agentPendingCommission">K0</div></div>
-            </div>
-            <div class="floating-card"><h4>My Customers</h4><div id="agentCustomersList"></div></div>
-            <div class="floating-card"><h4>Loan Applications (my customers)</h4><div id="agentLoansList"></div></div>
-            <div class="floating-card"><h4>Commission Breakdown</h4><div id="agentCommissionList"></div></div>
+    <!-- Sudo Mode (full super admin) -->
+    <div class="mode-view" id="sudoMode">
+        <div class="stats-grid">
+            <div class="stat-card"><div class="label">Customers</div><div class="value" id="sudoStatCustomers">0</div></div>
+            <div class="stat-card"><div class="label">Agents</div><div class="value" id="sudoStatAgents">0</div></div>
+            <div class="stat-card"><div class="label">Admins</div><div class="value" id="sudoStatAdmins">0</div></div>
+            <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="sudoStatActiveLoans">0</div></div>
         </div>
-
-        <!-- ADMIN MODE VIEW (mimics admin.html – full admin panel) -->
-        <div class="mode-view" id="adminMode">
-            <div class="stats-grid">
-                <div class="stat-card"><div class="label">Total Customers</div><div class="value" id="adminTotalCustomers">0</div></div>
-                <div class="stat-card"><div class="label">Total Agents</div><div class="value" id="adminTotalAgents">0</div></div>
-                <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="adminActiveLoans">0</div></div>
-                <div class="stat-card"><div class="label">Pending Payments</div><div class="value" id="adminPendingPayments">0</div></div>
-            </div>
-            <div class="grid-2">
-                <div class="floating-card"><h4>Pending Approvals</h4><div id="adminPendingSummary"></div></div>
-                <div class="floating-card"><h4>Quick Actions</h4><div class="grid-2"><button class="btn btn-primary" id="adminCreateCustomer">New Customer</button><button class="btn btn-primary" id="adminCreateAgent">New Agent</button><button class="btn btn-primary" id="adminCreateAdmin">New Admin</button><button class="btn btn-outline" id="adminViewReports">Reports</button></div></div>
-            </div>
-            <div class="tab-bar"><span class="tab active" data-admin-tab="customers">Customers</span><span class="tab" data-admin-tab="agents">Agents</span><span class="tab" data-admin-tab="loans">Loans</span><span class="tab" data-admin-tab="payments">Payments</span><span class="tab" data-admin-tab="audit">Audit Logs</span></div>
-            <div id="adminTabContent"></div>
+        <div class="tab-bar">
+            <span class="tab active" data-sudo-tab="overview">Overview</span>
+            <span class="tab" data-sudo-tab="customers">Customers</span>
+            <span class="tab" data-sudo-tab="agents">Agents</span>
+            <span class="tab" data-sudo-tab="admins">Admins</span>
+            <span class="tab" data-sudo-tab="loans">Loans</span>
+            <span class="tab" data-sudo-tab="payments">Payments</span>
+            <span class="tab" data-sudo-tab="lending">Lending</span>
+            <span class="tab" data-sudo-tab="database">Database</span>
+            <span class="tab" data-sudo-tab="security">Security</span>
+            <span class="tab" data-sudo-tab="system">System</span>
+            <span class="tab" data-sudo-tab="reports">Reports</span>
         </div>
-
-        <!-- SUDO MODE VIEW (full super admin – all features from data, lending, security, system, create-admin) -->
-        <div class="mode-view active" id="sudoMode">
-            <div class="stats-grid">
-                <div class="stat-card"><div class="label">Total Customers</div><div class="value" id="sudoStatCustomers">0</div></div>
-                <div class="stat-card"><div class="label">Total Agents</div><div class="value" id="sudoStatAgents">0</div></div>
-                <div class="stat-card"><div class="label">Admins</div><div class="value" id="sudoStatAdmins">0</div></div>
-                <div class="stat-card"><div class="label">Active Loans</div><div class="value" id="sudoStatActiveLoans">0</div></div>
-            </div>
-            <div class="tab-bar">
-                <span class="tab active" data-sudo-tab="overview">Overview</span>
-                <span class="tab" data-sudo-tab="customers">Customers</span>
-                <span class="tab" data-sudo-tab="agents">Agents</span>
-                <span class="tab" data-sudo-tab="admins">Admins</span>
-                <span class="tab" data-sudo-tab="loans">Loans</span>
-                <span class="tab" data-sudo-tab="payments">Payments</span>
-                <span class="tab" data-sudo-tab="lending">Lending Ops</span>
-                <span class="tab" data-sudo-tab="database">Database</span>
-                <span class="tab" data-sudo-tab="security">Security</span>
-                <span class="tab" data-sudo-tab="system">System</span>
-                <span class="tab" data-sudo-tab="reports">Reports</span>
-            </div>
-            <div id="sudoTabContent"></div>
-        </div>
+        <div id="sudoTabContent"></div>
     </div>
 </div>
 
-<!-- Global Modals (reused) -->
+<!-- Bottom Tab Bar -->
+<div class="bottom-tab-bar">
+    <div class="tab-item active" data-mode="customer"><i class="fas fa-user"></i><span>Customer</span></div>
+    <div class="tab-item" data-mode="agent"><i class="fas fa-user-tie"></i><span>Agent</span></div>
+    <div class="tab-item" data-mode="admin"><i class="fas fa-user-shield"></i><span>Admin</span></div>
+    <div class="tab-item" data-mode="sudo"><i class="fas fa-crown"></i><span>Sudo</span></div>
+</div>
+
+<!-- Modals (simplified, same as before but kept compact) -->
 <div class="modal-overlay" id="genericModal"><div class="modal-container"><div class="modal-header"><h3 id="modalTitle">Title</h3><span class="modal-close" onclick="closeModal('genericModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="genericModalBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('genericModal')">Cancel</button><button class="btn btn-primary" id="modalActionBtn">Save</button></div></div></div>
-<div class="modal-overlay" id="loanDetailsModal"><div class="modal-container large"><div class="modal-header"><h3>Loan Details</h3><span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="loanDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button></div></div></div>
-<div class="modal-overlay" id="paymentDetailsModal"><div class="modal-container"><div class="modal-header"><h3>Payment Details</h3><span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="paymentDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('paymentDetailsModal')">Close</button></div></div></div>
+<div class="modal-overlay" id="loanDetailsModal"><div class="modal-container"><div class="modal-header"><h3>Loan Details</h3><span class="modal-close" onclick="closeModal('loanDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="loanDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('loanDetailsModal')">Close</button></div></div></div>
+<div class="modal-overlay" id="paymentDetailsModal"><div class="modal-container"><div class="modal-header"><h3>Payment</h3><span class="modal-close" onclick="closeModal('paymentDetailsModal')"><i class="fas fa-times"></i></span></div><div class="modal-body" id="paymentDetailsBody"></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('paymentDetailsModal')">Close</button></div></div></div>
 <div class="modal-overlay" id="rejectionModal"><div class="modal-container"><div class="modal-header"><h3>Rejection Reason</h3><span class="modal-close" onclick="closeModal('rejectionModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><textarea id="rejectionReason" class="form-textarea" rows="4"></textarea></div><div class="modal-footer"><button class="btn btn-outline" onclick="closeModal('rejectionModal')">Cancel</button><button class="btn btn-danger" id="confirmRejectBtn">Confirm</button></div></div></div>
-<div class="modal-overlay" id="agreementModal"><div class="modal-container large"><div class="modal-header"><h3>Signed Agreement</h3><span class="modal-close" onclick="closeModal('agreementModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><iframe id="agreementFrame" style="width:100%; height:500px; border:none;"></iframe></div></div></div>
-<div class="modal-overlay" id="paymentModal"><div class="modal-container"><div class="modal-header"><h3>Make Payment</h3><span class="modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><div class="form-group"><label>Amount</label><input type="number" id="payAmount" class="form-input"></div><div class="form-group"><label>Method</label><select id="payMethod" class="form-select"><option>Cash</option><option>Mobile Money</option><option>Bank Transfer</option></select></div><div class="form-group"><label>Proof</label><div class="upload-box" data-type="payment-proof" onclick="openCloudinaryUpload('payment-proof')"><i class="fas fa-camera"></i><span>Upload</span><div class="upload-preview" id="payProofPreview"></div></div><input type="hidden" id="payProofUrl"></div><button id="submitPaymentBtn" class="btn btn-primary">Submit Payment</button></div></div></div>
+<div class="modal-overlay" id="paymentModal"><div class="modal-container"><div class="modal-header"><h3>Make Payment</h3><span class="modal-close" onclick="closeModal('paymentModal')"><i class="fas fa-times"></i></span></div><div class="modal-body"><div class="form-group"><label>Amount</label><input type="number" id="payAmount" class="form-input"></div><div class="form-group"><label>Method</label><select id="payMethod" class="form-select"><option>Cash</option><option>Mobile Money</option></select></div><div class="form-group"><label>Proof</label><div class="upload-box" data-type="payment-proof" onclick="openCloudinaryUpload('payment-proof')"><i class="fas fa-camera"></i><span>Upload</span><div class="upload-preview" id="payProofPreview"></div></div><input type="hidden" id="payProofUrl"></div><button id="submitPaymentBtn" class="btn btn-primary">Submit</button></div></div></div>
 
 <script>
-    // ==================== FIREBASE CONFIG ====================
+    // ==================== FIREBASE ====================
     const firebaseConfig = {
         apiKey: "AIzaSyCWm9yvg5he7Lncy3h51n7ytOq7AZrA9gs",
         authDomain: "trucash-9fee8.firebaseapp.com",
@@ -543,38 +457,32 @@
     const db = firebase.database();
 
     // ==================== GLOBAL STATE ====================
-    let currentUser = null;
-    let currentUserData = null;
-    let currentMode = 'sudo';
+    let currentUser = null, currentUserData = null;
     let allCustomers = [], allAgents = [], allAdmins = [], allLoans = [], allPayments = [], allCommission = [], allAuditLogs = [], allAgentApps = [];
     let systemSettings = {};
-    let currentLoanFilter = 'all', currentPaymentFilter = 'all';
     let pendingRejectCallback = null;
     let cloudinaryWidget = null;
     let uploadedCollateral = {};
 
-    // Helper functions
+    // ==================== UTILITIES ====================
     const utils = {
-        formatCurrency: (amt) => 'K' + (amt || 0).toFixed(2).replace(/\B(?=(\d{3})+(?!\d))/g, ','),
+        formatCurrency: (amt) => 'K' + (amt || 0).toFixed(2),
         formatDate: (ts) => ts ? moment(ts).format('MMM D, YYYY') : 'N/A',
-        formatDateTime: (ts) => ts ? moment(ts).format('MMM D, YYYY h:mm A') : 'N/A',
+        formatDateTime: (ts) => ts ? moment(ts).format('MMM D, h:mm A') : 'N/A',
         showToast: (title, msg, type='info') => {
             const toast = document.createElement('div');
             toast.className = 'toast';
             toast.style.borderLeftColor = type==='error'?'#f43f5e':type==='success'?'#10b981':'#00e5b8';
             toast.innerHTML = `<strong>${title}</strong><br>${msg}`;
             document.getElementById('toastContainer').appendChild(toast);
-            setTimeout(() => toast.remove(), 5000);
+            setTimeout(() => toast.remove(), 4000);
         },
         showLoading: (msg) => { document.querySelector('#loadingOverlay .loading-text').textContent = msg; document.getElementById('loadingOverlay').classList.add('active'); },
         hideLoading: () => document.getElementById('loadingOverlay').classList.remove('active'),
-        generateId: (p) => p + Date.now() + Math.random().toString(36).substr(2,8),
+        generateId: (p) => p + Date.now() + Math.random().toString(36).substr(2,6),
         logAudit: async (action, details) => {
             if(!currentUser) return;
-            await db.ref('auditLogs/'+utils.generateId('LOG')).set({
-                timestamp: Date.now(), adminUid: currentUser.uid, adminEmail: currentUser.email,
-                action, details: JSON.stringify(details)
-            });
+            await db.ref('auditLogs/'+utils.generateId('LOG')).set({ timestamp: Date.now(), adminUid: currentUser.uid, adminEmail: currentUser.email, action, details: JSON.stringify(details) });
         },
         calculateCreditScore: (customerId) => {
             const loans = allLoans.filter(l => l.customerId === customerId);
@@ -591,33 +499,15 @@
             score = Math.round(score * (0.5 + 0.5 * (totalDue ? totalPaid/totalDue : 1)));
             let grade = score>=80?'Excellent':score>=60?'Good':score>=40?'Fair':'Poor';
             return {score, grade};
-        },
-        generateRepaymentSchedule: (principal, rate, periods, isWeekly, startDate=Date.now()) => {
-            const schedule = [];
-            const monthlyRate = rate / 12;
-            const payment = (principal * monthlyRate * Math.pow(1+monthlyRate, periods)) / (Math.pow(1+monthlyRate, periods)-1);
-            let balance = principal;
-            for(let i=1; i<=periods; i++) {
-                const interest = balance * monthlyRate;
-                const principalPortion = payment - interest;
-                balance -= principalPortion;
-                const dueDate = moment(startDate).add(i, 'months').valueOf();
-                schedule.push({ installment: i, dueDate, principal: principalPortion, interest, totalDue: payment, paidAmount: 0, status: 'pending', penalty: 0 });
-            }
-            return schedule;
         }
     };
 
-    // ==================== CLOUDINARY WIDGET ====================
+    // ==================== CLOUDINARY ====================
     function initCloudinaryWidget() {
         if(cloudinaryWidget) return;
         cloudinaryWidget = cloudinary.createUploadWidget({
-            cloudName: 'dd3lcymrk',
-            uploadPreset: 'h3eyhc2o',
-            sources: ['local','camera'],
-            multiple: false,
-            maxFileSize: 5242880,
-            clientAllowedFormats: ['jpg','jpeg','png','pdf']
+            cloudName: 'dd3lcymrk', uploadPreset: 'h3eyhc2o', sources: ['local','camera'],
+            multiple: false, maxFileSize: 5242880, clientAllowedFormats: ['jpg','jpeg','png','pdf']
         }, (error, result) => {
             if(result && result.event === 'success') {
                 const url = result.info.secure_url;
@@ -647,15 +537,12 @@
         let selector = `.upload-box[data-type="${type}"]`;
         if(idx !== null) selector = `.upload-box[data-type="${type}"][data-idx="${idx}"]`;
         const box = document.querySelector(selector);
-        if(box) {
-            box.classList.add('active');
-            cloudinaryWidget.open();
-        }
+        if(box) { box.classList.add('active'); cloudinaryWidget.open(); }
     };
 
     // ==================== LOAD DATA ====================
     async function loadAllData() {
-        utils.showLoading('Loading data...');
+        utils.showLoading('Loading...');
         try {
             const usersSnap = await db.ref('users').once('value');
             const users = usersSnap.val() || {};
@@ -665,23 +552,17 @@
 
             const loansSnap = await db.ref('loans').once('value');
             allLoans = Object.entries(loansSnap.val() || {}).map(([id,l])=>({...l,id}));
-
             const paymentsSnap = await db.ref('payments').once('value');
             allPayments = Object.entries(paymentsSnap.val() || {}).map(([id,p])=>({...p,id}));
-
             const commSnap = await db.ref('commissionHistory').once('value');
             allCommission = Object.entries(commSnap.val() || {}).map(([id,c])=>({...c,id}));
-
             const auditSnap = await db.ref('auditLogs').once('value');
             allAuditLogs = Object.entries(auditSnap.val() || {}).map(([id,l])=>({...l,id})).sort((a,b)=>b.timestamp - a.timestamp);
-
             const appsSnap = await db.ref('agentApplications').once('value');
             allAgentApps = Object.entries(appsSnap.val() || {}).map(([id,a])=>({...a,id}));
-
             const settingsSnap = await db.ref('systemSettings').once('value');
             systemSettings = settingsSnap.val() || {};
 
-            // If user is logged in as a customer/agent/admin, filter data for their view
             if(currentUserData) {
                 if(currentUserData.userType === 'customer') {
                     allLoans = allLoans.filter(l => l.customerId === currentUser.uid);
@@ -699,9 +580,9 @@
         } catch(e) { utils.showToast('Error', e.message, 'error'); utils.hideLoading(); }
     }
 
-    // ==================== UPDATE ALL MODE VIEWS ====================
+    // ==================== UPDATE VIEWS ====================
     function updateAllViews() {
-        // Customer Mode
+        // Customer mode
         if(currentUserData && currentUserData.userType === 'customer') {
             const myLoans = allLoans;
             const activeLoans = myLoans.filter(l => l.status === 'active');
@@ -716,33 +597,30 @@
             const credit = utils.calculateCreditScore(currentUser.uid);
             document.getElementById('custCreditScore').innerHTML = `<span class="credit-score-badge ${credit.grade.toLowerCase()}">${credit.grade} (${credit.score})</span>`;
             const agent = allAgents.find(a => a.id === currentUserData.assignedAgentId);
-            document.getElementById('custAgentInfo').innerHTML = agent ? `<strong>${agent.fullName}</strong><br>${agent.phone}` : 'No agent assigned';
+            document.getElementById('custAgentInfo').innerHTML = agent ? `<strong>${agent.fullName}</strong><br>${agent.phone}` : 'No agent';
             document.getElementById('custLoansList').innerHTML = myLoans.map(l => `<div class="detail-card" onclick="showLoanDetails('${l.id}')">${utils.formatCurrency(l.amount)} - ${l.status} - ${utils.formatDate(l.createdAt)}</div>`).join('');
         }
-        // Agent Mode
+        // Agent mode
         if(currentUserData && currentUserData.userType === 'agent') {
             document.getElementById('agentCustomersCount').innerText = allCustomers.length;
-            const activeLoans = allLoans.filter(l => l.status === 'active');
-            document.getElementById('agentActiveLoans').innerText = activeLoans.length;
+            document.getElementById('agentActiveLoans').innerText = allLoans.filter(l=>l.status==='active').length;
             const myCommission = allCommission.filter(c => c.agentId === currentUser.uid);
-            const totalComm = myCommission.reduce((s,c)=>s+c.amount,0);
-            const pendingComm = myCommission.filter(c=>c.status==='pending').reduce((s,c)=>s+c.amount,0);
-            document.getElementById('agentTotalCommission').innerText = utils.formatCurrency(totalComm);
-            document.getElementById('agentPendingCommission').innerText = utils.formatCurrency(pendingComm);
+            document.getElementById('agentTotalCommission').innerText = utils.formatCurrency(myCommission.reduce((s,c)=>s+c.amount,0));
+            document.getElementById('agentPendingCommission').innerText = utils.formatCurrency(myCommission.filter(c=>c.status==='pending').reduce((s,c)=>s+c.amount,0));
             document.getElementById('agentCustomersList').innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')">${c.fullName} (${c.phone})</div>`).join('');
             document.getElementById('agentLoansList').innerHTML = allLoans.map(l => `<div class="detail-card" onclick="showLoanDetails('${l.id}')">${l.customerName} - ${utils.formatCurrency(l.amount)} (${l.status})</div>`).join('');
-            document.getElementById('agentCommissionList').innerHTML = myCommission.map(c => `<div class="detail-card">${utils.formatCurrency(c.amount)} - ${c.status} - ${c.loanId}</div>`).join('');
+            document.getElementById('agentCommissionList').innerHTML = myCommission.map(c => `<div class="detail-card">${utils.formatCurrency(c.amount)} - ${c.status}</div>`).join('');
         }
-        // Admin Mode
+        // Admin mode
         if(currentUserData && currentUserData.userType === 'admin') {
             document.getElementById('adminTotalCustomers').innerText = allCustomers.length;
             document.getElementById('adminTotalAgents').innerText = allAgents.length;
             document.getElementById('adminActiveLoans').innerText = allLoans.filter(l=>l.status==='active').length;
             document.getElementById('adminPendingPayments').innerText = allPayments.filter(p=>p.status==='pending').length;
-            document.getElementById('adminPendingSummary').innerHTML = `<div class="detail-card">Loan Apps: ${allLoans.filter(l=>l.status==='pending').length}</div><div class="detail-card">Agent Apps: ${allAgentApps.filter(a=>a.status==='pending').length}</div><div class="detail-card">Payments: ${allPayments.filter(p=>p.status==='pending').length}</div>`;
+            document.getElementById('adminPendingSummary').innerHTML = `<div class="stat-card">Loan Apps: ${allLoans.filter(l=>l.status==='pending').length}</div><div class="stat-card">Agent Apps: ${allAgentApps.filter(a=>a.status==='pending').length}</div><div class="stat-card">Payments: ${allPayments.filter(p=>p.status==='pending').length}</div>`;
             renderAdminTab('customers');
         }
-        // Sudo Mode (full super admin)
+        // Sudo mode
         document.getElementById('sudoStatCustomers').innerText = allCustomers.length;
         document.getElementById('sudoStatAgents').innerText = allAgents.length;
         document.getElementById('sudoStatAdmins').innerText = allAdmins.length;
@@ -753,66 +631,52 @@
     function renderAdminTab(tab) {
         const container = document.getElementById('adminTabContent');
         if(tab === 'customers') {
-            container.innerHTML = allCustomers.map(c => `<div class="floating-card" style="cursor:pointer" onclick="showCustomerDetails('${c.id}')">${c.fullName} - ${c.email} - ${c.phone} <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
+            container.innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')">${c.fullName}<br><span class="text-muted">${c.email} | ${c.phone}</span> <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
         } else if(tab === 'agents') {
-            container.innerHTML = allAgents.map(a => `<div class="floating-card" style="cursor:pointer" onclick="showAgentDetails('${a.id}')">${a.fullName} (${a.agentId}) - ${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
+            container.innerHTML = allAgents.map(a => `<div class="detail-card" onclick="showAgentDetails('${a.id}')">${a.fullName} (${a.agentId})<br>${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
         } else if(tab === 'loans') {
-            container.innerHTML = allLoans.map(l => `<div class="loan-card" onclick="showLoanDetails('${l.id}')"><div><strong>${l.customerName}</strong> - ${utils.formatCurrency(l.amount)} - ${l.status}</div></div>`).join('');
+            container.innerHTML = allLoans.map(l => `<div class="loan-card" onclick="showLoanDetails('${l.id}')"><strong>${l.customerName}</strong> - ${utils.formatCurrency(l.amount)} <span class="status-badge ${l.status}">${l.status}</span></div>`).join('');
         } else if(tab === 'payments') {
-            container.innerHTML = allPayments.map(p => `<div class="floating-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} - ${p.status}</div>`).join('');
-        } else if(tab === 'audit') {
-            container.innerHTML = allAuditLogs.slice(0,30).map(l => `<div class="detail-card">${l.action} - ${l.adminEmail} - ${utils.formatDateTime(l.timestamp)}<br><small>${l.details}</small></div>`).join('');
+            container.innerHTML = allPayments.map(p => `<div class="detail-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} <span class="status-badge ${p.status}">${p.status}</span></div>`).join('');
         }
     }
 
     function renderSudoTab(tab) {
         const container = document.getElementById('sudoTabContent');
         if(tab === 'overview') {
-            container.innerHTML = `<div class="floating-card"><h4>System Overview</h4><div class="grid-2"><div class="detail-card">Total Customers: ${allCustomers.length}</div><div class="detail-card">Total Agents: ${allAgents.length}</div><div class="detail-card">Admins: ${allAdmins.length}</div><div class="detail-card">Loans: ${allLoans.length}</div><div class="detail-card">Payments: ${allPayments.length}</div><div class="detail-card">Commission Paid: ${utils.formatCurrency(allCommission.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0))}</div></div></div>`;
+            container.innerHTML = `<div class="card"><h4>System Overview</h4><div class="stats-grid"><div class="stat-card">Customers: ${allCustomers.length}</div><div class="stat-card">Agents: ${allAgents.length}</div><div class="stat-card">Admins: ${allAdmins.length}</div><div class="stat-card">Loans: ${allLoans.length}</div></div></div>`;
         } else if(tab === 'customers') {
-            container.innerHTML = allCustomers.map(c => `<div class="floating-card" style="cursor:pointer" onclick="showCustomerDetails('${c.id}')">${c.fullName} - ${c.email} - ${c.phone} <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
+            container.innerHTML = allCustomers.map(c => `<div class="detail-card" onclick="showCustomerDetails('${c.id}')">${c.fullName}<br>${c.email} | ${c.phone} <span class="status-badge ${c.status}">${c.status}</span></div>`).join('');
         } else if(tab === 'agents') {
-            container.innerHTML = allAgents.map(a => `<div class="floating-card" style="cursor:pointer" onclick="showAgentDetails('${a.id}')">${a.fullName} (${a.agentId}) - ${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
-            container.innerHTML += `<div class="floating-card"><h4>Pending Agent Applications</h4>${allAgentApps.filter(a=>a.status==='pending').map(app=>`<div class="detail-card" onclick="showAgentApplication('${app.id}')">${app.fullName} - ${app.phone}</div>`).join('')}</div>`;
+            container.innerHTML = allAgents.map(a => `<div class="detail-card" onclick="showAgentDetails('${a.id}')">${a.fullName} (${a.agentId})<br>${a.phone} <span class="status-badge ${a.status}">${a.status}</span></div>`).join('');
+            container.innerHTML += `<div class="card"><h4>Pending Applications</h4>${allAgentApps.filter(a=>a.status==='pending').map(app=>`<div class="detail-card" onclick="showAgentApplication('${app.id}')">${app.fullName} - ${app.phone}</div>`).join('')}</div>`;
         } else if(tab === 'admins') {
-            container.innerHTML = allAdmins.map(a => `<div class="floating-card">${a.fullName} - ${a.email} <button class="btn btn-danger btn-small" onclick="deleteAdmin('${a.id}')">Delete</button></div>`).join('');
-            container.innerHTML += `<button class="btn btn-primary" id="sudoCreateAdminBtn">+ Create New Admin</button>`;
+            container.innerHTML = allAdmins.map(a => `<div class="detail-card">${a.fullName} - ${a.email} <button class="btn btn-danger btn-small" onclick="deleteAdmin('${a.id}')">Delete</button></div>`).join('');
+            container.innerHTML += `<button class="btn btn-primary" id="sudoCreateAdminBtn">+ New Admin</button>`;
             document.getElementById('sudoCreateAdminBtn')?.addEventListener('click', () => openCreateAdminModal());
         } else if(tab === 'loans') {
-            container.innerHTML = allLoans.map(l => `<div class="loan-card" onclick="showLoanDetails('${l.id}')"><div><strong>${l.customerName}</strong> - ${utils.formatCurrency(l.amount)} - ${l.status}</div></div>`).join('');
+            container.innerHTML = allLoans.map(l => `<div class="loan-card" onclick="showLoanDetails('${l.id}')"><strong>${l.customerName}</strong> - ${utils.formatCurrency(l.amount)} <span class="status-badge ${l.status}">${l.status}</span></div>`).join('');
         } else if(tab === 'payments') {
-            container.innerHTML = allPayments.map(p => `<div class="floating-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} - ${p.status}</div>`).join('');
+            container.innerHTML = allPayments.map(p => `<div class="detail-card" onclick="showPaymentDetails('${p.id}')">${p.customerName} - ${utils.formatCurrency(p.amount)} <span class="status-badge ${p.status}">${p.status}</span></div>`).join('');
         } else if(tab === 'lending') {
-            container.innerHTML = `
-                <div class="floating-card"><h4>Loan Override</h4><div class="form-group"><input type="text" id="overrideLoanId" class="form-input" placeholder="Loan ID"></div><div class="form-group"><select id="overrideOp" class="form-select"><option>Change Status</option><option>Extend Duration</option><option>Adjust Amount</option></select></div><div class="form-group"><input type="text" id="overrideValue" class="form-input" placeholder="New value"></div><button class="btn btn-primary" id="executeOverrideBtn">Execute</button></div>
-                <div class="floating-card"><h4>Wallet Operations</h4><div class="form-group"><input type="text" id="walletId" class="form-input" placeholder="Wallet/Customer ID"></div><div class="form-group"><select id="walletOp" class="form-select"><option>Credit</option><option>Debit</option><option>Freeze</option></select></div><div class="form-group"><input type="number" id="walletAmount" class="form-input" placeholder="Amount"></div><button class="btn btn-primary" id="executeWalletBtn">Execute</button></div>
-                <div class="floating-card"><h4>KYC Review Queue</h4><div id="kycQueue"></div></div>`;
+            container.innerHTML = `<div class="card"><h4>Loan Override</h4><input type="text" id="overrideLoanId" class="form-input" placeholder="Loan ID"><select id="overrideOp" class="form-select mt-2"><option>Change Status</option><option>Extend Duration</option></select><input type="text" id="overrideValue" class="form-input mt-2" placeholder="New value"><button class="btn btn-primary mt-2" id="executeOverrideBtn">Execute</button></div>
+            <div class="card"><h4>KYC Queue</h4><div id="kycQueue"></div></div>`;
             const kycQueue = allCustomers.filter(c => !c.kycVerified).slice(0,5);
-            document.getElementById('kycQueue').innerHTML = kycQueue.map(c => `<div class="detail-card">${c.fullName} <button class="btn btn-small btn-primary" onclick="verifyKyc('${c.id}')">Verify KYC</button></div>`).join('');
+            document.getElementById('kycQueue').innerHTML = kycQueue.map(c => `<div class="detail-card">${c.fullName} <button class="btn btn-small btn-primary" onclick="verifyKyc('${c.id}')">Verify</button></div>`).join('');
         } else if(tab === 'database') {
-            container.innerHTML = `<div class="floating-card"><h4>Query Runner</h4><div class="form-group"><select id="dbTable" class="form-select"><option>users</option><option>loans</option><option>payments</option><option>commissionHistory</option><option>auditLogs</option></select></div><div class="form-group"><textarea id="dbQuery" class="form-textarea" rows="3" placeholder='{"status":"pending"}'></textarea></div><button class="btn btn-primary" id="runQueryBtn">Run Query</button><div id="queryResult" class="detail-grid" style="margin-top:16px;"></div></div>
-                <div class="floating-card"><h4>Backup & Recovery</h4><button class="btn btn-success" id="manualBackupBtn">Trigger Manual Backup</button><div id="backupStatus" class="text-muted mt-2"></div></div>`;
+            container.innerHTML = `<div class="card"><h4>Query Runner</h4><select id="dbTable" class="form-select"><option>users</option><option>loans</option><option>payments</option></select><textarea id="dbQuery" class="form-textarea mt-2" rows="2" placeholder='{"status":"pending"}'></textarea><button class="btn btn-primary mt-2" id="runQueryBtn">Run</button><div id="queryResult" class="mt-2"></div></div><div class="card"><button class="btn btn-success" id="manualBackupBtn">Manual Backup</button></div>`;
         } else if(tab === 'security') {
-            container.innerHTML = `<div class="floating-card"><h4>Security Policies</h4><div class="form-group"><label>MFA Required</label><input type="checkbox" id="mfaToggle" ${systemSettings.mfaRequired?'checked':''}></div><div class="form-group"><label>IP Whitelisting</label><input type="checkbox" id="ipWhitelistToggle" ${systemSettings.ipWhitelistEnabled?'checked':''}></div><div class="form-group"><label>Session Timeout (min)</label><input type="number" id="sessionTimeout" class="form-input" value="${systemSettings.sessionTimeout||30}"></div><button class="btn btn-primary" id="saveSecurityBtn">Save Policies</button></div>
-                <div class="floating-card"><h4>Audit Logs</h4><div id="auditLogsList"></div></div>
-                <div class="floating-card"><h4>Encryption Status</h4><div>Database: AES-256 <span class="status-badge active">Active</span></div><div>In-Transit: TLS 1.3 <span class="status-badge active">Active</span></div><div>Backup Encryption: <span id="backupEncryptStatus">72%</span></div></div>`;
-            document.getElementById('auditLogsList').innerHTML = allAuditLogs.slice(0,20).map(l => `<div class="detail-card">${l.action} - ${l.adminEmail} - ${utils.formatDateTime(l.timestamp)}</div>`).join('');
+            container.innerHTML = `<div class="card"><h4>Security Policies</h4><label><input type="checkbox" id="mfaToggle" ${systemSettings.mfaRequired?'checked':''}> MFA Required</label><br><label><input type="checkbox" id="ipWhitelistToggle" ${systemSettings.ipWhitelistEnabled?'checked':''}> IP Whitelisting</label><br><label>Session Timeout: <input type="number" id="sessionTimeout" class="form-input" value="${systemSettings.sessionTimeout||30}"></label><button class="btn btn-primary mt-2" id="saveSecurityBtn">Save</button></div><div class="card"><h4>Audit Logs</h4><div id="auditLogsList"></div></div>`;
+            document.getElementById('auditLogsList').innerHTML = allAuditLogs.slice(0,10).map(l => `<div class="detail-card">${l.action}<br><span class="text-muted">${l.adminEmail} ${utils.formatDateTime(l.timestamp)}</span></div>`).join('');
         } else if(tab === 'system') {
-            container.innerHTML = `<div class="grid-2"><div class="floating-card"><h4>General Settings</h4><div class="form-group"><label>Commission Rate (%)</label><input type="number" id="commissionRate" class="form-input" value="${systemSettings.commissionRate||15}"></div><div class="form-group"><label>Monthly Interest (%)</label><input type="number" id="monthlyInterest" class="form-input" value="${systemSettings.monthlyInterestRate||35}"></div><div class="form-group"><label>Weekly Interest (%)</label><input type="number" id="weeklyInterest" class="form-input" value="${systemSettings.weeklyInterestRate||10}"></div><div class="form-group"><label>Max Loan (K)</label><input type="number" id="maxLoanAmount" class="form-input" value="${systemSettings.maxLoanAmount||50000}"></div><div class="form-group"><label>Min Loan (K)</label><input type="number" id="minLoanAmount" class="form-input" value="${systemSettings.minLoanAmount||100}"></div><div class="form-group"><label>Enable Customer App</label><input type="checkbox" id="enableCustomerApp" ${systemSettings.enableCustomerApp!==false?'checked':''}></div><div class="form-group"><label>Enable Agent App</label><input type="checkbox" id="enableAgentApp" ${systemSettings.enableAgentApp!==false?'checked':''}></div><button class="btn btn-primary" id="saveSystemBtn">Save Settings</button></div><div class="floating-card"><h4>Danger Zone</h4><button class="btn btn-danger" id="sudoResetBtn">Sudo Reset Database</button></div></div>`;
+            container.innerHTML = `<div class="card"><h4>System Settings</h4><label>Commission (%): <input type="number" id="commissionRate" class="form-input" value="${systemSettings.commissionRate||15}"></label><label>Monthly Interest: <input type="number" id="monthlyInterest" class="form-input" value="${systemSettings.monthlyInterestRate||35}"></label><label>Max Loan: <input type="number" id="maxLoanAmount" class="form-input" value="${systemSettings.maxLoanAmount||50000}"></label><label><input type="checkbox" id="enableCustomerApp" ${systemSettings.enableCustomerApp!==false?'checked':''}> Enable Customer App</label><button class="btn btn-primary mt-2" id="saveSystemBtn">Save</button></div><div class="card"><button class="btn btn-danger" id="sudoResetBtn">⚠️ Wipe Database</button></div>`;
         } else if(tab === 'reports') {
             const totalLent = allLoans.filter(l=>l.status==='active'||l.status==='approved').reduce((s,l)=>s+(l.amount||0),0);
-            const totalRepaid = allPayments.filter(p=>p.status==='confirmed').reduce((s,p)=>s+p.amount,0);
-            const interest = allLoans.reduce((s,l)=>s+(l.totalInterest||0),0);
-            const commissionPaid = allCommission.filter(c=>c.status==='paid').reduce((s,c)=>s+c.amount,0);
-            container.innerHTML = `<div class="floating-card"><h4>Financial Summary</h4><div class="grid-3"><div class="detail-card">Total Lent: ${utils.formatCurrency(totalLent)}</div><div class="detail-card">Repaid: ${utils.formatCurrency(totalRepaid)}</div><div class="detail-card">Interest: ${utils.formatCurrency(interest)}</div><div class="detail-card">Commission Paid: ${utils.formatCurrency(commissionPaid)}</div><div class="detail-card">Net Profit: ${utils.formatCurrency(interest - commissionPaid)}</div></div></div>
-            <div class="floating-card"><h4>Export Data</h4><button class="btn btn-outline" id="exportCustomersCsv">Customers CSV</button> <button class="btn btn-outline" id="exportLoansCsv">Loans CSV</button> <button class="btn btn-outline" id="exportPaymentsCsv">Payments CSV</button></div>
-            <div class="floating-card"><canvas id="loanTrendChart" height="200"></canvas></div>`;
-            document.getElementById('exportCustomersCsv').onclick = () => exportToCSV(allCustomers.map(c=>({Name:c.fullName,Email:c.email,Phone:c.phone,Status:c.status})), 'customers.csv');
-            document.getElementById('exportLoansCsv').onclick = () => exportToCSV(allLoans.map(l=>({ID:l.id,Customer:l.customerName,Amount:l.amount,Status:l.status})), 'loans.csv');
-            document.getElementById('exportPaymentsCsv').onclick = () => exportToCSV(allPayments.map(p=>({Customer:p.customerName,Amount:p.amount,Status:p.status,Date:utils.formatDateTime(p.timestamp)})), 'payments.csv');
-            new Chart(document.getElementById('loanTrendChart'), { type:'line', data:{ labels:['Jan','Feb','Mar','Apr','May','Jun'], datasets:[{ label:'Loans', data:[12,19,15,22,30,25], borderColor:'#00e5b8' }] } });
+            container.innerHTML = `<div class="card"><h4>Financial Summary</h4><div class="stats-grid"><div class="stat-card">Lent: ${utils.formatCurrency(totalLent)}</div><div class="stat-card">Repaid: ${utils.formatCurrency(allPayments.filter(p=>p.status==='confirmed').reduce((s,p)=>s+p.amount,0))}</div></div></div><div class="card"><button class="btn btn-outline" id="exportCustomersCsv">Export Customers</button><button class="btn btn-outline mt-2" id="exportLoansCsv">Export Loans</button></div>`;
+            document.getElementById('exportCustomersCsv')?.addEventListener('click', () => exportToCSV(allCustomers.map(c=>({Name:c.fullName,Email:c.email})), 'customers.csv'));
+            document.getElementById('exportLoansCsv')?.addEventListener('click', () => exportToCSV(allLoans.map(l=>({ID:l.id,Customer:l.customerName,Amount:l.amount})), 'loans.csv'));
         }
-        // Attach dynamic event listeners
+        // Attach dynamic listeners for sudo tabs
         document.getElementById('executeOverrideBtn')?.addEventListener('click', async () => {
             const loanId = document.getElementById('overrideLoanId').value;
             const op = document.getElementById('overrideOp').value;
@@ -820,11 +684,9 @@
             if(!loanId) return;
             if(op === 'Change Status') await db.ref('loans/'+loanId).update({status: val});
             else if(op === 'Extend Duration') await db.ref('loans/'+loanId).update({duration: parseInt(val)});
-            else if(op === 'Adjust Amount') await db.ref('loans/'+loanId).update({amount: parseFloat(val)});
             utils.showToast('Done', 'Override executed', 'success');
             loadAllData();
         });
-        document.getElementById('executeWalletBtn')?.addEventListener('click', () => utils.showToast('Wallet', 'Operation simulated', 'info'));
         document.getElementById('runQueryBtn')?.addEventListener('click', async () => {
             const table = document.getElementById('dbTable').value;
             const filter = document.getElementById('dbQuery').value.trim();
@@ -834,7 +696,7 @@
                 const cond = JSON.parse(filter);
                 data = Object.entries(data).filter(([k,v]) => Object.entries(cond).every(([ck,cv]) => v[ck]==cv)).reduce((a,[k,v])=>({...a,[k]:v}),{});
             }
-            document.getElementById('queryResult').innerHTML = `<pre>${JSON.stringify(data,null,2).substring(0,1000)}</pre>`;
+            document.getElementById('queryResult').innerHTML = `<pre>${JSON.stringify(data,null,2).substring(0,500)}</pre>`;
         });
         document.getElementById('manualBackupBtn')?.addEventListener('click', () => utils.showToast('Backup', 'Manual backup triggered', 'success'));
         document.getElementById('saveSecurityBtn')?.addEventListener('click', async () => {
@@ -842,29 +704,19 @@
             utils.showToast('Saved', 'Security policies saved', 'success');
         });
         document.getElementById('saveSystemBtn')?.addEventListener('click', async () => {
-            await db.ref('systemSettings').update({
-                commissionRate: parseFloat(document.getElementById('commissionRate').value),
-                monthlyInterestRate: parseFloat(document.getElementById('monthlyInterest').value),
-                weeklyInterestRate: parseFloat(document.getElementById('weeklyInterest').value),
-                maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value),
-                minLoanAmount: parseFloat(document.getElementById('minLoanAmount').value),
-                enableCustomerApp: document.getElementById('enableCustomerApp').checked,
-                enableAgentApp: document.getElementById('enableAgentApp').checked
-            });
+            await db.ref('systemSettings').update({ commissionRate: parseFloat(document.getElementById('commissionRate').value), monthlyInterestRate: parseFloat(document.getElementById('monthlyInterest').value), maxLoanAmount: parseFloat(document.getElementById('maxLoanAmount').value), enableCustomerApp: document.getElementById('enableCustomerApp').checked });
             utils.showToast('Saved', 'System settings saved', 'success');
         });
         document.getElementById('sudoResetBtn')?.addEventListener('click', () => {
-            if(confirm('⚠️ WARNING: This will DELETE ALL DATA. Type "RESET" to confirm.')) {
-                if(prompt('Type "RESET" to proceed') === 'RESET') {
-                    db.ref().set(null).then(() => { utils.showToast('Wiped', 'Database cleared', 'error'); setTimeout(()=>location.reload(),2000); });
-                }
+            if(confirm('WIPE ALL DATA? Type "RESET"')) {
+                if(prompt('Type "RESET"') === 'RESET') { db.ref().set(null); utils.showToast('Wiped', 'Database cleared', 'error'); setTimeout(()=>location.reload(),2000); }
             }
         });
     }
 
     function exportToCSV(data, filename) {
         const csv = Papa.unparse(data);
-        const blob = new Blob(['\uFEFF'+csv], {type:'text/csv;charset=utf-8;'});
+        const blob = new Blob(['\uFEFF'+csv], {type:'text/csv'});
         const link = document.createElement('a');
         link.href = URL.createObjectURL(blob);
         link.download = filename;
@@ -875,18 +727,11 @@
     window.showCustomerDetails = async (id) => {
         const c = allCustomers.find(c=>c.id===id);
         if(!c) return;
-        const html = `<div class="form-group"><label>Full Name</label><input type="text" id="editFullName" class="form-input" value="${c.fullName||''}"></div><div class="form-group"><label>Email</label><input type="email" id="editEmail" class="form-input" value="${c.email||''}"></div><div class="form-group"><label>Phone</label><input type="text" id="editPhone" class="form-input" value="${c.phone||''}"></div><div class="form-group"><label>NRC</label><input type="text" id="editNrc" class="form-input" value="${c.nrc||''}"></div><div class="form-group"><label>Address</label><input type="text" id="editAddress" class="form-input" value="${c.residence||''}"></div><div class="form-group"><label>Status</label><select id="editStatus" class="form-select"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="banned" ${c.status==='banned'?'selected':''}>Banned</option></select></div>`;
+        const html = `<div class="form-group"><label>Name</label><input id="editFullName" class="form-input" value="${c.fullName||''}"></div><div class="form-group"><label>Email</label><input id="editEmail" class="form-input" value="${c.email||''}"></div><div class="form-group"><label>Phone</label><input id="editPhone" class="form-input" value="${c.phone||''}"></div><div class="form-group"><label>Status</label><select id="editStatus" class="form-select"><option value="active" ${c.status==='active'?'selected':''}>Active</option><option value="banned" ${c.status==='banned'?'selected':''}>Banned</option></select></div>`;
         document.getElementById('genericModalBody').innerHTML = html;
         document.getElementById('modalTitle').innerText = 'Edit Customer';
         document.getElementById('modalActionBtn').onclick = async () => {
-            await db.ref('users/'+id).update({
-                fullName: document.getElementById('editFullName').value,
-                email: document.getElementById('editEmail').value,
-                phone: document.getElementById('editPhone').value,
-                nrc: document.getElementById('editNrc').value,
-                residence: document.getElementById('editAddress').value,
-                status: document.getElementById('editStatus').value
-            });
+            await db.ref('users/'+id).update({ fullName: document.getElementById('editFullName').value, email: document.getElementById('editEmail').value, phone: document.getElementById('editPhone').value, status: document.getElementById('editStatus').value });
             utils.showToast('Updated', 'Customer updated', 'success');
             closeModal('genericModal'); loadAllData();
         };
@@ -895,17 +740,11 @@
     window.showAgentDetails = async (id) => {
         const a = allAgents.find(a=>a.id===id);
         if(!a) return;
-        const html = `<div class="form-group"><label>Full Name</label><input type="text" id="editAgentName" class="form-input" value="${a.fullName||''}"></div><div class="form-group"><label>Email</label><input type="email" id="editAgentEmail" class="form-input" value="${a.email||''}"></div><div class="form-group"><label>Phone</label><input type="text" id="editAgentPhone" class="form-input" value="${a.phone||''}"></div><div class="form-group"><label>Agent ID</label><input type="text" id="editAgentId" class="form-input" value="${a.agentId||''}"></div><div class="form-group"><label>Status</label><select id="editAgentStatus" class="form-select"><option value="active" ${a.status==='active'?'selected':''}>Active</option><option value="banned" ${a.status==='banned'?'selected':''}>Banned</option></select></div>`;
+        const html = `<div class="form-group"><label>Name</label><input id="editAgentName" class="form-input" value="${a.fullName||''}"></div><div class="form-group"><label>Email</label><input id="editAgentEmail" class="form-input" value="${a.email||''}"></div><div class="form-group"><label>Phone</label><input id="editAgentPhone" class="form-input" value="${a.phone||''}"></div><div class="form-group"><label>Status</label><select id="editAgentStatus" class="form-select"><option value="active" ${a.status==='active'?'selected':''}>Active</option><option value="banned" ${a.status==='banned'?'selected':''}>Banned</option></select></div>`;
         document.getElementById('genericModalBody').innerHTML = html;
         document.getElementById('modalTitle').innerText = 'Edit Agent';
         document.getElementById('modalActionBtn').onclick = async () => {
-            await db.ref('users/'+id).update({
-                fullName: document.getElementById('editAgentName').value,
-                email: document.getElementById('editAgentEmail').value,
-                phone: document.getElementById('editAgentPhone').value,
-                agentId: document.getElementById('editAgentId').value,
-                status: document.getElementById('editAgentStatus').value
-            });
+            await db.ref('users/'+id).update({ fullName: document.getElementById('editAgentName').value, email: document.getElementById('editAgentEmail').value, phone: document.getElementById('editAgentPhone').value, status: document.getElementById('editAgentStatus').value });
             utils.showToast('Updated', 'Agent updated', 'success');
             closeModal('genericModal'); loadAllData();
         };
@@ -916,17 +755,15 @@
         if(!loan) return;
         let scheduleHtml = '';
         if(loan.repaymentSchedule) {
-            scheduleHtml = '<table style="width:100%"><tr><th>#</th><th>Due</th><th>Amount</th><th>Paid</th><th>Status</th></tr>';
+            scheduleHtml = '<table style="width:100%"><tr><th>#</th><th>Due</th><th>Amount</th><th>Paid</th></tr>';
             loan.repaymentSchedule.forEach(inst => {
-                scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.totalDue)}</td><td>${utils.formatCurrency(inst.paidAmount||0)}</td><td>${inst.status}</td></tr>`;
+                scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.totalDue)}</td><td>${utils.formatCurrency(inst.paidAmount||0)}</td></tr>`;
             });
             scheduleHtml += '</table>';
         }
-        const agreementBtn = loan.signedAgreementUrl ? `<button class="btn btn-outline" onclick="viewAgreement('${loan.signedAgreementUrl}')">View Agreement</button>` : '';
         const approveBtn = loan.status === 'pending' ? `<button class="btn btn-success" onclick="approveLoan('${loan.id}')">Approve</button>` : '';
         const rejectBtn = loan.status === 'pending' ? `<button class="btn btn-danger" onclick="openRejectModal('${loan.id}')">Reject</button>` : '';
-        const recordPaymentBtn = (loan.status === 'active' || loan.status === 'approved') ? `<button class="btn btn-primary" onclick="openRecordPayment('${loan.id}')">Record Payment</button>` : '';
-        document.getElementById('loanDetailsBody').innerHTML = `<div><strong>Customer:</strong> ${loan.customerName}</div><div><strong>Amount:</strong> ${utils.formatCurrency(loan.amount)}</div><div><strong>Status:</strong> ${loan.status}</div><div><strong>Duration:</strong> ${loan.duration} ${loan.durationUnit||'months'}</div><div><strong>Total Paid:</strong> ${utils.formatCurrency(loan.totalPaid||0)}</div><div><strong>Collateral:</strong> ${loan.collateral?.category||'N/A'}</div>${loan.collateral?.images ? `<div><strong>Images:</strong> ${loan.collateral.images.map(img=>`<a href="${img}" target="_blank">View</a>`).join(', ')}</div>` : ''}<hr><h4>Schedule</h4>${scheduleHtml}<hr><div class="grid-2">${approveBtn} ${rejectBtn} ${agreementBtn} ${recordPaymentBtn}</div>`;
+        document.getElementById('loanDetailsBody').innerHTML = `<div><strong>${loan.customerName}</strong><br>Amount: ${utils.formatCurrency(loan.amount)}<br>Status: ${loan.status}</div>${scheduleHtml}<div class="grid-2 mt-2">${approveBtn} ${rejectBtn}</div>`;
         openModal('loanDetailsModal');
     };
     window.showPaymentDetails = async (id) => {
@@ -934,13 +771,13 @@
         if(!payment) return;
         const confirmBtn = payment.status === 'pending' ? `<button class="btn btn-success" onclick="confirmPayment('${payment.id}')">Confirm</button>` : '';
         const rejectBtn = payment.status === 'pending' ? `<button class="btn btn-danger" onclick="rejectPayment('${payment.id}')">Reject</button>` : '';
-        document.getElementById('paymentDetailsBody').innerHTML = `<div><strong>Customer:</strong> ${payment.customerName}</div><div><strong>Amount:</strong> ${utils.formatCurrency(payment.amount)}</div><div><strong>Method:</strong> ${payment.method}</div><div><strong>Status:</strong> ${payment.status}</div>${payment.proofUrl ? `<div><strong>Proof:</strong> <a href="${payment.proofUrl}" target="_blank">View</a></div>` : ''}<hr>${confirmBtn} ${rejectBtn}`;
+        document.getElementById('paymentDetailsBody').innerHTML = `<div><strong>${payment.customerName}</strong><br>Amount: ${utils.formatCurrency(payment.amount)}<br>Method: ${payment.method}<br>Status: ${payment.status}</div><div class="grid-2 mt-2">${confirmBtn} ${rejectBtn}</div>`;
         openModal('paymentDetailsModal');
     };
     window.showAgentApplication = async (id) => {
         const app = allAgentApps.find(a=>a.id===id);
         if(!app) return;
-        const html = `<div><strong>Name:</strong> ${app.fullName}</div><div><strong>Phone:</strong> ${app.phone}</div><div><strong>NRC:</strong> ${app.nrc}</div><div><strong>Residence:</strong> ${app.residence}</div><div><strong>Submitted:</strong> ${utils.formatDateTime(app.submittedAt)}</div><div><strong>Documents:</strong> <a href="${app.nrcFront}" target="_blank">NRC Front</a>, <a href="${app.nrcBack}" target="_blank">NRC Back</a>, <a href="${app.profilePhoto}" target="_blank">Profile</a></div><hr><button class="btn btn-success" onclick="approveAgentApp('${id}')">Approve & Create Agent</button><button class="btn btn-danger" onclick="rejectAgentApp('${id}')">Reject</button>`;
+        const html = `<div><strong>${app.fullName}</strong><br>Phone: ${app.phone}<br>NRC: ${app.nrc}</div><div class="grid-2 mt-2"><button class="btn btn-success" onclick="approveAgentApp('${id}')">Approve</button><button class="btn btn-danger" onclick="rejectAgentApp('${id}')">Reject</button></div>`;
         document.getElementById('genericModalBody').innerHTML = html;
         document.getElementById('modalTitle').innerText = 'Agent Application';
         document.getElementById('modalActionBtn').style.display = 'none';
@@ -949,34 +786,34 @@
     window.approveAgentApp = async (appId) => {
         const app = allAgentApps.find(a=>a.id===appId);
         if(!app) return;
-        const email = prompt('Enter email for agent account:');
+        const email = prompt('Agent email:');
         if(!email) return;
-        const password = prompt('Enter password:');
+        const password = prompt('Password:');
         if(!password) return;
         utils.showLoading('Creating agent...');
         try {
             const cred = await auth.createUserWithEmailAndPassword(email, password);
             const agentId = 'AG' + Date.now().toString().slice(-6);
             await db.ref('users/'+cred.user.uid).set({ fullName: app.fullName, phone: app.phone, nrc: app.nrc, residence: app.residence, email, agentId, userType:'agent', status:'active', profilePhoto: app.profilePhoto, nrcFront: app.nrcFront, nrcBack: app.nrcBack, createdAt: Date.now() });
-            await db.ref('agentApplications/'+appId).update({ status:'approved', reviewedAt: Date.now() });
+            await db.ref('agentApplications/'+appId).update({ status:'approved' });
             utils.showToast('Success', 'Agent created', 'success');
             closeModal('genericModal'); loadAllData();
         } catch(e) { utils.showToast('Error', e.message, 'error'); }
         utils.hideLoading();
     };
     window.rejectAgentApp = async (appId) => {
-        await db.ref('agentApplications/'+appId).update({ status:'rejected', reviewedAt: Date.now() });
+        await db.ref('agentApplications/'+appId).update({ status:'rejected' });
         utils.showToast('Rejected', 'Application rejected', 'info');
         closeModal('genericModal'); loadAllData();
     };
     window.approveLoan = async (loanId) => {
-        await db.ref('loans/'+loanId).update({ status:'approved', approvedAt: Date.now() });
+        await db.ref('loans/'+loanId).update({ status:'approved' });
         utils.showToast('Approved', 'Loan approved', 'success');
         closeModal('loanDetailsModal'); loadAllData();
     };
     window.openRejectModal = (loanId) => {
         pendingRejectCallback = async (reason) => {
-            await db.ref('loans/'+loanId).update({ status:'rejected', rejectionReason: reason, rejectedAt: Date.now() });
+            await db.ref('loans/'+loanId).update({ status:'rejected', rejectionReason: reason });
             utils.showToast('Rejected', 'Loan rejected', 'info');
             closeModal('rejectionModal'); closeModal('loanDetailsModal'); loadAllData();
         };
@@ -984,12 +821,12 @@
         openModal('rejectionModal');
     };
     window.confirmPayment = async (paymentId) => {
-        await db.ref('payments/'+paymentId).update({ status:'confirmed', verifiedAt: Date.now() });
+        await db.ref('payments/'+paymentId).update({ status:'confirmed' });
         utils.showToast('Confirmed', 'Payment confirmed', 'success');
         closeModal('paymentDetailsModal'); loadAllData();
     };
     window.rejectPayment = async (paymentId) => {
-        await db.ref('payments/'+paymentId).update({ status:'rejected', rejectedAt: Date.now() });
+        await db.ref('payments/'+paymentId).update({ status:'rejected' });
         utils.showToast('Rejected', 'Payment rejected', 'info');
         closeModal('paymentDetailsModal'); loadAllData();
     };
@@ -999,48 +836,19 @@
         loadAllData();
     };
     window.deleteAdmin = async (id) => {
-        if(confirm('Delete this admin?')) { await db.ref('users/'+id).remove(); loadAllData(); }
-    };
-    window.viewAgreement = (url) => { document.getElementById('agreementFrame').src = url; openModal('agreementModal'); };
-    window.openRecordPayment = (loanId) => {
-        document.getElementById('payAmount').value = '';
-        document.getElementById('payProofUrl').value = '';
-        document.getElementById('payProofPreview').innerHTML = '';
-        document.getElementById('submitPaymentBtn').onclick = async () => {
-            const amount = parseFloat(document.getElementById('payAmount').value);
-            const method = document.getElementById('payMethod').value;
-            const proofUrl = document.getElementById('payProofUrl').value;
-            if(!amount || amount<=0) { alert('Enter amount'); return; }
-            utils.showLoading('Recording payment...');
-            try {
-                const paymentId = utils.generateId('PAY');
-                await db.ref('payments/'+paymentId).set({
-                    id: paymentId, loanId, customerId: currentUser.uid, customerName: currentUserData.fullName,
-                    amount, method, proofUrl, timestamp: Date.now(), status: 'pending'
-                });
-                utils.showToast('Success', 'Payment submitted for verification', 'success');
-                closeModal('paymentModal');
-                loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        openModal('paymentModal');
+        if(confirm('Delete admin?')) { await db.ref('users/'+id).remove(); loadAllData(); }
     };
 
     // ==================== CREATE MODALS ====================
     function openCreateAdminModal() {
-        document.getElementById('genericModalBody').innerHTML = `
-            <div class="form-group"><label>Full Name</label><input type="text" id="newAdminName" class="form-input"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="newAdminEmail" class="form-input"></div>
-            <div class="form-group"><label>Password</label><input type="password" id="newAdminPassword" class="form-input"></div>
-            <div class="form-group"><label>Confirm</label><input type="password" id="newAdminConfirm" class="form-input"></div>`;
+        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Name</label><input id="newAdminName" class="form-input"></div><div class="form-group"><label>Email</label><input id="newAdminEmail" class="form-input"></div><div class="form-group"><label>Password</label><input id="newAdminPassword" class="form-input"></div><div class="form-group"><label>Confirm</label><input id="newAdminConfirm" class="form-input"></div>`;
         document.getElementById('modalTitle').innerText = 'Create Admin';
         document.getElementById('modalActionBtn').onclick = async () => {
             const email = document.getElementById('newAdminEmail').value;
             const pwd = document.getElementById('newAdminPassword').value;
             const confirm = document.getElementById('newAdminConfirm').value;
             if(!email || !pwd || pwd!==confirm) { alert('Check fields'); return; }
-            utils.showLoading('Creating admin...');
+            utils.showLoading('Creating...');
             try {
                 const cred = await auth.createUserWithEmailAndPassword(email, pwd);
                 await db.ref('users/'+cred.user.uid).set({ fullName: document.getElementById('newAdminName').value, email, userType:'admin', status:'active', createdAt: Date.now() });
@@ -1051,12 +859,49 @@
         };
         openModal('genericModal');
     }
+    document.getElementById('adminCreateCustomer')?.addEventListener('click', () => {
+        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Name</label><input id="newCustName" class="form-input"></div><div class="form-group"><label>Email</label><input id="newCustEmail" class="form-input"></div><div class="form-group"><label>Phone</label><input id="newCustPhone" class="form-input"></div><div class="form-group"><label>Password</label><input id="newCustPassword" class="form-input"></div>`;
+        document.getElementById('modalTitle').innerText = 'Create Customer';
+        document.getElementById('modalActionBtn').onclick = async () => {
+            const email = document.getElementById('newCustEmail').value;
+            const pwd = document.getElementById('newCustPassword').value;
+            if(!email || !pwd) { alert('Email and password required'); return; }
+            utils.showLoading('Creating...');
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+                await db.ref('users/'+cred.user.uid).set({ fullName: document.getElementById('newCustName').value, email, phone: document.getElementById('newCustPhone').value, userType:'customer', status:'active', createdAt: Date.now() });
+                utils.showToast('Success', 'Customer created', 'success');
+                closeModal('genericModal'); loadAllData();
+            } catch(e) { utils.showToast('Error', e.message, 'error'); }
+            utils.hideLoading();
+        };
+        openModal('genericModal');
+    });
+    document.getElementById('adminCreateAgent')?.addEventListener('click', () => {
+        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Name</label><input id="newAgentName" class="form-input"></div><div class="form-group"><label>Email</label><input id="newAgentEmail" class="form-input"></div><div class="form-group"><label>Phone</label><input id="newAgentPhone" class="form-input"></div><div class="form-group"><label>Agent ID</label><input id="newAgentId" class="form-input"></div><div class="form-group"><label>Password</label><input id="newAgentPassword" class="form-input"></div>`;
+        document.getElementById('modalTitle').innerText = 'Create Agent';
+        document.getElementById('modalActionBtn').onclick = async () => {
+            const email = document.getElementById('newAgentEmail').value;
+            const pwd = document.getElementById('newAgentPassword').value;
+            if(!email || !pwd) { alert('Email and password required'); return; }
+            utils.showLoading('Creating...');
+            try {
+                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
+                await db.ref('users/'+cred.user.uid).set({ fullName: document.getElementById('newAgentName').value, email, phone: document.getElementById('newAgentPhone').value, agentId: document.getElementById('newAgentId').value, userType:'agent', status:'active', createdAt: Date.now() });
+                utils.showToast('Success', 'Agent created', 'success');
+                closeModal('genericModal'); loadAllData();
+            } catch(e) { utils.showToast('Error', e.message, 'error'); }
+            utils.hideLoading();
+        };
+        openModal('genericModal');
+    });
+    document.getElementById('adminCreateAdmin')?.addEventListener('click', () => openCreateAdminModal());
 
     // ==================== CUSTOMER LOAN APPLICATION ====================
     document.getElementById('custApplyLoan')?.addEventListener('click', () => {
         uploadedCollateral = {};
-        const uploadsDiv = document.getElementById('collateralUploads');
-        uploadsDiv.innerHTML = '';
+        const uploadsDiv = document.createElement('div');
+        uploadsDiv.className = 'grid-2';
         for(let i=0; i<4; i++) {
             const box = document.createElement('div');
             box.className = 'upload-box';
@@ -1066,27 +911,34 @@
             box.onclick = () => openCloudinaryUpload('collateral', i);
             uploadsDiv.appendChild(box);
         }
-        document.getElementById('custLoanAppForm').style.display = 'block';
         const modalBody = document.getElementById('genericModalBody');
-        modalBody.innerHTML = document.getElementById('custLoanAppForm').innerHTML;
+        modalBody.innerHTML = `<div class="form-group"><label>Amount (K)</label><input id="loanAmount" class="form-input" type="number"></div><div class="form-group"><label>Duration (months)</label><select id="loanDuration" class="form-select"><option>3</option><option>6</option><option>12</option></select></div><div class="form-group"><label>Purpose</label><textarea id="loanPurpose" class="form-textarea"></textarea></div><div><label>Collateral Images (min 3)</label>${uploadsDiv.outerHTML}</div>`;
         document.getElementById('modalTitle').innerText = 'Apply for Loan';
         document.getElementById('modalActionBtn').style.display = 'none';
         const submitBtn = document.createElement('button');
-        submitBtn.className = 'btn btn-primary';
-        submitBtn.innerText = 'Submit Application';
+        submitBtn.className = 'btn btn-primary mt-2';
+        submitBtn.innerText = 'Submit';
         submitBtn.onclick = async () => {
             const amount = parseFloat(document.getElementById('loanAmount').value);
             const duration = parseInt(document.getElementById('loanDuration').value);
             const purpose = document.getElementById('loanPurpose').value;
             const collateralImages = Object.values(uploadedCollateral);
             if(!amount || amount<100 || collateralImages.length<3) { alert('Amount min 100, upload at least 3 collateral images'); return; }
-            utils.showLoading('Submitting application...');
+            utils.showLoading('Submitting...');
             try {
                 const rate = (systemSettings.monthlyInterestRate || 35) / 100;
                 const totalInterest = amount * rate * duration;
                 const totalPayable = amount + totalInterest;
                 const periodicPayment = totalPayable / duration;
-                const repaymentSchedule = utils.generateRepaymentSchedule(amount, rate, duration, false);
+                let repaymentSchedule = [];
+                let balance = amount;
+                for(let i=1; i<=duration; i++) {
+                    const interest = balance * rate;
+                    const principal = periodicPayment - interest;
+                    balance -= principal;
+                    const dueDate = moment().add(i, 'months').valueOf();
+                    repaymentSchedule.push({ installment: i, dueDate, principal, interest, totalDue: periodicPayment, paidAmount: 0, status: 'pending', penalty: 0 });
+                }
                 const loanId = utils.generateId('LN');
                 await db.ref('loans/'+loanId).set({
                     id: loanId, customerId: currentUser.uid, customerName: currentUserData.fullName,
@@ -1105,143 +957,44 @@
         openModal('genericModal');
     });
     document.getElementById('custMakePayment')?.addEventListener('click', () => {
-        const loanSelect = document.createElement('select');
-        loanSelect.id = 'payLoanSelect';
-        loanSelect.className = 'form-select';
-        loanSelect.innerHTML = '<option>Select Loan</option>' + allLoans.filter(l=>l.status==='active'||l.status==='approved').map(l=>`<option value="${l.id}">${l.id.substring(0,8)} - ${utils.formatCurrency(l.amount)}</option>`).join('');
-        document.getElementById('genericModalBody').innerHTML = `<div class="form-group"><label>Loan</label></div><div class="form-group"><label>Amount</label><input type="number" id="payAmt" class="form-input"></div><div class="form-group"><label>Method</label><select id="payMeth" class="form-select"><option>Cash</option><option>Mobile Money</option></select></div><div class="form-group"><label>Proof</label><div class="upload-box" data-type="payment-proof" onclick="openCloudinaryUpload('payment-proof')"><i class="fas fa-camera"></i><span>Upload</span><div class="upload-preview" id="payProofPreview2"></div></div><input type="hidden" id="payProofUrl2"></div>`;
-        document.getElementById('genericModalBody').prepend(loanSelect);
-        document.getElementById('modalTitle').innerText = 'Make Payment';
-        document.getElementById('modalActionBtn').innerText = 'Submit';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            const loanId = document.getElementById('payLoanSelect').value;
-            const amount = parseFloat(document.getElementById('payAmt').value);
-            const method = document.getElementById('payMeth').value;
-            const proofUrl = document.getElementById('payProofUrl2').value;
-            if(!loanId || !amount) { alert('Select loan and amount'); return; }
-            utils.showLoading('Processing...');
+        document.getElementById('payAmount').value = '';
+        document.getElementById('payProofUrl').value = '';
+        document.getElementById('payProofPreview').innerHTML = '';
+        document.getElementById('submitPaymentBtn').onclick = async () => {
+            const amount = parseFloat(document.getElementById('payAmount').value);
+            const method = document.getElementById('payMethod').value;
+            const proofUrl = document.getElementById('payProofUrl').value;
+            if(!amount || amount<=0) { alert('Enter amount'); return; }
+            utils.showLoading('Recording...');
             try {
                 const paymentId = utils.generateId('PAY');
                 await db.ref('payments/'+paymentId).set({
-                    id: paymentId, loanId, customerId: currentUser.uid, customerName: currentUserData.fullName,
+                    id: paymentId, loanId: 'manual', customerId: currentUser.uid, customerName: currentUserData.fullName,
                     amount, method, proofUrl, timestamp: Date.now(), status: 'pending'
                 });
                 utils.showToast('Success', 'Payment submitted', 'success');
-                closeModal('genericModal'); loadAllData();
+                closeModal('paymentModal');
+                loadAllData();
             } catch(e) { utils.showToast('Error', e.message, 'error'); }
             utils.hideLoading();
         };
-        openModal('genericModal');
+        openModal('paymentModal');
     });
-
-    // ==================== ADMIN CREATE MODALS ====================
-    document.getElementById('adminCreateCustomer')?.addEventListener('click', () => openCreateCustomerModal());
-    document.getElementById('adminCreateAgent')?.addEventListener('click', () => openCreateAgentModal());
-    document.getElementById('adminCreateAdmin')?.addEventListener('click', () => openCreateAdminModal());
-    function openCreateCustomerModal() {
-        document.getElementById('genericModalBody').innerHTML = `
-            <div class="form-group"><label>Full Name</label><input type="text" id="newCustName" class="form-input"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="newCustEmail" class="form-input"></div>
-            <div class="form-group"><label>Phone</label><input type="text" id="newCustPhone" class="form-input"></div>
-            <div class="form-group"><label>NRC</label><input type="text" id="newCustNrc" class="form-input"></div>
-            <div class="form-group"><label>Address</label><input type="text" id="newCustAddress" class="form-input"></div>
-            <div class="form-group"><label>Password</label><input type="password" id="newCustPassword" class="form-input"></div>`;
-        document.getElementById('modalTitle').innerText = 'Create Customer';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            const email = document.getElementById('newCustEmail').value;
-            const pwd = document.getElementById('newCustPassword').value;
-            if(!email || !pwd) { alert('Email and password required'); return; }
-            utils.showLoading('Creating...');
-            try {
-                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-                await db.ref('users/'+cred.user.uid).set({
-                    fullName: document.getElementById('newCustName').value, email, phone: document.getElementById('newCustPhone').value,
-                    nrc: document.getElementById('newCustNrc').value, residence: document.getElementById('newCustAddress').value,
-                    userType:'customer', status:'active', createdAt: Date.now()
-                });
-                utils.showToast('Success', 'Customer created', 'success');
-                closeModal('genericModal'); loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        openModal('genericModal');
-    }
-    function openCreateAgentModal() {
-        document.getElementById('genericModalBody').innerHTML = `
-            <div class="form-group"><label>Full Name</label><input type="text" id="newAgentName" class="form-input"></div>
-            <div class="form-group"><label>Email</label><input type="email" id="newAgentEmail" class="form-input"></div>
-            <div class="form-group"><label>Phone</label><input type="text" id="newAgentPhone" class="form-input"></div>
-            <div class="form-group"><label>Agent ID</label><input type="text" id="newAgentId" class="form-input"></div>
-            <div class="form-group"><label>Password</label><input type="password" id="newAgentPassword" class="form-input"></div>`;
-        document.getElementById('modalTitle').innerText = 'Create Agent';
-        document.getElementById('modalActionBtn').onclick = async () => {
-            const email = document.getElementById('newAgentEmail').value;
-            const pwd = document.getElementById('newAgentPassword').value;
-            if(!email || !pwd) { alert('Email and password required'); return; }
-            utils.showLoading('Creating...');
-            try {
-                const cred = await auth.createUserWithEmailAndPassword(email, pwd);
-                await db.ref('users/'+cred.user.uid).set({
-                    fullName: document.getElementById('newAgentName').value, email, phone: document.getElementById('newAgentPhone').value,
-                    agentId: document.getElementById('newAgentId').value, userType:'agent', status:'active', createdAt: Date.now()
-                });
-                utils.showToast('Success', 'Agent created', 'success');
-                closeModal('genericModal'); loadAllData();
-            } catch(e) { utils.showToast('Error', e.message, 'error'); }
-            utils.hideLoading();
-        };
-        openModal('genericModal');
-    }
 
     // ==================== MODE SWITCHING ====================
     function setMode(mode) {
-        currentMode = mode;
         document.querySelectorAll('.mode-view').forEach(v => v.classList.remove('active'));
         document.getElementById(mode+'Mode').classList.add('active');
-        document.querySelectorAll('.mode-btn').forEach(btn => btn.classList.remove('active'));
-        document.querySelector(`.mode-btn[data-mode="${mode}"]`).classList.add('active');
-        document.getElementById('sidebarRole').innerText = mode.charAt(0).toUpperCase() + mode.slice(1) + ' Mode';
-        let menuHtml = '';
-        if(mode === 'customer') {
-            menuHtml = `<div class="sidebar-item" data-nav="dashboard">Dashboard</div><div class="sidebar-item" data-nav="loans">My Loans</div><div class="sidebar-item" data-nav="payments">Payments</div><div class="sidebar-item" data-nav="profile">Profile</div>`;
-        } else if(mode === 'agent') {
-            menuHtml = `<div class="sidebar-item" data-nav="customers">Customers</div><div class="sidebar-item" data-nav="loans">Loans</div><div class="sidebar-item" data-nav="commission">Commission</div>`;
-        } else if(mode === 'admin') {
-            menuHtml = `<div class="sidebar-item" data-nav="dashboard">Dashboard</div><div class="sidebar-item" data-nav="customers">Customers</div><div class="sidebar-item" data-nav="agents">Agents</div><div class="sidebar-item" data-nav="loans">Loans</div><div class="sidebar-item" data-nav="payments">Payments</div><div class="sidebar-item" data-nav="audit">Audit</div>`;
-        } else {
-            menuHtml = `<div class="sidebar-item" data-nav="overview">Overview</div><div class="sidebar-item" data-nav="customers">Customers</div><div class="sidebar-item" data-nav="agents">Agents</div><div class="sidebar-item" data-nav="admins">Admins</div><div class="sidebar-item" data-nav="loans">Loans</div><div class="sidebar-item" data-nav="payments">Payments</div><div class="sidebar-item" data-nav="lending">Lending Ops</div><div class="sidebar-item" data-nav="database">Database</div><div class="sidebar-item" data-nav="security">Security</div><div class="sidebar-item" data-nav="system">System</div><div class="sidebar-item" data-nav="reports">Reports</div>`;
-        }
-        document.getElementById('sidebarMenu').innerHTML = menuHtml + `<div class="sidebar-item logout" id="sidebarLogoutBtn">Logout</div>`;
-        document.querySelectorAll('.sidebar-item[data-nav]').forEach(item => {
-            item.addEventListener('click', () => {
-                const nav = item.dataset.nav;
-                if(mode === 'customer') {
-                    if(nav === 'dashboard') updateAllViews();
-                    else if(nav === 'loans') document.getElementById('custLoansList').scrollIntoView();
-                    else if(nav === 'payments') utils.showToast('Info', 'Payment history', 'info');
-                } else if(mode === 'agent') {
-                    if(nav === 'customers') document.getElementById('agentCustomersList').scrollIntoView();
-                    else if(nav === 'loans') document.getElementById('agentLoansList').scrollIntoView();
-                    else if(nav === 'commission') document.getElementById('agentCommissionList').scrollIntoView();
-                } else if(mode === 'admin') {
-                    if(nav === 'dashboard') updateAllViews();
-                    else if(nav === 'customers') renderAdminTab('customers');
-                    else if(nav === 'agents') renderAdminTab('agents');
-                    else if(nav === 'loans') renderAdminTab('loans');
-                    else if(nav === 'payments') renderAdminTab('payments');
-                    else if(nav === 'audit') renderAdminTab('audit');
-                } else {
-                    const sudoTabMap = {overview:'overview', customers:'customers', agents:'agents', admins:'admins', loans:'loans', payments:'payments', lending:'lending', database:'database', security:'security', system:'system', reports:'reports'};
-                    renderSudoTab(sudoTabMap[nav]);
-                }
-                document.getElementById('sidebar').classList.remove('active');
-                document.getElementById('sidebarOverlay').classList.remove('active');
-            });
-        });
-        document.getElementById('sidebarLogoutBtn').onclick = () => auth.signOut();
+        document.querySelectorAll('.tab-item').forEach(t => t.classList.remove('active'));
+        document.querySelector(`.tab-item[data-mode="${mode}"]`).classList.add('active');
+        if(mode === 'admin') renderAdminTab('customers');
+        if(mode === 'sudo') renderSudoTab('overview');
     }
+    document.querySelectorAll('.tab-item').forEach(tab => {
+        tab.addEventListener('click', () => setMode(tab.dataset.mode));
+    });
 
-    // Tab listeners for admin and sudo modes
+    // Tab listeners for admin/sudo
     document.querySelectorAll('[data-admin-tab]').forEach(tab => {
         tab.addEventListener('click', () => {
             document.querySelectorAll('[data-admin-tab]').forEach(t=>t.classList.remove('active'));
@@ -1257,38 +1010,28 @@
         });
     });
 
-    // ==================== AUTH & INIT ====================
+    function openModal(id) { document.getElementById(id).classList.add('active'); }
+    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
+    document.getElementById('confirmRejectBtn').onclick = () => { if(pendingRejectCallback) pendingRejectCallback(document.getElementById('rejectionReason').value); };
+
+    // ==================== AUTH ====================
     auth.onAuthStateChanged(async (user) => {
         if(!user) { window.location.href = 'login.html'; return; }
         const snap = await db.ref('users/'+user.uid).once('value');
         currentUserData = snap.val();
         if(!currentUserData) { auth.signOut(); return; }
         currentUser = user;
-        document.getElementById('sidebarName').innerText = currentUserData.fullName || 'User';
+        document.getElementById('adminNameDisplay').innerText = currentUserData.fullName || 'User';
         let defaultMode = 'sudo';
         if(currentUserData.userType === 'customer') defaultMode = 'customer';
         else if(currentUserData.userType === 'agent') defaultMode = 'agent';
         else if(currentUserData.userType === 'admin') defaultMode = 'admin';
         setMode(defaultMode);
         await loadAllData();
-        // Real-time listeners
         ['users','loans','payments','commissionHistory','auditLogs','agentApplications','systemSettings'].forEach(r => {
             db.ref(r).on('value', () => loadAllData());
         });
     });
-
-    // Sidebar toggle
-    document.getElementById('menuToggle').onclick = () => {
-        document.getElementById('sidebar').classList.toggle('active');
-        document.getElementById('sidebarOverlay').classList.toggle('active');
-    };
-    document.getElementById('sidebarOverlay').onclick = () => {
-        document.getElementById('sidebar').classList.remove('active');
-        document.getElementById('sidebarOverlay').classList.remove('active');
-    };
-    document.getElementById('confirmRejectBtn').onclick = () => { if(pendingRejectCallback) pendingRejectCallback(document.getElementById('rejectionReason').value); };
-    function openModal(id) { document.getElementById(id).classList.add('active'); }
-    window.closeModal = (id) => document.getElementById(id).classList.remove('active');
 </script>
 </body>
 </html>
