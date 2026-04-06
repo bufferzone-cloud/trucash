@@ -1,0 +1,913 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="theme-color" content="#04070f">
+  <title>TruCash · Create Admin</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/@phosphor-icons/web@2.1.1"></script>
+  <style>
+    :root {
+      --bg:         #04070f;
+      --surface:    #080e1a;
+      --surface2:   #0c1422;
+      --surface3:   #10192b;
+      --border:     rgba(255,255,255,0.07);
+      --border2:    rgba(255,255,255,0.13);
+      --text:       #e8f0fc;
+      --text-muted: #5d7498;
+      --text-dim:   #2d4060;
+      --accent:     #00e5b8;
+      --accent2:    #4f8eff;
+      --danger:     #f43f5e;
+      --success:    #10b981;
+      --warning:    #f59e0b;
+      --purple:     #a78bfa;
+      --cyan:       #22d3ee;
+      --radius:     20px;
+      --radius-sm:  13px;
+      --nav-h:      72px;
+    }
+
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    html, body { height: 100%; overflow: hidden; }
+
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      -webkit-font-smoothing: antialiased;
+      -webkit-tap-highlight-color: transparent;
+      user-select: none;
+    }
+
+    h1,h2,h3,h4,h5 { font-family: 'Poppins', sans-serif; font-weight: 700; }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 9999;
+      opacity: 0.45;
+    }
+
+    /* ─── App Shell ─── */
+    .app {
+      height: 100dvh;
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      position: relative;
+    }
+
+    .glow-orb {
+      position: fixed;
+      border-radius: 50%;
+      filter: blur(80px);
+      pointer-events: none;
+      z-index: 0;
+    }
+    .glow-orb.g1 {
+      width: 260px; height: 260px;
+      top: -60px; left: -60px;
+      background: radial-gradient(circle, rgba(0,229,184,0.12) 0%, transparent 70%);
+    }
+    .glow-orb.g2 {
+      width: 200px; height: 200px;
+      top: 30%; right: -80px;
+      background: radial-gradient(circle, rgba(79,142,255,0.1) 0%, transparent 70%);
+    }
+
+    /* ─── Header ─── */
+    .app-header {
+      position: relative;
+      z-index: 10;
+      padding: env(safe-area-inset-top, 12px) 20px 0;
+      background: linear-gradient(180deg, var(--bg) 60%, transparent);
+      flex-shrink: 0;
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      height: 58px;
+    }
+
+    .header-brand { display: flex; align-items: center; gap: 10px; }
+
+    .brand-icon {
+      width: 38px; height: 38px;
+      border-radius: 12px;
+      background: linear-gradient(140deg, var(--accent) 0%, #00b896 100%);
+      display: grid; place-items: center;
+      font-size: 17px;
+      color: #001a12;
+      box-shadow: 0 0 20px rgba(0,229,184,0.3);
+      position: relative;
+      flex-shrink: 0;
+    }
+
+    .brand-icon .lock-pip {
+      position: absolute;
+      bottom: -4px; right: -4px;
+      width: 15px; height: 15px;
+      background: var(--bg);
+      border: 1.5px solid var(--border2);
+      border-radius: 50%;
+      display: grid; place-items: center;
+      font-size: 7px;
+      color: var(--accent);
+    }
+
+    .brand-text { line-height: 1.1; }
+    .brand-text strong {
+      font-family: 'Poppins', sans-serif;
+      font-size: 14px; font-weight: 700;
+      color: var(--text); letter-spacing: 1.5px; display: block;
+    }
+    .brand-text span {
+      font-size: 9.5px; color: var(--accent);
+      letter-spacing: 2px; text-transform: uppercase;
+      display: block; font-weight: 600; margin-top: 1px;
+    }
+
+    .header-actions { display: flex; align-items: center; gap: 8px; }
+
+    .hdr-btn {
+      width: 40px; height: 40px;
+      border-radius: 13px;
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text-muted);
+      display: grid; place-items: center;
+      cursor: pointer;
+      font-size: 18px;
+      position: relative;
+      transition: all 0.15s;
+    }
+
+    .hdr-btn:active { transform: scale(0.93); background: var(--surface2); }
+
+    .notif-pip {
+      position: absolute;
+      top: 9px; right: 9px;
+      width: 7px; height: 7px;
+      border-radius: 50%;
+      background: var(--danger);
+      border: 2px solid var(--bg);
+      box-shadow: 0 0 6px var(--danger);
+    }
+
+    /* ─── Scroll Area ─── */
+    .app-scroll {
+      flex: 1;
+      overflow-y: auto;
+      overflow-x: hidden;
+      -webkit-overflow-scrolling: touch;
+      scroll-behavior: smooth;
+      position: relative;
+      z-index: 1;
+      padding-bottom: calc(var(--nav-h) + env(safe-area-inset-bottom, 0px) + 16px);
+    }
+
+    .app-scroll::-webkit-scrollbar { display: none; }
+
+    /* ─── Page animation ─── */
+    .page { animation: pageIn 0.32s cubic-bezier(0.4,0,0.2,1) both; }
+
+    @keyframes pageIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    /* ─── Welcome strip ─── */
+    .welcome-strip { padding: 18px 20px 12px; }
+    .welcome-strip h1 {
+      font-size: 24px; font-weight: 900; letter-spacing: -0.5px;
+      background: linear-gradient(135deg, var(--text) 0%, var(--text-muted) 130%);
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+      line-height: 1.2;
+    }
+    .welcome-strip p { font-size: 13px; color: var(--text-muted); margin-top: 4px; font-weight: 500; }
+
+    /* ─── Priv strip ─── */
+    .priv-strip {
+      margin: 4px 20px 16px;
+      padding: 9px 14px;
+      border-radius: 12px;
+      background: rgba(245,158,11,0.07);
+      border: 1px solid rgba(245,158,11,0.18);
+      display: flex; align-items: center; gap: 8px;
+      font-size: 11.5px; color: var(--warning); font-weight: 600;
+    }
+    .priv-strip i { font-size: 15px; flex-shrink: 0; }
+
+    /* ─── Sec label ─── */
+    .sec-label {
+      padding: 0 20px 8px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ─── Form Card ─── */
+    .form-card {
+      margin: 0 20px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+      position: relative;
+    }
+
+    .form-card::before {
+      content: '';
+      position: absolute; inset: 0;
+      background: radial-gradient(ellipse at 0% 0%, rgba(0,229,184,0.04) 0%, transparent 60%);
+      pointer-events: none;
+    }
+
+    .form-card-header {
+      padding: 16px 18px 14px;
+      border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; gap: 10px;
+    }
+
+    .form-card-icon {
+      width: 34px; height: 34px; border-radius: 10px;
+      background: rgba(0,229,184,0.1); border: 1px solid rgba(0,229,184,0.18);
+      display: grid; place-items: center;
+      font-size: 16px; color: var(--accent); flex-shrink: 0;
+    }
+
+    .form-card-header h3 { font-size: 14px; font-weight: 700; }
+
+    .form-card-body { padding: 16px 18px 18px; display: flex; flex-direction: column; gap: 14px; }
+
+    /* ─── Form controls ─── */
+    .form-group { display: flex; flex-direction: column; gap: 6px; }
+
+    .form-label {
+      font-size: 11px; font-weight: 700;
+      letter-spacing: 1px; text-transform: uppercase;
+      color: var(--text-muted);
+    }
+
+   .form-input, .form-select, .form-textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: var(--radius-sm);
+      padding: 12px 14px;
+      color: var(--text);
+      font-family: Arial, sans-serif;
+      font-size: 13px;
+      outline: none;
+      transition: border-color 0.15s, box-shadow 0.15s;
+      appearance: none;
+      -webkit-appearance: none;
+    }
+
+    .form-input::placeholder { color: var(--text-dim); }
+
+    .form-input:focus, .form-select:focus {
+      border-color: rgba(0,229,184,0.35);
+      box-shadow: 0 0 0 3px rgba(0,229,184,0.07);
+    }
+
+    .select-wrap { position: relative; }
+    .select-wrap i {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-dim); font-size: 14px;
+      pointer-events: none;
+    }
+    .form-select { padding-right: 38px; cursor: pointer; }
+
+    .input-wrap { position: relative; }
+    .input-icon {
+      position: absolute; right: 14px; top: 50%;
+      transform: translateY(-50%);
+      color: var(--text-muted); font-size: 17px;
+      cursor: pointer;
+    }
+
+    /* ─── Primary button ─── */
+    .btn-primary {
+      width: 100%; padding: 15px;
+      border-radius: var(--radius); border: none;
+      background: linear-gradient(135deg, var(--accent) 0%, #00c49e 100%);
+      color: #001f17;
+      font-family: Arial, sans-serif;
+      font-size: 14px; font-weight: 700; cursor: pointer;
+      display: flex; align-items: center; justify-content: center; gap: 8px;
+      box-shadow: 0 4px 24px rgba(0,229,184,0.22);
+      transition: transform 0.15s, box-shadow 0.15s;
+      margin-top: 4px;
+    }
+    .btn-primary:active { transform: scale(0.97); box-shadow: 0 2px 12px rgba(0,229,184,0.15); }
+
+    /* ─── Security checklist card ─── */
+    .info-card {
+      margin: 0 20px 16px;
+      background: rgba(79,142,255,0.04);
+      border: 1px solid rgba(79,142,255,0.14);
+      border-radius: var(--radius);
+      padding: 16px 18px;
+      display: flex; flex-direction: column; gap: 12px;
+    }
+
+    .info-icon-wrap {
+      width: 36px; height: 36px; border-radius: 11px;
+      background: rgba(79,142,255,0.1); border: 1px solid rgba(79,142,255,0.18);
+      display: grid; place-items: center;
+      font-size: 18px; color: var(--accent2);
+    }
+
+    .info-card h3 { font-size: 14px; font-weight: 700; }
+    .info-card p { font-size: 12px; color: var(--text-muted); line-height: 1.6; }
+
+    .check-list { display: flex; flex-direction: column; gap: 8px; padding-top: 4px; }
+    .check-list li {
+      display: flex; align-items: center; gap: 8px;
+      font-size: 12px; font-weight: 600; color: var(--text-muted);
+      list-style: none;
+    }
+    .check-list li i { color: var(--success); font-size: 15px; flex-shrink: 0; }
+
+    /* ─── Admin list ─── */
+    .txn-list { padding: 0 20px; display: flex; flex-direction: column; gap: 2px; }
+
+    .txn-item {
+      display: flex; align-items: center; gap: 13px;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer; transition: opacity 0.12s;
+    }
+    .txn-item:last-child { border-bottom: none; }
+    .txn-item:active { opacity: 0.6; }
+
+    .txn-ava {
+      width: 42px; height: 42px; border-radius: 13px;
+      display: grid; place-items: center;
+      font-family: 'Poppins', sans-serif;
+      font-size: 12px; font-weight: 700; flex-shrink: 0;
+    }
+    .txn-ava.a { background: rgba(79,142,255,0.15);  color: var(--accent2); }
+    .txn-ava.b { background: rgba(0,229,184,0.15);   color: var(--accent); }
+    .txn-ava.c { background: rgba(167,139,250,0.15); color: var(--purple); }
+
+    .txn-info { flex: 1; min-width: 0; }
+    .txn-name { font-size: 13.5px; font-weight: 600; }
+    .txn-date { font-size: 11.5px; color: var(--text-muted); margin-top: 2px; font-weight: 500; }
+
+    .txn-right { text-align: right; flex-shrink: 0; display: flex; flex-direction: column; align-items: flex-end; gap: 4px; }
+
+    .pill {
+      display: inline-flex; align-items: center; gap: 4px;
+      padding: 3px 9px; border-radius: 99px;
+      font-size: 10px; font-weight: 700; border: 1px solid;
+    }
+    .pill::before { content: ''; width: 4px; height: 4px; border-radius: 50%; }
+    .pill.active  { background: rgba(16,185,129,0.08); color: var(--success); border-color: rgba(16,185,129,0.2); }
+    .pill.active::before  { background: var(--success); box-shadow: 0 0 4px var(--success); }
+    .pill.pending { background: rgba(245,158,11,0.08); color: var(--warning); border-color: rgba(245,158,11,0.2); }
+    .pill.pending::before { background: var(--warning); }
+    .pill.inactive{ background: rgba(244,63,94,0.08); color: var(--danger); border-color: rgba(244,63,94,0.2); }
+    .pill.inactive::before{ background: var(--danger); }
+
+    .role-chip {
+      font-size: 10px; font-weight: 700; color: var(--purple);
+      background: rgba(167,139,250,0.1); border: 1px solid rgba(167,139,250,0.2);
+      border-radius: 6px; padding: 2px 7px;
+    }
+
+    /* ─── Action row ─── */
+    .action-row { display: flex; align-items: center; gap: 6px; margin-top: 4px; }
+    .act-btn {
+      width: 32px; height: 32px; border-radius: 9px;
+      border: 1px solid var(--border2);
+      background: var(--surface2);
+      color: var(--text-muted);
+      display: grid; place-items: center; cursor: pointer;
+      font-size: 15px; transition: all 0.15s;
+    }
+    .act-btn:active { transform: scale(0.9); }
+    .act-btn.danger { color: var(--danger); border-color: rgba(244,63,94,0.2); background: rgba(244,63,94,0.06); }
+
+    /* ─── Bottom Nav ─── */
+    .bottom-nav {
+      position: relative;
+      z-index: 10;
+      background: var(--surface);
+      border-top: 1px solid var(--border);
+      padding-bottom: env(safe-area-inset-bottom, 0px);
+      flex-shrink: 0;
+    }
+
+    .nav-items {
+      display: flex;
+      height: var(--nav-h);
+    }
+
+    .nav-tab {
+      flex: 1; background: none; border: none;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      gap: 4px; cursor: pointer; color: var(--text-dim);
+      transition: color 0.15s; position: relative;
+    }
+
+    .nav-tab.active { color: var(--accent); }
+
+    .nav-icon-wrap {
+      position: relative;
+      width: 26px; height: 26px;
+      display: grid; place-items: center;
+      font-size: 22px;
+    }
+
+    .nav-badge {
+      position: absolute; top: -4px; right: -8px;
+      min-width: 16px; height: 16px;
+      border-radius: 99px; padding: 0 4px;
+      background: var(--danger);
+      border: 2px solid var(--surface);
+      font-size: 9px; font-weight: 700;
+      display: grid; place-items: center;
+      color: #fff;
+    }
+
+    .nav-label {
+      font-size: 10px; font-weight: 600;
+      letter-spacing: 0.3px;
+    }
+
+    /* ─── Active indicator ─── */
+    .nav-tab.active::before {
+      content: '';
+      position: absolute; top: 0;
+      width: 28px; height: 2px;
+      background: var(--accent);
+      border-radius: 0 0 3px 3px;
+      box-shadow: 0 0 12px var(--accent);
+    }
+
+    /* ─── Menu Modal ─── */
+    .menu-modal {
+      position: fixed; inset: 0;
+      background: transparent;
+      z-index: 300; opacity: 0; pointer-events: none;
+      transition: opacity 0.3s;
+    }
+
+    .menu-modal.active { opacity: 1; pointer-events: auto; }
+
+    .menu-overlay {
+      position: absolute; inset: 0;
+      background: rgba(0,0,0,0.4);
+    }
+
+    .menu-content {
+      position: fixed; top: var(--nav-h); right: 0;
+      width: 100%; max-width: 340px;
+      height: calc(100dvh - var(--nav-h));
+      background: var(--bg);
+      border-left: 1px solid var(--border);
+      overflow-y: auto;
+      -webkit-overflow-scrolling: touch;
+      animation: slideInRight 0.3s cubic-bezier(0.4,0,0.2,1);
+    }
+
+    @keyframes slideInRight {
+      from { transform: translateX(100%); }
+      to { transform: translateX(0); }
+    }
+
+    .page { margin: 0; }
+
+    .page .welcome-strip { padding: 16px 16px 12px; }
+
+    .admin-profile {
+      display: flex; align-items: center; gap: 12px;
+      margin: 12px 16px 16px;
+      padding: 14px 16px;
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 14px;
+      position: relative;
+    }
+
+    .admin-ava {
+      width: 44px; height: 44px;
+      border-radius: 11px;
+      background: linear-gradient(135deg, var(--accent) 0%, var(--cyan) 100%);
+      display: grid; place-items: center;
+      font-size: 16px; font-weight: 700;
+      color: #001f17;
+      flex-shrink: 0;
+    }
+
+    .admin-meta {
+      display: flex; flex-direction: column; gap: 2px;
+      flex: 1;
+    }
+
+    .admin-meta strong {
+      font-size: 13px; color: var(--text);
+    }
+
+    .admin-meta span {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    .status-dot {
+      width: 10px; height: 10px;
+      border-radius: 50%;
+      background: var(--success);
+      box-shadow: 0 0 8px rgba(16,185,129,0.6);
+      flex-shrink: 0;
+    }
+
+    .menu-list {
+      display: flex; flex-direction: column; gap: 2px;
+      padding: 0 8px;
+    }
+
+    .menu-item {
+      display: flex; align-items: center; gap: 12px;
+      padding: 12px 14px;
+      border-radius: 12px;
+      background: transparent;
+      border: none;
+      color: var(--text);
+      text-decoration: none;
+      cursor: pointer;
+      transition: background 0.15s;
+      text-align: left;
+    }
+
+    .menu-item:active { background: var(--surface); }
+
+    .menu-icon {
+      width: 40px; height: 40px;
+      border-radius: 10px;
+      display: grid; place-items: center;
+      font-size: 18px;
+      flex-shrink: 0;
+    }
+
+    .menu-icon.mi1 { background: rgba(79,142,255,0.1); color: var(--accent2); }
+    .menu-icon.mi2 { background: rgba(34,211,238,0.1); color: var(--cyan); }
+    .menu-icon.mi3 { background: rgba(245,158,11,0.1); color: var(--warning); }
+    .menu-icon.mi4 { background: rgba(245,158,11,0.1); color: var(--warning); }
+    .menu-icon.mi5 { background: rgba(167,139,250,0.1); color: var(--purple); }
+
+    .menu-item > div:nth-child(2) {
+      flex: 1;
+      display: flex; flex-direction: column; gap: 2px;
+    }
+
+    .menu-label {
+      font-size: 13px; font-weight: 600; color: var(--text);
+    }
+
+    .menu-sub {
+      font-size: 11px; color: var(--text-muted);
+    }
+
+    .menu-arrow {
+      font-size: 14px; color: var(--text-dim);
+      flex-shrink: 0;
+    }
+
+    .divider {
+      height: 1px; background: var(--border);
+      margin: 12px 16px;
+    }
+
+    .sec-label {
+      padding: 12px 16px 8px;
+      font-size: 10px; font-weight: 700;
+      letter-spacing: 2px; text-transform: uppercase;
+      color: var(--text-dim);
+    }
+
+    /* ─── Success toast ─── */
+    .toast {
+      position: fixed; bottom: calc(var(--nav-h) + 16px); left: 50%; transform: translateX(-50%) translateY(20px);
+      background: var(--surface2); border: 1px solid rgba(16,185,129,0.25);
+      border-radius: 12px; padding: 10px 18px;
+      display: flex; align-items: center; gap: 8px;
+      font-size: 13px; font-weight: 600; color: var(--success);
+      opacity: 0; transition: all 0.3s cubic-bezier(0.4,0,0.2,1);
+      z-index: 200; white-space: nowrap;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.4);
+    }
+    .toast.show { opacity: 1; transform: translateX(-50%) translateY(0); }
+
+    /* ─── Spacer ─── */
+    .spacer { height: 16px; }
+  </style>
+</head>
+<body>
+
+<div class="app">
+  <div class="glow-orb g1"></div>
+  <div class="glow-orb g2"></div>
+
+  <!-- Header -->
+  <header class="app-header">
+    <div class="header-inner">
+      <div class="header-brand">
+        <div class="brand-icon">
+          <i class="ph-bold ph-shield-check"></i>
+          <div class="lock-pip"><i class="ph-bold ph-lock-simple"></i></div>
+        </div>
+        <div class="brand-text">
+          <strong>TRUCASH</strong>
+          <span>Sudo Panel</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <button class="hdr-btn" id="menu-toggle">
+          <i class="ph-bold ph-list"></i>
+          <span style="font-size: 11px; margin-left: 4px;">Menu</span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <!-- Scroll Content -->
+  <div class="app-scroll">
+    <div class="page">
+
+      <!-- Title -->
+      <div class="welcome-strip">
+        <h1>Admin Management</h1>
+        <p>Create accounts &amp; manage permissions</p>
+      </div>
+
+      <!-- Priv warning -->
+      <div class="priv-strip">
+        <i class="ph-bold ph-shield-warning"></i>
+        Privileged session — changes are audit-logged
+      </div>
+
+      <!-- Create form -->
+      <div class="sec-label">Create New Admin</div>
+      <div class="form-card">
+        <div class="form-card-header">
+          <div class="form-card-icon"><i class="ph-bold ph-user-plus"></i></div>
+          <h3>Account Details</h3>
+        </div>
+        <div class="form-card-body">
+
+          <div class="form-group">
+            <label class="form-label">Full Name</label>
+            <input type="text" class="form-input" placeholder="Enter full name" id="inp-name">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Email Address</label>
+            <input type="email" class="form-input" placeholder="admin@trucash.io" id="inp-email">
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Assigned Role</label>
+            <div class="select-wrap">
+              <select class="form-select" id="inp-role">
+                <option>Super Admin</option>
+                <option>Operations Manager</option>
+                <option>Support Agent</option>
+              </select>
+              <i class="ph-bold ph-caret-down"></i>
+            </div>
+          </div>
+
+          <div class="form-group">
+            <label class="form-label">Temporary Password</label>
+            <div class="input-wrap">
+              <input type="password" class="form-input" placeholder="••••••••" id="pwdInput" style="padding-right: 46px;">
+              <i class="ph-bold ph-eye input-icon" id="pwdToggle" onclick="togglePwd()"></i>
+            </div>
+          </div>
+
+          <button class="btn-primary" onclick="createAdmin()">
+            <i class="ph-bold ph-user-plus"></i> Create Account
+          </button>
+
+        </div>
+      </div>
+
+      <!-- Security reminder -->
+      <div class="sec-label">Security Reminder</div>
+      <div class="info-card">
+        <div class="info-icon-wrap"><i class="ph-bold ph-shield-check"></i></div>
+        <div>
+          <h3>Best Practices</h3>
+          <p>New admins receive an email to set their permanent password. Assign minimum required permissions following the principle of least privilege.</p>
+        </div>
+        <ul class="check-list">
+          <li><i class="ph-bold ph-check-circle"></i> MFA required for all admins</li>
+          <li><i class="ph-bold ph-check-circle"></i> Session timeout: 30 minutes</li>
+          <li><i class="ph-bold ph-check-circle"></i> Audit logging active</li>
+        </ul>
+      </div>
+
+      <!-- Active admins -->
+      <div class="sec-label">Active Administrators</div>
+      <div class="txn-list">
+
+        <div class="txn-item">
+          <div class="txn-ava a">JD</div>
+          <div class="txn-info">
+            <div class="txn-name">Jane Daka</div>
+            <div class="txn-date">jane@trucash.io · 2 hours ago</div>
+          </div>
+          <div class="txn-right">
+            <span class="role-chip">Super Admin</span>
+            <span class="pill active">Active</span>
+          </div>
+        </div>
+
+        <div class="txn-item">
+          <div class="txn-ava b">RS</div>
+          <div class="txn-info">
+            <div class="txn-name">Robert Sakala</div>
+            <div class="txn-date">robert@trucash.io · Yesterday</div>
+          </div>
+          <div class="txn-right">
+            <span class="role-chip">Manager</span>
+            <span class="pill active">Active</span>
+          </div>
+        </div>
+
+        <div class="txn-item">
+          <div class="txn-ava c">TM</div>
+          <div class="txn-info">
+            <div class="txn-name">Tina Mwale</div>
+            <div class="txn-date">tina@trucash.io · 3 days ago</div>
+          </div>
+          <div class="txn-right">
+            <span class="role-chip">Support</span>
+            <span class="pill pending">Pending</span>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="spacer"></div>
+
+    </div>
+  </div>
+
+  <!-- Menu Modal -->
+  <div class="menu-modal" id="menu-modal">
+    <div class="menu-overlay" id="menu-overlay"></div>
+    <div class="menu-content">
+      <section class="page" id="page-menu">
+        <div class="welcome-strip">
+          <h1>Menu</h1>
+        </div>
+
+        <div class="admin-profile">
+          <div class="admin-ava">SA</div>
+          <div class="admin-meta">
+            <strong>Root Operations</strong>
+            <span>sudo@trucash.admin</span>
+          </div>
+          <div class="status-dot"></div>
+        </div>
+
+        <div class="priv-strip">
+          <i class="ph-bold ph-shield-warning"></i>
+          Privileged session active
+        </div>
+
+        <div class="sec-label">Navigation</div>
+        <div class="menu-list">
+          <a href="dashboard.html" class="menu-item">
+            <div class="menu-icon mi2"><i class="ph-bold ph-squares-four"></i></div>
+            <div>
+              <div class="menu-label">Dashboard</div>
+              <div class="menu-sub">Overview & stats</div>
+            </div>
+            <i class="ph-bold ph-caret-right menu-arrow"></i>
+          </a>
+          <a href="create-admin.html" class="menu-item">
+            <div class="menu-icon mi1"><i class="ph-bold ph-user-plus"></i></div>
+            <div>
+              <div class="menu-label">Create Admin</div>
+              <div class="menu-sub">Manage administrators</div>
+            </div>
+            <i class="ph-bold ph-caret-right menu-arrow"></i>
+          </a>
+          <a href="security.html" class="menu-item">
+            <div class="menu-icon mi2"><i class="ph-bold ph-shield-check"></i></div>
+            <div>
+              <div class="menu-label">Security Center</div>
+              <div class="menu-sub">Auth & access control</div>
+            </div>
+            <i class="ph-bold ph-caret-right menu-arrow"></i>
+          </a>
+        </div>
+
+        <div class="divider"></div>
+        <div class="sec-label">Tools</div>
+        <div class="menu-list">
+          <a href="data.html" class="menu-item">
+            <div class="menu-icon mi4"><i class="ph-bold ph-database"></i></div>
+            <div>
+              <div class="menu-label">Database Ops</div>
+              <div class="menu-sub">Query & manage data</div>
+            </div>
+            <i class="ph-bold ph-caret-right menu-arrow"></i>
+          </a>
+          <a href="lending.html" class="menu-item">
+            <div class="menu-icon mi3"><i class="ph-bold ph-currency-dollar"></i></div>
+            <div>
+              <div class="menu-label">Loan Overrides</div>
+              <div class="menu-sub">Lending controls</div>
+            </div>
+            <i class="ph-bold ph-caret-right menu-arrow"></i>
+          </a>
+          <a href="system.html" class="menu-item">
+            <div class="menu-icon mi5"><i class="ph-bold ph-gear"></i></div>
+            <div>
+              <div class="menu-label">System Config</div>
+              <div class="menu-sub">Platform settings</div>
+            </div>
+            <i class="ph-bold ph-caret-right menu-arrow"></i>
+          </a>
+        </div>
+        <div style="height:20px;"></div>
+      </section>
+    </div>
+  </div>
+
+<!-- Toast -->
+<div class="toast" id="toast">
+  <i class="ph-bold ph-check-circle"></i>
+  Admin account created!
+</div>
+
+<script>
+  function togglePwd() {
+    const inp = document.getElementById('pwdInput');
+    const ico = document.getElementById('pwdToggle');
+    if (inp.type === 'password') {
+      inp.type = 'text';
+      ico.className = 'ph-bold ph-eye-slash input-icon';
+    } else {
+      inp.type = 'password';
+      ico.className = 'ph-bold ph-eye input-icon';
+    }
+  }
+
+  function createAdmin() {
+    const name  = document.getElementById('inp-name').value.trim();
+    const email = document.getElementById('inp-email').value.trim();
+    const pwd   = document.getElementById('pwdInput').value.trim();
+    if (!name || !email || !pwd) return;
+
+    // Show toast
+    const t = document.getElementById('toast');
+    t.classList.add('show');
+    setTimeout(() => t.classList.remove('show'), 2800);
+
+    // Clear fields
+    document.getElementById('inp-name').value  = '';
+    document.getElementById('inp-email').value = '';
+    document.getElementById('pwdInput').value  = '';
+  }
+
+  // Menu toggle
+  const menuToggle = document.getElementById('menu-toggle');
+  const menuModal = document.getElementById('menu-modal');
+  const menuOverlay = document.getElementById('menu-overlay');
+  const menuItems = document.querySelectorAll('.menu-item');
+
+  menuToggle.addEventListener('click', () => {
+    menuModal.classList.add('active');
+  });
+
+  menuOverlay.addEventListener('click', () => {
+    menuModal.classList.remove('active');
+  });
+
+  menuItems.forEach(item => {
+    item.addEventListener('click', () => {
+      menuModal.classList.remove('active');
+    });
+  });
+</script>
+</body>
+</html>
