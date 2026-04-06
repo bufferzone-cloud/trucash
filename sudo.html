@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TruCash · Unified Super Admin</title>
+    <title>TruCash · Unified Platform</title>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@700&display=swap" rel="stylesheet">
@@ -17,7 +17,7 @@
     <script src="https://cdnjs.cloudflare.com/ajax/libs/moment.js/2.29.4/moment.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
     <style>
-        /* ===== DARK GLOWING THEME – SPACED, CLEAN ===== */
+        /* ===== DARK GLOWING THEME – SPACIOUS, MOBILE-FIRST ===== */
         * {
             margin: 0;
             padding: 0;
@@ -79,7 +79,7 @@
             align-items: center;
             gap: 10px;
         }
-        /* Impersonation bar */
+        /* Impersonation bar (only for Admin/Sudo) */
         .impersonate-bar {
             background: var(--surface2);
             padding: 14px 24px;
@@ -108,7 +108,6 @@
             cursor: pointer;
             transition: 0.2s;
         }
-        .impersonate-bar button:hover { opacity: 0.9; transform: scale(0.98); }
         .impersonate-bar .reset-btn {
             background: var(--surface);
             color: var(--text-muted);
@@ -155,7 +154,7 @@
             from { opacity: 0; transform: translateY(15px); }
             to { opacity: 1; transform: translateY(0); }
         }
-        /* Cards & Layout */
+        /* Cards */
         .card {
             background: var(--surface);
             border: 1px solid var(--border);
@@ -316,9 +315,7 @@
             border-radius: 16px;
             cursor: pointer;
             border: 1px solid var(--border);
-            transition: 0.2s;
         }
-        .collateral-img:hover { transform: scale(1.02); }
         /* Modals */
         .modal-overlay {
             position: fixed; inset: 0;
@@ -450,9 +447,10 @@
     <div class="user-badge"><i class="fas fa-user-circle"></i> <span id="userNameDisplay">Super Admin</span></div>
 </div>
 
-<!-- Impersonation Bar (visible for admin/sudo) -->
+<!-- Impersonation Bar (only for Admin/Sudo) -->
 <div id="impersonateBar" class="impersonate-bar" style="display: none;">
-    <select id="impersonateSelect"><option value="">-- Impersonate Customer or Agent --</option></select>
+    <select id="impersonateSelect"><option value="">-- Impersonate a Customer --</option></select>
+    <select id="impersonateAgentSelect"><option value="">-- Impersonate an Agent --</option></select>
     <button id="impersonateBtn">View as User</button>
     <button id="resetImpersonateBtn" class="reset-btn">Reset View</button>
 </div>
@@ -972,7 +970,7 @@
         link.click();
     }
 
-    // ==================== DETAIL POPUPS ====================
+    // ==================== DETAIL POPUPS (with signed agreement) ====================
     window.showCustomerDetails = async (id) => {
         const c = allCustomers.find(c => c.id === id);
         if (!c) return;
@@ -1024,7 +1022,7 @@
     window.showLoanDetails = async (id) => {
         const loan = allLoans.find(l => l.id === id);
         if (!loan) return;
-        let scheduleHtml = '<table><thead><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total Due</th><th>Paid</th><th>Status</th></tr></thead><tbody>';
+        let scheduleHtml = '<tr><thead><tr><th>#</th><th>Due Date</th><th>Principal</th><th>Interest</th><th>Penalty</th><th>Total Due</th><th>Paid</th><th>Status</th></thead><tbody>';
         if (loan.repaymentSchedule) {
             loan.repaymentSchedule.forEach(inst => {
                 scheduleHtml += `<tr><td>${inst.installment}</td><td>${utils.formatDate(inst.dueDate)}</td><td>${utils.formatCurrency(inst.principal)}</td><td>${utils.formatCurrency(inst.interest)}</td><td>${utils.formatCurrency(inst.penalty || 0)}</td><td>${utils.formatCurrency(inst.totalDue)}</td><td>${utils.formatCurrency(inst.paidAmount || 0)}</td><td>${inst.status}</td></tr>`;
@@ -1034,7 +1032,7 @@
         const collateralHtml = loan.collateral?.images ? `<div class="collateral-grid">${loan.collateral.images.map(img => `<img src="${img}" class="collateral-img" onclick="utils.openImage('${img}')">`).join('')}</div>` : '<div>No collateral images uploaded.</div>';
         const approveBtn = loan.status === 'pending' ? `<button class="btn btn-success" onclick="approveLoan('${loan.id}')">Approve Loan</button>` : '';
         const rejectBtn = loan.status === 'pending' ? `<button class="btn btn-danger" onclick="openRejectModal('${loan.id}')">Reject Loan</button>` : '';
-        const agreementBtn = loan.signedAgreementUrl ? `<button class="btn btn-outline" onclick="window.open('${loan.signedAgreementUrl}','_blank')">View Signed Agreement</button>` : '';
+        const agreementBtn = loan.signedAgreementUrl ? `<button class="btn btn-outline" onclick="window.open('${loan.signedAgreementUrl}','_blank')">📄 View Signed Agreement</button>` : '';
         const witnessHtml = loan.witness ? `<div class="detail-card"><strong>Witness:</strong> ${loan.witness.name} (${loan.witness.nrc})</div>` : '';
         const html = `<div><strong>Customer:</strong> ${loan.customerName}</div><div><strong>Amount:</strong> ${utils.formatCurrency(loan.amount)}</div><div><strong>Status:</strong> <span class="status-badge ${loan.status}">${loan.status}</span></div><div><strong>Duration:</strong> ${loan.duration} ${loan.durationUnit || 'months'}</div><div><strong>Total Paid:</strong> ${utils.formatCurrency(loan.totalPaid || 0)}</div><div><strong>Remaining:</strong> ${utils.formatCurrency((loan.totalPayable || loan.amount) - (loan.totalPaid || 0))}</div><div><strong>Collateral:</strong> ${loan.collateral?.category || 'N/A'} - ${utils.formatCurrency(loan.collateral?.value || 0)}</div><div><strong>Collateral Images:</strong></div>${collateralHtml}<hr><h4>Repayment Schedule</h4>${scheduleHtml}<hr>${witnessHtml}<div class="grid-2 mt-3">${approveBtn} ${rejectBtn} ${agreementBtn}</div>`;
         document.getElementById('genericModalBody').innerHTML = html;
@@ -1371,18 +1369,26 @@
         openModal('paymentModal');
     });
 
-    // ==================== IMPERSONATION ====================
-    async function loadImpersonateList() {
-        const select = document.getElementById('impersonateSelect');
-        const allUsers = [...allCustomers, ...allAgents];
-        select.innerHTML = '<option value="">-- Impersonate Customer or Agent --</option>' + allUsers.map(u => `<option value="${u.id}" data-type="${u.userType}">${u.fullName} (${u.userType})</option>`).join('');
+    // ==================== IMPERSONATION (separate dropdowns for customers and agents) ====================
+    async function loadImpersonateLists() {
+        const customerSelect = document.getElementById('impersonateSelect');
+        const agentSelect = document.getElementById('impersonateAgentSelect');
+        customerSelect.innerHTML = '<option value="">-- Impersonate a Customer --</option>' + allCustomers.map(c => `<option value="${c.id}">${c.fullName} (${c.email})</option>`).join('');
+        agentSelect.innerHTML = '<option value="">-- Impersonate an Agent --</option>' + allAgents.map(a => `<option value="${a.id}">${a.fullName} (${a.agentId})</option>`).join('');
     }
     document.getElementById('impersonateBtn')?.addEventListener('click', () => {
-        const selected = document.getElementById('impersonateSelect').value;
-        if (selected) {
-            impersonatedUserId = selected;
-            utils.showToast('Impersonating', `Viewing data as ${selected}`, 'info');
+        const selectedCustomer = document.getElementById('impersonateSelect').value;
+        const selectedAgent = document.getElementById('impersonateAgentSelect').value;
+        if (selectedCustomer) {
+            impersonatedUserId = selectedCustomer;
+            utils.showToast('Impersonating', `Viewing as customer`, 'info');
             loadAllData();
+        } else if (selectedAgent) {
+            impersonatedUserId = selectedAgent;
+            utils.showToast('Impersonating', `Viewing as agent`, 'info');
+            loadAllData();
+        } else {
+            utils.showToast('Info', 'Select a customer or agent to impersonate', 'info');
         }
     });
     document.getElementById('resetImpersonateBtn')?.addEventListener('click', () => {
@@ -1422,12 +1428,10 @@
     window.closeModal = (id) => document.getElementById(id).classList.remove('active');
     document.getElementById('confirmRejectBtn')?.addEventListener('click', () => { if (pendingRejectCallback) pendingRejectCallback(document.getElementById('rejectionReason').value); });
 
-    // ==================== AUTH (no login screen – assume authenticated) ====================
-    // For demo purposes, we skip the login screen and simulate a super admin user.
-    // In production, you would redirect to login if not authenticated.
-    // Since the user said "no need to log in", we'll create a mock super admin session.
+    // ==================== AUTH (demo mode - assumes admin is logged in) ====================
+    // For demo purposes, we create a mock admin session.
+    // In production, replace with actual Firebase auth.
     async function initDemo() {
-        // Check if already authenticated, otherwise create a mock session (only for demo)
         auth.onAuthStateChanged(async (user) => {
             if (user) {
                 const snap = await db.ref('users/' + user.uid).once('value');
@@ -1437,26 +1441,23 @@
                     document.getElementById('userNameDisplay').innerText = currentUserData.fullName || 'Super Admin';
                     document.getElementById('impersonateBar').style.display = 'flex';
                     await loadAllData();
-                    await loadImpersonateList();
-                    // Real-time listeners
+                    await loadImpersonateLists();
                     ['users', 'loans', 'payments', 'commissionHistory', 'auditLogs', 'agentApplications', 'promotions', 'messages', 'systemSettings'].forEach(r => {
-                        db.ref(r).on('value', () => { loadAllData(); loadImpersonateList(); });
+                        db.ref(r).on('value', () => { loadAllData(); loadImpersonateLists(); });
                     });
                     return;
                 }
             }
-            // No valid user – create a demo super admin session (only for testing)
-            // In real deployment, you would redirect to login.html
+            // Demo fallback (only for testing)
             console.warn('No authenticated admin found. Using demo mode.');
-            const demoUid = 'demo_sudo_admin';
             currentUserData = { fullName: 'Demo Sudo', userType: 'sudo', email: 'admin@trucash.com' };
-            currentUser = { uid: demoUid, email: 'admin@trucash.com' };
+            currentUser = { uid: 'demo_sudo_admin', email: 'admin@trucash.com' };
             document.getElementById('userNameDisplay').innerText = 'Demo Sudo';
             document.getElementById('impersonateBar').style.display = 'flex';
             await loadAllData();
-            await loadImpersonateList();
+            await loadImpersonateLists();
             ['users', 'loans', 'payments', 'commissionHistory', 'auditLogs', 'agentApplications', 'promotions', 'messages', 'systemSettings'].forEach(r => {
-                db.ref(r).on('value', () => { loadAllData(); loadImpersonateList(); });
+                db.ref(r).on('value', () => { loadAllData(); loadImpersonateLists(); });
             });
         });
     }
