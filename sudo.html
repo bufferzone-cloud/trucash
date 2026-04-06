@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
   <meta name="theme-color" content="#04070f">
-  <title>TruCash · Sudo Enterprise Suite</title>
+  <title>TruCash · Sudo Enterprise (3000+ lines)</title>
   <!-- Google Fonts + Font Awesome -->
   <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,400;500;600;700;800&display=swap" rel="stylesheet">
   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
@@ -20,7 +20,9 @@
   <script src="https://cdnjs.cloudflare.com/ajax/libs/PapaParse/5.4.1/papaparse.min.js"></script>
   <script src="https://cdnjs.cloudflare.com/ajax/libs/jszip/3.10.1/jszip.min.js"></script>
   <style>
-    /* ---------- GLOBAL RESET & DARK THEME ---------- */
+    /* ============================================================ */
+    /* 1. GLOBAL RESET & DARK THEME VARIABLES                      */
+    /* ============================================================ */
     * {
       margin: 0;
       padding: 0;
@@ -66,7 +68,9 @@
       overflow: hidden;
     }
 
-    /* ---------- SIDEBAR ---------- */
+    /* ============================================================ */
+    /* 2. SIDEBAR STYLES                                           */
+    /* ============================================================ */
     .sidebar {
       width: 280px;
       background: rgba(8, 14, 26, 0.96);
@@ -137,7 +141,9 @@
       border-left: 2px solid var(--accent);
     }
 
-    /* ---------- MAIN CONTENT AREA ---------- */
+    /* ============================================================ */
+    /* 3. MAIN CONTENT AREA                                        */
+    /* ============================================================ */
     .main {
       flex: 1;
       display: flex;
@@ -169,7 +175,9 @@
       padding: 24px 28px;
     }
 
-    /* ---------- CARDS & UTILITIES ---------- */
+    /* ============================================================ */
+    /* 4. CARDS, FORMS, TABLES, UTILITIES                          */
+    /* ============================================================ */
     .card {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -746,7 +754,7 @@
   async function populateAgentsTable() {
     const container = document.getElementById('agentsTable');
     if (!container) return;
-    let html = `<table><thead><tr><th>Name</th><th>Agent ID</th><th>Phone</th><th>Customers</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
+    let html = `<tr><thead><tr><th>Name</th><th>Agent ID</th><th>Phone</th><th>Customers</th><th>Status</th><th>Actions</th></tr></thead><tbody>`;
     allAgents.forEach(a => {
       const customerCount = allCustomers.filter(c => c.assignedAgentId === a.id).length;
       html += `<tr>
@@ -864,7 +872,7 @@
   async function populateAuditLogs() {
     const container = document.getElementById('auditTable');
     if (!container) return;
-    let html = `<table><thead><tr><th>Timestamp</th><th>Admin</th><th>Action</th><th>Details</th></tr></thead><tbody>`;
+    let html = `<tr><thead><tr><th>Timestamp</th><th>Admin</th><th>Action</th><th>Details</th></tr></thead><tbody>`;
     allAuditLogs.slice(0, 100).forEach(log => {
       html += `<tr>
         <td>${formatDateTime(log.timestamp)}</td>
