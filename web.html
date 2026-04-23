@@ -8,7 +8,7 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;400;500;600;700;800;900&display=swap" rel="stylesheet">
-    <!-- Firebase Realtime Database (same config as admin) -->
+    <!-- Firebase Realtime Database -->
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     <!-- GSAP for scroll animations -->
@@ -211,8 +211,57 @@
             transform: translateY(-2px);
             box-shadow: 0 10px 20px -5px rgba(30,58,138,0.3);
         }
+        /* Promotion section - large image and description */
+        .promo-card {
+            background: white;
+            border-radius: 28px;
+            box-shadow: 0 20px 35px -12px rgba(0,0,0,0.1);
+            overflow: hidden;
+            margin: 1rem 0;
+        }
+        .promo-image-large {
+            width: 100%;
+            max-height: 400px;
+            object-fit: cover;
+            object-position: center;
+        }
+        .promo-content {
+            padding: 2rem;
+            text-align: center;
+        }
+        .promo-content h3 {
+            font-size: 2rem;
+            font-weight: 800;
+            margin-bottom: 1rem;
+            background: linear-gradient(135deg, #1E3A8A, #DC2626);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+        }
+        .promo-content p {
+            font-size: 1.25rem;
+            color: #4b5563;
+            line-height: 1.6;
+            max-width: 800px;
+            margin: 0 auto 1.5rem auto;
+        }
+        .promo-cta {
+            display: inline-block;
+            background: #1E3A8A;
+            color: white;
+            padding: 0.75rem 2rem;
+            border-radius: 50px;
+            font-weight: 600;
+            transition: 0.2s;
+        }
+        .promo-cta:hover {
+            background: #DC2626;
+            transform: scale(1.02);
+        }
         @media (max-width: 768px) {
-            .hero-text { font-size: 2.25rem; }
+            .promo-content h3 { font-size: 1.5rem; }
+            .promo-content p { font-size: 1rem; }
+            .promo-image-large { max-height: 250px; }
         }
     </style>
 </head>
@@ -299,7 +348,7 @@
     </header>
 
     <!-- Hero Section -->
-    <section id="home" class="relative pt-16 pb-20 md:pt-28 md:pb-32 overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white">
+    <section id="home" class="relative pt-16 pb-12 md:pt-28 md:pb-16 overflow-hidden bg-gradient-to-br from-white via-gray-50 to-white">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="flex flex-col lg:flex-row items-center gap-12">
                 <div class="flex-1 text-center lg:text-left scroll-reveal">
@@ -338,14 +387,15 @@
         </div>
     </section>
 
-    <!-- Promotion Banner (latest promotion from Firebase) -->
-    <div id="promoBanner" class="hidden bg-gradient-to-r from-amber-50 to-orange-100 border-y border-amber-200 py-3">
-        <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row items-center justify-between gap-3">
-            <div class="flex items-center gap-3">
-                <div id="promoImageContainer" class="hidden"><img id="promoImage" class="w-12 h-12 rounded-lg object-cover"></div>
-                <div><p class="font-bold text-base" id="promoTitle">Limited Offer</p><p id="promoDesc" class="text-gray-600 text-sm">Special rates available</p></div>
+    <!-- Promotion Section - Large Image and Big Description -->
+    <div id="promotionSection" class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 mb-12 hidden">
+        <div class="promo-card scroll-reveal">
+            <img id="promoImageLarge" class="promo-image-large" src="" alt="Promotion">
+            <div class="promo-content">
+                <h3 id="promoTitleLarge">Limited Time Offer</h3>
+                <p id="promoDescLarge">Special interest rates available for first-time borrowers. Apply now in the TruCash app!</p>
+                <a href="#" id="promoLinkLarge" class="promo-cta">Learn More →</a>
             </div>
-            <a href="#" id="promoLink" class="bg-[#1E3A8A] text-white px-5 py-1.5 rounded-full text-sm font-semibold shadow-md">Learn More →</a>
         </div>
     </div>
 
@@ -553,8 +603,8 @@
         };
         let currentTerm = "week";
         let currentLoanAmount = 5000;
-        let allApprovedAgents = []; // store all approved agents
-        let visibleAgentCount = 2; // initially show 2
+        let allApprovedAgents = [];
+        let visibleAgentCount = 2;
 
         // DOM elements
         const loanSlider = document.getElementById('loanSlider');
@@ -610,7 +660,6 @@
             updateCalculatorUI();
         }
 
-        // Load system settings
         async function loadSystemSettings() {
             try {
                 const snap = await database.ref('systemSettings').once('value');
@@ -639,7 +688,6 @@
             } catch (e) { console.warn(e); }
         }
 
-        // Load approved agents (userType === 'agent' AND banned !== true)
         async function loadApprovedAgents() {
             const agentsGrid = document.getElementById('agentsGrid');
             agentsGrid.innerHTML = '<div class="col-span-full text-center py-10"><i class="fas fa-spinner fa-spin mr-2"></i> Loading agents...</div>';
@@ -701,7 +749,6 @@
             });
             agentsGrid.innerHTML = html;
             
-            // Add copy event listeners
             document.querySelectorAll('.copy-id').forEach(btn => {
                 btn.addEventListener('click', (e) => {
                     e.stopPropagation();
@@ -713,7 +760,6 @@
                 });
             });
             
-            // Show/hide "See More" button
             if (allApprovedAgents.length > visibleAgentCount) {
                 seeMoreContainer.classList.remove('hidden');
             } else {
@@ -727,7 +773,7 @@
             document.getElementById('seeMoreBtn').style.display = 'none';
         }
 
-        // Load latest promotion (active === true)
+        // Load latest active promotion (with image, title, description)
         async function loadLatestPromotion() {
             try {
                 const snap = await database.ref('promotions').once('value');
@@ -742,15 +788,16 @@
                     }
                 }
                 if (latestPromo) {
-                    document.getElementById('promoTitle').innerText = latestPromo.title || 'Limited Offer';
-                    document.getElementById('promoDesc').innerText = latestPromo.message || 'Special rates available';
-                    document.getElementById('promoLink').href = latestPromo.link || '#';
+                    document.getElementById('promoTitleLarge').innerText = latestPromo.title || 'Limited Time Offer';
+                    document.getElementById('promoDescLarge').innerText = latestPromo.message || 'Special interest rates available for first-time borrowers. Apply now in the TruCash app!';
+                    document.getElementById('promoLinkLarge').href = latestPromo.link || '#';
                     if (latestPromo.imageUrl) {
-                        const promoImg = document.getElementById('promoImage');
-                        promoImg.src = latestPromo.imageUrl;
-                        document.getElementById('promoImageContainer').classList.remove('hidden');
+                        document.getElementById('promoImageLarge').src = latestPromo.imageUrl;
+                    } else {
+                        // fallback placeholder
+                        document.getElementById('promoImageLarge').src = 'https://placehold.co/800x400?text=TruCash+Promotion';
                     }
-                    document.getElementById('promoBanner').classList.remove('hidden');
+                    document.getElementById('promotionSection').classList.remove('hidden');
                 }
             } catch(e) { console.warn(e); }
         }
@@ -776,12 +823,10 @@
             if (e.target === iosModal) closeIosModal();
         });
 
-        // Event listeners
         loanSlider.addEventListener('input', (e) => { currentLoanAmount = parseInt(e.target.value); updateCalculatorUI(); });
         weekTermBtn.addEventListener('click', () => setActiveTerm('week'));
         monthTermBtn.addEventListener('click', () => setActiveTerm('month'));
 
-        // Sidebar logic
         const sidebar = document.getElementById('sidebar');
         const overlay = document.getElementById('sidebarOverlay');
         document.getElementById('sidebarBtn').addEventListener('click', () => {
@@ -797,7 +842,6 @@
         document.getElementById('closeSidebarBtn').addEventListener('click', closeSidebar);
         overlay.addEventListener('click', closeSidebar);
 
-        // Scroll reveal using Intersection Observer
         const revealElements = document.querySelectorAll('.scroll-reveal');
         const observer = new IntersectionObserver((entries) => {
             entries.forEach(entry => {
@@ -809,13 +853,11 @@
         }, { threshold: 0.1 });
         revealElements.forEach(el => observer.observe(el));
 
-        // See More button
         const seeMoreBtn = document.getElementById('seeMoreBtn');
         if (seeMoreBtn) {
             seeMoreBtn.addEventListener('click', seeMoreAgents);
         }
 
-        // Initialize
         loadSystemSettings();
         loadApprovedAgents();
         loadLatestPromotion();
