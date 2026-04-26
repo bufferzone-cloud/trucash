@@ -65,6 +65,17 @@
             overscroll-behavior-y: none;
         }
 
+        /* GREEN BAR AT TOP */
+        .green-top-bar {
+            background: var(--ios-green);
+            height: env(safe-area-inset-top, 20px);
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1100;
+        }
+
         body::before {
             content: '';
             position: fixed;
@@ -86,12 +97,13 @@
             min-height: 100vh;
         }
 
+        /* Mobile header - positioned below green bar */
         .mobile-header {
             display: none;
             position: sticky;
-            top: 0;
+            top: env(safe-area-inset-top, 20px);
             z-index: 100;
-            background: rgba(255, 255, 255, 0.92);
+            background: rgba(255, 255, 255, 0.96);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             padding: 11px 14px;
@@ -1246,7 +1258,7 @@
             border-radius: 6px;
         }
 
-        /* Loan Tabs */
+        /* Loan Tabs - includes completed */
         .loan-tabs {
             display: flex;
             gap: 7px;
@@ -1922,6 +1934,9 @@
     </style>
 </head>
 <body>
+    <!-- GREEN TOP BAR -->
+    <div class="green-top-bar"></div>
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
@@ -1953,7 +1968,7 @@
     <!-- Toast Container (enhanced) -->
     <div class="toast-container" id="toastContainer"></div>
 
-    <!-- Mobile Header with notification bell -->
+    <!-- Mobile Header with notification bell - now below green bar -->
     <div class="mobile-header">
         <button class="hamburger-menu" id="menuToggle">
             <i class="fas fa-bars"></i>
@@ -2449,7 +2464,7 @@
                     </div>
                 </section>
 
-                <!-- My Loans Section (default approved active) -->
+                <!-- My Loans Section (default approved active, includes completed tab) -->
                 <section id="loansSection" class="content-section d-none">
                     <div class="loan-tabs">
                         <span class="loan-tab active" data-status="approved">Approved</span>
@@ -2517,7 +2532,7 @@
                     </div>
                 </section>
 
-                <!-- Loan History Section (completed loans) -->
+                <!-- Loan History Section (completed loans - separate view) -->
                 <section id="historySection" class="content-section d-none">
                     <div class="section">
                         <div class="section-header">
@@ -3549,8 +3564,6 @@
                             AppState.currentUser = user;
                             AppState.userData = userData;
                             await this.loadSystemSettings();
-
-                            // Check if user is banned
                             if (userData.banned === true) {
                                 document.getElementById('maintenanceOverlay').style.display = 'none';
                                 const banOverlay = document.getElementById('banOverlay');
@@ -3569,7 +3582,6 @@
                                 resolve(null);
                                 return;
                             }
-
                             if (AppState.systemSettings && AppState.systemSettings.enableCustomerApp === false) {
                                 document.getElementById('maintenanceOverlay').style.display = 'flex';
                                 document.querySelector('.dashboard-container').style.opacity = '0.3';
@@ -3608,7 +3620,6 @@
                             customerContactWebsite: 'https://trucash.zm'
                         };
                     }
-                    // Update max loan banner
                     const maxAmountElem = document.getElementById('maxLoanAmountText');
                     if (maxAmountElem) maxAmountElem.innerText = Utils.formatCurrency(AppState.systemSettings.maxLoanAmount);
                 } catch (error) {
@@ -3637,7 +3648,6 @@
                     this.listenForNotifications();
                     await this.loadPromotions();
                     this.listenForPromotions();
-                    // Setup payment status listener
                     this.listenForPaymentStatus();
                 } catch (error) {
                     console.error('Error loading customer data:', error);
@@ -3789,7 +3799,6 @@
                             loan.status === 'rejected'
                         );
                     }
-                    // Update UI for loans with default filter = approved
                     if (AppState.currentSection === 'loans') UIManager.updateLoansUI();
                     return loans;
                 } catch (error) {
@@ -3828,7 +3837,6 @@
                         if (AppState.currentSection === 'payments') {
                             UIManager.updatePaymentsUI();
                         }
-                        // Show toast for status change
                         let statusMsg = '';
                         if (updatedPayment.status === 'verified') statusMsg = 'Your payment has been confirmed!';
                         else if (updatedPayment.status === 'rejected') statusMsg = 'Your payment was rejected. Please contact support.';
@@ -3851,7 +3859,6 @@
                         }
                     });
                     AppState.notifications.sort((a,b) => (b.timestamp || 0) - (a.timestamp || 0));
-                    // Auto-delete notifications older than 30 minutes per user
                     const now = Date.now();
                     const thirtyMinutes = 30 * 60 * 1000;
                     const toDelete = AppState.notifications.filter(n => (now - (n.timestamp || 0)) > thirtyMinutes);
@@ -4462,7 +4469,6 @@
                 this.closeLoanDetailsModal?.addEventListener('click', () => {
                     this.loanDetailsModal.classList.remove('active');
                 });
-                // Loan tabs: set default approved active
                 this.loanTabs.forEach(tab => {
                     tab.addEventListener('click', () => {
                         const status = tab.dataset.status;
@@ -4484,21 +4490,15 @@
                     });
                 });
                 this.mobileNotificationBell.addEventListener('click', () => this.openNotificationsModal());
-                
                 this.markAllReadBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
                 this.markAllReadModalBtn.addEventListener('click', () => this.markAllNotificationsAsRead());
-
                 this.closeFloatingPromo.addEventListener('click', () => this.closeFloatingPromotion());
-                
-                // Payment Due Card click -> open payment modal with next installment amount
                 const paymentDueCard = document.getElementById('paymentDueCard');
                 if (paymentDueCard) {
                     paymentDueCard.addEventListener('click', () => {
                         this.openPaymentModalWithNextDue();
                     });
                 }
-
-                // Cancel loan button
                 const cancelLoanBtn = document.getElementById('cancelLoanBtn');
                 if (cancelLoanBtn) {
                     cancelLoanBtn.addEventListener('click', () => {
@@ -4507,7 +4507,6 @@
                 }
             },
             openPaymentModalWithNextDue() {
-                // Find next pending installment across active/approved loans
                 const eligibleLoans = AppState.activeLoans.filter(loan => loan.status === 'active' || loan.status === 'approved');
                 let earliestInstallment = null;
                 let earliestLoan = null;
@@ -4525,7 +4524,6 @@
                 if (earliestInstallment && earliestLoan) {
                     AppState.selectedLoanForPayment = earliestLoan.id;
                     this.showPaymentModal();
-                    // Pre-fill amount in the modal after it opens
                     setTimeout(() => {
                         const amountInput = document.getElementById('paymentAmount');
                         if (amountInput) {
@@ -4572,7 +4570,6 @@
                 this.updateAgentUI();
                 this.updateCreditScore();
                 this.updateNotificationBadge();
-                // Set header title to customer's full name
                 const headerTitle = document.getElementById('pageTitle');
                 if (headerTitle && userData.fullName) {
                     headerTitle.innerText = userData.fullName;
@@ -4581,7 +4578,6 @@
                     Utils.showToast('Welcome Back', `Hello ${userData.fullName || 'Customer'}!`, 'info');
                 }, 1000);
                 Utils.hideLoading();
-
                 if (userData && userData.tutorialCompleted !== true) {
                     setTimeout(() => {
                         TutorialManager.startTour();
@@ -4601,7 +4597,6 @@
                         if (headerTitle && AppState.userData.fullName) {
                             headerTitle.innerText = AppState.userData.fullName;
                         }
-                        // Update max loan banner if settings changed
                         if (AppState.systemSettings) {
                             const maxElem = document.getElementById('maxLoanAmountText');
                             if (maxElem) maxElem.innerText = Utils.formatCurrency(AppState.systemSettings.maxLoanAmount);
@@ -4656,14 +4651,12 @@
                     this.updateCreditScore();
                 });
                 AppState.realtimeListeners.push(() => paymentsRef.off('value', paymentsListener));
-
                 const settingsRef = db.ref('systemSettings');
                 const settingsListener = settingsRef.on('value', (snapshot) => {
                     if (snapshot.exists()) {
                         AppState.systemSettings = snapshot.val();
                         FirebaseService.updateSettingsUI();
                         this.updateDashboardUI();
-                        // Update max loan banner
                         const maxElem = document.getElementById('maxLoanAmountText');
                         if (maxElem) maxElem.innerText = Utils.formatCurrency(AppState.systemSettings.maxLoanAmount);
                     }
@@ -4679,10 +4672,8 @@
                 if (section) {
                     section.classList.remove('d-none');
                 }
-                // Special handling for loans: set default filter to approved
                 if (sectionId === 'loans') {
                     AppState.currentLoanStatusFilter = 'approved';
-                    // Update tabs active style
                     this.loanTabs.forEach(tab => {
                         if (tab.dataset.status === 'approved') {
                             tab.classList.add('active');
@@ -4694,23 +4685,10 @@
                     this.updateLoansUI();
                 }
                 if (sectionId === 'apply') {
-                    // Ensure max banner is updated
                     if (AppState.systemSettings) {
                         document.getElementById('maxLoanAmountText').innerText = Utils.formatCurrency(AppState.systemSettings.maxLoanAmount);
                     }
                 }
-                const titles = {
-                    dashboard: 'Dashboard',
-                    profile: 'My Profile',
-                    apply: 'Apply for Loan',
-                    loans: 'My Loans',
-                    payments: 'Payments',
-                    notifications: 'Notifications',
-                    history: 'Loan History',
-                    about: 'About Us',
-                    settings: 'Settings'
-                };
-                // Keep header showing customer name
                 const headerTitle = document.getElementById('pageTitle');
                 if (headerTitle && AppState.userData?.fullName) {
                     headerTitle.innerText = AppState.userData.fullName;
@@ -5404,7 +5382,7 @@
                             <td>${Utils.formatCurrency(inst.interest)}</td>
                             <td>${Utils.formatCurrency(inst.penalty || 0)}</td>
                             <td>${Utils.formatCurrency(inst.totalDue)}</td>
-                            <td>${Utils.formatCurrency(inst.paidAmount || 0)}<td>
+                            <td>${Utils.formatCurrency(inst.paidAmount || 0)}</td>
                             <td><span class="status-badge-tag ${inst.status === 'paid' ? 'status-active' : 'status-pending'}">${inst.status}</span></td>
                         </tr>`;
                     });
@@ -5743,7 +5721,6 @@
                 if (currentPromo) {
                     AppState.seenPromotions.add(currentPromo.id);
                     Utils.saveSeenPromotions();
-                    // Also mark in Firebase for persistence
                     db.ref(`users/${AppState.currentUser.uid}/seenPromotions/${currentPromo.id}`).set(true);
                 }
                 this.floatingPromo.classList.remove('show');
@@ -5869,16 +5846,16 @@
         window.addEventListener('orientationchange', setVhProperty);
         setVhProperty();
 
-        // ===== TUTORIAL MANAGER with dynamic repositioning =====
+        // ===== TUTORIAL MANAGER =====
         const TutorialManager = {
             steps: [
-                { selector: '#menuToggle', text: 'Tap here to open the sidebar menu. Navigate to different sections like Profile, Loans, and Settings.' },
-                { selector: '#mobileNotificationBell', text: 'Check your notifications here. You\'ll receive updates on loan approvals, payments, and messages.' },
-                { selector: '#agentIdInput', text: 'Enter your agent\'s unique ID and click Verify to get assigned an agent. You need an agent before applying for a loan.' },
-                { selector: '#applyLoanBtn', text: 'After agent verification, click here to apply for a loan. You\'ll need to upload collateral images and sign an agreement.' },
-                { selector: '.mobile-nav-item[data-section="loans"]', text: 'View your active and past loans here. Track repayment schedules and make payments.' },
-                { selector: '.mobile-nav-item[data-section="payments"]', text: 'Make payments and upload proof. Your payment history is also shown here.' },
-                { selector: null, text: 'You\'re all set! Explore the app and enjoy quick loans with TruCash.' }
+                { selector: '#menuToggle', text: 'Tap here to open the sidebar menu.' },
+                { selector: '#mobileNotificationBell', text: 'Check your notifications here.' },
+                { selector: '#agentIdInput', text: 'Enter agent ID and verify.' },
+                { selector: '#applyLoanBtn', text: 'Apply for a loan after agent verification.' },
+                { selector: '.mobile-nav-item[data-section="loans"]', text: 'View your loans.' },
+                { selector: '.mobile-nav-item[data-section="payments"]', text: 'Make payments.' },
+                { selector: null, text: 'You\'re all set! Enjoy TruCash.' }
             ],
             currentStep: 0,
             overlay: document.getElementById('tutorialOverlay'),
@@ -5908,7 +5885,6 @@
                         this.highlightEl.style.top = (rect.top - 10 + window.scrollY) + 'px';
                         this.highlightEl.style.left = (rect.left - 10 + window.scrollX) + 'px';
                         this.highlightEl.style.display = 'block';
-                        // Position tooltip relative to highlight
                         this.tooltipEl.style.position = 'absolute';
                         this.tooltipEl.style.top = (rect.bottom + 15 + window.scrollY) + 'px';
                         this.tooltipEl.style.left = (rect.left + rect.width/2 - 140) + 'px';
