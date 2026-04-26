@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
-    <title>TruCash Admin</title>
+    <title>TruCash Admin | Full Suite</title>
     <!-- Font Awesome 6 -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Firebase SDK (compat) -->
@@ -56,11 +56,22 @@
             --radius-lg: 24px;         
             --glass-bg: rgba(255,255,255,0.7);
             --glass-border: 1px solid rgba(255,255,255,0.2);
-            /* Credit score colors */
             --score-excellent: #34C759;
             --score-good: #5856d6;
             --score-fair: #FF9500;
             --score-poor: #FF3B30;
+        }
+
+        /* ===== NEW BLUE BAR ON TOP ===== */
+        .top-blue-bar {
+            background: linear-gradient(90deg, #0055ff, #007AFF, #5856d6);
+            height: 5px;
+            width: 100%;
+            position: fixed;
+            top: 0;
+            left: 0;
+            z-index: 1000;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
         }
 
         /* Progress bar styles */
@@ -127,7 +138,7 @@
         /* ===== Header with Logo ===== */
         .app-header {
             position: sticky;
-            top: 0;
+            top: 5px;  /* below blue bar */
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
@@ -1610,13 +1621,33 @@
             color: white;
         }
 
-        /* Rejection reason modal textarea */
-        .rejection-reason-text {
-            min-height: 85px;                                 
+        /* Delete button style for messages/promos */
+        .delete-msg-btn, .delete-promo-btn {
+            background: transparent;
+            border: none;
+            color: var(--ios-red);
+            cursor: pointer;
+            font-size: 12px;
+            margin-left: 6px;
+            transition: 0.2s;
+        }
+        .delete-msg-btn:hover, .delete-promo-btn:hover {
+            transform: scale(1.1);
+            color: #e02b20;
+        }
+
+        .record-payment-warning {
+            font-size: 11px;
+            color: var(--ios-orange);
+            margin-top: 6px;
+            font-weight: 500;
         }
     </style>
 </head>
 <body>
+    <!-- NEW BLUE BAR ON TOP -->
+    <div class="top-blue-bar"></div>
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
@@ -1663,8 +1694,13 @@
                 <i class="fas fa-exclamation-triangle"></i> Upcoming Payments
                 <span class="sidebar-badge" id="sidebarUpcomingBadge" style="display: none;">0</span>
             </div>
+            <!-- NEW DEFAULTED LOANS SIDEBAR ITEM -->
+            <div class="sidebar-item" data-section="defaultedLoans">
+                <i class="fas fa-ban"></i> Defaulted Loans
+                <span class="sidebar-badge" id="sidebarDefaultedBadge" style="display: none;">0</span>
+            </div>
             <div class="sidebar-item" data-section="notifications">
-                <i class="fas fa-bell"></i> Notifications
+                <i class="fas fa-bell"></i> Messages & Promos
                 <span class="sidebar-badge" id="sidebarNotificationsBadge" style="display: none;">0</span>
             </div>
             <div class="sidebar-item" id="signedAgreementsBtn"><i class="fas fa-file-signature"></i> Signed Agreements</div>
@@ -2060,7 +2096,15 @@
             </div>
         </section>
 
-        <!-- NOTIFICATIONS SECTION -->
+        <!-- NEW DEFAULTED LOANS SECTION -->
+        <section class="content-section" id="defaultedLoansSection">
+            <div class="floating-card">
+                <h3 class="mb-4">Defaulted Loans (Hidden from customers/agents)</h3>
+                <div id="defaultedLoansList"></div>
+            </div>
+        </section>
+
+        <!-- NOTIFICATIONS SECTION (Messages & Promos) -->
         <section class="content-section" id="notificationsSection">
             <div class="floating-card">
                 <h3 class="mb-4">Send Message</h3>
@@ -2085,11 +2129,11 @@
                 <button class="btn btn-warning w-100 mt-2" id="openPromotionModalBtn"><i class="fas fa-bullhorn"></i> Send Promotion</button>
             </div>
             <div class="floating-card">
-                <h3 class="mb-4">Promotion History <span class="text-muted">(click resend to reuse)</span></h3>
+                <h3 class="mb-4">Promotion History <span class="text-muted">(click resend to reuse, delete to remove)</span></h3>
                 <div id="promotionHistoryList"></div>
             </div>
             <div class="floating-card">
-                <h3 class="mb-4">Recent Messages <span class="text-muted">(click resend to reuse)</span></h3>
+                <h3 class="mb-4">Recent Messages <span class="text-muted">(click resend to reuse, delete to remove)</span></h3>
                 <div id="recentMessagesList"></div>
             </div>
         </section>
@@ -2217,6 +2261,7 @@
                 <div class="form-group">
                     <label class="form-label">Amount Paid (K)</label>
                     <input type="number" id="recordAmount" class="form-input" step="0.01" min="0">
+                    <div id="paymentWarningMsg" class="record-payment-warning"></div>
                     <small class="text-muted" id="installmentRemaining"></small>
                 </div>
                 <div class="form-group">
@@ -3130,6 +3175,18 @@
                     sidebarUpcomingBadge.style.display = 'none';
                 }
             }
+            
+            // Defaulted loans badge
+            const defaultedLoansCount = allLoans.filter(l => l.status === 'defaulted').length;
+            const sidebarDefaultedBadge = document.getElementById('sidebarDefaultedBadge');
+            if (sidebarDefaultedBadge) {
+                if (defaultedLoansCount > 0) {
+                    sidebarDefaultedBadge.style.display = 'flex';
+                    sidebarDefaultedBadge.innerText = defaultedLoansCount > 99 ? '99+' : defaultedLoansCount;
+                } else {
+                    sidebarDefaultedBadge.style.display = 'none';
+                }
+            }
         }
 
         function getUpcomingPayments() {
@@ -3549,6 +3606,7 @@
             renderPromotionHistory();
             updateBadges();
             checkForNewNotifications(); // check for new notifications after data update
+            renderDefaultedLoans(); // new function
         }
 
         function updateDashboardStats() {
@@ -3730,6 +3788,10 @@
         function renderLoans() {
             const searchTerm = document.getElementById('loanSearch')?.value.toLowerCase() || '';
             let filtered = allLoans;
+            // Do not show defaulted loans in normal loan list (they appear only in defaulted section)
+            if (currentLoanFilter !== 'defaulted') {
+                filtered = filtered.filter(l => l.status !== 'defaulted');
+            }
             if (currentLoanFilter !== 'all') filtered = filtered.filter(l => l.status === currentLoanFilter);
             
             filtered = filtered.sort((a, b) => (b.createdAt || 0) - (a.createdAt || 0));
@@ -3781,6 +3843,44 @@
                     </div>
                     <div class="loan-card-right">
                         <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')}" class="loan-card-agent-img" title="Agent">
+                    </div>
+                </div>
+            `}).join('');
+        }
+        
+        // NEW: renderDefaultedLoans - only defaulted loans
+        function renderDefaultedLoans() {
+            const container = document.getElementById('defaultedLoansList');
+            if (!container) return;
+            const defaulted = allLoans.filter(l => l.status === 'defaulted');
+            if (defaulted.length === 0) {
+                container.innerHTML = '<p class="text-muted">No defaulted loans.</p>';
+                return;
+            }
+            container.innerHTML = defaulted.map(l => {
+                const customer = allCustomers.find(c => c.id === l.customerId);
+                const agent = allAgents.find(a => a.id === l.agentId);
+                const totalPaid = l.totalPaid || 0;
+                const totalPayable = l.totalPayable || l.amount || 0;
+                const remaining = totalPayable - totalPaid;
+                return `
+                <div class="loan-card" onclick="showLoanDetails('${l.id}')">
+                    <div class="loan-card-left">
+                        <img src="${customer?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(l.customerName||'C')}" class="loan-card-profile-img">
+                    </div>
+                    <div class="loan-card-center">
+                        <div class="loan-card-customer-name">${l.customerName}</div>
+                        <div class="loan-card-amount">${Utils.formatCurrency(l.amount)}</div>
+                        <div class="progress-container">
+                            <div class="progress-bar" style="width: ${totalPayable>0?(totalPaid/totalPayable*100):0}%; background:#FF3B30;"></div>
+                        </div>
+                        <div class="loan-card-badges">
+                            <span class="status-badge defaulted">Defaulted</span>
+                            <span class="badge-icon">Remaining: ${Utils.formatCurrency(remaining)}</span>
+                        </div>
+                    </div>
+                    <div class="loan-card-right">
+                        <img src="${agent?.profilePhoto || 'https://ui-avatars.com/api/?name='+encodeURIComponent(agent?.fullName||'A')}" class="loan-card-agent-img">
                     </div>
                 </div>
             `}).join('');
@@ -4010,7 +4110,6 @@
                     const statusClass = p.type === 'overdue' ? 'overdue' : 'upcoming';
                     const badgeText = p.type === 'overdue' ? `${Math.abs(daysLeft)} day${Math.abs(daysLeft)!==1?'s':''} overdue` : `${daysLeft} day${daysLeft!==1?'s':''} left`;
                     const badgeClass = p.type === 'overdue' ? 'overdue-badge' : 'reminder-badge';
-                    
                     return `
                     <div class="notification-item ${statusClass}" onclick="showReminderDetails('${p.loanId}', ${p.installment})">
                         <div class="d-flex justify-between align-center">
@@ -4214,9 +4313,11 @@
 
             select.addEventListener('change', (e) => {
                 const selectedOption = e.target.options[e.target.selectedIndex];
-                const remaining = selectedOption.dataset.remaining;
+                const remaining = parseFloat(selectedOption.dataset.remaining);
                 document.getElementById('installmentRemaining').innerText = `Remaining for this installment: ${Utils.formatCurrency(remaining || 0)}`;
                 document.getElementById('recordAmount').max = remaining;
+                const warningDiv = document.getElementById('paymentWarningMsg');
+                warningDiv.innerHTML = `Maximum allowed for this installment: ${Utils.formatCurrency(remaining)}. You can record any amount up to this limit.`;
             });
             if (select.options.length > 0) {
                 const event = new Event('change');
@@ -4393,17 +4494,33 @@
             const recent = allMessages.slice(0, 20);
             container.innerHTML = recent.map(m => `
                 <div class="detail-card mb-2">
-                    <div class="d-flex justify-between">
+                    <div class="d-flex justify-between align-center">
                         <div>
                             <strong>To: ${m.recipientId === 'all_customers' ? 'All Customers' : m.recipientId === 'all_agents' ? 'All Agents' : m.recipientId.substring(0,8)}</strong>
                             <span class="text-muted"> · ${Utils.formatDateTime(m.timestamp)}</span>
                         </div>
-                        <button class="resend-btn" onclick="resendMessage('${m.id}')"><i class="fas fa-redo-alt"></i> Resend</button>
+                        <div>
+                            <button class="resend-btn" onclick="resendMessage('${m.id}')"><i class="fas fa-redo-alt"></i> Resend</button>
+                            <button class="delete-msg-btn" onclick="deleteMessage('${m.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
                     </div>
                     <div class="profile-meta">${m.message}</div>
                 </div>
             `).join('');
         }
+        
+        // Delete message
+        window.deleteMessage = async (msgId) => {
+            if (!confirm('Delete this message permanently?')) return;
+            Utils.showLoading('Deleting...');
+            try {
+                await db.ref('messages/' + msgId).remove();
+                Utils.showToast('Success', 'Message deleted', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        };
 
         window.resendMessage = async (msgId) => {
             const msg = allMessages.find(m => m.id === msgId);
@@ -4440,11 +4557,14 @@
             }
             container.innerHTML = allPromotions.map(p => `
                 <div class="detail-card mb-2">
-                    <div class="d-flex justify-between">
+                    <div class="d-flex justify-between align-center">
                         <div>
                             <strong>${p.title}</strong> · ${Utils.formatDateTime(p.createdAt)}
                         </div>
-                        <button class="resend-btn" onclick="resendPromotion('${p.id}')"><i class="fas fa-redo-alt"></i> Resend</button>
+                        <div>
+                            <button class="resend-btn" onclick="resendPromotion('${p.id}')"><i class="fas fa-redo-alt"></i> Resend</button>
+                            <button class="delete-promo-btn" onclick="deletePromotion('${p.id}')"><i class="fas fa-trash"></i></button>
+                        </div>
                     </div>
                     <div class="profile-meta">${p.message}</div>
                     <div class="profile-meta">Recipients: ${p.recipients}</div>
@@ -4452,6 +4572,19 @@
                 </div>
             `).join('');
         }
+        
+        // Delete promotion
+        window.deletePromotion = async (promoId) => {
+            if (!confirm('Delete this promotion permanently?')) return;
+            Utils.showLoading('Deleting...');
+            try {
+                await db.ref('promotions/' + promoId).remove();
+                Utils.showToast('Success', 'Promotion deleted', 'success');
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        };
 
         window.resendPromotion = async (promoId) => {
             const promo = allPromotions.find(p => p.id === promoId);
@@ -4928,7 +5061,7 @@
             document.getElementById('rejectLoanBtn').style.display = (loan.status === 'pending' || loan.status === 'approved') ? 'inline-flex' : 'none';
             document.getElementById('markDefaultedBtn').style.display = loan.status === 'active' ? 'inline-flex' : 'none';
             document.getElementById('editLoanBtn').style.display = 'inline-flex';
-            document.getElementById('recordPaymentBtn').style.display = loan.status === 'active' || loan.status === 'approved' ? 'inline-flex' : 'none';
+            document.getElementById('recordPaymentBtn').style.display = (loan.status === 'active' || loan.status === 'approved') ? 'inline-flex' : 'none';
             
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
             document.getElementById('rejectLoanBtn').onclick = () => openRejectionModal(loan.id); // use modal
@@ -5509,7 +5642,7 @@
         }
 
         async function markAsDefaulted(loanId) {
-            if (!confirm('Mark this loan as defaulted?')) return;
+            if (!confirm('Mark this loan as defaulted? It will be moved to Defaulted Loans and hidden from customers/agents.')) return;
             
             Utils.showLoading('Updating loan...');
             try {
@@ -5519,8 +5652,14 @@
                     defaultedBy: currentUser?.uid
                 });
                 
+                // Optionally notify customer/agent
+                const loan = allLoans.find(l => l.id === loanId);
+                if (loan && loan.customerId) {
+                    await Utils.sendNotification(loan.customerId, `Your loan (${loanId.substring(0,8)}) has been marked as defaulted due to non-payment.`, 'loan_defaulted', loanId);
+                }
+                
                 await Utils.logAudit('MARK_DEFAULTED', { loanId });
-                Utils.showToast('Success', 'Loan marked as defaulted', 'warning');
+                Utils.showToast('Success', 'Loan marked as defaulted and moved to Defaulted Loans section', 'warning');
                 closeModal('loanDetailsModal');
             } catch (e) {
                 Utils.showToast('Error', e.message, 'error');
@@ -6397,6 +6536,7 @@
                 audit: 'auditSection',
                 applications: 'applicationsSection',
                 upcomingPayments: 'upcomingPaymentsSection',
+                defaultedLoans: 'defaultedLoansSection',
                 notifications: 'notificationsSection',
                 settings: 'settingsSection'
             };
@@ -6414,15 +6554,16 @@
             if (sectionId === 'analytics') renderAnalytics();
             if (sectionId === 'applications') renderPendingApplications();
             if (sectionId === 'upcomingPayments') renderUpcomingPayments();
-            if (sectionId === 'notifications') {
-                renderMessages();
-                renderPromotionHistory();
-            }
+            if (sectionId === 'defaultedLoans') renderDefaultedLoans();
             if (sectionId === 'loans') {
                 currentLoanFilter = 'pending';
                 document.querySelectorAll('#loansSection .tab').forEach(t => t.classList.remove('active'));
                 document.querySelector('#loansSection .tab').classList.add('active');
                 renderLoans();
+            }
+            if (sectionId === 'notifications') {
+                renderMessages();
+                renderPromotionHistory();
             }
         }
         window.showSection = showSection;
