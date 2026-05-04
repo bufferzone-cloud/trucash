@@ -140,16 +140,17 @@
         /* ===== Header with Logo ===== */
         .app-header {
             position: sticky;
-            top: 45px;  /* below blue bar */
+            top: 45px;
             background: var(--glass-bg);
             backdrop-filter: blur(20px);
             -webkit-backdrop-filter: blur(20px);
             border-bottom: var(--glass-border);
-            padding: 10px 20px;         
+            padding: 10px 20px;
             display: flex;
             align-items: center;
             justify-content: space-between;
             z-index: 100;
+            height: 60px;
         }
 
         .logo-area {
@@ -221,7 +222,7 @@
             transform: translateY(-1px);
         }
 
-        /* ===== Sidebar with Logo ===== */
+        /* ===== Sidebar – now starts under the header ===== */
         .sidebar-overlay {
             position: fixed;
             top: 0;
@@ -243,10 +244,10 @@
 
         .sidebar {
             position: fixed;
-            top: 0;
+            top: 105px;
             right: -306px;                   
             width: 306px;
-            height: 100%;
+            height: calc(100vh - 105px);
             background: var(--glass-bg);
             backdrop-filter: blur(10px);
             -webkit-backdrop-filter: blur(10px);
@@ -350,7 +351,6 @@
             color: var(--ios-red);
         }
 
-        /* ===== MODIFIED: Upcoming Payments sidebar item – red text only, no background ===== */
         .sidebar-item.upcoming-payments {
             background: transparent !important;
             color: var(--ios-red) !important;
@@ -453,12 +453,11 @@
             border: 1px solid white;
         }
 
-        /* ===== Main Content ===== */
+        /* ===== Main Content – now with top padding to clear header ===== */
         .main-content {
             max-width: 1360px;                              
             margin: 0 auto;
-            padding: 20px;                                  
-            padding-bottom: 0;
+            padding: 70px 20px 0 20px;
         }
 
         .content-section {
@@ -1552,7 +1551,7 @@
         /* ===== Responsive ===== */
         @media (max-width: 768px) {
             .main-content {
-                padding: 14px;                                
+                padding: 70px 14px 0 14px;
             }
             
             .modal-container {
@@ -1677,7 +1676,7 @@
         <div class="menu-toggle" id="sidebarToggle"><i class="fas fa-bars"></i></div>
     </div>
 
-    <!-- Sidebar with Logo -->
+    <!-- Sidebar with Logo – starts under header -->
     <div class="sidebar-overlay" id="sidebarOverlay"></div>
     <div class="sidebar" id="sidebar">
         <div class="sidebar-header">
@@ -1743,7 +1742,7 @@
         </div>
     </div>
 
-    <!-- Main Content -->
+    <!-- Main Content – all content starts under header -->
     <div class="main-content" id="mainContent">
         <!-- DASHBOARD SECTION -->
         <section class="content-section active" id="dashboardSection">
@@ -2106,7 +2105,7 @@
             </div>
         </section>
 
-        <!-- NEW DEFAULTED LOANS SECTION -->
+        <!-- NEW DEFAULTED LOANS SECTION with typed reason -->
         <section class="content-section" id="defaultedLoansSection">
             <div class="floating-card">
                 <h3 class="mb-4">Defaulted Loans (Hidden from customers/agents)</h3>
@@ -3377,7 +3376,8 @@
                         'Witness NRC': l.witness?.nrc || 'N/A',
                         'Signed Agreement': l.signedAgreementUrl || 'N/A',
                         RejectionReason: l.rejectionReason || '',
-                        'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0)
+                        'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0),
+                        'Default Reason': l.defaultReason || ''
                     }));
                     filename = 'loans.csv';
                     break;
@@ -3508,7 +3508,8 @@
                 'Witness NRC': l.witness?.nrc || 'N/A',
                 'Signed Agreement': l.signedAgreementUrl || 'N/A',
                 RejectionReason: l.rejectionReason || '',
-                'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0)
+                'Total Penalty': Utils.formatCurrency(l.totalPenalty || 0),
+                'Default Reason': l.defaultReason || ''
             }));
             zip.file("loans.csv", Papa.unparse(loansData));
             
@@ -3660,7 +3661,7 @@
             updateDashboardStats();
             renderCustomers();
             renderAgents();
-            renderLoans();  // modified
+            renderLoans();
             renderPayments();
             renderAnalytics();
             renderCommission();
@@ -3673,8 +3674,8 @@
             renderMessages(); 
             renderPromotionHistory();
             updateBadges();
-            checkForNewNotifications(); // check for new notifications after data update
-            renderDefaultedLoans(); // new function
+            checkForNewNotifications();
+            renderDefaultedLoans();
         }
 
         function updateDashboardStats() {
@@ -3916,7 +3917,7 @@
             `}).join('');
         }
         
-        // NEW: renderDefaultedLoans - only defaulted loans
+        // NEW: renderDefaultedLoans - only defaulted loans, with reason displayed
         function renderDefaultedLoans() {
             const container = document.getElementById('defaultedLoansList');
             if (!container) return;
@@ -3931,6 +3932,7 @@
                 const totalPaid = l.totalPaid || 0;
                 const totalPayable = l.totalPayable || l.amount || 0;
                 const remaining = totalPayable - totalPaid;
+                const reason = l.defaultReason || 'No reason provided';
                 return `
                 <div class="loan-card" onclick="showLoanDetails('${l.id}')">
                     <div class="loan-card-left">
@@ -3945,6 +3947,9 @@
                         <div class="loan-card-badges">
                             <span class="status-badge defaulted">Defaulted</span>
                             <span class="badge-icon">Remaining: ${Utils.formatCurrency(remaining)}</span>
+                        </div>
+                        <div class="default-reason" style="margin-top:6px; font-size:11px; color:var(--ios-red); border-top:1px dashed var(--ios-gray3); padding-top:6px;">
+                            <strong>Reason:</strong> ${reason}
                         </div>
                     </div>
                     <div class="loan-card-right">
@@ -4575,7 +4580,7 @@
                     method: method,
                     reference: reference,
                     proofUrl: proofUrl || null,
-                    status: 'confirmed', // directly confirmed
+                    status: 'confirmed',
                     timestamp: Date.now(),
                     verifiedAt: Date.now(),
                     verifiedBy: currentUser.uid,
@@ -5241,7 +5246,7 @@
             document.getElementById('recordPaymentBtn').style.display = (loan.status === 'active' || loan.status === 'approved') ? 'inline-flex' : 'none';
             
             document.getElementById('approveLoanBtn').onclick = () => approveLoan(loan.id);
-            document.getElementById('rejectLoanBtn').onclick = () => openRejectionModal(loan.id); // use modal
+            document.getElementById('rejectLoanBtn').onclick = () => openRejectionModal(loan.id);
             document.getElementById('markDefaultedBtn').onclick = () => markAsDefaulted(loan.id);
             document.getElementById('editLoanBtn').onclick = () => editLoan(loan.id);
             
