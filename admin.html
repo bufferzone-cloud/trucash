@@ -62,16 +62,18 @@
             --score-poor: #FF3B30;
         }
 
-        /* ===== NEW BLUE BAR ON TOP ===== */
+        /* ===== NEW BLUE BAR ON TOP – now glassy to match header ===== */
         .top-blue-bar {
-            background: linear-gradient(90deg, #0055ff, #007AFF, #5856d6);
+            background: var(--glass-bg);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
             height: 45px;
             width: 100%;
             position: fixed;
             top: 0;
             left: 0;
             z-index: 1000;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            border-bottom: var(--glass-border);
         }
 
         /* Progress bar styles */
@@ -348,18 +350,26 @@
             color: var(--ios-red);
         }
 
+        /* ===== MODIFIED: Upcoming Payments sidebar item – red text only, no background ===== */
         .sidebar-item.upcoming-payments {
-            background-color: var(--ios-red);
-            color: white;
-            border: none;
-            box-shadow: 0 3px 10px rgba(255,59,48,0.3);
+            background: transparent !important;
+            color: var(--ios-red) !important;
+            border: 1px solid transparent;
+            box-shadow: none !important;
         }
         .sidebar-item.upcoming-payments i {
-            color: white;
+            color: var(--ios-red) !important;
         }
         .sidebar-item.upcoming-payments:hover {
-            background-color: #e02b20;
+            background: var(--glass-bg);
+            border: var(--glass-border);
             transform: translateX(-3px);
+        }
+        .sidebar-item.upcoming-payments .sidebar-badge {
+            background: var(--ios-red);
+            color: white;
+            border: 1px solid white;
+            box-shadow: 0 2px 3px rgba(255,59,48,0.3);
         }
 
         .sidebar-badge {
@@ -1645,7 +1655,7 @@
     </style>
 </head>
 <body>
-    <!-- NEW BLUE BAR ON TOP -->
+    <!-- NEW BLUE BAR ON TOP – now glassy to match header -->
     <div class="top-blue-bar"></div>
 
     <!-- Loading Overlay -->
@@ -2779,6 +2789,64 @@
             <div class="modal-footer">
                 <button class="btn btn-outline" onclick="closeModal('sudoModal')">Cancel</button>
                 <button class="btn btn-danger" id="confirmSudoReset">Wipe</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- NEW MODAL: Default Loan Modal -->
+    <div class="modal-overlay" id="defaultLoanModal">
+        <div class="modal-container compact" style="z-index: 303;">
+            <div class="modal-header">
+                <img src="logo.png" style="height:26px;">
+                <span>Default Loan</span>
+                <span class="modal-close" onclick="closeModal('defaultLoanModal')"><i class="fas fa-times"></i></span>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="defaultLoanId">
+                <div class="detail-section">
+                    <div class="grid-2">
+                        <div class="detail-card">
+                            <div class="detail-label">Customer Name</div>
+                            <div class="detail-value" id="defaultCustomerName">—</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Agent Name</div>
+                            <div class="detail-value" id="defaultAgentName">—</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Loan Amount</div>
+                            <div class="detail-value" id="defaultLoanAmount">—</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Penalty Amount</div>
+                            <div class="detail-value text-red" id="defaultPenaltyAmount">—</div>
+                        </div>
+                        <div class="detail-card">
+                            <div class="detail-label">Overdue Days</div>
+                            <div class="detail-value text-orange" id="defaultOverdueDays">—</div>
+                        </div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Reason for Defaulting *</label>
+                    <textarea id="defaultReason" class="form-textarea" rows="3" placeholder="Enter reason..."></textarea>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Send Defaulted Notification To</label>
+                    <select id="defaultRecipient" class="form-select">
+                        <option value="customer">Customer only</option>
+                        <option value="agent">Agent only</option>
+                        <option value="both">Both Customer and Agent</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label class="form-label">Notification Message (optional)</label>
+                    <textarea id="defaultMessage" class="form-textarea" rows="3" placeholder="Message to send...">Your loan has been defaulted due to non-payment.</textarea>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-outline" onclick="closeModal('defaultLoanModal')">Cancel</button>
+                <button class="btn btn-danger" id="confirmDefaultLoan">Confirm Default</button>
             </div>
         </div>
     </div>
@@ -4090,6 +4158,7 @@
             `).join('');
         }
 
+        // ===== UPDATED renderUpcomingPayments with Default Loan button =====
         function renderUpcomingPayments() {
             const upcoming = getUpcomingPayments();
             const overdue = getOverduePayments();
@@ -4125,15 +4194,123 @@
                         <div class="profile-meta">
                             Penalty: ${Utils.formatCurrency(p.penalty || 0)} · Agent: ${p.agentName || 'None'}
                         </div>
-                        <div class="mt-2">
+                        <div class="mt-2 d-flex justify-between">
                             <button class="btn btn-small btn-primary" onclick="event.stopPropagation(); openSendReminderModal('${p.loanId}', ${p.installment}, '${p.customerId}', '${p.agentId}')">
                                 <i class="fas fa-bell"></i> Send Reminder
+                            </button>
+                            <button class="btn btn-small btn-danger" onclick="event.stopPropagation(); openDefaultLoanModal('${p.loanId}')">
+                                <i class="fas fa-ban"></i> Default Loan
                             </button>
                         </div>
                     </div>
                 `}).join('');
             }
         }
+
+        // ===== NEW: openDefaultLoanModal =====
+        window.openDefaultLoanModal = async (loanId) => {
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan) {
+                Utils.showToast('Error', 'Loan not found', 'error');
+                return;
+            }
+            
+            const customer = allCustomers.find(c => c.id === loan.customerId);
+            const agent = allAgents.find(a => a.id === loan.agentId);
+            
+            // Calculate overdue days: find earliest unpaid installment
+            let overdueDays = 0;
+            if (loan.repaymentSchedule) {
+                for (const inst of loan.repaymentSchedule) {
+                    if (inst.status !== 'paid') {
+                        const days = Math.floor((Date.now() - inst.dueDate) / (24 * 60 * 60 * 1000));
+                        if (days > 0) {
+                            overdueDays = days;
+                            break;
+                        }
+                    }
+                }
+            }
+            
+            document.getElementById('defaultLoanId').value = loanId;
+            document.getElementById('defaultCustomerName').innerText = customer?.fullName || loan.customerName || 'Unknown';
+            document.getElementById('defaultAgentName').innerText = agent?.fullName || loan.agentName || 'None';
+            document.getElementById('defaultLoanAmount').innerText = Utils.formatCurrency(loan.amount);
+            document.getElementById('defaultPenaltyAmount').innerText = Utils.formatCurrency(loan.totalPenalty || 0);
+            document.getElementById('defaultOverdueDays').innerText = overdueDays > 0 ? `${overdueDays} days` : 'None';
+            document.getElementById('defaultReason').value = '';
+            document.getElementById('defaultRecipient').value = 'both';
+            document.getElementById('defaultMessage').value = 'Your loan has been defaulted due to non-payment.';
+            
+            openModal('defaultLoanModal');
+        };
+
+        document.getElementById('confirmDefaultLoan').addEventListener('click', async () => {
+            const loanId = document.getElementById('defaultLoanId').value;
+            const reason = document.getElementById('defaultReason').value.trim();
+            const recipient = document.getElementById('defaultRecipient').value;
+            const message = document.getElementById('defaultMessage').value.trim();
+
+            if (!reason) {
+                Utils.showToast('Error', 'Please enter a reason for defaulting', 'error');
+                return;
+            }
+
+            const loan = allLoans.find(l => l.id === loanId);
+            if (!loan) {
+                Utils.showToast('Error', 'Loan not found', 'error');
+                return;
+            }
+
+            Utils.showLoading('Processing default...');
+            try {
+                // Update loan status to defaulted
+                await db.ref('loans/' + loanId).update({
+                    status: 'defaulted',
+                    defaultedAt: Date.now(),
+                    defaultedBy: currentUser?.uid,
+                    defaultReason: reason
+                });
+
+                // Send notifications based on selection
+                if (recipient === 'customer' || recipient === 'both') {
+                    if (loan.customerId) {
+                        await Utils.sendNotification(loan.customerId, message, 'loan_defaulted', loanId);
+                    }
+                }
+                if (recipient === 'agent' || recipient === 'both') {
+                    if (loan.agentId) {
+                        await Utils.sendNotification(loan.agentId, message, 'loan_defaulted', loanId);
+                    }
+                }
+
+                // Calculate agent commission based on interest paid so far (if any) and create pending commission entry
+                if (loan.agentId && (loan.interestPaid || 0) > 0) {
+                    const commissionAmount = (loan.interestPaid || 0) * 0.15;
+                    await db.ref('commissionHistory/' + Utils.generateId('COMM')).set({
+                        agentId: loan.agentId,
+                        customerId: loan.customerId,
+                        loanId: loanId,
+                        customerName: loan.customerName,
+                        amount: commissionAmount,
+                        paidAt: null,
+                        paidBy: null,
+                        status: 'pending',
+                        note: `Commission from defaulted loan ${loanId.substring(0,8)}`
+                    });
+                }
+
+                await Utils.logAudit('DEFAULT_LOAN', { loanId, reason, recipient });
+                Utils.showToast('Success', 'Loan marked as defaulted', 'info');
+                closeModal('defaultLoanModal');
+                // Re-render defaulted loans section
+                renderDefaultedLoans();
+                updateBadges();
+            } catch (e) {
+                Utils.showToast('Error', e.message, 'error');
+            }
+            Utils.hideLoading();
+        });
 
         window.showReminderDetails = (loanId, installment) => {
             const loan = allLoans.find(l => l.id === loanId);
