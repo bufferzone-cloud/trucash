@@ -353,12 +353,19 @@
         .floating-input {
             margin-bottom: 0;
         }
+        /* File upload grids – separate for customer and agent */
         .file-upload-grid {
             display: grid;
-            grid-template-columns: repeat(2,1fr);
             gap: 14px;                 /* 18px * 0.8 */
             margin-top: 10px;          /* 12px * 0.8 */
             margin-bottom: 13px;       /* 16px * 0.8 */
+        }
+        .file-upload-grid.customer-grid {
+            grid-template-columns: repeat(3, 1fr);
+        }
+        .file-upload-grid.agent-grid {
+            grid-template-columns: 1fr;
+            justify-items: center;
         }
         .upload-box {
             aspect-ratio: 1;
@@ -374,12 +381,26 @@
             position: relative;
             overflow: hidden;
             font-size: 13px;
+            width: 100%;
+        }
+        /* Circular upload box for agent profile */
+        .upload-box.circle-upload {
+            border-radius: 50%;
+            width: 160px;
+            height: 160px;
+            aspect-ratio: 1/1;
+        }
+        .upload-box.circle-upload .upload-preview {
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .upload-box.active {
+            border-color: var(--tru-blue);
         }
         .upload-preview {
             width: 100%;
             height: 100%;
             object-fit: cover;
-            border-radius: 17px;       /* 22px * 0.8 */
         }
         .banned-card {
             text-align: center;
@@ -428,7 +449,9 @@
             .form-grid { grid-template-columns: 1fr; gap: 13px; }
             .full-width { grid-column: span 1; }
             .user-type-selector { flex-direction: column; }
-            .file-upload-grid { gap: 10px; }
+            .file-upload-grid.customer-grid { grid-template-columns: repeat(3, 1fr); }
+            .file-upload-grid.agent-grid { grid-template-columns: 1fr; }
+            .upload-box.circle-upload { width: 140px; height: 140px; }
         }
         .hidden { display: none; }
         .text-center { text-align: center; }
@@ -553,11 +576,15 @@
                     </div>
                     <div>
                         <label>Required Documents (NRC Front/Back, Profile Photo) *</label>
-                        <div class="file-upload-grid" id="uploadGrid">
+                        <!-- Customer upload grid (3 boxes) -->
+                        <div class="file-upload-grid customer-grid" id="customerUploadGrid">
                             <div class="upload-box" data-type="nrc-front"><i class="fas fa-id-card"></i><span>NRC Front</span></div>
                             <div class="upload-box" data-type="nrc-back"><i class="fas fa-id-card"></i><span>NRC Back</span></div>
                             <div class="upload-box" data-type="profile"><i class="fas fa-user-circle"></i><span>Profile Photo</span></div>
-                            <div class="upload-box" data-type="additional"><i class="fas fa-plus"></i><span>Additional (opt)</span></div>
+                        </div>
+                        <!-- Agent upload grid (only profile, circular) -->
+                        <div class="file-upload-grid agent-grid hidden" id="agentUploadGrid">
+                            <div class="upload-box circle-upload" data-type="profile"><i class="fas fa-user-circle"></i><span>Profile Photo</span></div>
                         </div>
                     </div>
                     <input type="hidden" id="regUserType" value="">
@@ -741,9 +768,9 @@
     };
 
     // ========================= CLOUDINARY UPLOAD =========================
-    let cloudinaryWidget = null, activeUploadBox = null, uploadedFiles = { nrcFront: null, nrcBack: null, profile: null, additional: null };
+    let cloudinaryWidget = null, activeUploadBox = null, uploadedFiles = { nrcFront: null, nrcBack: null, profile: null };
     const cloudinarySvc = {
-        initWidget() { if(!cloudinaryWidget) { cloudinaryWidget = cloudinary.createUploadWidget({ cloudName:'dd3lcymrk', uploadPreset:'h3eyhc2o', sources:['local','camera'], multiple:false, maxFileSize:5242880, clientAllowedFormats:['jpg','jpeg','png','pdf'] }, (error,result) => { if(error) return; if(result && result.event==='success' && activeUploadBox) { const url = result.info.secure_url; const type = activeUploadBox.dataset.type; const key = type==='nrc-front'?'nrcFront':type==='nrc-back'?'nrcBack':type==='profile'?'profile':'additional'; uploadedFiles[key]=url; activeUploadBox.innerHTML = ''; const img=document.createElement('img'); img.src=url; img.className='upload-preview'; activeUploadBox.appendChild(img); activeUploadBox.classList.add('active'); activeUploadBox=null; } }); } },
+        initWidget() { if(!cloudinaryWidget) { cloudinaryWidget = cloudinary.createUploadWidget({ cloudName:'dd3lcymrk', uploadPreset:'h3eyhc2o', sources:['local','camera'], multiple:false, maxFileSize:5242880, clientAllowedFormats:['jpg','jpeg','png','pdf'] }, (error,result) => { if(error) return; if(result && result.event==='success' && activeUploadBox) { const url = result.info.secure_url; const type = activeUploadBox.dataset.type; const key = type==='nrc-front'?'nrcFront':type==='nrc-back'?'nrcBack':'profile'; uploadedFiles[key]=url; activeUploadBox.innerHTML = ''; const img=document.createElement('img'); img.src=url; img.className='upload-preview'; activeUploadBox.appendChild(img); activeUploadBox.classList.add('active'); activeUploadBox=null; } }); } },
         openWidget(box) { activeUploadBox=box; if(cloudinaryWidget) cloudinaryWidget.open(); else console.warn('widget not ready'); }
     };
     cloudinarySvc.initWidget();
@@ -887,6 +914,8 @@
     });
 
     // Registration modal handlers
+    let selectedUserType = '';
+
     function openRegisterModal() {
         document.getElementById('registerModal').classList.add('active');
         document.getElementById('userTypeStep').style.display = 'flex';
@@ -895,19 +924,30 @@
         document.getElementById('customerFields').style.display = 'block';
         document.getElementById('agentFields').style.display = 'none';
         document.getElementById('regUserType').value = '';
-        uploadedFiles = { nrcFront: null, nrcBack: null, profile: null, additional: null };
-        document.querySelectorAll('.upload-box').forEach(box => { 
-            // Reset upload boxes to original state (keeping icon)
-            if(!box.querySelector('img')) {
-                box.innerHTML = box.dataset.type === 'nrc-front' ? '<i class="fas fa-id-card"></i><span>NRC Front</span>' :
-                                 box.dataset.type === 'nrc-back' ? '<i class="fas fa-id-card"></i><span>NRC Back</span>' :
-                                 box.dataset.type === 'profile' ? '<i class="fas fa-user-circle"></i><span>Profile Photo</span>' :
-                                 '<i class="fas fa-plus"></i><span>Additional (opt)</span>';
-            }
-            box.classList.remove('active');
-        });
+        uploadedFiles = { nrcFront: null, nrcBack: null, profile: null };
+        // Reset upload boxes
+        const customerGrid = document.getElementById('customerUploadGrid');
+        const agentGrid = document.getElementById('agentUploadGrid');
+        customerGrid.querySelectorAll('.upload-box').forEach(box => resetUploadBox(box));
+        agentGrid.querySelectorAll('.upload-box').forEach(box => resetUploadBox(box));
+        // Show customer grid, hide agent grid
+        customerGrid.classList.remove('hidden');
+        agentGrid.classList.add('hidden');
         clearErrors();
     }
+
+    function resetUploadBox(box) {
+        const type = box.dataset.type;
+        if(!box.querySelector('img')) {
+            let inner = '';
+            if(type === 'nrc-front') inner = '<i class="fas fa-id-card"></i><span>NRC Front</span>';
+            else if(type === 'nrc-back') inner = '<i class="fas fa-id-card"></i><span>NRC Back</span>';
+            else if(type === 'profile') inner = '<i class="fas fa-user-circle"></i><span>Profile Photo</span>';
+            box.innerHTML = inner;
+        }
+        box.classList.remove('active');
+    }
+
     document.querySelectorAll('.user-type-card').forEach(card => {
         card.addEventListener('click', () => {
             document.querySelectorAll('.user-type-card').forEach(c => c.classList.remove('active'));
@@ -916,21 +956,38 @@
             document.getElementById('regUserType').value = selectedUserType;
             document.getElementById('userTypeStep').style.display = 'none';
             document.getElementById('registrationForms').style.display = 'block';
+
+            const customerGrid = document.getElementById('customerUploadGrid');
+            const agentGrid = document.getElementById('agentUploadGrid');
+
             if(selectedUserType === 'agent') {
                 document.getElementById('agentInfoBox').style.display = 'block';
                 document.getElementById('customerFields').style.display = 'none';
                 document.getElementById('agentFields').style.display = 'block';
+                // Show agent grid, hide customer grid
+                customerGrid.classList.add('hidden');
+                agentGrid.classList.remove('hidden');
+                // Reset agent upload box to ensure profile is clean
+                agentGrid.querySelectorAll('.upload-box').forEach(box => resetUploadBox(box));
             } else {
                 document.getElementById('agentInfoBox').style.display = 'none';
                 document.getElementById('customerFields').style.display = 'block';
                 document.getElementById('agentFields').style.display = 'none';
+                // Show customer grid, hide agent grid
+                customerGrid.classList.remove('hidden');
+                agentGrid.classList.add('hidden');
+                // Reset customer upload boxes
+                customerGrid.querySelectorAll('.upload-box').forEach(box => resetUploadBox(box));
             }
             clearErrors();
         });
     });
+
+    // Attach click listeners to all upload boxes (customer and agent)
     document.querySelectorAll('.upload-box').forEach(box => {
         box.addEventListener('click', () => cloudinarySvc.openWidget(box));
     });
+
     document.getElementById('submitRegisterBtn').addEventListener('click', async () => {
         clearErrors();
         const userType = document.getElementById('regUserType').value;
@@ -939,10 +996,20 @@
         const nrc = document.getElementById('regNRC').value.trim();
         if(!fullName || !residence || !nrc) { showError(registerErrorBox, 'Please fill all required fields'); return; }
         if(!utils.validateNRC(nrc)) { showError(registerErrorBox, 'Invalid NRC format. Use 123456/78/9'); return; }
-        const requiredDocs = ['nrcFront', 'nrcBack', 'profile'];
-        if(requiredDocs.some(k => !uploadedFiles[k])) { showError(registerErrorBox, 'Please upload NRC Front, NRC Back and Profile Photo'); return; }
 
-        const data = { fullName, residence, nrc, nrcFront: uploadedFiles.nrcFront, nrcBack: uploadedFiles.nrcBack, profilePhoto: uploadedFiles.profile, additionalDoc: uploadedFiles.additional || '' };
+        // Determine required documents based on user type
+        let requiredDocs = [];
+        if (userType === 'customer') {
+            requiredDocs = ['nrcFront', 'nrcBack', 'profile'];
+        } else if (userType === 'agent') {
+            requiredDocs = ['profile']; // only profile for agent
+        }
+        if(requiredDocs.some(k => !uploadedFiles[k])) {
+            showError(registerErrorBox, 'Please upload required documents: ' + requiredDocs.join(', '));
+            return;
+        }
+
+        const data = { fullName, residence, nrc, nrcFront: uploadedFiles.nrcFront || null, nrcBack: uploadedFiles.nrcBack || null, profilePhoto: uploadedFiles.profile };
         const btn = document.getElementById('submitRegisterBtn');
         utils.setButtonLoading(btn, true);
         if(userType === 'customer') {
@@ -970,7 +1037,7 @@
                     showError(registerErrorBox, 'Registration failed: ' + e.message);
                 }
             }
-        } else {
+        } else { // agent
             const phone = document.getElementById('agentPhone').value.trim();
             if(!utils.validatePhone(phone)) { showError(registerErrorBox, 'Valid phone number required'); utils.setButtonLoading(btn, false); return; }
             data.phone = phone;
